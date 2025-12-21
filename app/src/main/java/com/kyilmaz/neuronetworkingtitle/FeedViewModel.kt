@@ -281,7 +281,7 @@ class FeedViewModel : ViewModel() {
             val updatedPosts = state.posts.map { post ->
                 if (post.id == postId) {
                     val isLiked = !post.isLikedByMe
-                    val newLikes = if (isLiked) post.likes + 1 else post.likes - 1
+                    val newLikes = if (isLiked) post.likes + 1 else (post.likes - 1).coerceAtLeast(0)
                     post.copy(isLikedByMe = isLiked, likes = newLikes)
                 } else {
                     post
@@ -347,6 +347,9 @@ class FeedViewModel : ViewModel() {
             type = "text/plain"
         }
         val shareIntent = Intent.createChooser(sendIntent, null)
+        if (context !is android.app.Activity) {
+            shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
         context.startActivity(shareIntent)
     }
 

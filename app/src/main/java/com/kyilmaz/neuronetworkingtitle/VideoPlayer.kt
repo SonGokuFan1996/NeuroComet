@@ -35,7 +35,7 @@ fun VideoPlayer(videoUrl: String, shouldPlay: Boolean) {
     }
 
     // Lifecycle observer to handle app foreground/background
-    DisposableEffect(lifecycleOwner) {
+    DisposableEffect(lifecycleOwner, exoPlayer) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
