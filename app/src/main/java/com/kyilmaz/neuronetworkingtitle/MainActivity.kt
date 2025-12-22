@@ -81,17 +81,17 @@ data class User(
 val CURRENT_USER = User("me", "MyProfile", "https://api.dicebear.com/7.x/avataaars/svg?seed=Me", true)
 
 val SPECTRUM_GRADIENT = listOf(
-    Color(0xFFFF4FA3),
-    Color(0xFFFF8A3D),
-    Color(0xFF2ED8B6),
-    Color(0xFF4F8CFF),
-    Color(0xFFB45CFF)
+    Color(0xFFFF6FB5),
+    Color(0xFFFFB554),
+    Color(0xFF5BE7C4),
+    Color(0xFF6DB4FF),
+    Color(0xFFD27BFF)
 )
 
 val SPECTRUM_GRADIENT_DARK = listOf(
-    NeonPink,
-    NeonTeal,
-    NeonPurple
+    Color(0xFFFF7FD0),
+    Color(0xFF7CFFD9),
+    Color(0xFF8A7BFF)
 )
 
 val MOCK_NOTIFICATIONS = listOf(
