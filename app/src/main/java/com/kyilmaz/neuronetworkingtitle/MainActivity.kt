@@ -38,6 +38,14 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.kyilmaz.neuronetworkingtitle.ui.theme.BubblyBlue
+import com.kyilmaz.neuronetworkingtitle.ui.theme.BubblyOrange
+import com.kyilmaz.neuronetworkingtitle.ui.theme.BubblyPink
+import com.kyilmaz.neuronetworkingtitle.ui.theme.BubblyPurple
+import com.kyilmaz.neuronetworkingtitle.ui.theme.BubblyTeal
+import com.kyilmaz.neuronetworkingtitle.ui.theme.NeonPink
+import com.kyilmaz.neuronetworkingtitle.ui.theme.NeonPurple
+import com.kyilmaz.neuronetworkingtitle.ui.theme.NeonTeal
 import com.kyilmaz.neuronetworkingtitle.ui.theme.NeuroNetWorkingTitleTheme
 
 // --- REVENUECAT IMPORTS ---
@@ -73,7 +81,17 @@ data class User(
 val CURRENT_USER = User("me", "MyProfile", "https://api.dicebear.com/7.x/avataaars/svg?seed=Me", true)
 
 val SPECTRUM_GRADIENT = listOf(
-    Color(0xFFFFB7B2), Color(0xFFFFDAC1), Color(0xFFE2F0CB), Color(0xFFB5EAD7), Color(0xFFC7CEEA)
+    Color(0xFFFF6FB5),
+    Color(0xFFFFB554),
+    Color(0xFF5BE7C4),
+    Color(0xFF6DB4FF),
+    Color(0xFFD27BFF)
+)
+
+val SPECTRUM_GRADIENT_DARK = listOf(
+    Color(0xFFFF7FD0),
+    Color(0xFF7CFFD9),
+    Color(0xFF8A7BFF)
 )
 
 val MOCK_NOTIFICATIONS = listOf(
@@ -320,6 +338,10 @@ fun FeedScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
     var showCreatePostDialog by remember { mutableStateOf(false) }
+    val isDarkTheme = isSystemInDarkTheme()
+    val logoBrush = remember(isDarkTheme) {
+        Brush.linearGradient(if (isDarkTheme) SPECTRUM_GRADIENT else SPECTRUM_GRADIENT_DARK)
+    }
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -327,9 +349,41 @@ fun FeedScreen(
             LargeTopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Filled.AllInclusive, "Logo", tint = if (isQuietMode) MaterialTheme.colorScheme.onSurface else Color.Unspecified, modifier = Modifier.size(32.dp).graphicsLayer(alpha = 0.99f).drawWithCache { val brush = Brush.linearGradient(SPECTRUM_GRADIENT); onDrawWithContent { drawContent(); if (!isQuietMode) drawRect(brush, blendMode = BlendMode.SrcAtop) } })
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (isQuietMode) {
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                    } else {
+                                        Color.Transparent
+                                    }
+                                )
+                                .graphicsLayer(alpha = 0.99f)
+                                .drawWithCache {
+                                    onDrawWithContent {
+                                        drawContent()
+                                        if (!isQuietMode) {
+                                            drawRect(logoBrush, blendMode = BlendMode.SrcAtop)
+                                        }
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Filled.BubbleChart,
+                                "Logo",
+                                tint = if (isQuietMode) {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                } else {
+                                    Color.White.copy(alpha = 0.95f)
+                                },
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text("NeuroNet", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, color = if (isQuietMode) MaterialTheme.colorScheme.onSurface else Color.Unspecified), modifier = Modifier.graphicsLayer(alpha = 0.99f).drawWithCache { val brush = Brush.linearGradient(SPECTRUM_GRADIENT); onDrawWithContent { drawContent(); if (!isQuietMode) drawRect(brush, blendMode = BlendMode.SrcAtop) } })
+                        Text("NeuroNet", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, color = if (isQuietMode) MaterialTheme.colorScheme.onSurface else Color.Unspecified), modifier = Modifier.graphicsLayer(alpha = 0.99f).drawWithCache { onDrawWithContent { drawContent(); if (!isQuietMode) drawRect(logoBrush, blendMode = BlendMode.SrcAtop) } })
                     }
                 },
                 actions = {
