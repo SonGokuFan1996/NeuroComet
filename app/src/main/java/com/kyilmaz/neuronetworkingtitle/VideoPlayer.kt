@@ -3,7 +3,9 @@ package com.kyilmaz.neuronetworkingtitle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -35,20 +37,19 @@ fun VideoPlayer(videoUrl: String, shouldPlay: Boolean) {
     }
 
     // Lifecycle observer to handle app foreground/background
-    DisposableEffect(lifecycleOwner) {
+    val playWhenReady by rememberUpdatedState(newValue = shouldPlay)
+
+    DisposableEffect(lifecycleOwner, exoPlayer) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
-                    if (shouldPlay) exoPlayer.play()
+                    if (playWhenReady) exoPlayer.play()
                 }
                 Lifecycle.Event.ON_PAUSE -> {
                     exoPlayer.pause()
                 }
                 Lifecycle.Event.ON_STOP -> {
                     exoPlayer.pause()
-                }
-                Lifecycle.Event.ON_DESTROY -> {
-                     exoPlayer.release()
                 }
                 else -> Unit
             }
@@ -75,7 +76,7 @@ fun VideoPlayer(videoUrl: String, shouldPlay: Boolean) {
             PlayerView(context).apply {
                 player = exoPlayer
                 useController = true
-                clipToOutline = true 
+                clipToOutline = true
             }
         },
         modifier = Modifier

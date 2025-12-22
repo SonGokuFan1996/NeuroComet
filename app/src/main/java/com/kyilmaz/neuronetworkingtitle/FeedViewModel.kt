@@ -1,5 +1,6 @@
 package com.kyilmaz.neuronetworkingtitle
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -110,11 +111,11 @@ class FeedViewModel : ViewModel() {
     }
 
     fun toggleFakePremium(enabled: Boolean) {
-        _uiState.update { 
+        _uiState.update {
             it.copy(
                 isFakePremiumEnabled = enabled,
                 isPremium = enabled // Immediately apply the fake status
-            ) 
+            )
         }
     }
 
@@ -206,8 +207,8 @@ class FeedViewModel : ViewModel() {
                     createdAt = "Just now"
                 )
                 // Prepend new post to the local list
-                _uiState.update { 
-                    it.copy(posts = listOf(newPost) + it.posts, isLoading = false) 
+                _uiState.update {
+                    it.copy(posts = listOf(newPost) + it.posts, isLoading = false)
                 }
                 return@launch
             }
@@ -245,8 +246,8 @@ class FeedViewModel : ViewModel() {
             // Handle deletion in Mock Mode
             if (_uiState.value.isMockInterfaceEnabled) {
                 delay(300)
-                _uiState.update { 
-                    it.copy(posts = it.posts.filter { p -> p.id != postId }, isLoading = false) 
+                _uiState.update {
+                    it.copy(posts = it.posts.filter { p -> p.id != postId }, isLoading = false)
                 }
                 return@launch
             }
@@ -281,7 +282,7 @@ class FeedViewModel : ViewModel() {
             val updatedPosts = state.posts.map { post ->
                 if (post.id == postId) {
                     val isLiked = !post.isLikedByMe
-                    val newLikes = if (isLiked) post.likes + 1 else post.likes - 1
+                    val newLikes = if (isLiked) post.likes + 1 else (post.likes - 1).coerceAtLeast(0)
                     post.copy(isLikedByMe = isLiked, likes = newLikes)
                 } else {
                     post
@@ -296,14 +297,14 @@ class FeedViewModel : ViewModel() {
 
     // --- COMMENT FUNCTIONALITY ---
     fun openCommentSheet(post: Post) {
-        _uiState.update { 
+        _uiState.update {
             it.copy(
-                isCommentSheetVisible = true, 
+                isCommentSheetVisible = true,
                 activePostId = post.id,
                 activePostComments = emptyList() // Reset while loading
-            ) 
+            )
         }
-        
+
         // Mock fetching comments
         viewModelScope.launch {
             delay(500)
@@ -331,11 +332,11 @@ class FeedViewModel : ViewModel() {
             createdAt = "Just now",
             userAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=Me"
         )
-        
-        _uiState.update { 
-            it.copy(activePostComments = it.activePostComments + newComment) 
+
+        _uiState.update {
+            it.copy(activePostComments = it.activePostComments + newComment)
         }
-        
+
         // In real app, send to backend here
     }
 
@@ -347,6 +348,9 @@ class FeedViewModel : ViewModel() {
             type = "text/plain"
         }
         val shareIntent = Intent.createChooser(sendIntent, null)
+        if (context !is Activity) {
+            shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
         context.startActivity(shareIntent)
     }
 
@@ -388,7 +392,7 @@ class FeedViewModel : ViewModel() {
                 SupabaseClient.client.from("posts").insert(dummyPosts)
                 fetchPosts()
             } catch (e: Exception) {
-                 _uiState.update { it.copy(isLoading = false, errorMessage = "Stress Test failed: ${e.message}") }
+                _uiState.update { it.copy(isLoading = false, errorMessage = "Stress Test failed: ${e.message}") }
             }
         }
     }
