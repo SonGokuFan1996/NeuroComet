@@ -349,7 +349,39 @@ fun FeedScreen(
             LargeTopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Filled.AllInclusive, "Logo", tint = if (isQuietMode) MaterialTheme.colorScheme.onSurface else Color.Unspecified, modifier = Modifier.size(32.dp).graphicsLayer(alpha = 0.99f).drawWithCache { onDrawWithContent { drawContent(); if (!isQuietMode) drawRect(logoBrush, blendMode = BlendMode.SrcAtop) } })
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (isQuietMode) {
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                    } else {
+                                        Color.Transparent
+                                    }
+                                )
+                                .graphicsLayer(alpha = 0.99f)
+                                .drawWithCache {
+                                    onDrawWithContent {
+                                        drawContent()
+                                        if (!isQuietMode) {
+                                            drawRect(logoBrush, blendMode = BlendMode.SrcAtop)
+                                        }
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Filled.BubbleChart,
+                                "Logo",
+                                tint = if (isQuietMode) {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                } else {
+                                    Color.White.copy(alpha = 0.95f)
+                                },
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
                         Spacer(modifier = Modifier.width(12.dp))
                         Text("NeuroNet", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, color = if (isQuietMode) MaterialTheme.colorScheme.onSurface else Color.Unspecified), modifier = Modifier.graphicsLayer(alpha = 0.99f).drawWithCache { onDrawWithContent { drawContent(); if (!isQuietMode) drawRect(logoBrush, blendMode = BlendMode.SrcAtop) } })
                     }
