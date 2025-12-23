@@ -232,7 +232,8 @@ fun NeuroNetApp(
                     onProfileClick = { },
                     isPremium = feedState.isPremium,
                     showStories = feedState.showStories,
-                    isVideoAutoplayEnabled = feedState.isVideoAutoplayEnabled
+                    isVideoAutoplayEnabled = feedState.isVideoAutoplayEnabled,
+                    onGoPremium = { navController.navigate(Screen.Settings.route) }
                 )
                 if(feedState.isLoading) {
                     Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
@@ -334,6 +335,7 @@ fun FeedScreen(
     isPremium: Boolean,
     showStories: Boolean,
     isVideoAutoplayEnabled: Boolean,
+    onGoPremium: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
@@ -383,12 +385,63 @@ fun FeedScreen(
                             )
                         }
                         Spacer(modifier = Modifier.width(12.dp))
-                        Text("NeuroNet", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, color = if (isQuietMode) MaterialTheme.colorScheme.onSurface else Color.Unspecified), modifier = Modifier.graphicsLayer(alpha = 0.99f).drawWithCache { onDrawWithContent { drawContent(); if (!isQuietMode) drawRect(logoBrush, blendMode = BlendMode.SrcAtop) } })
+                        Column {
+                            Text(
+                                "NeuroNet",
+                                style = MaterialTheme.typography.headlineMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isQuietMode) MaterialTheme.colorScheme.onSurface else Color.Unspecified
+                                ),
+                                modifier = Modifier
+                                    .graphicsLayer(alpha = 0.99f)
+                                    .drawWithCache {
+                                        onDrawWithContent {
+                                            drawContent()
+                                            if (!isQuietMode) drawRect(logoBrush, blendMode = BlendMode.SrcAtop)
+                                        }
+                                    }
+                            )
+                            Text(
+                                if (isQuietMode) "Quiet feed" else "Community pulse",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onQuietToggle(!isQuietMode) }) { Icon(if(isQuietMode) Icons.Outlined.VolumeOff else Icons.AutoMirrored.Outlined.VolumeUp, "Quiet Mode", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
-                    IconButton(onClick = onProfileClick) { Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) { Text(currentUser.name.take(1).uppercase(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer) } }
+                    AssistChip(
+                        onClick = { onQuietToggle(!isQuietMode) },
+                        label = { Text(if (isQuietMode) "Quiet" else "Vibrant") },
+                        leadingIcon = {
+                            Icon(
+                                if (isQuietMode) Icons.Outlined.VolumeOff else Icons.AutoMirrored.Outlined.VolumeUp,
+                                contentDescription = "Quiet Mode"
+                            )
+                        },
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            leadingIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    IconButton(onClick = onProfileClick) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primaryContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                currentUser.name.take(1).uppercase(),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
                 },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.largeTopAppBarColors(containerColor = MaterialTheme.colorScheme.background, scrolledContainerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onBackground)
@@ -401,6 +454,15 @@ fun FeedScreen(
         }
     ) { innerPadding ->
         LazyColumn(contentPadding = PaddingValues(top = innerPadding.calculateTopPadding() + 16.dp, bottom = innerPadding.calculateBottomPadding() + 80.dp, start = 16.dp, end = 16.dp), verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+
+            item {
+                FeedHeroCard(
+                    isQuietMode = isQuietMode,
+                    isPremium = isPremium,
+                    onCreatePost = { showCreatePostDialog = true },
+                    onGoPremium = onGoPremium
+                )
+            }
 
             // Stories Row (Conditional)
             if (showStories) {
@@ -445,6 +507,110 @@ fun FeedScreen(
     }
     if (showCreatePostDialog) {
         CreatePostDialog(onDismiss = { showCreatePostDialog = false }, onPost = { c, t, i, v -> onAddPost(c, t, i, v); showCreatePostDialog = false })
+    }
+}
+
+@Composable
+fun FeedHeroCard(
+    isQuietMode: Boolean,
+    isPremium: Boolean,
+    onCreatePost: () -> Unit,
+    onGoPremium: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val gradient = if (isQuietMode) {
+        Brush.linearGradient(listOf(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.surface))
+    } else {
+        Brush.linearGradient(
+            listOf(
+                MaterialTheme.colorScheme.primaryContainer,
+                MaterialTheme.colorScheme.secondaryContainer,
+                MaterialTheme.colorScheme.surface
+            )
+        )
+    }
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .background(gradient)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                ) {
+                    Icon(
+                        Icons.Outlined.AutoAwesome,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+                Column(Modifier.weight(1f)) {
+                    Text("Daily check-in", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text(
+                        if (isPremium) "Share a win or ask for support with your circles." else "Post a win, a need, or a thought from today.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(
+                    selected = false,
+                    onClick = {},
+                    label = { Text("Celebrate") },
+                    leadingIcon = { Icon(Icons.Outlined.Celebration, contentDescription = null) }
+                )
+                FilterChip(
+                    selected = false,
+                    onClick = {},
+                    label = { Text("Need support") },
+                    leadingIcon = { Icon(Icons.Outlined.VolunteerActivism, contentDescription = null) }
+                )
+                FilterChip(
+                    selected = false,
+                    onClick = {},
+                    label = { Text("Focus tips") },
+                    leadingIcon = { Icon(Icons.Outlined.Lightbulb, contentDescription = null) }
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Button(onClick = onCreatePost) {
+                    Icon(Icons.Outlined.Edit, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("New post")
+                }
+                if (!isPremium) {
+                    OutlinedButton(onClick = onGoPremium) {
+                        Icon(Icons.Outlined.Star, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Go Premium")
+                    }
+                } else {
+                    Surface(
+                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Outlined.Verified, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
+                            Spacer(Modifier.width(6.dp))
+                            Text("Premium active", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -503,26 +669,71 @@ fun CreatePostDialog(onDismiss: () -> Unit, onPost: (String, String, String?, St
     val tones = listOf("/gen", "/pos", "/srs", "/j", "/lh")
     
     Dialog(onDismissRequest = onDismiss) {
-        Card(shape = RoundedCornerShape(32.dp), modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+        Card(
+            shape = RoundedCornerShape(32.dp),
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
             Column(modifier = Modifier.padding(24.dp).verticalScroll(rememberScrollState())) {
                 Text("Create Post", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(24.dp))
-                OutlinedTextField(value = text, onValueChange = { text = it }, placeholder = { Text("What's on your mind?") }, modifier = Modifier.fillMaxWidth().height(120.dp), shape = RoundedCornerShape(20.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary, unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant))
+                Text("Share a thought, win, or request.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(modifier = Modifier.height(20.dp))
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    placeholder = { Text("What's on your mind?") },
+                    modifier = Modifier.fillMaxWidth().height(140.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                    )
+                )
                 Spacer(modifier = Modifier.height(12.dp))
-                OutlinedTextField(value = imageUrl, onValueChange = { imageUrl = it }, label = { Text("Image URL (Optional)") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
+                OutlinedTextField(
+                    value = imageUrl,
+                    onValueChange = { imageUrl = it },
+                    label = { Text("Image URL (Optional)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    leadingIcon = { Icon(Icons.Outlined.Image, contentDescription = null) }
+                )
                 Spacer(modifier = Modifier.height(12.dp))
-                OutlinedTextField(value = videoUrl, onValueChange = { videoUrl = it }, label = { Text("Video URL (Optional)") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
-                Spacer(modifier = Modifier.height(24.dp))
+                OutlinedTextField(
+                    value = videoUrl,
+                    onValueChange = { videoUrl = it },
+                    label = { Text("Video URL (Optional)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    leadingIcon = { Icon(Icons.Outlined.PlayCircleOutline, contentDescription = null) }
+                )
+                Spacer(modifier = Modifier.height(20.dp))
                 Text("Tone Indicator", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
-                    tones.forEach { tone -> FilterChip(selected = tone == selectedTone, onClick = { selectedTone = tone }, label = { Text(tone) }, modifier = Modifier.padding(end = 8.dp), shape = CircleShape) }
+                    tones.forEach { tone ->
+                        FilterChip(
+                            selected = tone == selectedTone,
+                            onClick = { selectedTone = tone },
+                            label = { Text(tone) },
+                            modifier = Modifier.padding(end = 8.dp),
+                            shape = CircleShape
+                        )
+                    }
                 }
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(28.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     TextButton(onClick = onDismiss) { Text("Cancel") }
                     Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = { if (text.isNotBlank()) onPost(text, selectedTone, imageUrl.ifBlank { null }, videoUrl.ifBlank { null }) }, enabled = text.isNotBlank(), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) { Text("Post") }
+                    Button(
+                        onClick = { if (text.isNotBlank()) onPost(text, selectedTone, imageUrl.ifBlank { null }, videoUrl.ifBlank { null }) },
+                        enabled = text.isNotBlank(),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Icon(Icons.Outlined.Send, contentDescription = null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Post")
+                    }
                 }
             }
         }
@@ -554,20 +765,11 @@ fun SettingsScreen(
     Column(modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
         Text("Settings", style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 24.dp))
 
-        Card(
-            colors = CardDefaults.cardColors(containerColor = if(isPremium) Color(0xFFE8F5E9) else MaterialTheme.colorScheme.primaryContainer),
-            shape = RoundedCornerShape(24.dp),
-            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp).clickable { if(!isPremium) showPremiumDialog = true }
-        ) {
-            Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(if(isPremium) Icons.Outlined.VerifiedUser else Icons.Outlined.Star, null, tint = if(isPremium) Color(0xFF2E7D32) else MaterialTheme.colorScheme.primary)
-                Spacer(Modifier.width(16.dp))
-                Column {
-                    Text(if(isPremium) "Premium Active" else "Go Premium", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Text(if(isPremium) "Thank you for your support!" else "Remove ads & support devs", style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-        }
+        SettingsProfileCard(
+            isPremium = isPremium,
+            isUserVerified = isUserVerified,
+            onUpgradeClick = { if (!isPremium) showPremiumDialog = true }
+        )
 
         // --- NEW: Personalized Theme Section ---
         SettingsGroup("Personalized Theme") {
@@ -604,7 +806,7 @@ fun SettingsScreen(
              SettingsTile("Video Autoplay", "Play videos automatically.", Icons.Outlined.PlayCircle, feedState.isVideoAutoplayEnabled, { feedViewModel.toggleVideoAutoplay(it) })
         }
         SettingsGroup("Security") {
-            SettingsTile("Verified Human", "Identity status.", Icons.Outlined.Shield, isUserVerified, {})
+            SettingsTile("Verified Human", "Identity status.", Icons.Outlined.Shield, isUserVerified, { _ -> onToggleVerification() })
             SettingsTile("Two-Factor Auth", "Require code at login.", Icons.Outlined.Lock, is2FAEnabled, { authViewModel.toggle2FA(it) })
         }
 
@@ -617,7 +819,7 @@ fun SettingsScreen(
             shape = RoundedCornerShape(24.dp)
         ) {
             Column(modifier = Modifier.padding(vertical = 12.dp)) {
-                SettingsTile("Force Verify", "Toggle status.", Icons.Outlined.VerifiedUser, isUserVerified, { onToggleVerification() })
+                SettingsTile("Force Verify", "Toggle status.", Icons.Outlined.VerifiedUser, isUserVerified, { _ -> onToggleVerification() })
 
                 // NEW: Fake Premium Toggle
                 SettingsTile("Fake Premium", "Simulate paid status.", Icons.Outlined.MonetizationOn, feedState.isFakePremiumEnabled, { feedViewModel.toggleFakePremium(it) })
@@ -635,12 +837,12 @@ fun SettingsScreen(
 
                 SettingsTile("Simulate HTTP 500", "Force fetch failure.", Icons.Outlined.ErrorOutline, simulateError, {
                     simulateError = it
-                    feedViewModel.simulateError = it
+                    feedViewModel.setSimulateError(it)
                 })
 
                 SettingsTile("Infinite Loading", "Stalls fetch request.", Icons.Outlined.HourglassEmpty, simulateInfiniteLoading, {
                     simulateInfiniteLoading = it
-                    feedViewModel.simulateInfiniteLoading = it
+                    feedViewModel.setSimulateInfiniteLoading(it)
                 })
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.error.copy(alpha=0.1f))
@@ -703,6 +905,106 @@ fun SettingsScreen(
             },
             icon = { Icon(Icons.Outlined.Warning, null, tint = MaterialTheme.colorScheme.error) }
         )
+    }
+}
+
+@Composable
+fun SettingsProfileCard(
+    isPremium: Boolean,
+    isUserVerified: Boolean,
+    onUpgradeClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(28.dp),
+        modifier = modifier.fillMaxWidth().padding(bottom = 24.dp)
+    ) {
+        Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("N", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                }
+                Spacer(Modifier.width(16.dp))
+                Column(Modifier.weight(1f)) {
+                    Text("MyProfile", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text(
+                        if (isUserVerified) "Verified human" else "Verification pending",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                if (isPremium) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Outlined.Verified, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
+                            Spacer(Modifier.width(6.dp))
+                            Text("Premium", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                        }
+                    }
+                }
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text("Streak", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("8 days", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    }
+                }
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text("Posts", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("24", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    }
+                }
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text("Circles", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("5", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+
+            if (!isPremium) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier.fillMaxWidth().clickable { onUpgradeClick() }
+                ) {
+                    Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.Star, null, tint = MaterialTheme.colorScheme.primary)
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text("Upgrade to Premium", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Text("Remove ads & unlock calming themes.", style = MaterialTheme.typography.bodyMedium)
+                        }
+                        Icon(Icons.Outlined.ChevronRight, null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                    }
+                }
+            }
+        }
     }
 }
 

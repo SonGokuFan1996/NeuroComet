@@ -3,7 +3,6 @@ package com.kyilmaz.neuronetworkingtitle
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.spring
@@ -11,8 +10,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,14 +18,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.Verified
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
-import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -55,6 +55,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -108,7 +109,7 @@ fun BubblyPostCard(
     val containerColor = if(isDarkTheme) MaterialTheme.colorScheme.surfaceVariant.copy(alpha=0.5f) else MaterialTheme.colorScheme.surface
 
     Card(
-        shape = RoundedCornerShape(32.dp), // Extra rounded corners for "bubbly" feel
+        shape = RoundedCornerShape(28.dp), // Extra rounded corners for "bubbly" feel
         colors = CardDefaults.cardColors(containerColor = containerColor),
         elevation = CardDefaults.cardElevation(defaultElevation = if (isQuietMode) 0.dp else 4.dp),
         border = if (!isQuietMode) BorderStroke(1.dp, borderPulseColor) else null,
@@ -139,6 +140,15 @@ fun BubblyPostCard(
                             fontWeight = FontWeight.ExtraBold, // Bolder font
                             style = MaterialTheme.typography.titleMedium
                         )
+                        if (post.userId == "Therapy_Bot") {
+                            Spacer(Modifier.width(6.dp))
+                            Icon(
+                                Icons.Outlined.Verified,
+                                contentDescription = "Verified",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                     Text(
                         post.community ?: "General",
@@ -146,12 +156,18 @@ fun BubblyPostCard(
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
-                IconButton(onClick = onDelete) { Icon(Icons.Rounded.MoreHoriz, "More", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Outlined.DeleteOutline, "Delete", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
-            
+
             // --- CONTENT ---
             Spacer(Modifier.height(12.dp))
-            Text(post.content, style = MaterialTheme.typography.bodyLarge, lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.2)
+            Text(
+                post.content,
+                style = MaterialTheme.typography.bodyLarge,
+                lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.2
+            )
 
             // --- MEDIA ---
             if (!isQuietMode) {
@@ -178,14 +194,40 @@ fun BubblyPostCard(
                 ) {
                     Text(post.tone ?: "/gen", modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSecondaryContainer)
                 }
+                Spacer(Modifier.width(10.dp))
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                    shape = CircleShape
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Outlined.Schedule,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            post.createdAt ?: "Just now",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.wrapContentWidth()
+                        )
+                    }
+                }
                 Spacer(Modifier.weight(1f))
             }
             
             Spacer(Modifier.height(16.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                BouncyIcon(likeIcon, "Like", onLike, likeTint, isQuietMode, post.likes.toString())
-                BouncyIcon(Icons.AutoMirrored.Filled.Chat, "Reply", onReplyClick, MaterialTheme.colorScheme.secondary, isQuietMode)
-                BouncyIcon(Icons.Rounded.Share, "Share", onShare, MaterialTheme.colorScheme.tertiary, isQuietMode) // Wired up onShare
+                BouncyIcon(likeIcon, "Like", onLike, likeTint, isQuietMode, "${post.likes}")
+                BouncyIcon(Icons.AutoMirrored.Filled.Chat, "Reply", onReplyClick, MaterialTheme.colorScheme.secondary, isQuietMode, "Reply")
+                BouncyIcon(Icons.Rounded.Share, "Share", onShare, MaterialTheme.colorScheme.tertiary, isQuietMode, "Share")
             }
         }
     }
@@ -196,13 +238,18 @@ fun BouncyIcon(icon: ImageVector, description: String, onClick: () -> Unit, tint
     var isPressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(if (isPressed) 0.7f else 1.0f, spring(dampingRatio = 0.4f, stiffness = 400f), label = "bounce")
 
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { isPressed = true; onClick() }) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = { isPressed = true; onClick() }, modifier = Modifier.scale(scale)) {
             LaunchedEffect(isPressed) { if (isPressed) { delay(100); isPressed = false } }
             Icon(icon, description, tint = tint, modifier = Modifier.size(26.dp))
         }
         if (labelText != null) {
-            Text(labelText, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = tint)
+            Text(
+                labelText,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = if (isQuietMode) MaterialTheme.colorScheme.onSurfaceVariant else tint
+            )
         }
     }
 }

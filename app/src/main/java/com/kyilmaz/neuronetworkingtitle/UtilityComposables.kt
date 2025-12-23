@@ -40,9 +40,9 @@ fun SettingsGroup(title: String, content: @Composable ColumnScope.() -> Unit) {
             modifier = Modifier.padding(bottom = 16.dp, start = 8.dp)
         )
         Card(
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             shape = RoundedCornerShape(24.dp),
-            elevation = CardDefaults.cardElevation(0.dp)
+            elevation = CardDefaults.cardElevation(2.dp)
         ) {
             Column(modifier = Modifier.padding(vertical = 12.dp)) { content() }
         }
@@ -68,7 +68,7 @@ fun SettingsTile(
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)),
+                .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
