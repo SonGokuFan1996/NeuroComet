@@ -837,12 +837,12 @@ fun SettingsScreen(
 
                 SettingsTile("Simulate HTTP 500", "Force fetch failure.", Icons.Outlined.ErrorOutline, simulateError, {
                     simulateError = it
-                    feedViewModel.simulateError = it
+                    feedViewModel.setSimulateError(it)
                 })
 
                 SettingsTile("Infinite Loading", "Stalls fetch request.", Icons.Outlined.HourglassEmpty, simulateInfiniteLoading, {
                     simulateInfiniteLoading = it
-                    feedViewModel.simulateInfiniteLoading = it
+                    feedViewModel.setSimulateInfiniteLoading(it)
                 })
 
                 HorizontalDivider(color = MaterialTheme.colorScheme.error.copy(alpha=0.1f))
