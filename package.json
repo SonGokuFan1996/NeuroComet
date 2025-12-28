@@ -1,0 +1,29 @@
+{
+  "name": "neuronet",
+  "version": "1.0.0",
+  "description": "NeuroNet - Age-gating and parental controls support",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "neuronet",
+    "age-gating",
+    "parental-controls",
+    "coppa"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.8.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.2.2"
+  }
+}
