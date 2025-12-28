@@ -57,6 +57,18 @@ const ParentalControls: React.FC<ParentalControlsProps> = ({
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
+  const [successTimeoutId, setSuccessTimeoutId] = useState<NodeJS.Timeout | null>(null);
+
+  /**
+   * Cleanup timeout on unmount
+   */
+  useEffect(() => {
+    return () => {
+      if (successTimeoutId) {
+        clearTimeout(successTimeoutId);
+      }
+    };
+  }, [successTimeoutId]);
 
   /**
    * Fetch current parental controls settings
@@ -150,7 +162,12 @@ const ParentalControls: React.FC<ParentalControlsProps> = ({
       setSuccessMessage('Settings saved successfully!');
       
       // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(''), 3000);
+      // Clear any existing timeout first
+      if (successTimeoutId) {
+        clearTimeout(successTimeoutId);
+      }
+      const timeoutId = setTimeout(() => setSuccessMessage(''), 3000);
+      setSuccessTimeoutId(timeoutId);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save settings';
       setError(message);
