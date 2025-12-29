@@ -16,15 +16,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
+import com.kyilmaz.neuronetworkingtitle.Post
+import com.kyilmaz.neuronetworkingtitle.BubblyPostCard // Assuming this is defined in MainActivity.kt or a common composables file
+import java.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MockCategoryDetailScreen(
     categoryName: String,
     onBack: () -> Unit,
-    isQuietMode: Boolean = false
+    isQuietMode: Boolean = false,
+    onSharePost: (Context, Post) -> Unit = { _, _ -> } // MODIFIED: onSharePost now accepts Context and Post
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val context = LocalContext.current // Added back the context variable
     
     // Generate mock posts based on category
     val mockPosts = remember(categoryName) {
@@ -110,7 +117,7 @@ fun MockCategoryDetailScreen(
                     onLike = {},
                     onDelete = {},
                     onReplyClick = {},
-                    onShare = {}
+                    onShare = { onSharePost(context, post) } // FIXED: passed a () -> Unit lambda that uses captured context and post
                 )
             }
         }
@@ -118,89 +125,103 @@ fun MockCategoryDetailScreen(
 }
 
 private fun generateMockPostsForCategory(category: String): List<Post> {
+    val userAvatarUrl = { seed: String -> "https://api.dicebear.com/7.x/avataaars/svg?seed=$seed" }
     return when (category) {
         "ADHD Hacks" -> listOf(
             Post(
-                id = 101,
+                id = 101L,
                 userId = "NeuroHacker",
-                userAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=NeuroHacker",
+                userAvatar = userAvatarUrl("NeuroHacker"),
                 content = "Body doubling saved my thesis! Just having someone on zoom while I work made all the difference.",
-                tone = "/gen",
                 likes = 1242,
-                community = "r/ADHD",
-                createdAt = "2h ago"
+                comments = 56,
+                shares = 12,
+                createdAt = Instant.now().toString(),
+                isLikedByMe = false
             ),
             Post(
-                id = 102,
+                id = 102L,
                 userId = "DopamineMiner",
-                userAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=Dopamine",
+                userAvatar = userAvatarUrl("Dopamine"),
                 content = "Tip: Keep a 'doom box' for cleaning. Throw everything in a box to sort later, just clear the surfaces now!",
-                tone = "/pos",
                 likes = 853,
-                community = "r/CleaningTips",
-                createdAt = "5h ago"
+                comments = 30,
+                shares = 8,
+                createdAt = Instant.now().toString(),
+                isLikedByMe = false
             ),
              Post(
-                id = 103,
+                id = 103L,
                 userId = "TimeBlindness",
+                userAvatar = userAvatarUrl("TimeBlindness"),
                 content = "Does anyone else set alarms for every step of their morning routine? Shower: 7:00, Dry off: 7:15, Dress: 7:20...",
-                tone = "/gen",
                 likes = 2300,
-                community = "r/ADHD",
-                createdAt = "1d ago"
+                comments = 150,
+                shares = 45,
+                createdAt = Instant.now().toString(),
+                isLikedByMe = false
             )
         )
         "Safe Foods" -> listOf(
             Post(
-                id = 201,
+                id = 201L,
                 userId = "TexturePerson",
+                userAvatar = userAvatarUrl("TexturePerson"),
                 content = "Mac and Cheese is the ultimate safe food. Consistent texture every time.",
-                tone = "/srs",
                 likes = 5000,
+                comments = 700,
+                shares = 200,
                 imageUrl = "https://picsum.photos/seed/macncheese/400/300",
-                community = "r/ARFID",
-                createdAt = "10m ago"
+                createdAt = Instant.now().toString(),
+                isLikedByMe = false
             ),
             Post(
-                id = 202,
+                id = 202L,
                 userId = "NuggetLover",
+                userAvatar = userAvatarUrl("NuggetLover"),
                 content = "Dino nuggets simply taste better than regular shapes. It's science.",
-                tone = "/j",
                 likes = 342,
-                community = "r/SafeFoods",
-                createdAt = "3h ago"
+                comments = 50,
+                shares = 10,
+                createdAt = Instant.now().toString(),
+                isLikedByMe = false
             )
         )
         "Stimming" -> listOf(
              Post(
-                id = 301,
+                id = 301L,
                 userId = "FidgetSpinner99",
+                userAvatar = userAvatarUrl("FidgetSpinner99"),
                 content = "Just got this new infinity cube and it's so satisfying.",
-                tone = "/happy",
                 likes = 89,
-                videoUrl = "https://www.w3schools.com/html/mov_bbb.mp4", // Mock video
-                community = "r/Stimming",
-                createdAt = "1h ago"
+                comments = 10,
+                shares = 5,
+                createdAt = Instant.now().toString(),
+                isLikedByMe = false
             ),
             Post(
-                id = 302,
+                id = 302L,
                 userId = "RockingChair",
+                userAvatar = userAvatarUrl("RockingChair"),
                 content = "Visual stims >> anyone else love watching lava lamps for hours?",
-                tone = "/gen",
                 likes = 404,
-                community = "r/Autism",
-                createdAt = "4h ago"
+                comments = 60,
+                shares = 15,
+                createdAt = Instant.now().toString(),
+                isLikedByMe = false
             )
         )
         else -> listOf(
             Post(
-                id = 999,
+                id = 999L,
                 userId = "MockUser",
+                userAvatar = userAvatarUrl("MockUser"),
                 content = "This is a mock post for the category: $category. Explore and enjoy!",
-                tone = "/test",
                 likes = 42,
-                community = "r/$category",
-                createdAt = "Now"
+                comments = 5,
+                shares = 2,
+                createdAt = Instant.now().toString(),
+                isLikedByMe = false
             )
         )
     }

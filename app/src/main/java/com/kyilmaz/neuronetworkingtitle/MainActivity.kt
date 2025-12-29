@@ -1,754 +1,713 @@
+@file:Suppress(
+    "ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE",
+    "UNUSED_VALUE",
+    "AssignedValueIsNeverRead",
+    "AssignmentToStateVariable"
+)
+
 package com.kyilmaz.neuronetworkingtitle
 
 import android.app.Activity
+import android.content.Context
 import android.os.Bundle
+import androidx.core.view.WindowInsetsControllerCompat
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
-import androidx.compose.foundation.shape.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.*
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
+import androidx.core.content.edit
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.*
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.kyilmaz.neuronetworkingtitle.ui.theme.BubblyBlue
-import com.kyilmaz.neuronetworkingtitle.ui.theme.BubblyOrange
-import com.kyilmaz.neuronetworkingtitle.ui.theme.BubblyPink
-import com.kyilmaz.neuronetworkingtitle.ui.theme.BubblyPurple
-import com.kyilmaz.neuronetworkingtitle.ui.theme.BubblyTeal
-import com.kyilmaz.neuronetworkingtitle.ui.theme.NeonPink
-import com.kyilmaz.neuronetworkingtitle.ui.theme.NeonPurple
-import com.kyilmaz.neuronetworkingtitle.ui.theme.NeonTeal
-import com.kyilmaz.neuronetworkingtitle.ui.theme.NeuroNetWorkingTitleTheme
-
-// --- REVENUECAT IMPORTS ---
-import com.revenuecat.purchases.Purchases
-import com.revenuecat.purchases.PurchasesConfiguration
-import com.revenuecat.purchases.PurchaseParams
-import com.revenuecat.purchases.CustomerInfo
-import com.revenuecat.purchases.PurchasesError
+import com.revenuecat.purchases.*
 import com.revenuecat.purchases.interfaces.ReceiveCustomerInfoCallback
-import com.revenuecat.purchases.interfaces.GetStoreProductsCallback
-import com.revenuecat.purchases.interfaces.PurchaseCallback
-import com.revenuecat.purchases.models.StoreProduct
-import com.revenuecat.purchases.models.StoreTransaction
-import com.revenuecat.purchases.LogLevel
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+import java.util.Locale
+import kotlin.random.Random
 
-// --- 1. NAVIGATION & ROUTES ---
-sealed class Screen(val route: String, val label: String, val iconFilled: ImageVector, val iconOutlined: ImageVector) {
-    data object Feed : Screen("feed", "Feed", Icons.Filled.Home, Icons.Outlined.Home)
-    data object Explore : Screen("explore", "Explore", Icons.Filled.Search, Icons.Outlined.Search)
-    data object Notifications : Screen("notifications", "Alerts", Icons.Filled.Notifications, Icons.Outlined.Notifications)
-    data object Settings : Screen("settings", "Settings", Icons.Filled.Settings, Icons.Outlined.Settings)
+// Mock for Shared Preferences to persist locale across recreates (needed for on-the-fly switch)
+private const val PREFS_NAME = "app_settings"
+private const val KEY_LOCALE = "selected_locale"
+
+private fun getLocaleCode(context: Context): String {
+    return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(KEY_LOCALE, "") ?: ""
 }
 
-// --- 2. DATA MODELS ---
-data class User(
-    val id: String,
-    val name: String,
-    val avatarUrl: String,
-    val isVerified: Boolean = false,
-)
+private fun setLocaleCode(context: Context, code: String) {
+    context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit { putString(KEY_LOCALE, code) }
+}
 
-// --- 3. MOCK DATA & ASSETS ---
-val CURRENT_USER = User("me", "MyProfile", "https://api.dicebear.com/7.x/avataaars/svg?seed=Me", true)
+// Helper function to apply the locale, must be called before super.onCreate in Activity
+private fun Context.applyLocale(localeCode: String): Context {
+    if (localeCode.isBlank()) return this
 
-val SPECTRUM_GRADIENT = listOf(
-    Color(0xFFFF6FB5),
-    Color(0xFFFFB554),
-    Color(0xFF5BE7C4),
-    Color(0xFF6DB4FF),
-    Color(0xFFD27BFF)
-)
+    val locale = if (localeCode.contains("-")) {
+        val parts = localeCode.split("-")
+        Locale.Builder()
+            .setLanguage(parts[0])
+            .setRegion(parts.getOrNull(1)?.removePrefix("r") ?: "")
+            .build()
+    } else {
+        Locale.Builder().setLanguage(localeCode).build()
+    }
 
-val SPECTRUM_GRADIENT_DARK = listOf(
-    Color(0xFFFF7FD0),
-    Color(0xFF7CFFD9),
-    Color(0xFF8A7BFF)
-)
+    Locale.setDefault(locale)
+    val config = resources.configuration
+    config.setLocale(locale)
+    return createConfigurationContext(config)
+}
 
-val MOCK_NOTIFICATIONS = listOf(
+
+// --- 1. NAVIGATION & ROUTES ---
+sealed class Screen(val route: String, val labelId: Int, val iconFilled: ImageVector, val iconOutlined: ImageVector) {
+    data object Feed : Screen("feed", R.string.nav_feed, Icons.Filled.Home, Icons.Outlined.Home)
+    data object Explore : Screen("explore", R.string.nav_explore, Icons.Filled.Search, Icons.Outlined.Search)
+    data object Messages : Screen("messages", R.string.nav_messages, Icons.Filled.Mail, Icons.Outlined.Mail)
+    data object Notifications : Screen("notifications", R.string.nav_notifications, Icons.Filled.Notifications, Icons.Outlined.Notifications)
+    data object Settings : Screen("settings", R.string.nav_settings, Icons.Filled.Settings, Icons.Outlined.Settings)
+    data object Badges : Screen("badges", R.string.settings_badges_title, Icons.Filled.Star, Icons.Outlined.Star)
+    data object Conversation : Screen("conversation/{conversationId}", R.string.nav_messages, Icons.Filled.Mail, Icons.Outlined.Mail) {
+        fun route(conversationId: String) = "conversation/$conversationId"
+    }
+
+    data object DevOptions : Screen("dev_options", R.string.settings_developer_options_group, Icons.Filled.Build, Icons.Outlined.Build)
+}
+
+// --- 3. MOCK DATA & ASSETS (Relies on DataModels.kt) ---
+val INITIAL_MOCK_NOTIFICATIONS = listOf(
     NotificationItem("1", "New Badge Earned", "You verified your humanity!", "10m ago", NotificationType.SYSTEM),
     NotificationItem("2", "Alex_Stims liked your post", "The one about mechanical keyboards.", "1h ago", NotificationType.LIKE),
     NotificationItem("3", "Reply from DinoLover99", "I totally agree with that!", "2h ago", NotificationType.COMMENT)
 )
 
-val EXPLORE_TOPICS = listOf(
-    "ADHD Hacks" to Color(0xFFFFF3E0), "Safe Foods" to Color(0xFFE0F7FA),
-    "Executive Dysfunction" to Color(0xFFF3E5F5), "Hyperfixations" to Color(0xFFFFF9C4),
-    "Noise Cancelling" to Color(0xFFE8F5E9), "Stimming" to Color(0xFFE3F2FD)
+val MOCK_EXPLORE_POSTS = listOf(
+    Post(
+        id = 1L,
+        createdAt = Instant.now().minus(1, ChronoUnit.HOURS).toString(),
+        content = "Just had a breakthrough on my project! Hyperfocus is a superpower when you can direct it.",
+        userId = "NeuroThinker",
+        likes = 125,
+        comments = 18,
+        shares = 5,
+        isLikedByMe = true,
+        userAvatar = MOCK_USERS.find { it.id == "HyperFocusCode" }?.avatarUrl,
+        imageUrl = "https://example.com/image1.jpg"
+    ),
+    Post(
+        id = 2L,
+        createdAt = Instant.now().minus(3, ChronoUnit.HOURS).toString(),
+        content = "Trying out my new weighted vest today. Instant calm, highly recommend for sensory regulation!",
+        userId = "SensorySeeker",
+        likes = 250,
+        comments = 45,
+        shares = 10,
+        isLikedByMe = false,
+        userAvatar = MOCK_USERS.find { it.id == "SensorySeeker" }?.avatarUrl,
+        imageUrl = "https://picsum.photos/seed/SensorySeeker/400/300"
+    ),
+    Post(
+        id = 3L,
+        createdAt = Instant.now().minus(10, ChronoUnit.HOURS).toString(),
+        content = "Need a quiet space. Going into Overload Mode for the rest of the afternoon. See you all tomorrow. #QuietMode",
+        userId = "CalmObserver",
+        likes = 50,
+        comments = 5,
+        shares = 1,
+        isLikedByMe = false,
+        userAvatar = MOCK_USERS.find { it.id == "CalmObserver" }?.avatarUrl,
+    ),
+    Post(
+        id = 4L,
+        createdAt = Instant.now().minus(2, ChronoUnit.DAYS).toString(),
+        content = "Just finished sorting all my project files into categorized folders. The visual order is immensely satisfying.",
+        userId = "NeuroNaut",
+        likes = 1200,
+        comments = 250,
+        shares = 80,
+        isLikedByMe = true,
+        userAvatar = MOCK_USERS.find { it.id == "NeuroNaut" }?.avatarUrl,
+    )
 )
 
 class MainActivity : ComponentActivity() {
+    override fun attachBaseContext(newBase: Context) {
+        val localeCode = getLocaleCode(newBase)
+        super.attachBaseContext(newBase.applyLocale(localeCode))
+    }
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        // Initialize RevenueCat
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
+        window.navigationBarColor = android.graphics.Color.TRANSPARENT
+
         Purchases.logLevel = LogLevel.DEBUG
         Purchases.configure(PurchasesConfiguration.Builder(this, "goog_your_revenuecat_api_key_here").build())
-
+        
         setContent {
-            var isQuietMode by rememberSaveable { mutableStateOf(false) }
-
-            // ThemeViewModel to manage personalization
-            val themeViewModel: ThemeViewModel = viewModel()
-            val themeState by themeViewModel.themeState.collectAsState()
-            
             val feedViewModel: FeedViewModel = viewModel()
             val authViewModel: AuthViewModel = viewModel()
+            val themeViewModel: ThemeViewModel = viewModel()
+            val safetyViewModel: SafetyViewModel = viewModel()
 
-            // Apply the custom theme wrapper
-            NeuroNetWorkingTitleTheme(
-                darkTheme = themeState.isDarkMode, // Controlled by ViewModel now
-                neuroState = themeState.selectedState,
-                quietMode = isQuietMode
-            ) {
-                LaunchedEffect(Unit) {
-                    Purchases.sharedInstance.getCustomerInfo(object : ReceiveCustomerInfoCallback {
-                        override fun onReceived(customerInfo: CustomerInfo) {
-                            val isPremium = customerInfo.entitlements["premium"]?.isActive == true
-                            feedViewModel.setPremiumStatus(isPremium)
-                        }
-                        override fun onError(error: PurchasesError) { /* Log error */ }
-                    })
+            val themeState by themeViewModel.themeState.collectAsState()
+            val darkIcons = !themeState.isDarkMode
+            SideEffect {
+                WindowInsetsControllerCompat(window, window.decorView).apply {
+                    isAppearanceLightStatusBars = darkIcons
+                    isAppearanceLightNavigationBars = darkIcons
                 }
+            }
 
+            LaunchedEffect(Unit) {
+                themeViewModel.setLanguageCode(getLocaleCode(this@MainActivity))
+                
+                Purchases.sharedInstance.getCustomerInfo(object : ReceiveCustomerInfoCallback {
+                    override fun onReceived(customerInfo: CustomerInfo) {
+                        val isPremium = customerInfo.entitlements["premium"]?.isActive == true
+                        feedViewModel.setPremiumStatus(isPremium)
+                    }
+                    override fun onError(error: PurchasesError) { /* Log error */ }
+                })
+            }
+
+            NeuroThemeApplication(themeViewModel = themeViewModel) {
                 NeuroNetApp(
-                    isDarkMode = themeState.isDarkMode,
-                    onDarkToggle = { themeViewModel.toggleDarkMode(it) }, // Pass ViewModel function
-                    isQuietMode = isQuietMode,
-                    onQuietToggle = { isQuietMode = it },
                     feedViewModel = feedViewModel,
                     authViewModel = authViewModel,
-                    themeViewModel = themeViewModel // Pass down for Settings
+                    themeViewModel = themeViewModel,
+                    safetyViewModel = safetyViewModel
                 )
             }
         }
     }
 }
 
+// All Composables and supporting functions are moved to ThemeComposables.kt
+// and other UI files to resolve compilation conflicts.
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NeuroNetApp(
-    isDarkMode: Boolean,
-    onDarkToggle: (Boolean) -> Unit,
-    isQuietMode: Boolean,
-    onQuietToggle: (Boolean) -> Unit,
-    feedViewModel: FeedViewModel,
-    authViewModel: AuthViewModel,
-    themeViewModel: ThemeViewModel
-) {
+fun NeuroNetApp(feedViewModel: FeedViewModel, authViewModel: AuthViewModel, themeViewModel: ThemeViewModel, safetyViewModel: SafetyViewModel) {
     val navController = rememberNavController()
     val feedState by feedViewModel.uiState.collectAsState()
-    val notifications = remember { mutableStateListOf(*MOCK_NOTIFICATIONS.toTypedArray()) }
-    var isUserVerified by remember { mutableStateOf(true) }
-    val context = LocalContext.current
+    val safetyState by safetyViewModel.state.collectAsState()
+
+    val authedUser by authViewModel.user.collectAsState()
+    val isUserVerified = authedUser?.isVerified ?: CURRENT_USER.isVerified
+
+    var showPremiumDialog by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(feedState.errorMessage) {
-        feedState.errorMessage?.let { error ->
-            snackbarHostState.showSnackbar(message = error, withDismissAction = true)
+        val msg = feedState.errorMessage
+        if (!msg.isNullOrBlank()) {
+            snackbarHostState.showSnackbar(message = msg)
             feedViewModel.clearError()
         }
     }
 
-    if (feedState.isCommentSheetVisible) {
-        ModalBottomSheet(onDismissRequest = { feedViewModel.dismissCommentSheet() }) {
-            CommentSheetContent(
-                comments = feedState.activePostComments,
-                onAddComment = { feedViewModel.addComment(it) }
-            )
-        }
+    val context = LocalContext.current
+    val app = remember(context) { context.applicationContext as android.app.Application }
+    val devOptionsViewModel: DevOptionsViewModel = viewModel()
+    val devOptions by devOptionsViewModel.options.collectAsState()
+
+    LaunchedEffect(Unit) {
+        devOptionsViewModel.refresh(app)
+        safetyViewModel.refresh(app)
     }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface,
-                tonalElevation = 0.dp,
-                modifier = Modifier.clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-            ) {
+            NavigationBar {
+                val screens = listOf(Screen.Feed, Screen.Explore, Screen.Messages, Screen.Notifications, Screen.Settings)
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
-                val screens = listOf(Screen.Feed, Screen.Explore, Screen.Notifications, Screen.Settings)
 
                 screens.forEach { screen ->
                     val isSelected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
-                    val iconScale by animateFloatAsState(targetValue = if (isSelected) 1.1f else 1.0f)
-
                     NavigationBarItem(
-                        icon = { Icon(if (isSelected) screen.iconFilled else screen.iconOutlined, screen.label, Modifier.scale(iconScale)) },
-                        label = { Text(screen.label, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
+                        icon = { Icon(if (isSelected) screen.iconFilled else screen.iconOutlined, stringResource(screen.labelId)) },
+                        label = { Text(stringResource(screen.labelId)) },
                         selected = isSelected,
-                        onClick = { navController.navigate(screen.route) { popUpTo(navController.graph.findStartDestination().id) { saveState = true }; launchSingleTop = true; restoreState = true } },
-                        colors = NavigationBarItemDefaults.colors(indicatorColor = MaterialTheme.colorScheme.primaryContainer, selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer, unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                        onClick = {
+                            navController.navigate(screen.route) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        modifier = if (screen == Screen.Settings) {
+                            Modifier.combinedClickable(
+                                onClick = {
+                                    navController.navigate(screen.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                },
+                                onLongClick = {
+                                    DevOptionsSettings.setDevMenuEnabled(app, true)
+                                    devOptionsViewModel.refresh(app)
+                                    navController.navigate(Screen.DevOptions.route)
+                                }
+                            )
+                        } else Modifier
                     )
                 }
             }
         }
     ) { innerPadding ->
-        NavHost(navController, Screen.Feed.route, Modifier.padding(innerPadding).fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        NavHost(
+            navController = navController,
+            startDestination = Screen.Feed.route,
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+        ) {
             composable(Screen.Feed.route) {
                 FeedScreen(
                     posts = feedState.posts,
                     stories = feedState.stories,
-                    isQuietMode = isQuietMode,
                     currentUser = CURRENT_USER.copy(isVerified = isUserVerified),
-                    onQuietToggle = onQuietToggle,
-                    onLikePost = { feedViewModel.toggleLike(it) },
-                    onReplyPost = { feedViewModel.openCommentSheet(it) },
-                    onSharePost = { feedViewModel.sharePost(context, it) },
-                    onAddPost = { c, t, i, v -> feedViewModel.createPost(c, t, i, v) },
-                    onDeletePost = { id -> feedViewModel.deletePost(id) },
-                    onProfileClick = { },
-                    isPremium = feedState.isPremium,
-                    showStories = feedState.showStories,
-                    isVideoAutoplayEnabled = feedState.isVideoAutoplayEnabled
-                )
-                if(feedState.isLoading) {
-                    Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
-                        NeuroLoadingAnimation()
-                    }
-                }
-            }
-            composable(Screen.Explore.route) { 
-                ExploreScreen(exploreTopics = EXPLORE_TOPICS) 
-            }
-            composable(Screen.Notifications.route) { 
-                NotificationsScreen(notifications = notifications) 
-            }
-            composable(Screen.Settings.route) {
-                SettingsScreen(
-                    isDarkMode, onDarkToggle, isQuietMode, onQuietToggle, isUserVerified,
-                    { isUserVerified = !isUserVerified },
-                    feedViewModel = feedViewModel,
-                    authViewModel = authViewModel,
-                    themeViewModel = themeViewModel,
-                    isPremium = feedState.isPremium,
-                    onPurchaseSuccess = { feedViewModel.setPremiumStatus(true) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun CommentSheetContent(comments: List<Comment>, onAddComment: (String) -> Unit) {
-    var text by remember { mutableStateOf("") }
-    
-    Column(Modifier.fillMaxWidth().padding(16.dp)) {
-        Text("Comments", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 16.dp))
-        
-        LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            if (comments.isEmpty()) {
-                item {
-                    Text("No comments yet. Be the first!", style = MaterialTheme.typography.bodyMedium, color = Color.Gray, modifier = Modifier.padding(vertical = 20.dp))
-                }
-            }
-            items(comments) { comment ->
-                Row(verticalAlignment = Alignment.Top) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current).data(comment.userAvatar).crossfade(true).build(),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(40.dp).clip(CircleShape).background(Color.LightGray)
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Column {
-                        Text(comment.userId, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
-                        Text(comment.content, style = MaterialTheme.typography.bodyMedium)
-                    }
-                }
-            }
-        }
-        
-        Spacer(Modifier.height(12.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                placeholder = { Text("Add a comment...") },
-                modifier = Modifier.weight(1f),
-                shape = CircleShape
-            )
-            Spacer(Modifier.width(8.dp))
-            IconButton(
-                onClick = { 
-                    if (text.isNotBlank()) {
-                        onAddComment(text)
-                        text = ""
-                    }
-                },
-                enabled = text.isNotBlank()
-            ) {
-                Icon(Icons.AutoMirrored.Filled.Send, "Send", tint = MaterialTheme.colorScheme.primary)
-            }
-        }
-        Spacer(Modifier.height(32.dp)) // Keyboard spacer
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun FeedScreen(
-    posts: List<Post>,
-    stories: List<Story>,
-    isQuietMode: Boolean,
-    currentUser: User,
-    onQuietToggle: (Boolean) -> Unit,
-    onLikePost: (Long) -> Unit,
-    onReplyPost: (Post) -> Unit, // Changed to accept Post object for context
-    onSharePost: (Post) -> Unit, // ADDED
-    onAddPost: (String, String, String?, String?) -> Unit,
-    onDeletePost: (Long) -> Unit,
-    onProfileClick: () -> Unit,
-    isPremium: Boolean,
-    showStories: Boolean,
-    isVideoAutoplayEnabled: Boolean,
-    modifier: Modifier = Modifier
-) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    var showCreatePostDialog by remember { mutableStateOf(false) }
-    val isDarkTheme = isSystemInDarkTheme()
-    val logoBrush = remember(isDarkTheme) {
-        Brush.linearGradient(if (isDarkTheme) SPECTRUM_GRADIENT else SPECTRUM_GRADIENT_DARK)
-    }
-
-    Scaffold(
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            LargeTopAppBar(
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    if (isQuietMode) {
-                                        MaterialTheme.colorScheme.surfaceVariant
-                                    } else {
-                                        Color.Transparent
-                                    }
-                                )
-                                .graphicsLayer(alpha = 0.99f)
-                                .drawWithCache {
-                                    onDrawWithContent {
-                                        drawContent()
-                                        if (!isQuietMode) {
-                                            drawRect(logoBrush, blendMode = BlendMode.SrcAtop)
-                                        }
-                                    }
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Filled.BubbleChart,
-                                "Logo",
-                                tint = if (isQuietMode) {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                } else {
-                                    Color.White.copy(alpha = 0.95f)
-                                },
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text("NeuroNet", style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, color = if (isQuietMode) MaterialTheme.colorScheme.onSurface else Color.Unspecified), modifier = Modifier.graphicsLayer(alpha = 0.99f).drawWithCache { onDrawWithContent { drawContent(); if (!isQuietMode) drawRect(logoBrush, blendMode = BlendMode.SrcAtop) } })
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { onQuietToggle(!isQuietMode) }) { Icon(if(isQuietMode) Icons.Outlined.VolumeOff else Icons.AutoMirrored.Outlined.VolumeUp, "Quiet Mode", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
-                    IconButton(onClick = onProfileClick) { Box(modifier = Modifier.size(40.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer), contentAlignment = Alignment.Center) { Text(currentUser.name.take(1).uppercase(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer) } }
-                },
-                scrollBehavior = scrollBehavior,
-                colors = TopAppBarDefaults.largeTopAppBarColors(containerColor = MaterialTheme.colorScheme.background, scrolledContainerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onBackground)
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { showCreatePostDialog = true }, containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary, elevation = FloatingActionButtonDefaults.elevation(4.dp), shape = RoundedCornerShape(16.dp)) {
-                Row(modifier = Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Filled.Add, "Create Post"); Spacer(modifier = Modifier.width(8.dp)); Text("Post", fontWeight = FontWeight.SemiBold) }
-            }
-        }
-    ) { innerPadding ->
-        LazyColumn(contentPadding = PaddingValues(top = innerPadding.calculateTopPadding() + 16.dp, bottom = innerPadding.calculateBottomPadding() + 80.dp, start = 16.dp, end = 16.dp), verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-
-            // Stories Row (Conditional)
-            if (showStories) {
-                item {
-                    StoriesRow(stories)
-                }
-            }
-
-            if (!isPremium) {
-                item {
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = Color.LightGray.copy(alpha = 0.3f)),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier.fillMaxWidth().height(100.dp)
-                    ) {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("ADVERTISEMENT", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
-                                Text("Buy Premium to Remove Ads!", style = MaterialTheme.typography.bodyMedium)
-                            }
-                        }
-                    }
-                }
-            }
-
-            items(items = posts) { post ->
-                var isVisible by remember { mutableStateOf(false) }
-                LaunchedEffect(Unit) { isVisible = true }
-                AnimatedVisibility(visible = isVisible, enter = fadeIn() + slideInVertically { 50 }) {
-                    BubblyPostCard(
-                        post = post,
-                        isQuietMode = isQuietMode,
-                        isAutoVideoPlayback = isVideoAutoplayEnabled, 
-                        onLike = { onLikePost(post.id ?: 0L) },
-                        onDelete = { onDeletePost(post.id ?: 0L) },
-                        onReplyClick = { onReplyPost(post) }, // Pass post to open sheet
-                        onShare = { onSharePost(post) }
-                    )
-                }
-            }
-        }
-    }
-    if (showCreatePostDialog) {
-        CreatePostDialog(onDismiss = { showCreatePostDialog = false }, onPost = { c, t, i, v -> onAddPost(c, t, i, v); showCreatePostDialog = false })
-    }
-}
-
-@Composable
-fun StoriesRow(stories: List<Story>) {
-    var selectedStory by remember { mutableStateOf<Story?>(null) }
-
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(vertical = 8.dp)
-    ) {
-        items(stories) { story ->
-            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable { selectedStory = story }) {
-                Box(
-                    modifier = Modifier
-                        .size(72.dp)
-                        .border(2.dp, Brush.linearGradient(listOf(Color(0xFFE91E63), Color(0xFFFF9800))), CircleShape)
-                        .padding(4.dp)
-                ) {
-                     AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current).data(story.userAvatarUrl).crossfade(true).build(),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize().clip(CircleShape)
-                    )
-                }
-                Spacer(Modifier.height(4.dp))
-                Text(story.userId, style = MaterialTheme.typography.labelSmall)
-            }
-        }
-    }
-
-    selectedStory?.let { story ->
-        Dialog(onDismissRequest = { selectedStory = null }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-            Box(Modifier.fillMaxSize().background(Color.Black)) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current).data(story.imageUrl).crossfade(true).build(),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Fit
-                )
-                IconButton(onClick = { selectedStory = null }, modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)) {
-                    Icon(Icons.Default.Close, null, tint = Color.White)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun CreatePostDialog(onDismiss: () -> Unit, onPost: (String, String, String?, String?) -> Unit) {
-    var text by remember { mutableStateOf("") }
-    var imageUrl by remember { mutableStateOf("") }
-    var videoUrl by remember { mutableStateOf("") }
-    var selectedTone by remember { mutableStateOf("/gen") }
-    val tones = listOf("/gen", "/pos", "/srs", "/j", "/lh")
-    
-    Dialog(onDismissRequest = onDismiss) {
-        Card(shape = RoundedCornerShape(32.dp), modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
-            Column(modifier = Modifier.padding(24.dp).verticalScroll(rememberScrollState())) {
-                Text("Create Post", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(24.dp))
-                OutlinedTextField(value = text, onValueChange = { text = it }, placeholder = { Text("What's on your mind?") }, modifier = Modifier.fillMaxWidth().height(120.dp), shape = RoundedCornerShape(20.dp), colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary, unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant))
-                Spacer(modifier = Modifier.height(12.dp))
-                OutlinedTextField(value = imageUrl, onValueChange = { imageUrl = it }, label = { Text("Image URL (Optional)") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
-                Spacer(modifier = Modifier.height(12.dp))
-                OutlinedTextField(value = videoUrl, onValueChange = { videoUrl = it }, label = { Text("Video URL (Optional)") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
-                Spacer(modifier = Modifier.height(24.dp))
-                Text("Tone Indicator", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
-                    tones.forEach { tone -> FilterChip(selected = tone == selectedTone, onClick = { selectedTone = tone }, label = { Text(tone) }, modifier = Modifier.padding(end = 8.dp), shape = CircleShape) }
-                }
-                Spacer(modifier = Modifier.height(32.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    TextButton(onClick = onDismiss) { Text("Cancel") }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = { if (text.isNotBlank()) onPost(text, selectedTone, imageUrl.ifBlank { null }, videoUrl.ifBlank { null }) }, enabled = text.isNotBlank(), colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)) { Text("Post") }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun SettingsScreen(
-    isDarkMode: Boolean, onDarkToggle: (Boolean) -> Unit,
-    isQuietMode: Boolean, onQuietToggle: (Boolean) -> Unit,
-    isUserVerified: Boolean, onToggleVerification: () -> Unit,
-    feedViewModel: FeedViewModel,
-    authViewModel: AuthViewModel,
-    themeViewModel: ThemeViewModel, // Add ThemeViewModel
-    isPremium: Boolean, onPurchaseSuccess: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val context = LocalContext.current as Activity
-    var showPremiumDialog by remember { mutableStateOf(false) }
-    var showNukeConfirmation by remember { mutableStateOf(false) }
-
-    var simulateError by remember { mutableStateOf(feedViewModel.simulateError) }
-    var simulateInfiniteLoading by remember { mutableStateOf(feedViewModel.simulateInfiniteLoading) }
-    
-    val is2FAEnabled by authViewModel.is2FAEnabled.collectAsState()
-    val feedState by feedViewModel.uiState.collectAsState()
-    val themeState by themeViewModel.themeState.collectAsState()
-
-    Column(modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp)) {
-        Text("Settings", style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 24.dp))
-
-        Card(
-            colors = CardDefaults.cardColors(containerColor = if(isPremium) Color(0xFFE8F5E9) else MaterialTheme.colorScheme.primaryContainer),
-            shape = RoundedCornerShape(24.dp),
-            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp).clickable { if(!isPremium) showPremiumDialog = true }
-        ) {
-            Row(Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(if(isPremium) Icons.Outlined.VerifiedUser else Icons.Outlined.Star, null, tint = if(isPremium) Color(0xFF2E7D32) else MaterialTheme.colorScheme.primary)
-                Spacer(Modifier.width(16.dp))
-                Column {
-                    Text(if(isPremium) "Premium Active" else "Go Premium", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    Text(if(isPremium) "Thank you for your support!" else "Remove ads & support devs", style = MaterialTheme.typography.bodyMedium)
-                }
-            }
-        }
-
-        // --- NEW: Personalized Theme Section ---
-        SettingsGroup("Personalized Theme") {
-            SettingsTile("Dark Mode", "Easier on the eyes.", Icons.Outlined.DarkMode, isDarkMode, onDarkToggle)
-            
-            Text("How are you feeling?", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
-            
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp)
-            ) {
-                items(com.kyilmaz.neuronetworkingtitle.NeuroState.values()) { state ->
-                    FilterChip(
-                        selected = themeState.selectedState == state,
-                        onClick = { themeViewModel.setNeuroState(state) },
-                        label = { Text(state.label) },
-                        leadingIcon = { 
-                            Box(modifier = Modifier.size(12.dp).background(state.seedColor, CircleShape)) 
-                        }
-                    )
-                }
-            }
-            Text(
-                text = themeState.selectedState.description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 16.dp)
-            )
-        }
-
-        SettingsGroup("Sensory & Interface") {
-            SettingsTile("Quiet Mode", "Reduces saturation.", Icons.Outlined.VolumeOff, isQuietMode, onQuietToggle)
-             SettingsTile("Show Stories", "Toggle story bar.", Icons.Outlined.AmpStories, feedState.showStories, { feedViewModel.toggleStories(it) })
-             SettingsTile("Video Autoplay", "Play videos automatically.", Icons.Outlined.PlayCircle, feedState.isVideoAutoplayEnabled, { feedViewModel.toggleVideoAutoplay(it) })
-        }
-        SettingsGroup("Security") {
-            SettingsTile("Verified Human", "Identity status.", Icons.Outlined.Shield, isUserVerified, {})
-            SettingsTile("Two-Factor Auth", "Require code at login.", Icons.Outlined.Lock, is2FAEnabled, { authViewModel.toggle2FA(it) })
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-        Text("Developer Options", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(bottom = 12.dp, start = 8.dp))
-
-        Card(
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f)),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.2f)),
-            shape = RoundedCornerShape(24.dp)
-        ) {
-            Column(modifier = Modifier.padding(vertical = 12.dp)) {
-                SettingsTile("Force Verify", "Toggle status.", Icons.Outlined.VerifiedUser, isUserVerified, { onToggleVerification() })
-
-                // NEW: Fake Premium Toggle
-                SettingsTile("Fake Premium", "Simulate paid status.", Icons.Outlined.MonetizationOn, feedState.isFakePremiumEnabled, { feedViewModel.toggleFakePremium(it) })
-
-                // NEW: Mock Interface Toggle
-                SettingsTile("Mock Interface", "Show fake data for demo.", Icons.Outlined.DesignServices, feedState.isMockInterfaceEnabled, { feedViewModel.toggleMockInterface(it) })
-
-                Row(modifier = Modifier.fillMaxWidth().clickable { authViewModel.reset2FAState() }.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.LockReset, null, tint = MaterialTheme.colorScheme.error); Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                         Text("Reset 2FA State", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
-                         Text("Clear verified status.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-
-                SettingsTile("Simulate HTTP 500", "Force fetch failure.", Icons.Outlined.ErrorOutline, simulateError, {
-                    simulateError = it
-                    feedViewModel.simulateError = it
-                })
-
-                SettingsTile("Infinite Loading", "Stalls fetch request.", Icons.Outlined.HourglassEmpty, simulateInfiniteLoading, {
-                    simulateInfiniteLoading = it
-                    feedViewModel.simulateInfiniteLoading = it
-                })
-
-                HorizontalDivider(color = MaterialTheme.colorScheme.error.copy(alpha=0.1f))
-                
-                Row(modifier = Modifier.fillMaxWidth().clickable { feedViewModel.stressTestDb() }.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.Speed, null, tint = MaterialTheme.colorScheme.error); Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text("Stress Test DB", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
-                        Text("Insert 50 posts rapidly", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-                
-                HorizontalDivider(color = MaterialTheme.colorScheme.error.copy(alpha=0.1f))
-
-                Row(modifier = Modifier.fillMaxWidth().clickable { feedViewModel.floodDb() }.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.WaterDrop, null, tint = MaterialTheme.colorScheme.error); Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text("Flood Database", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error)
-                        Text("Adds 5 dummy posts instantly", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-
-                HorizontalDivider(color = MaterialTheme.colorScheme.error.copy(alpha=0.1f))
-
-                Row(modifier = Modifier.fillMaxWidth().clickable { showNukeConfirmation = true }.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.DeleteForever, null, tint = MaterialTheme.colorScheme.error); Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text("Nuke Database", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
-                        Text("Delete ALL posts. Irreversible.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-            }
-        }
-        Spacer(modifier = Modifier.height(80.dp))
-    }
-
-    if(showPremiumDialog) {
-        PremiumDialog(context, onDismiss = { showPremiumDialog = false }, onPurchaseSuccess = {
-            onPurchaseSuccess()
-            showPremiumDialog = false
-        })
-    }
-
-    if(showNukeConfirmation) {
-        AlertDialog(
-            onDismissRequest = { showNukeConfirmation = false },
-            title = { Text("Nuke Database?") },
-            text = { Text("This will permanently delete all posts from the server. This action cannot be undone.") },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        feedViewModel.nukeDb()
-                        showNukeConfirmation = false
+                    onLikePost = { postId: Long -> feedViewModel.toggleLike(postId) },
+                    onReplyPost = { post: Post -> feedViewModel.openCommentSheet(post) },
+                    onSharePost = { ctx: Context, post: Post -> feedViewModel.sharePost(ctx, post) },
+                    onAddPost = { content: String, tone: String, imageUrl: String?, videoUrl: String? ->
+                        feedViewModel.createPost(content, tone, imageUrl, videoUrl)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                ) { Text("Yes, Nuke it") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showNukeConfirmation = false }) { Text("Cancel") }
-            },
-            icon = { Icon(Icons.Outlined.Warning, null, tint = MaterialTheme.colorScheme.error) }
+                    onDeletePost = { postId: Long -> feedViewModel.deletePost(postId) },
+                    onProfileClick = { },
+                    onViewStory = { story -> feedViewModel.viewStory(story) },
+                    onAddStory = { imageUrl, duration -> feedViewModel.createStory(imageUrl, duration) },
+                    isPremium = feedState.isPremium,
+                    onUpgradeClick = { showPremiumDialog = true },
+                    isMockInterfaceEnabled = feedState.isMockInterfaceEnabled,
+                    safetyState = safetyState
+                )
+            }
+            composable(Screen.Explore.route) { ExploreScreen(posts = MOCK_EXPLORE_POSTS, safetyState = safetyState) }
+            composable(Screen.Messages.route) {
+                val state by feedViewModel.uiState.collectAsState()
+                DmInboxScreen(
+                    conversations = state.conversations,
+                    safetyState = safetyState,
+                    onOpenConversation = { conversationId ->
+                        feedViewModel.openConversation(conversationId)
+                        navController.navigate(Screen.Conversation.route(conversationId))
+                    }
+                )
+            }
+            composable(Screen.Conversation.route) { backStackEntry ->
+                val conversationId = backStackEntry.arguments?.getString("conversationId")
+                val state by feedViewModel.uiState.collectAsState()
+                val conv = state.conversations.find { it.id == conversationId } ?: state.activeConversation
+                if (conv == null) {
+                    DmInboxScreen(
+                        conversations = state.conversations,
+                        safetyState = safetyState,
+                        onOpenConversation = { id ->
+                            feedViewModel.openConversation(id)
+                            navController.navigate(Screen.Conversation.route(id))
+                        },
+                        onBack = { navController.popBackStack() }
+                    )
+                } else {
+                    val recipientId = conv.participants.firstOrNull { it != "me" }.orEmpty()
+                    DmConversationScreen(
+                        conversation = conv,
+                        safetyState = safetyState,
+                        onBack = {
+                            navController.popBackStack()
+                            feedViewModel.dismissConversation()
+                        },
+                        onSend = { recipientId, content ->
+                            feedViewModel.sendDirectMessage(recipientId, content)
+                        },
+                        onReport = { messageId ->
+                            feedViewModel.reportMessage(messageId)
+                        },
+                        onRetryMessage = { convId, msgId ->
+                            feedViewModel.retryDirectMessage(convId, msgId)
+                        },
+                         onBlockUser = { feedViewModel.blockUser(it) },
+                         onUnblockUser = { feedViewModel.unblockUser(it) },
+                         onMuteUser = { feedViewModel.muteUser(it) },
+                         onUnmuteUser = { feedViewModel.unmuteUser(it) },
+                         isBlocked = { feedViewModel.isUserBlocked(it) },
+                         isMuted = { feedViewModel.isUserMuted(it) }
+                     )
+                 }
+             }
+            composable(Screen.Settings.route) {
+                com.kyilmaz.neuronetworkingtitle.SettingsScreen(
+                    authViewModel = authViewModel,
+                    onLogout = {
+                        authViewModel.signOut()
+                        navController.popBackStack(Screen.Feed.route, true)
+                    },
+                    safetyViewModel = safetyViewModel,
+                    devOptionsViewModel = devOptionsViewModel,
+                    canShowDevOptions = devOptions.devMenuEnabled,
+                    onOpenDevOptions = {
+                        navController.navigate(Screen.DevOptions.route)
+                    }
+                )
+            }
+            composable(Screen.DevOptions.route) {
+                DevOptionsScreen(
+                    onBack = { navController.popBackStack() },
+                    devOptionsViewModel = devOptionsViewModel,
+                    safetyViewModel = safetyViewModel
+                )
+            }
+        }
+    }
+
+    if (showPremiumDialog) {
+        AlertDialog(
+            onDismissRequest = { showPremiumDialog = false },
+            title = { Text("Premium") },
+            text = { Text("Premium upgrades are not wired in this demo build.") },
+            confirmButton = {
+                TextButton(onClick = { showPremiumDialog = false }) { Text("OK") }
+            }
         )
     }
 }
 
+// --- DEV OPTIONS UI ---
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PremiumDialog(activity: Activity, onDismiss: () -> Unit, onPurchaseSuccess: () -> Unit) {
-    fun purchaseProduct(productId: String) {
-        Purchases.sharedInstance.getProducts(listOf(productId), object : GetStoreProductsCallback {
-            override fun onReceived(storeProducts: List<StoreProduct>) {
-                val product = storeProducts.firstOrNull { it.id == productId }
-                if (product != null) {
-                    val params = PurchaseParams.Builder(activity, product).build()
-                    Purchases.sharedInstance.purchase(params, object : PurchaseCallback {
-                        override fun onCompleted(storeTransaction: StoreTransaction, customerInfo: CustomerInfo) {
-                            if (customerInfo.entitlements["premium"]?.isActive == true) {
-                                onPurchaseSuccess()
-                            }
-                        }
-                        override fun onError(error: PurchasesError, userCancelled: Boolean) {
-                            if(!userCancelled) {
-                                Toast.makeText(activity, "Purchase Error: ${error.message}", Toast.LENGTH_LONG).show()
-                            }
-                        }
-                    })
-                } else {
-                    Toast.makeText(activity, "Product not found", Toast.LENGTH_SHORT).show()
-                }
-            }
-            override fun onError(error: PurchasesError) {
-                Toast.makeText(activity, "Error fetching products: ${error.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
+fun DevOptionsScreen(
+    onBack: () -> Unit,
+    devOptionsViewModel: DevOptionsViewModel,
+    safetyViewModel: SafetyViewModel
+) {
+    val context = LocalContext.current
+    val app = remember(context) { context.applicationContext as android.app.Application }
+    val options by devOptionsViewModel.options.collectAsState()
+
+    // Keep SafetyViewModel in sync when toggles change.
+    LaunchedEffect(options.forceAudience, options.forceKidsFilterLevel, options.forcePinSet, options.forcePinVerifySuccess) {
+        safetyViewModel.refresh(app)
     }
 
-    Dialog(onDismissRequest = onDismiss) {
-        Card(shape = RoundedCornerShape(32.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-            Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Remove Ads", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                Spacer(Modifier.height(8.dp))
-                Text("Choose a plan to support NeuroNet.", textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(Modifier.height(24.dp))
-                Button(onClick = { purchaseProduct("neuro_monthly_no_ads") }, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("Monthly Subscription ($2.00)") }
-                Spacer(Modifier.height(12.dp))
-                OutlinedButton(onClick = { purchaseProduct("neuro_lifetime_no_ads") }, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("One-Time Purchase ($60.00)") }
-                Spacer(Modifier.height(24.dp))
-                TextButton(onClick = onDismiss) { Text("Maybe Later") }
+    var delayText by remember(options.dmArtificialSendDelayMs) { mutableStateOf(options.dmArtificialSendDelayMs.toString()) }
+    var minIntervalText by remember(options.dmMinIntervalOverrideMs) { mutableStateOf(options.dmMinIntervalOverrideMs?.toString().orEmpty()) }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Developer Options") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.dm_back))
+                    }
+                },
+                actions = {
+                    TextButton(
+                        onClick = {
+                            devOptionsViewModel.resetAll(app)
+                            safetyViewModel.refresh(app)
+                        }
+                    ) { Text("Reset") }
+                }
+            )
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            item {
+                Text(
+                    "These settings are for testing DM + safety behavior. Keep them OFF in production builds.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
+
+            item { HorizontalDivider() }
+
+            // GLOBAL
+            item {
+                Text("Global", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            }
+            item {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Enable Dev Menu")
+                        Text("Shows Developer Options entry in Settings.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Switch(
+                        checked = options.devMenuEnabled,
+                        onCheckedChange = { devOptionsViewModel.setDevMenuEnabled(app, it) }
+                    )
+                }
+            }
+            item {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Show DM debug overlay")
+                        Text("(Reserved) Add extra debug chips/labels in DM UI.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Switch(
+                        checked = options.showDmDebugOverlay,
+                        onCheckedChange = { devOptionsViewModel.setShowDmDebugOverlay(app, it) }
+                    )
+                }
+            }
+
+            item { HorizontalDivider() }
+
+            // DM DELIVERY
+            item {
+                Text("DM Delivery", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            }
+            item {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Force send failure")
+                        Text("All outgoing DMs will fail and become retryable.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Switch(
+                        checked = options.dmForceSendFailure,
+                        onCheckedChange = { devOptionsViewModel.setDmForceSendFailure(app, it) }
+                    )
+                }
+            }
+            item {
+                OutlinedTextField(
+                    value = delayText,
+                    onValueChange = { newVal ->
+                        delayText = newVal.filter { it.isDigit() }.take(5)
+                    },
+                    label = { Text("Artificial send delay (ms)") },
+                    supportingText = { Text("Controls how long messages stay in SENDING after you press send.") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            item {
+                Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                    TextButton(
+                        onClick = {
+                            val ms = delayText.toLongOrNull() ?: 450L
+                            devOptionsViewModel.setDmSendDelayMs(app, ms)
+                        }
+                    ) { Text("Apply") }
+                }
+            }
+
+            item { HorizontalDivider() }
+
+            // DM RATE LIMITING
+            item {
+                Text("DM Rate Limiting", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            }
+            item {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Disable rate limit")
+                        Text("Bypasses ViewModel throttle checks.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Switch(
+                        checked = options.dmDisableRateLimit,
+                        onCheckedChange = { devOptionsViewModel.setDmDisableRateLimit(app, it) }
+                    )
+                }
+            }
+            item {
+                OutlinedTextField(
+                    value = minIntervalText,
+                    onValueChange = { newVal ->
+                        minIntervalText = newVal.filter { it.isDigit() }.take(5)
+                    },
+                    label = { Text("Min interval override (ms)") },
+                    supportingText = { Text("Leave empty to use the default (1200ms).") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            item {
+                Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                    TextButton(
+                        onClick = {
+                            val ms = minIntervalText.trim().takeIf { it.isNotBlank() }?.toLongOrNull()
+                            devOptionsViewModel.setDmMinIntervalOverrideMs(app, ms)
+                        }
+                    ) { Text("Apply") }
+                }
+            }
+
+            item { HorizontalDivider() }
+
+            // MODERATION
+            item {
+                Text("Moderation", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            }
+            item {
+                val choices = listOf(
+                    DevModerationOverride.OFF to "Normal",
+                    DevModerationOverride.CLEAN to "Force CLEAN",
+                    DevModerationOverride.FLAGGED to "Force FLAGGED",
+                    DevModerationOverride.BLOCKED to "Force BLOCKED"
+                )
+
+                Column {
+                    Text("Moderation override", style = MaterialTheme.typography.bodyLarge)
+                    Spacer(Modifier.height(8.dp))
+                    choices.forEach { (value, label) ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { devOptionsViewModel.setModerationOverride(app, value) }
+                                .padding(vertical = 6.dp)
+                        ) {
+                            RadioButton(
+                                selected = options.moderationOverride == value,
+                                onClick = { devOptionsViewModel.setModerationOverride(app, value) }
+                            )
+                            Spacer(Modifier.width(10.dp))
+                            Text(label)
+                        }
+                    }
+                }
+            }
+
+            item { HorizontalDivider() }
+
+            // SAFETY
+            item {
+                Text("Safety Overrides", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            }
+            item {
+                val choices = listOf(
+                    null to "No override",
+                    Audience.ADULT to "Force ADULT",
+                    Audience.TEEN to "Force TEEN",
+                    Audience.UNDER_13 to "Force UNDER 13"
+                )
+
+                Column {
+                    Text("Force audience", style = MaterialTheme.typography.bodyLarge)
+                    Spacer(Modifier.height(8.dp))
+                    choices.forEach { (value, label) ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { devOptionsViewModel.setForceAudience(app, value) }
+                                .padding(vertical = 6.dp)
+                        ) {
+                            RadioButton(
+                                selected = options.forceAudience == value,
+                                onClick = { devOptionsViewModel.setForceAudience(app, value) }
+                            )
+                            Spacer(Modifier.width(10.dp))
+                            Text(label)
+                        }
+                    }
+                }
+            }
+
+            item {
+                val choices = listOf(
+                    null to "No override",
+                    KidsFilterLevel.STRICT to "Force STRICT",
+                    KidsFilterLevel.MODERATE to "Force MODERATE"
+                )
+
+                Column {
+                    Text("Force kids filter level", style = MaterialTheme.typography.bodyLarge)
+                    Spacer(Modifier.height(8.dp))
+                    choices.forEach { (value, label) ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { devOptionsViewModel.setForceKidsFilterLevel(app, value) }
+                                .padding(vertical = 6.dp)
+                        ) {
+                            RadioButton(
+                                selected = options.forceKidsFilterLevel == value,
+                                onClick = { devOptionsViewModel.setForceKidsFilterLevel(app, value) }
+                            )
+                            Spacer(Modifier.width(10.dp))
+                            Text(label)
+                        }
+                    }
+                }
+            }
+
+            item {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Force PIN set")
+                        Text("Makes SafetyViewModel think a parental PIN exists.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Switch(checked = options.forcePinSet, onCheckedChange = { devOptionsViewModel.setForcePinSet(app, it) })
+                }
+            }
+
+            item {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Force PIN verify success")
+                        Text("Any PIN entry returns success.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Switch(checked = options.forcePinVerifySuccess, onCheckedChange = { devOptionsViewModel.setForcePinVerifySuccess(app, it) })
+                }
+            }
+
+            item { Spacer(Modifier.height(24.dp)) }
         }
     }
 }

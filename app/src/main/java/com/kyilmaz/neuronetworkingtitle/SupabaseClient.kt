@@ -1,29 +1,74 @@
+@file:Suppress(
+    "unused",
+    "UNUSED",
+    "ObjectPropertyName",
+    "unused",
+    "UNUSED_VARIABLE",
+    "MemberVisibilityCanBePrivate"
+)
+
 package com.kyilmaz.neuronetworkingtitle
 
+import com.kyilmaz.neuronetworkingtitle.BuildConfig
+import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
-import io.github.jan.supabase.auth.Auth // UPDATED: Was .gotrue.Auth
 import io.github.jan.supabase.postgrest.Postgrest
-import io.github.jan.supabase.realtime.Realtime
-import io.github.jan.supabase.serializer.KotlinXSerializer
-import kotlinx.serialization.json.Json
+import android.util.Log
 
-object SupabaseClient {
-    // Your Project URL and Anon Key
-    private const val SUPABASE_URL = "https://xfylbfqposgllodadhka.supabase.co"
-    private const val SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmeWxiZnFwb3NnbGxvZGFkaGthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1NjQzNzIsImV4cCI6MjA4MDE0MDM3Mn0.AkaLs9Q5KqYPA3xRb_XjWHveoTZ2BtTgaeCfOO7z83c"
+// Avoid name collision with io.github.jan.supabase.SupabaseClient which confuses some analyzers.
+@Suppress("unused")
+object AppSupabaseClient {
+    // NOTE: These are expected to be provided via buildConfigField in Gradle.
+    // Validate and fail fast with a clear message if they are not configured.
+    private fun resolveSupabaseUrl(): String {
+        val configuredUrl = BuildConfig.SUPABASE_URL
+        if (configuredUrl.isNotBlank()) {
+            return configuredUrl
+        }
 
-    val client = createSupabaseClient(
-        supabaseUrl = SUPABASE_URL,
-        supabaseKey = SUPABASE_KEY
+        if (BuildConfig.DEBUG) {
+            Log.w(
+                "AppSupabaseClient",
+                "Supabase URL is not configured for debug build. " +
+                "Set SUPABASE_URL via buildConfigField / gradle.properties to enable Supabase."
+            )
+        }
+
+        throw IllegalStateException(
+            "Supabase URL is not configured. Set SUPABASE_URL via buildConfigField / gradle.properties."
+        )
+    }
+
+    private fun resolveSupabaseKey(): String {
+        val configuredKey = BuildConfig.SUPABASE_KEY
+        if (configuredKey.isNotBlank()) {
+            return configuredKey
+        }
+
+        if (BuildConfig.DEBUG) {
+            Log.w(
+                "AppSupabaseClient",
+                "Supabase key is not configured. Using placeholder key for debug build. " +
+                "Set SUPABASE_KEY via buildConfigField / gradle.properties to enable Supabase."
+            )
+            // Placeholder key used only to avoid hard crashes in development.
+            return "DEVELOPMENT_PLACEHOLDER_KEY"
+        }
+
+        throw IllegalStateException(
+            "Supabase key is not configured. Set SUPABASE_KEY via buildConfigField / gradle.properties."
+        )
+    }
+
+    private val url: String = resolveSupabaseUrl()
+    private val key: String = resolveSupabaseKey()
+    @Suppress("unused")
+    val client: io.github.jan.supabase.SupabaseClient = createSupabaseClient(
+        supabaseUrl = url,
+        supabaseKey = key
     ) {
-        // Configure JSON Serialization (Required for Post objects)
-        defaultSerializer = KotlinXSerializer(Json {
-            ignoreUnknownKeys = true
-            encodeDefaults = true
-        })
-
         install(Postgrest)
-        install(Auth) // Uses the new Auth module
-        install(Realtime)
     }
 }
+
+typealias SupabaseClientProvider = AppSupabaseClient
