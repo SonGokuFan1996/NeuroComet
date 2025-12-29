@@ -9,7 +9,6 @@
 
 package com.kyilmaz.neuronetworkingtitle
 
-import android.app.Application
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,29 +21,10 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import kotlin.time.Duration.Companion.milliseconds
 
-// Explicitly import models and constants from other files in the same package
-// to ensure test visibility and prevent unexpected runtime/compiler errors.
-import com.kyilmaz.neuronetworkingtitle.CURRENT_USER
-import com.kyilmaz.neuronetworkingtitle.DevModerationOverride
-import com.kyilmaz.neuronetworkingtitle.DevOptions
-import com.kyilmaz.neuronetworkingtitle.DevOptionsSettings
-import com.kyilmaz.neuronetworkingtitle.DmPrivacySettings
-import com.kyilmaz.neuronetworkingtitle.Story
-import com.kyilmaz.neuronetworkingtitle.StoryItem
-import com.kyilmaz.neuronetworkingtitle.Post
-import com.kyilmaz.neuronetworkingtitle.Conversation
-import com.kyilmaz.neuronetworkingtitle.DirectMessage
-import com.kyilmaz.neuronetworkingtitle.ModerationStatus
-import com.kyilmaz.neuronetworkingtitle.MessageDeliveryStatus
-import com.kyilmaz.neuronetworkingtitle.MOCK_CONVERSATIONS
-import com.kyilmaz.neuronetworkingtitle.MOCK_STORIES
-import com.kyilmaz.neuronetworkingtitle.ApplicationProvider
-
-
 // Required for Mock Data
 private const val CURRENT_USER_ID_MOCK = "me"
-private val DINO_USER_ID = "DinoLover99"
-private val THERAPY_USER_ID = "Therapy_Bot"
+private const val DINO_USER_ID = "DinoLover99"
+private const val THERAPY_USER_ID = "Therapy_Bot"
 
 // --- HIGH QUALITY MOCK DATA ---
 val MOCK_FEED_POSTS = listOf(
@@ -89,41 +69,23 @@ data class FeedUiState(
     val activeStory: Story? = null,
     val conversations: List<Conversation> = emptyList(),
     val activeConversation: Conversation? = null,
-    val isDinoBanned: Boolean = false // Track mock ban status for Dev UI
+    val isDinoBanned: Boolean = false
 )
 
 class FeedViewModel : ViewModel() {
-    // In this app we use local list persistence; we need an Application context.
-    // For production you'd move this to a repository and enforce on backend too.
-    private val appContext: Application? = ApplicationProvider.app
-
-    private fun appContextOrNull(): Application? = appContext
-
-    private fun isDmBlocked(userId: String): Boolean {
-        val app = appContextOrNull() ?: return false
-        return DmPrivacySettings.isBlocked(app, userId)
-    }
-
-    private fun isDmMuted(userId: String): Boolean {
-        val app = appContextOrNull() ?: return false
-        return DmPrivacySettings.isMuted(app, userId)
-    }
 
     private val _uiState = MutableStateFlow(FeedUiState(isLoading = true))
     val uiState: StateFlow<FeedUiState> = _uiState.asStateFlow()
 
     private var realPremiumStatus = false
 
-    @Suppress("unused")
     var simulateError = false
-
-    @Suppress("unused")
     var simulateInfiniteLoading = false
 
     private val _userStories = MutableStateFlow<List<Story>>(emptyList())
     private val _userConversations = MutableStateFlow<List<Conversation>>(MOCK_CONVERSATIONS)
 
-    // Mock strike counter for comprehensive anti-abuse system
+    // Mock strike counter
     private val _userStrikeCount = MutableStateFlow<Map<String, Int>>(emptyMap())
 
     init {
@@ -133,16 +95,14 @@ class FeedViewModel : ViewModel() {
     }
 
     private fun devOptions(): DevOptions {
-        val app = appContextOrNull() ?: return DevOptions()
+        val app = ApplicationProvider.app ?: return DevOptions()
         return DevOptionsSettings.get(app)
     }
 
-    // Mock Content Moderation Logic
+    // Mock content moderation
     private fun performContentModeration(content: String): ModerationStatus {
         val lowerCaseContent = content.lowercase()
-        // Keywords allowing profanity but flagging for review
         val flaggedKeywords = listOf("scam", "phishing", "hate", "link", "spam", "shit", "damn")
-        // Keywords triggering automatic block/strike
         val blockedKeywords = listOf("kill", "harm", "abuse", "underage", "threat", "illegal", "criminal")
 
         return when {
@@ -161,89 +121,55 @@ class FeedViewModel : ViewModel() {
         }
     }
 
-    private fun handleAbusiveContent(_senderId: String, status: ModerationStatus) {
-        // Keep the parameter for future real-user wiring.
-        val senderId = _senderId
-
+    private fun handleAbusiveContent(senderId: String, status: ModerationStatus) {
         if (status == ModerationStatus.BLOCKED) {
             _userStrikeCount.update { currentCounts ->
                 val strikes = (currentCounts[senderId] ?: 0) + 1
                 val newCounts = currentCounts + (senderId to strikes)
-
-                if (strikes >= 3) {
-                    banUser(senderId)
-                }
+                if (strikes >= 3) banUser(senderId)
                 newCounts
             }
         }
     }
 
     fun banUser(userId: String) {
-        // This is a powerful administrative action
         if (userId == DINO_USER_ID) {
             _uiState.update { it.copy(isDinoBanned = true, errorMessage = "User DinoLover99 has been banned.") }
         } else if (userId == CURRENT_USER_ID_MOCK) {
             _uiState.update { it.copy(errorMessage = "You have been banned (Mock)! DM features disabled.") }
         }
-        // In a real app, this would trigger DB update and user logout/restriction
     }
 
-    // --- DM ACTIONS ---
+    // --- Conversations / DM list ---
 
     fun fetchConversations() {
         viewModelScope.launch {
             delay(300.milliseconds)
 
-            // Reconstruct the full list, including mock data, but dynamically filter out banned users' DMs
             val combinedConversations = MOCK_CONVERSATIONS.map { staticConv ->
                 _userConversations.value.find { it.id == staticConv.id } ?: staticConv
             }.plus(_userConversations.value.filter { conv -> MOCK_CONVERSATIONS.none { it.id == conv.id } })
 
-            // Apply DM privacy: remove blocked conversations; mask notifications for muted users.
-            val filtered = combinedConversations
-                .filterNot { conv ->
-                    val other = conv.participants.firstOrNull { it != CURRENT_USER_ID_MOCK }.orEmpty()
-                    other.isNotBlank() && isDmBlocked(other)
-                }
-                .map { conv ->
-                    val other = conv.participants.firstOrNull { it != CURRENT_USER_ID_MOCK }.orEmpty()
-                    if (other.isNotBlank() && isDmMuted(other)) {
-                        conv.copy(unreadCount = 0) // muted: don't surface unread
-                    } else conv
-                }
-
             _uiState.update {
-                it.copy(conversations = filtered.sortedByDescending { conv -> Instant.parse(conv.lastMessageTimestamp) })
+                it.copy(conversations = combinedConversations.sortedByDescending { conv -> Instant.parse(conv.lastMessageTimestamp) })
             }
         }
     }
 
     fun openConversation(conversationId: String) {
         _uiState.update { state ->
-            val conversation = state.conversations.find { it.id == conversationId }
-            conversation?.let { conv ->
-                val other = conv.participants.firstOrNull { it != CURRENT_USER_ID_MOCK }.orEmpty()
-                if (other.isNotBlank() && isDmBlocked(other)) {
-                    return@update state.copy(errorMessage = "This conversation is blocked.")
-                }
+            val conversation = state.conversations.find { it.id == conversationId } ?: return@update state
+            val updatedMessages = conversation.messages.map { it.copy(isRead = true) }
+            val updatedConversation = conversation.copy(messages = updatedMessages, unreadCount = 0)
 
-                // Mark messages as read when opening conversation
-                val updatedMessages = conv.messages.map { it.copy(isRead = true) }
-                val updatedConversation = conv.copy(messages = updatedMessages, unreadCount = 0)
+            _userConversations.update { currentList ->
+                currentList.map { if (it.id == conversationId) updatedConversation else it }
+            }
 
-                val newConversationsList = state.conversations.map {
-                    if (it.id == conversationId) updatedConversation else it
-                }
-
-                _userConversations.update { currentList ->
-                    currentList.map { if (it.id == conversationId) updatedConversation else it }
-                }
-
-                state.copy(
-                    activeConversation = updatedConversation,
-                    conversations = newConversationsList
-                )
-            } ?: state
+            state.copy(
+                activeConversation = updatedConversation,
+                conversations = state.conversations.map { if (it.id == conversationId) updatedConversation else it }
+            )
         }
     }
 
@@ -251,254 +177,23 @@ class FeedViewModel : ViewModel() {
         _uiState.update { it.copy(activeConversation = null) }
     }
 
-    // --- DM RATE LIMITING / DELIVERY ---
-    // Per (sender->recipient) throttle to mimic server-side protection.
-    private val dmLastSendAtMs = mutableMapOf<String, Long>()
-    private val dmMinIntervalMs: Long = 1200L
-
-    // Simple failure simulation so the UX can show retry.
-    // In a real app: network call can fail, server can return 429, etc.
-    private fun shouldSimulateNetworkFailure(content: String): Boolean {
-        val dev = devOptions()
-        if (dev.dmForceSendFailure) return true
-
-        // Deterministic-ish triggers = easier to test manually.
-        val lc = content.lowercase()
-        if (lc.contains("fail")) return true
-        // Low probability random-ish fallback without importing Random: hash-based.
-        return (content.hashCode() % 23) == 0
-    }
-
-    private fun throttleKey(senderId: String, recipientId: String): String = "$senderId->$recipientId"
-
-    fun sendDirectMessage(recipientId: String, messageContent: String) {
-        viewModelScope.launch {
-            val senderId = CURRENT_USER_ID_MOCK
-
-            val dev = devOptions()
-            val effectiveMinIntervalMs = dev.dmMinIntervalOverrideMs ?: dmMinIntervalMs
-
-            // Server-like rate limiting (authoritative, not just UI).
-            if (!dev.dmDisableRateLimit) {
-                val nowMs = System.currentTimeMillis()
-                val key = throttleKey(senderId, recipientId)
-                val last = dmLastSendAtMs[key] ?: 0L
-                if (nowMs - last < effectiveMinIntervalMs) {
-                    _uiState.update { it.copy(errorMessage = "Too many messages. Please slow down.") }
-                    return@launch
-                }
-                dmLastSendAtMs[key] = nowMs
-            }
-
-            if (isDmBlocked(recipientId)) {
-                _uiState.update { it.copy(errorMessage = "You blocked this user. Unblock them to send messages.") }
-                return@launch
-            }
-
-            if (_uiState.value.isDinoBanned && recipientId == DINO_USER_ID) {
-                _uiState.update { it.copy(errorMessage = "Message failed: DinoLover99 is banned.") }
-                return@launch
-            }
-            if (_uiState.value.errorMessage?.contains("banned") == true && senderId == CURRENT_USER_ID_MOCK) {
-                 _uiState.update { it.copy(errorMessage = "Message failed: Your account is banned.") }
-                return@launch
-            }
-
-            val moderationStatus = effectiveModerationStatus(messageContent)
-
-            if (moderationStatus == ModerationStatus.BLOCKED) {
-                // Apply strike to sender for BLOCKED content
-                handleAbusiveContent(senderId, moderationStatus)
-                _uiState.update { it.copy(errorMessage = "Message BLOCKED due to severe violation. A strike has been recorded.") }
-                return@launch
-            }
-
-            val tempId = "local-${System.currentTimeMillis()}"
-            val sendingMessage = DirectMessage(
-                id = tempId,
-                senderId = senderId,
-                recipientId = recipientId,
-                content = messageContent,
-                timestamp = Instant.now().toString(),
-                moderationStatus = moderationStatus,
-                deliveryStatus = MessageDeliveryStatus.SENDING
-            )
-
-            // Optimistically insert the message into conversation as SENDING.
-            upsertOutgoingMessage(senderId, recipientId, sendingMessage)
-
-            // Simulate network delivery
-            val delayMs = dev.dmArtificialSendDelayMs.coerceIn(0L, 15_000L)
-            delay(delayMs.milliseconds)
-
-            val failed = shouldSimulateNetworkFailure(messageContent)
-            if (failed) {
-                 markMessageDelivery(senderId, recipientId, tempId, MessageDeliveryStatus.FAILED)
-                _uiState.update { it.copy(errorMessage = "Message failed to send. Tap and retry.") }
-                 return@launch
-            }
-
-            // Server assigns a final ID; for demo we just convert to a new id.
-            val finalId = System.currentTimeMillis().toString()
-            val sentMessage = sendingMessage.copy(id = finalId, deliveryStatus = MessageDeliveryStatus.SENT)
-            replaceMessageIdAndStatus(senderId, recipientId, tempId, sentMessage)
-
-            // Refresh conversations list order/unread after send.
-            fetchConversations()
-        }
-    }
-
-    /** Retry a failed message (keeps content, creates a new sending message). */
-    fun retryDirectMessage(conversationId: String, failedMessageId: String) {
-        val state = _uiState.value
-        val conv = state.conversations.find { it.id == conversationId } ?: state.activeConversation
-        val msg = conv?.messages?.find { it.id == failedMessageId } ?: return
-        if (msg.senderId != CURRENT_USER_ID_MOCK) return
-        if (msg.deliveryStatus != MessageDeliveryStatus.FAILED) return
-        sendDirectMessage(msg.recipientId, msg.content)
-    }
-
-    private fun upsertOutgoingMessage(senderId: String, recipientId: String, message: DirectMessage) {
-        _userConversations.update { currentConversations ->
-            val existing = currentConversations.find { conv ->
-                conv.participants.containsAll(listOf(senderId, recipientId)) && conv.participants.size == 2
-            }
-            val nowTs = message.timestamp
-            if (existing != null) {
-                val updated = existing.copy(
-                    messages = existing.messages + message,
-                    lastMessageTimestamp = nowTs,
-                    unreadCount = if (isDmMuted(recipientId)) 0 else existing.unreadCount + 1
-                )
-                currentConversations.map { if (it.id == existing.id) updated else it }
-            } else {
-                val newConv = Conversation(
-                    id = "conv-${System.currentTimeMillis()}",
-                    participants = listOf(senderId, recipientId),
-                    messages = listOf(message),
-                    lastMessageTimestamp = nowTs,
-                    unreadCount = if (isDmMuted(recipientId)) 0 else 1
-                )
-                currentConversations + newConv
-            }
-        }
-
-        // Keep active conversation in sync
-        _uiState.update { state ->
-            val active = state.activeConversation
-            if (active != null && active.participants.containsAll(listOf(senderId, recipientId))) {
-                state.copy(activeConversation = active.copy(messages = active.messages + message))
-            } else state
-        }
-    }
-
-    private fun markMessageDelivery(senderId: String, recipientId: String, messageId: String, status: MessageDeliveryStatus) {
-        _userConversations.update { current ->
-            current.map { conv ->
-                if (conv.participants.containsAll(listOf(senderId, recipientId)) && conv.participants.size == 2) {
-                    conv.copy(
-                        messages = conv.messages.map { m -> if (m.id == messageId) m.copy(deliveryStatus = status) else m }
-                    )
-                } else conv
-            }
-        }
-        _uiState.update { state ->
-            state.copy(
-                activeConversation = state.activeConversation?.let { conv ->
-                    if (conv.participants.containsAll(listOf(senderId, recipientId)) && conv.participants.size == 2) {
-                        conv.copy(messages = conv.messages.map { m -> if (m.id == messageId) m.copy(deliveryStatus = status) else m })
-                    } else conv
-                }
-            )
-        }
-    }
-
-    private fun replaceMessageIdAndStatus(senderId: String, recipientId: String, oldId: String, newMessage: DirectMessage) {
-        _userConversations.update { current ->
-            current.map { conv ->
-                if (conv.participants.containsAll(listOf(senderId, recipientId)) && conv.participants.size == 2) {
-                    conv.copy(
-                        messages = conv.messages.map { m -> if (m.id == oldId) newMessage else m },
-                        lastMessageTimestamp = newMessage.timestamp
-                    )
-                } else conv
-            }
-        }
-
-        _uiState.update { state ->
-            state.copy(
-                activeConversation = state.activeConversation?.let { conv ->
-                    if (conv.participants.containsAll(listOf(senderId, recipientId)) && conv.participants.size == 2) {
-                        conv.copy(messages = conv.messages.map { m -> if (m.id == oldId) newMessage else m })
-                    } else conv
-                }
-            )
-        }
-    }
-
-    // --- DM PRIVACY ACTIONS ---
-
-    fun blockUser(userId: String) {
-        val app = appContextOrNull()
-        if (app != null) {
-            DmPrivacySettings.block(app, userId)
-            // Drop active conversation immediately (avoid leaked content)
-            _uiState.update { it.copy(activeConversation = null, errorMessage = "User blocked.") }
-            fetchConversations()
-        } else {
-            _uiState.update { it.copy(errorMessage = "Unable to block user in this environment.") }
-        }
-    }
-
-    fun unblockUser(userId: String) {
-        val app = appContextOrNull()
-        if (app != null) {
-            DmPrivacySettings.unblock(app, userId)
-            _uiState.update { it.copy(errorMessage = "User unblocked.") }
-            fetchConversations()
-        } else {
-            _uiState.update { it.copy(errorMessage = "Unable to unblock user in this environment.") }
-        }
-    }
-
-    fun muteUser(userId: String) {
-        val app = appContextOrNull()
-        if (app != null) {
-            DmPrivacySettings.mute(app, userId)
-            _uiState.update { it.copy(errorMessage = "User muted.") }
-            fetchConversations()
-        } else {
-            _uiState.update { it.copy(errorMessage = "Unable to mute user in this environment.") }
-        }
-    }
-
-    fun unmuteUser(userId: String) {
-        val app = appContextOrNull()
-        if (app != null) {
-            DmPrivacySettings.unmute(app, userId)
-            _uiState.update { it.copy(errorMessage = "User unmuted.") }
-            fetchConversations()
-        } else {
-            _uiState.update { it.copy(errorMessage = "Unable to unmute user in this environment.") }
-        }
-    }
-
-    fun isUserBlocked(userId: String): Boolean = isDmBlocked(userId)
-    fun isUserMuted(userId: String): Boolean = isDmMuted(userId)
+    // --- Premium ---
 
     fun setPremiumStatus(isPremium: Boolean) {
         realPremiumStatus = isPremium
-        _uiState.update { it.copy(isPremium = if(it.isFakePremiumEnabled) true else isPremium) }
+        _uiState.update { it.copy(isPremium = if (it.isFakePremiumEnabled) true else isPremium) }
     }
 
     fun toggleFakePremium(enabled: Boolean) {
         _uiState.update {
             it.copy(
                 isFakePremiumEnabled = enabled,
-                isPremium = if(enabled) true else realPremiumStatus
+                isPremium = if (enabled) true else realPremiumStatus
             )
         }
     }
+
+    // --- Feed toggles ---
 
     fun toggleStories(enabled: Boolean) {
         _uiState.update { it.copy(showStories = enabled) }
@@ -517,10 +212,22 @@ class FeedViewModel : ViewModel() {
         _uiState.update { it.copy(isFallbackUiEnabled = enabled) }
     }
 
+    // --- Data loading ---
+
     fun fetchPosts() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            delay(500.milliseconds) // Mock delay
+            delay(500.milliseconds)
+
+            if (simulateError) {
+                _uiState.update { it.copy(isLoading = false, errorMessage = "Simulated server error (HTTP 500)") }
+                return@launch
+            }
+            if (simulateInfiniteLoading) {
+                // keep loading forever
+                return@launch
+            }
+
             _uiState.update { it.copy(posts = MOCK_FEED_POSTS, isLoading = false) }
         }
     }
@@ -530,64 +237,23 @@ class FeedViewModel : ViewModel() {
         _uiState.update { it.copy(stories = allStories) }
     }
 
-    // Added: Story lifecycle helpers used by the UI (create, view, dismiss, delete)
-    fun createStory(imageUrl: String?, duration: Long = 5000L) {
-        viewModelScope.launch {
-            val item = StoryItem(id = "sitem-${System.currentTimeMillis()}", imageUrl = imageUrl ?: "", duration = duration)
-            val newStory = Story(
-                id = "story-${System.currentTimeMillis()}",
-                // Use hardcoded values to bypass potential model resolution issues in unit tests
-                userAvatar = "https://api.dicebear.com/7.x/adventurer/svg?seed=Me",
-                userName = "You",
-                items = listOf(item),
-                isViewed = false
-            )
+    // --- Post actions ---
 
-            // Prepend to user stories so it shows up first
-            _userStories.update { current -> listOf(newStory) + current }
-            fetchStories()
-        }
-    }
-
-    fun viewStory(story: Story) {
-        // Mark story as active in the UI and mark it as viewed in the stored list
-        _uiState.update { it.copy(activeStory = story) }
-
-        // Update the backing user stories list if it belongs to the mutable collection
-        _userStories.update { current ->
-            current.map { s -> if (s.id == story.id) s.copy(isViewed = true) else s }
-        }
-        fetchStories()
-    }
-
-    fun dismissStory() {
-        _uiState.update { it.copy(activeStory = null) }
-    }
-
-    fun deleteStory(storyId: String) {
-        _userStories.update { current -> current.filter { it.id != storyId } }
-        _uiState.update { state ->
-            state.copy(activeStory = if (state.activeStory?.id == storyId) null else state.activeStory)
-        }
-        fetchStories()
-    }
-
-    @Suppress("UNUSED_PARAMETER")
     fun createPost(content: String, tone: String, imageUrl: String? = null, videoUrl: String? = null) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            delay(500.milliseconds)
+            delay(300.milliseconds)
             val newPost = Post(
                 id = System.currentTimeMillis(),
                 createdAt = Instant.now().toString(),
                 content = content,
-                userId = "Me",
+                userId = CURRENT_USER_ID_MOCK,
                 likes = 0,
                 comments = 0,
                 shares = 0,
                 isLikedByMe = false,
                 imageUrl = imageUrl,
-                userAvatar = "https://api.dicebear.com/7.x/avataaars/svg?seed=Me",
+                userAvatar = CURRENT_USER.avatarUrl,
                 videoUrl = videoUrl
             )
             _uiState.update { it.copy(posts = listOf(newPost) + it.posts, isLoading = false) }
@@ -597,7 +263,7 @@ class FeedViewModel : ViewModel() {
     fun deletePost(postId: Long) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            delay(300.milliseconds)
+            delay(200.milliseconds)
             _uiState.update { it.copy(posts = it.posts.filter { p -> p.id != postId }, isLoading = false) }
         }
     }
@@ -611,48 +277,68 @@ class FeedViewModel : ViewModel() {
                         isLikedByMe = nowLiked,
                         likes = (post.likes + if (nowLiked) 1 else -1).coerceAtLeast(0)
                     )
-                } else {
-                    post
-                }
+                } else post
             }
             currentState.copy(posts = updatedPosts)
         }
     }
 
+    // --- Comments bottom sheet ---
+
     fun openCommentSheet(post: Post) {
-        // ... (remaining logic remains mock)
-    }
-
-    fun addComment(content: String) {
-        // ... (remaining logic remains mock)
-    }
-
-    fun stressTestDb() {
-        // ... (remaining logic remains mock)
-    }
-
-    fun floodDb() {
-        // ... (remaining logic remains mock)
-    }
-
-    fun nukeDb() {
-        // ... (remaining logic remains mock)
+        _uiState.update {
+            it.copy(
+                activePostId = post.id,
+                activePostComments = emptyList(),
+                isCommentSheetVisible = true
+            )
+        }
     }
 
     fun dismissCommentSheet() {
         _uiState.update { it.copy(isCommentSheetVisible = false, activePostId = null) }
     }
 
-    fun sharePost(context: Context, post: Post) {
-        // ... (remaining logic remains the same)
+    fun addComment(content: String) {
+        val postId = _uiState.value.activePostId ?: return
+        val newComment = Comment(
+            id = "c-${System.currentTimeMillis()}",
+            postId = postId,
+            userId = CURRENT_USER_ID_MOCK,
+            userAvatar = CURRENT_USER.avatarUrl,
+            content = content,
+            timestamp = Instant.now().toString()
+        )
+        _uiState.update { it.copy(activePostComments = it.activePostComments + newComment) }
     }
 
-    fun clearError() { _uiState.update { it.copy(errorMessage = null) } }
+    // --- Dev-only actions referenced in SettingsScreen ---
 
-    fun reportMessage(messageId: String) {
-        // In a real app this would call the backend and hide the message / notify moderation.
-        // For this demo we surface a snackbar message.
-        _uiState.update { it.copy(errorMessage = "Reported message $messageId. Thanks for helping keep the community safe.") }
+    fun stressTestDb() {
+        viewModelScope.launch {
+            repeat(50) { idx ->
+                createPost("Stress post #$idx", tone = "/gen")
+            }
+        }
+    }
+
+    fun floodDb() {
+        repeat(5) { idx ->
+            createPost("Flood post #$idx", tone = "/gen")
+        }
+    }
+
+    fun nukeDb() {
+        _uiState.update { it.copy(posts = emptyList(), errorMessage = "Local feed cleared (mock).") }
+    }
+
+    fun sharePost(context: Context, post: Post) {
+        // Placeholder: real sharing would use ACTION_SEND intent.
+        _uiState.update { it.copy(errorMessage = "Share is not wired up in this mock build.") }
+    }
+
+    fun clearError() {
+        _uiState.update { it.copy(errorMessage = null) }
     }
 }
 
