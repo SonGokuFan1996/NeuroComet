@@ -1,11 +1,6 @@
 package com.kyilmaz.neuronetworkingtitle
 
-data class NotificationItem(
-    val id: String,
-    val title: String,
-    val body: String,
-    val time: String,
-    val type: NotificationType
-)
+// This file previously duplicated Notification models that are already defined in `DataModels.kt`.
+// Keeping a single source of truth avoids type mismatches (e.g., timestamp String vs Long).
 
-enum class NotificationType { LIKE, COMMENT, SYSTEM }
+// Intentionally left empty.

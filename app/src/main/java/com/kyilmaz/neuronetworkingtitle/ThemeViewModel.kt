@@ -1,26 +1,48 @@
 package com.kyilmaz.neuronetworkingtitle
 
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-enum class NeuroState(val label: String, val seedColor: Color, val description: String) {
-    DEFAULT("NeuroNet Standard", Color(0xFF6750A4), "The classic look."),
-    OVERSTIMULATED("Sensory Soothe", Color(0xFF546E7A), "Deep, muted blue-greys to reduce visual noise."), // Blue Grey 600
-    UNDERSTIMULATED("Dopamine Boost", Color(0xFFFF6D00), "High-energy orange to wake up the brain."), // Orange A700
-    ANXIETY("Grounding", Color(0xFF2E7D32), "Natural forest tones to feel safe and stable."), // Green 800
-    FOCUS("Hyperfocus", Color(0xFF283593), "Deep indigo for minimizing distraction."), // Indigo 800
-    MELTDOWN("Safe Space", Color(0xFFAD1457), "Warm, comforting rose tones for recovery.") // Pink 800
+enum class NeuroState {
+    DEFAULT,
+    HYPERFOCUS, // High Contrast, Sharp Focus
+    OVERLOAD,   // Low Contrast, Quiet Mode
+    CALM        // Soft, Soothing Tones
 }
+
+// Map from a descriptive size to a scale factor
+val TEXT_SCALE_FACTORS = mapOf(
+    "Small" to 0.8f,
+    "Medium" to 1.0f,
+    "Large" to 1.2f,
+    "X-Large" to 1.5f
+)
+
+// List of supported locales (code -> display name)
+val SUPPORTED_LOCALES = mapOf(
+    "" to "System Default",
+    "en" to "English (US/Default)",
+    "en-GB" to "English (British)",
+    "en-CA" to "English (Canadian)",
+    "en-AU" to "English (Aus/NZ)",
+    "fr" to "Français",
+    "es" to "Español",
+    "sv" to "Svenska",
+    "nl" to "Nederlands",
+    "tr" to "Türkçe",
+    "ar" to "العربية"
+)
 
 @Immutable
 data class ThemeState(
     val selectedState: NeuroState = NeuroState.DEFAULT,
     val isDarkMode: Boolean = false,
-    val isHighContrast: Boolean = false
+    val isHighContrast: Boolean = false,
+    val textScaleFactor: Float = 1.0f, // Added for accessibility
+    val languageCode: String = "" // ISO 639-1 code + optional region, or "" for system default
 )
 
 class ThemeViewModel : ViewModel() {
@@ -33,5 +55,17 @@ class ThemeViewModel : ViewModel() {
 
     fun toggleDarkMode(enabled: Boolean) {
         _themeState.update { it.copy(isDarkMode = enabled) }
+    }
+
+    fun toggleHighContrast(enabled: Boolean) {
+        _themeState.update { it.copy(isHighContrast = enabled) }
+    }
+    
+    fun setTextScaleFactor(scale: Float) {
+        _themeState.update { it.copy(textScaleFactor = scale) }
+    }
+
+    fun setLanguageCode(code: String) {
+        _themeState.update { it.copy(languageCode = code) }
     }
 }

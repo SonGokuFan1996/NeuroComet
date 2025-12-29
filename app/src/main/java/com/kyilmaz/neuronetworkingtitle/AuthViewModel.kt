@@ -32,7 +32,7 @@ class AuthViewModel : ViewModel() {
                 if (_is2FAEnabled.value) {
                     _is2FARequired.value = true
                 } else {
-                    _user.value = User(id = "mock_user_id", name = "Mock User", avatarUrl = "", isVerified = true)
+                    _user.value = User(id = "mock_user_id", name = "Mock User", avatarUrl = "", isVerified = true, personality = "A mock user.")
                 }
             } catch (e: Exception) {
                 _error.value = e.message
@@ -45,7 +45,7 @@ class AuthViewModel : ViewModel() {
             delay(500)
             if (code == "123456") { // Mock Verification
                 _is2FARequired.value = false
-                _user.value = User(id = "mock_user_id", name = "Mock User", avatarUrl = "", isVerified = true)
+                _user.value = User(id = "mock_user_id", name = "Mock User", avatarUrl = "", isVerified = true, personality = "A mock user.")
             } else {
                 _error.value = "Invalid 2FA Code"
             }
@@ -59,7 +59,7 @@ class AuthViewModel : ViewModel() {
     fun signUp(email: String, password: String) {
         viewModelScope.launch {
             delay(1000)
-            _user.value = User(id = "mock_user_id", name = "Mock User", avatarUrl = "", isVerified = true)
+            _user.value = User(id = "mock_user_id", name = "Mock User", avatarUrl = "", isVerified = true, personality = "A mock user.")
         }
     }
 

@@ -1,23 +1,27 @@
+# suppress: NewerVersionAvailable, UnusedCatalogEntry
+
 [versions]
 kotlin = "2.1.0"
 agp = "8.13.2"
-coreKtx = "1.15.0"
+coreKtx = "1.17.0"
 junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.8.7"
-activityCompose = "1.9.3"
-composeBom = "2024.11.00"
-revenuecat = "9.15.2"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+lifecycleRuntimeKtx = "2.10.0"
+activityCompose = "1.12.2"
+composeBom = "2025.12.01" # Updated from "2024.11.00"
+revenuecat = "9.18.0"
+coilCompose = "2.7.0"
+coroutinesTest = "1.10.2"
 
 # Added versions for manually managed dependencies in app/build.gradle.kts
 firebaseBom = "34.7.0"
 media3 = "1.9.0"
 composeIconsExtended = "1.7.8"
-navigationCompose = "2.9.0-rc01" # Using a slightly older stable/RC version for navigation-compose to avoid known issues.
+navigationCompose = "2.9.6" # Using this stable version of navigation-compose to avoid known issues.
 supabaseBom = "3.2.6"
 ktorClientAndroid = "3.3.3"
-kotlinxSerializationJson = "1.7.3"
+kotlinxSerializationJson = "1.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -44,8 +48,18 @@ androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "medi
 supabase-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabaseBom" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktorClientAndroid" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 
 revenuecat-purchases = { module = "com.revenuecat.purchases:purchases", version.ref = "revenuecat" }
+
+firebase-auth = { module = "com.google.firebase:firebase-auth" }
+
+supabase-postgrest = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
+supabase-auth = { module = "io.github.jan-tennert.supabase:auth-kt" }
+supabase-realtime = { module = "io.github.jan-tennert.supabase:realtime-kt" }
+
+coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
