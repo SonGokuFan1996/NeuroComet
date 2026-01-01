@@ -1,21 +1,68 @@
 # NeuroNet 🧠
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Platform-Android-green?style=for-the-badge&logo=android" alt="Platform: Android"/>
-  <img src="https://img.shields.io/badge/Kotlin-2.1.0-purple?style=for-the-badge&logo=kotlin" alt="Kotlin"/>
-  <img src="https://img.shields.io/badge/Jetpack%20Compose-Material%203-blue?style=for-the-badge&logo=jetpackcompose" alt="Jetpack Compose"/>
-  <img src="https://img.shields.io/badge/Min%20SDK-26-orange?style=for-the-badge" alt="Min SDK"/>
-  <img src="https://img.shields.io/badge/Version-1.0.0--beta-yellow?style=for-the-badge" alt="Version"/>
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:6366f1,50:a855f7,100:ec4899&height=200&section=header&text=NeuroNet%20🧠&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=Where%20Every%20Mind%20Belongs&descSize=20&descAlignY=55" alt="NeuroNet Header"/>
 </p>
 
 <p align="center">
-  <b>A social platform designed with neurodivergent users in mind.</b><br/>
-  Built with accessibility, safety, and mental wellness as core priorities.
+  🎊✨🎆 <b>Happy New Year 2026!</b> 🎆✨🎊
 </p>
+
+<p align="center">
+  <a href="#"><img src="https://img.shields.io/badge/🎉_Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Platform: Android"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/🚀_Kotlin-2.1.0-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/✨_Compose-Material%203-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose"/></a>
+</p>
+
+<p align="center">
+  <a href="#"><img src="https://img.shields.io/badge/📱_Min%20SDK-26-FF6F00?style=for-the-badge" alt="Min SDK"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/🎆_Version-1.0.0--beta-FFD600?style=for-the-badge" alt="Version"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/⭐_Stars-Welcome!-FF69B4?style=for-the-badge" alt="Stars Welcome"/></a>
+</p>
+
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=1000&color=A855F7&center=true&vCenter=true&multiline=true&repeat=true&width=650&height=80&lines=🧠+A+social+platform+for+neurodivergent+minds;🛡️+Built+with+accessibility+%26+safety+first;💜+Join+the+neurodiverse+community+today!" alt="Typing SVG" />
+</p>
+
+<p align="center">
+  <b>🌟 A social platform designed with neurodivergent users in mind 🌟</b><br/>
+  <sub>Built with accessibility, safety, and mental wellness as core priorities</sub>
+</p>
+
+<p align="center">
+  <a href="#-features">
+    <img src="https://img.shields.io/badge/✨_Features-6366F1?style=flat-square" alt="Features"/>
+  </a>
+  <a href="#-getting-started">
+    <img src="https://img.shields.io/badge/🚀_Get_Started-10B981?style=flat-square" alt="Getting Started"/>
+  </a>
+  <a href="#-tech-stack">
+    <img src="https://img.shields.io/badge/🛠️_Tech_Stack-F59E0B?style=flat-square" alt="Tech Stack"/>
+  </a>
+  <a href="#-contributing">
+    <img src="https://img.shields.io/badge/🤝_Contribute-EC4899?style=flat-square" alt="Contributing"/>
+  </a>
+</p>
+
+<br/>
 
 ---
 
-## ✨ Features
+<h2 align="center">
+  <img src="https://media.giphy.com/media/hvRJCLFzcasrR4ia7z/giphy.gif" width="28"/>
+  ✨ Features ✨
+  <img src="https://media.giphy.com/media/hvRJCLFzcasrR4ia7z/giphy.gif" width="28"/>
+</h2>
+
+<p align="center">
+  <i>Everything you need for a safe, accessible, and engaging social experience</i>
+</p>
+
+<br/>
+
+<table align="center">
+<tr>
+<td width="50%">
 
 ### 🎯 Core Social Features
 - **Feed** - Browse and interact with posts from the community
@@ -24,45 +71,86 @@
 - **Explore** - Discover new content and categories
 - **Notifications** - Stay updated with customizable alerts
 
+</td>
+<td width="50%">
+
 ### 🧠 Neuro-Centric Design
-- **Neuro-State Themes** - Adaptive UI themes based on mental states:
-  - **Default** - Balanced, neutral appearance
-  - **Hyperfocus** - High contrast, minimal distractions
-  - **Overload** - Calming colors, reduced visual noise
-  - **Calm** - Soft, soothing color palette
+- **Neuro-State Themes** - Adaptive UI themes based on mental states
 - **Adjustable Text Sizes** - Small, Medium, Large, X-Large options
 - **High Contrast Mode** - Pure black/white for visual accessibility
 - **Dark Mode** - Reduce eye strain with full dark theme support
 
+</td>
+</tr>
+</table>
+
+<details>
+<summary><h3>🎨 Neuro-State Themes (click to expand)</h3></summary>
+
+| Theme | Description |
+|:-----:|-------------|
+| 🌤️ **Default** | Balanced, neutral appearance |
+| ⚡ **Hyperfocus** | High contrast, minimal distractions |
+| 🌊 **Overload** | Calming colors, reduced visual noise |
+| 🍃 **Calm** | Soft, soothing color palette |
+
+</details>
+
+<table align="center">
+<tr>
+<td width="50%">
+
 ### 👨‍👩‍👧‍👦 Safety & Parental Controls
-- **Age Verification** - Protect younger users with age-appropriate restrictions
-- **Kids Mode** - Disable DMs and restrict content for under-13 users
-- **Content Filtering** - AI-powered moderation for safe interactions
-- **Block & Mute** - User controls for managing interactions
-- **Report System** - Flag inappropriate content or behavior
+- **Age Verification** - Protect younger users
+- **Kids Mode** - Disable DMs for under-13 users
+- **Content Filtering** - AI-powered moderation
+- **Block & Mute** - User controls for interactions
+- **Report System** - Flag inappropriate content
+
+</td>
+<td width="50%">
 
 ### 🏆 Gamification & Engagement
-- **Badge System** - Earn achievements for positive engagement:
+- **Badge System** - Earn achievements:
   - 🔵 Verified Human
   - ✍️ First Post
   - 🎯 HyperFocus Master
   - 🏛️ Community Pillar
   - 🤫 Quiet Achiever
-- **Progress Tracking** - View earned and locked badges
+- **Progress Tracking** - View earned badges
+
+</td>
+</tr>
+</table>
+
+<table align="center">
+<tr>
+<td width="50%">
 
 ### 📞 Communication
-- **WebRTC Voice & Video Calls** - Real-time communication with peers
-- **Real-time Messaging** - Instant message delivery via Supabase Realtime
-- **Typing Indicators** - See when others are composing messages
+- **WebRTC Voice & Video Calls** - Real-time communication
+- **Real-time Messaging** - Instant delivery via Supabase
+- **Typing Indicators** - See when others are typing
+
+</td>
+<td width="50%">
 
 ### 💎 Premium Features
-- **Ad-Free Experience** - Remove all advertisements
+- **Ad-Free Experience** - Remove all ads
 - **Monthly Subscription** - $2/month
 - **Lifetime Access** - $60 one-time purchase
 
+</td>
+</tr>
+</table>
+
 ---
 
-## 🛠️ Tech Stack
+<h2 align="center">🛠️ Tech Stack 🛠️</h2>
+
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=kotlin,androidstudio,gradle,firebase,postgres,git&theme=dark" alt="Tech Stack Icons"/>
+</p>
 
 | Layer | Technology |
 |-------|------------|
@@ -90,7 +178,11 @@
 
 ---
 
-## 🚀 Getting Started
+<h2 align="center">🚀 Getting Started 🚀</h2>
+
+<p align="center">
+  <i>Get up and running in just a few minutes!</i>
+</p>
 
 ### 1. Clone the Repository
 
@@ -230,21 +322,44 @@ Developer options are available for testing and debugging. To enable:
 
 ---
 
-## 📱 Screenshots
+<h2 align="center">📱 Screenshots 📱</h2>
 
-*Coming soon*
+<p align="center">
+  <i>🚧 Coming soon! 🚧</i>
+</p>
+
+<p align="center">
+  <img src="https://via.placeholder.com/200x400/6366F1/FFFFFF?text=Feed" alt="Feed"/>
+  <img src="https://via.placeholder.com/200x400/A855F7/FFFFFF?text=Stories" alt="Stories"/>
+  <img src="https://via.placeholder.com/200x400/EC4899/FFFFFF?text=Messages" alt="Messages"/>
+  <img src="https://via.placeholder.com/200x400/10B981/FFFFFF?text=Settings" alt="Settings"/>
+</p>
 
 ---
 
-## 🤝 Contributing
+<h2 align="center">🤝 Contributing 🤝</h2>
 
-Contributions are welcome! Please read our contributing guidelines before submitting PRs.
+<p align="center">
+  <img src="https://contrib.rocks/image?repo=user/neuronet" alt="Contributors"/>
+</p>
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+<p align="center">
+  <b>Contributions are welcome!</b> Please read our contributing guidelines before submitting PRs.
+</p>
+
+```bash
+# 1. Fork the repository
+# 2. Create a feature branch
+git checkout -b feature/amazing-feature
+
+# 3. Commit your changes
+git commit -m 'Add amazing feature'
+
+# 4. Push to the branch
+git push origin feature/amazing-feature
+
+# 5. Open a Pull Request 🎉
+```
 
 ---
 
@@ -271,6 +386,22 @@ For support, please open an issue on GitHub or contact the development team.
 ---
 
 <p align="center">
-  Made with ❤️ for the neurodivergent community
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:6366f1,50:a855f7,100:ec4899&height=120&section=footer" alt="Footer Wave"/>
+</p>
+
+<p align="center">
+  <img src="https://media.giphy.com/media/LnQjpWaON8nhr21vNW/giphy.gif" width="40"/>
+  <br/>
+  <b>Made with ❤️ for the neurodivergent community</b>
+</p>
+
+<p align="center">
+  🎆🎇✨ <b><i>Cheers to an amazing 2026!</i></b> ✨🎇🎆
+</p>
+
+<p align="center">
+  <a href="#neuronet-">
+    <img src="https://img.shields.io/badge/⬆️_Back_to_Top-6366F1?style=for-the-badge" alt="Back to Top"/>
+  </a>
 </p>
 
