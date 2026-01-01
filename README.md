@@ -76,7 +76,6 @@
 
 ### 🧠 Neuro-Centric Design
 - **Neuro-State Themes** - Adaptive UI themes based on mental states
-- **Holiday Logo Themes** - Festive animated logos with ND-affirming messages
 - **Adjustable Text Sizes** - Small, Medium, Large, X-Large options
 - **High Contrast Mode** - Pure black/white for visual accessibility
 - **Dark Mode** - Reduce eye strain with full dark theme support
@@ -94,43 +93,6 @@
 | ⚡ **Hyperfocus** | High contrast, minimal distractions |
 | 🌊 **Overload** | Calming colors, reduced visual noise |
 | 🍃 **Calm** | Soft, soothing color palette |
-
-</details>
-
-<details>
-<summary><h3>🎉 Holiday Logo Themes (click to expand)</h3></summary>
-
-The NeuroNet logo comes alive with **dynamic holiday theming**! Special celebrations get extra love with bouncy animations, floating decorations, and festive glow effects.
-
-| Holiday | Emoji | Decorations | Special Features |
-|:-------:|:-----:|:-----------:|------------------|
-| 🎆 **New Year** | 🎆 | ✨🎊🥳🎉⭐ | Gold & silver sparkles |
-| 💖 **Valentine's** | 💖 | 💕💝💗💓🌹 | Pink hearts glow |
-| ☘️ **St. Patrick's** | ☘️ | 🍀🌈💚🪙✨ | Lucky green shimmer |
-| 🐣 **Easter** | 🐣 | 🐰🌷🥚🌸🦋 | Pastel spring colors |
-| 🌍 **Earth Day** | 🌍 | 🌱🌿🌳💚🦋 | Nature-inspired greens |
-| 🏳️‍🌈 **Pride Month** | 🏳️‍🌈 | 🏳️‍⚧️✨💖💜💙 | **Extra celebration mode!** 🌈 |
-| 🎆 **Independence Day** | 🎆 | 🇺🇸✨🎇⭐🎆 | Red, white & blue |
-| 🎃 **Halloween** | 🎃 | 👻🦇🕷️🌙✨ | Spooky purple & orange |
-| 🦃 **Thanksgiving** | 🦃 | 🍂🌽🥧🍁✨ | Warm autumn tones |
-| 🕎 **Hanukkah** | 🕎 | ✡️✨🕯️💙⭐ | Blue & gold glow |
-| 🎄 **Christmas** | 🎄 | 🎅❄️⭐🎁✨ | Festive red & green |
-| ♾️ **Autism Awareness** | ♾️ | 💙💛❤️✨🧩 | **Extra celebration mode!** 🧩 |
-| 🧠 **ADHD Awareness** | 🧠 | ⚡💡✨🔥💫 | **Extra celebration mode!** ⚡ |
-| 🌈 **Neurodiversity Week** | 🌈 | ✨💜💛💚💙 | **Extra celebration mode!** ♾️ |
-
-#### 🌟 Special ND Celebration Mode
-Autism Awareness Day, ADHD Awareness Month, Neurodiversity Week, and Pride Month feature:
-- 🎊 **Extra bouncy animations** (1.25x scale)
-- ✨ **Spinning sparkle decorations**
-- 🌈 **More vibrant color palettes**
-- 💫 **Energetic animation speed** (1.3x faster)
-- 🔆 **Intensified glow effects**
-
-Each holiday also has its own **neurodivergent-affirming tagline**, like:
-- *"Autism is a superpower!"*
-- *"ADHD brains are amazing!"*
-- *"All brains are beautiful!"*
 
 </details>
 
