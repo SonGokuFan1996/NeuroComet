@@ -207,20 +207,22 @@ private fun detectCurrentHoliday(): HolidayType {
 private fun getHolidayColors(holiday: HolidayType): List<Color> {
     return when (holiday) {
         HolidayType.NEW_YEAR -> listOf(
-            Color(0xFFD4AF37), // Soft gold
-            Color(0xFFB8B8B8), // Soft silver
-            Color(0xFFF5F5F5), // Off-white
-            Color(0xFFD4AF37), // Soft gold
-            Color(0xFF9370DB), // Muted purple
-            Color(0xFFD4AF37)  // Soft gold
+            Color(0xFFFFD700), // Bright gold
+            Color(0xFFC0C0C0), // Silver
+            Color(0xFFFFFFFF), // White sparkle
+            Color(0xFFFFD700), // Bright gold
+            Color(0xFFCB6CE6), // Festive purple
+            Color(0xFF4DABF5), // Celebration blue
+            Color(0xFFFFD700)  // Bright gold
         )
         HolidayType.VALENTINES -> listOf(
-            Color(0xFFDB7093), // Pale violet red
-            Color(0xFFF08080), // Light coral
-            Color(0xFFFFB6C1), // Light pink
-            Color(0xFFCD5C5C), // Indian red (soft)
-            Color(0xFFDB7093), // Pale violet red
-            Color(0xFFBC8F8F)  // Rosy brown
+            Color(0xFFFF6B9D), // Hot pink
+            Color(0xFFFF8FAB), // Rose pink
+            Color(0xFFFFB3C6), // Light pink
+            Color(0xFFFF6B6B), // Coral heart
+            Color(0xFFFF6B9D), // Hot pink
+            Color(0xFFCB6CE6), // Love purple
+            Color(0xFFFF6B9D)  // Hot pink
         )
         HolidayType.ST_PATRICKS -> listOf(
             Color(0xFF6B8E23), // Olive drab
@@ -247,13 +249,14 @@ private fun getHolidayColors(holiday: HolidayType): List<Color> {
             Color(0xFF6495ED)  // Cornflower blue
         )
         HolidayType.PRIDE_MONTH -> listOf(
-            Color(0xFFE57373), // Soft red
-            Color(0xFFFFB74D), // Soft orange
-            Color(0xFFFFF176), // Soft yellow
-            Color(0xFF81C784), // Soft green
-            Color(0xFF64B5F6), // Soft blue
-            Color(0xFFBA68C8), // Soft violet
-            Color(0xFFE57373)  // Soft red
+            Color(0xFFFF6B6B), // Vibrant coral red
+            Color(0xFFFFAB4D), // Bright orange
+            Color(0xFFFFE66D), // Sunny yellow
+            Color(0xFF7BC67B), // Fresh green
+            Color(0xFF4DABF5), // Sky blue
+            Color(0xFFCB6CE6), // Vivid violet
+            Color(0xFFFF6B9D), // Hot pink
+            Color(0xFFFF6B6B)  // Loop back
         )
         HolidayType.INDEPENDENCE_DAY -> listOf(
             Color(0xFFCD5C5C), // Indian red (soft)
@@ -264,12 +267,13 @@ private fun getHolidayColors(holiday: HolidayType): List<Color> {
             Color(0xFF6495ED)  // Cornflower blue
         )
         HolidayType.HALLOWEEN -> listOf(
-            Color(0xFFE9967A), // Dark salmon (soft orange)
-            Color(0xFF4A4A4A), // Dark gray (soft black)
-            Color(0xFF9370DB), // Medium purple
-            Color(0xFFE9967A), // Dark salmon
-            Color(0xFF8FBC8F), // Dark sea green
-            Color(0xFFE9967A)  // Dark salmon
+            Color(0xFFFF8C42), // Pumpkin orange
+            Color(0xFF2D2D2D), // Deep shadow
+            Color(0xFFCB6CE6), // Spooky purple
+            Color(0xFF7BC67B), // Witch green
+            Color(0xFFFF8C42), // Pumpkin orange
+            Color(0xFF9B59B6), // Dark purple
+            Color(0xFFFF8C42)  // Pumpkin orange
         )
         HolidayType.THANKSGIVING -> listOf(
             Color(0xFFE9967A), // Dark salmon
@@ -288,38 +292,42 @@ private fun getHolidayColors(holiday: HolidayType): List<Color> {
             Color(0xFFF5F5F5)  // Off-white
         )
         HolidayType.CHRISTMAS -> listOf(
-            Color(0xFFCD5C5C), // Indian red (soft)
-            Color(0xFF6B8E23), // Olive drab (soft green)
-            Color(0xFFD4AF37), // Soft gold
-            Color(0xFFCD5C5C), // Indian red
-            Color(0xFF6B8E23), // Olive drab
-            Color(0xFFD4AF37)  // Soft gold
+            Color(0xFFFF6B6B), // Festive red
+            Color(0xFF6BCB77), // Bright green
+            Color(0xFFFFD700), // Golden star
+            Color(0xFFFFFFFF), // Snow white
+            Color(0xFFFF6B6B), // Festive red
+            Color(0xFF6BCB77), // Bright green
+            Color(0xFFFFD700)  // Golden star
         )
         HolidayType.AUTISM_AWARENESS -> listOf(
-            Color(0xFFE57373), // Soft red
-            Color(0xFFD4AF37), // Soft gold
-            Color(0xFF81C784), // Soft green
-            Color(0xFF64B5F6), // Soft blue
-            Color(0xFFE57373), // Soft red
-            Color(0xFFD4AF37)  // Soft gold
+            Color(0xFFFF6B6B), // Vibrant red
+            Color(0xFFFFD93D), // Golden yellow
+            Color(0xFF6BCB77), // Fresh green
+            Color(0xFF4D96FF), // Bright blue
+            Color(0xFFCB6CE6), // Violet
+            Color(0xFFFF6B6B), // Vibrant red
+            Color(0xFFFFD93D)  // Golden yellow
         )
         HolidayType.ADHD_AWARENESS -> listOf(
-            Color(0xFFFFB74D), // Soft orange
-            Color(0xFFD4AF37), // Soft gold
-            Color(0xFFE9967A), // Dark salmon
-            Color(0xFFFFA726), // Muted orange
-            Color(0xFFFFB74D), // Soft orange
-            Color(0xFFD4AF37)  // Soft gold
+            Color(0xFFFF8C42), // Electric orange
+            Color(0xFFFFD93D), // Bright yellow
+            Color(0xFFFF6B6B), // Coral red
+            Color(0xFFFFAB4D), // Tangerine
+            Color(0xFFFF8C42), // Electric orange
+            Color(0xFFFFE66D), // Sunny yellow
+            Color(0xFFFF8C42)  // Electric orange
         )
         HolidayType.NEURODIVERSITY -> listOf(
-            Color(0xFFE57373), // Soft red
-            Color(0xFFFFB74D), // Soft orange
-            Color(0xFFFFF176), // Soft yellow
-            Color(0xFF81C784), // Soft green
-            Color(0xFF64B5F6), // Soft blue
-            Color(0xFFBA68C8), // Soft purple
-            Color(0xFFF48FB1), // Soft pink
-            Color(0xFFE57373)  // Loop back
+            Color(0xFFFF6B6B), // Vibrant coral
+            Color(0xFFFFAB4D), // Bright orange
+            Color(0xFFFFE66D), // Sunny yellow
+            Color(0xFF7BC67B), // Fresh green
+            Color(0xFF4DABF5), // Sky blue
+            Color(0xFFCB6CE6), // Vivid violet
+            Color(0xFFFF6B9D), // Hot pink
+            Color(0xFF7FDBDA), // Teal
+            Color(0xFFFF6B6B)  // Loop back
         )
         HolidayType.NONE -> listOf(
             Color(0xFFE57373), // Soft red
@@ -358,11 +366,85 @@ private fun getHolidayEmoji(holiday: HolidayType): String? {
 }
 
 /**
+ * Get secondary decorative emojis that appear around the logo for extra flair
+ */
+private fun getHolidayDecorations(holiday: HolidayType): List<String> {
+    return when (holiday) {
+        HolidayType.NEW_YEAR -> listOf("✨", "🎊", "🥳", "🎉", "⭐")
+        HolidayType.VALENTINES -> listOf("💕", "💝", "💗", "💓", "🌹")
+        HolidayType.ST_PATRICKS -> listOf("🍀", "🌈", "💚", "🪙", "✨")
+        HolidayType.EASTER -> listOf("🐰", "🌷", "🥚", "🌸", "🦋")
+        HolidayType.EARTH_DAY -> listOf("🌱", "🌿", "🌳", "💚", "🦋")
+        HolidayType.PRIDE_MONTH -> listOf("🏳️‍⚧️", "✨", "💖", "💜", "💙")
+        HolidayType.INDEPENDENCE_DAY -> listOf("🇺🇸", "✨", "🎇", "⭐", "🎆")
+        HolidayType.HALLOWEEN -> listOf("👻", "🦇", "🕷️", "🌙", "✨")
+        HolidayType.THANKSGIVING -> listOf("🍂", "🌽", "🥧", "🍁", "✨")
+        HolidayType.HANUKKAH -> listOf("✡️", "✨", "🕯️", "💙", "⭐")
+        HolidayType.CHRISTMAS -> listOf("🎅", "❄️", "⭐", "🎁", "✨")
+        HolidayType.AUTISM_AWARENESS -> listOf("💙", "💛", "❤️", "✨", "🧩")
+        HolidayType.ADHD_AWARENESS -> listOf("⚡", "💡", "✨", "🔥", "💫")
+        HolidayType.NEURODIVERSITY -> listOf("✨", "💜", "💛", "💚", "💙")
+        HolidayType.NONE -> emptyList()
+    }
+}
+
+/**
+ * Get a fun, neurodivergent-friendly holiday greeting/tagline
+ */
+private fun getHolidayTagline(holiday: HolidayType): String? {
+    return when (holiday) {
+        HolidayType.NEW_YEAR -> "New year, same awesome brain!"
+        HolidayType.VALENTINES -> "Loving your unique self!"
+        HolidayType.ST_PATRICKS -> "Lucky to be ND!"
+        HolidayType.EASTER -> "Celebrating new beginnings!"
+        HolidayType.EARTH_DAY -> "Our different brains, one planet!"
+        HolidayType.PRIDE_MONTH -> "Proud to be neurodivergent!"
+        HolidayType.INDEPENDENCE_DAY -> "Free to think differently!"
+        HolidayType.HALLOWEEN -> "Embrace the spooky brains!"
+        HolidayType.THANKSGIVING -> "Grateful for our ND community!"
+        HolidayType.HANUKKAH -> "8 nights of ND joy!"
+        HolidayType.CHRISTMAS -> "The most wonderful ND time!"
+        HolidayType.AUTISM_AWARENESS -> "Autism is a superpower!"
+        HolidayType.ADHD_AWARENESS -> "ADHD brains are amazing!"
+        HolidayType.NEURODIVERSITY -> "All brains are beautiful!"
+        HolidayType.NONE -> null
+    }
+}
+
+/**
+ * Determine if this holiday should have extra celebration mode
+ * (more animations, sparkles, and excitement!)
+ * These are the neurodivergent community's special days!
+ */
+private fun isSpecialNDCelebration(holiday: HolidayType): Boolean {
+    return when (holiday) {
+        HolidayType.AUTISM_AWARENESS,
+        HolidayType.ADHD_AWARENESS,
+        HolidayType.NEURODIVERSITY,
+        HolidayType.PRIDE_MONTH -> true
+        else -> false
+    }
+}
+
+/**
+ * Get the animation speed multiplier for a holiday
+ * Special ND celebrations get faster, more energetic animations!
+ */
+private fun getHolidayAnimationSpeed(holiday: HolidayType): Float {
+    return when {
+        isSpecialNDCelebration(holiday) -> 1.3f  // Extra energetic!
+        holiday != HolidayType.NONE -> 1.0f      // Normal holiday speed
+        else -> 0.8f                              // Calm default
+    }
+}
+
+/**
  * Neurodivergent-centric logo for NeuroNet with holiday theming.
  * Features the rainbow infinity symbol and flashy animated text.
  * The infinity symbol represents the infinite variations of the human mind.
  *
  * Holiday variants provide themed colors while maintaining the core neurodiversity identity.
+ * Enhanced with floating decorations, bouncy emojis, and festive glow effects!
  */
 @Composable
 private fun NeuroNetLogo(
@@ -372,32 +454,231 @@ private fun NeuroNetLogo(
     val currentHoliday = remember { detectCurrentHoliday() }
     val holidayEmoji = remember { getHolidayEmoji(currentHoliday) }
     val holidayColors = remember { getHolidayColors(currentHoliday) }
+    val holidayDecorations = remember { getHolidayDecorations(currentHoliday) }
+    val isHoliday = currentHoliday != HolidayType.NONE
+    val isSpecialCelebration = remember { isSpecialNDCelebration(currentHoliday) }
+    val animSpeed = remember { getHolidayAnimationSpeed(currentHoliday) }
 
-    Row(
+    // Animations for holiday decorations
+    val infiniteTransition = rememberInfiniteTransition(label = "holiday-decorations")
+
+    // Bouncy animation for the main emoji - extra bouncy for ND celebrations!
+    val bounceScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = if (animateLogos && isHoliday) {
+            if (isSpecialCelebration) 1.25f else 1.15f
+        } else 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = if (animateLogos) (600 / animSpeed).toInt() else 1,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "bounce"
+    )
+
+    // Rotation animation for sparkle effect - more wiggly for ND celebrations!
+    val sparkleRotation by infiniteTransition.animateFloat(
+        initialValue = if (isSpecialCelebration) -12f else -8f,
+        targetValue = if (animateLogos && isHoliday) {
+            if (isSpecialCelebration) 12f else 8f
+        } else 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = if (animateLogos) (400 / animSpeed).toInt() else 1,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "wiggle"
+    )
+
+    // Floating animation for decorations - faster for celebrations
+    val floatOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = if (animateLogos && isHoliday) {
+            if (isSpecialCelebration) 6f else 4f
+        } else 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = if (animateLogos) (1500 / animSpeed).toInt() else 1,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "float"
+    )
+
+    // Secondary decoration animation (offset from primary)
+    val floatOffset2 by infiniteTransition.animateFloat(
+        initialValue = 2f,
+        targetValue = if (animateLogos && isHoliday) {
+            if (isSpecialCelebration) -4f else -2f
+        } else 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = if (animateLogos) (1800 / animSpeed).toInt() else 1,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "float2"
+    )
+
+    // Extra sparkle rotation for special celebrations
+    val sparkleDecorationRotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = if (animateLogos && isSpecialCelebration) 360f else 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = if (animateLogos) 3000 else 1,
+                easing = LinearEasing
+            ),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "sparkle-rotation"
+    )
+
+    // Glow pulse for holiday background - more intense for special celebrations
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = if (isSpecialCelebration) 0.15f else 0.1f,
+        targetValue = if (animateLogos && isHoliday) {
+            if (isSpecialCelebration) 0.35f else 0.25f
+        } else 0.1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = if (animateLogos) (2000 / animSpeed).toInt() else 1,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glow"
+    )
+
+    // Get primary glow color from holiday palette
+    val glowColor = if (isHoliday && holidayColors.isNotEmpty()) {
+        holidayColors[0].copy(alpha = glowAlpha)
+    } else {
+        Color.Transparent
+    }
+
+    Box(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        contentAlignment = Alignment.Center
     ) {
-        // Holiday emoji (if applicable)
-        if (holidayEmoji != null) {
-            Text(
-                text = holidayEmoji,
-                style = MaterialTheme.typography.titleLarge
+        // Festive glow background for holidays
+        if (isHoliday && animateLogos) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        scaleX = 1.3f
+                        scaleY = 1.3f
+                    }
+                    .background(
+                        brush = Brush.radialGradient(
+                            colors = listOf(glowColor, Color.Transparent)
+                        ),
+                        shape = RoundedCornerShape(16.dp)
+                    )
             )
         }
 
-        // Rainbow Infinity Symbol - The Neurodiversity Symbol (with holiday colors)
-        RainbowInfinitySymbol(
-            modifier = Modifier.size(32.dp),
-            animated = animateLogos,
-            colors = holidayColors
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Left floating decoration (if holiday)
+            if (isHoliday && holidayDecorations.isNotEmpty() && animateLogos) {
+                Text(
+                    text = holidayDecorations.getOrNull(0) ?: "",
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier
+                        .graphicsLayer {
+                            translationY = floatOffset
+                            alpha = 0.8f
+                            // Spinning sparkle for special celebrations
+                            if (isSpecialCelebration) {
+                                rotationZ = sparkleDecorationRotation
+                            }
+                        }
+                )
+            }
 
-        // Flashy animated app name text (with holiday colors)
-        FlashyNeuroNetText(
-            animated = animateLogos,
-            colors = holidayColors
-        )
+            // Holiday emoji (if applicable) with bounce animation
+            if (holidayEmoji != null) {
+                Text(
+                    text = holidayEmoji,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier
+                        .graphicsLayer {
+                            scaleX = bounceScale
+                            scaleY = bounceScale
+                            rotationZ = sparkleRotation
+                        }
+                )
+            }
+
+            // Rainbow Infinity Symbol - The Neurodiversity Symbol (with holiday colors)
+            RainbowInfinitySymbol(
+                modifier = Modifier.size(32.dp),
+                animated = animateLogos,
+                colors = holidayColors
+            )
+
+            // Flashy animated app name text (with holiday colors)
+            FlashyNeuroNetText(
+                animated = animateLogos,
+                colors = holidayColors
+            )
+
+            // Right floating decorations (if holiday) - extra for special celebrations!
+            if (isHoliday && holidayDecorations.size >= 2 && animateLogos) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Text(
+                        text = holidayDecorations.getOrNull(1) ?: "",
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier
+                            .graphicsLayer {
+                                translationY = floatOffset2
+                                alpha = 0.7f
+                            }
+                    )
+                    if (holidayDecorations.size >= 3) {
+                        Text(
+                            text = holidayDecorations.getOrNull(2) ?: "",
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier
+                                .graphicsLayer {
+                                    translationY = -floatOffset
+                                    alpha = 0.6f
+                                    // Spinning sparkle for special celebrations
+                                    if (isSpecialCelebration) {
+                                        rotationZ = -sparkleDecorationRotation
+                                    }
+                                }
+                        )
+                    }
+                    // Extra sparkle for special ND celebrations!
+                    if (isSpecialCelebration && holidayDecorations.size >= 4) {
+                        Text(
+                            text = holidayDecorations.getOrNull(3) ?: "✨",
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier
+                                .graphicsLayer {
+                                    translationY = floatOffset
+                                    scaleX = bounceScale * 0.8f
+                                    scaleY = bounceScale * 0.8f
+                                    alpha = 0.5f
+                                }
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
