@@ -5,7 +5,7 @@
     <!-- Navigation/Screen Titles -->
     <string name="nav_feed">Feed</string>
     <string name="nav_explore">Explore</string>
-    <string name="nav_messages" translatable="false">Messages</string>
+    <string name="nav_messages">Messages</string>
     <string name="nav_notifications">Alerts</string>
     <string name="nav_settings">Settings</string>
 
@@ -145,6 +145,20 @@
     <string name="simulate_badge_notification_toast">Simulated: New Badge Notification!</string>
     <string name="notification_badge_earned_title">Badge Earned: %s</string>
     <string name="notification_badge_earned_message">You earned the achievement: %s</string>
+
+    <!-- Notification Custom View -->
+    <string name="notification_icon_description">Notification icon</string>
+    <string name="notification_action_dismiss">Dismiss</string>
+    <string name="notification_action_reply">Reply</string>
+    <string name="notification_action_view">View</string>
+    <string name="notification_action_mark_read">Mark as read</string>
+
+    <!-- Emoji strings for notification reactions (universal, no translation needed) -->
+    <string name="emoji_thumbs_up" translatable="false">👍</string>
+    <string name="emoji_heart" translatable="false">❤️</string>
+    <string name="emoji_smile" translatable="false">😊</string>
+    <string name="emoji_hands" translatable="false">🙌</string>
+    <string name="emoji_more" translatable="false">+</string>
 
     <!-- Generic content descriptions for FeedScreen -->
     <string name="user_avatar_content_description">User Avatar</string>

@@ -1,5 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="nav_messages">Mensajes</string>
-</resources>
+    <string name="app_name">NeuroNet</string>
 
+    <!-- Navigation/Screen Titles -->
+    <string name="nav_feed">Inicio</string>
+    <string name="nav_explore">Explorar</string>
+    <string name="nav_messages">Mensajes</string>
+    <string name="nav_notifications">Alertas</string>
+    <string name="nav_settings">Ajustes</string>
+
+    <!-- Direct Messages (DM) -->
+    <string name="dm_title">Mensajes</string>
+    <string name="dm_search_placeholder">Buscar mensajes</string>
+    <string name="dm_empty_title">Sin conversaciones aún</string>
+    <string name="dm_empty_subtitle">Cuando alguien te escriba, lo verás aquí.</string>
+    <string name="dm_kids_disabled_title">Mensajes desactivados</string>
+    <string name="dm_kids_disabled_body">Los mensajes directos están desactivados para el modo infantil (menores de 13). Un padre puede cambiarlo en Ajustes → Seguridad y Controles Parentales.</string>
+    <string name="dm_conversation_options">Opciones de conversación</string>
+    <string name="dm_safety_title">Seguridad</string>
+    <string name="dm_safety_body">Si algo no está bien, reporta los mensajes abusivos. Las cuentas de menores de 13 años no pueden usar mensajes directos.</string>
+    <string name="dm_message_placeholder">Mensaje</string>
+    <string name="dm_send">Enviar</string>
+    <string name="dm_back">Atrás</string>
+    <string name="dm_report">Reportar</string>
+    <string name="dm_flagged_badge">Marcado</string>
+    <string name="dm_flagged_explainer">Marcado para revisión</string>
+    <string name="dm_slow_down">Más despacio…</string>
+    <string name="dm_copy">Copiar</string>
+    <string name="dm_block_user">Bloquear usuario</string>
+    <string name="dm_unblock_user">Desbloquear usuario</string>
+    <string name="dm_mute_user">Silenciar</string>
+    <string name="dm_unmute_user">Dejar de silenciar</string>
+    <string name="dm_block_confirm_title">¿Bloquear a %s?</string>
+    <string name="dm_block_confirm_body">No podrá enviarte mensajes y esta conversación se ocultará.</string>
+    <string name="dm_unblock_confirm_title">¿Desbloquear a %s?</string>
+    <string name="dm_unblock_confirm_body">Podrá enviarte mensajes de nuevo.</string>
+    <string name="dm_copied">Copiado</string>
+    <string name="dm_sending">Enviando…</string>
+    <string name="dm_failed">Falló</string>
+    <string name="dm_tap_to_retry">Toca para reintentar</string>
+    <string name="dm_blocked_banner">Bloqueaste a este usuario.</string>
+    <string name="dm_rate_limited">Demasiados mensajes. Por favor, más despacio.</string>
+    <string name="dm_send_failed">El mensaje no se pudo enviar. Toca para reintentar.</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_profile_group">Perfil</string>
+    <string name="settings_badges_title">Insignias</string>
+    <string name="settings_badges_subtitle">Ver tus logros y metas obtenidas.</string>
+    <string name="settings_visual_comfort_group">Confort Visual y Temas</string>
+    <string name="settings_text_size_title">Tamaño del texto</string>
+    <string name="settings_text_size_current_label">Actual: %s</string>
+    <string name="settings_dark_mode_title">Modo oscuro</string>
+    <string name="settings_dark_mode_enabled">Activado</string>
+    <string name="settings_dark_mode_disabled">Desactivado</string>
+    <string name="settings_high_contrast_title">Modo de alto contraste</string>
+    <string name="settings_high_contrast_subtitle_enabled">Activado (Negro/Blanco puro)</string>
+    <string name="settings_high_contrast_subtitle_disabled">Desactivado</string>
+    <string name="settings_neuro_centric_theme_title">Tema Neuro-Céntrico</string>
+    <string name="settings_current_state_label">Estado actual: %s</string>
+    <string name="settings_go_premium_title">Hazte Premium</string>
+    <string name="settings_go_premium_subtitle">Elimina anuncios y apoya a los desarrolladores.</string>
+    <string name="settings_account_group">Cuenta</string>
+    <string name="settings_verified_human_title">Humano Verificado</string>
+    <string name="settings_verified_human_subtitle_verified">Estado: Verificado</string>
+    <string name="settings_verified_human_subtitle_unverified">Estado: Sin verificar</string>
+    <string name="settings_2fa_title">Autenticación de dos factores</string>
+    <string name="settings_2fa_subtitle">Requiere un código al iniciar sesión.</string>
+    <string name="settings_developer_options_group">Opciones de desarrollador</string>
+    <string name="settings_force_verify_title">Forzar verificación</string>
+    <string name="settings_force_verify_subtitle">Alternar estado de verificación del usuario.</string>
+    <string name="settings_fake_premium_title">Premium falso</string>
+    <string name="settings_fake_premium_subtitle">Simular estado de pago.</string>
+    <string name="settings_mock_interface_title">Interfaz simulada</string>
+    <string name="settings_mock_interface_subtitle">Mostrar datos falsos para demostración.</string>
+    <string name="settings_simulate_badge_title">Simular notificación de insignia</string>
+    <string name="settings_simulate_badge_subtitle">Activa la notificación para \'%s\'.</string>
+    <string name="settings_nuke_db_title">Borrar base de datos</string>
+    <string name="settings_nuke_db_subtitle">Eliminar TODAS las publicaciones. Irreversible.</string>
+    <string name="settings_nuke_db_dialog_title">¿Borrar base de datos?</string>
+    <string name="settings_nuke_db_dialog_text">Esto eliminará permanentemente todas las publicaciones del servidor. Esta acción no se puede deshacer.</string>
+    <string name="settings_nuke_db_dialog_confirm">BORRAR</string>
+    <string name="settings_nuke_db_dialog_cancel">Cancelar</string>
+    <string name="settings_language_test_title">Idioma de la app (Prueba)</string>
+    <string name="settings_language_test_subtitle">Establecer idioma manualmente. Requiere reiniciar la app.</string>
+
+    <!-- Badges Screen -->
+    <string name="badges_screen_title">Tus insignias</string>
+    <string name="badges_earned_section_title">Insignias obtenidas</string>
+    <string name="badges_locked_section_title">Insignias bloqueadas</string>
+    <string name="badges_back_button_description">Atrás</string>
+    <string name="badge_earned_content_description">Obtenida</string>
+    <string name="badge_locked_content_description">Bloqueada</string>
+    <string name="badge_name_verified_human">Humano Verificado</string>
+    <string name="badge_name_first_post">Primera publicación</string>
+    <string name="badge_name_hyperfocus_master">Maestro del Hiperfoco</string>
+    <string name="badge_name_community_pillar">Pilar de la comunidad</string>
+    <string name="badge_name_quiet_achiever">Triunfador silencioso</string>
+
+    <!-- Comment Sheet -->
+    <string name="comments_title">Comentarios</string>
+    <string name="comments_add_comment_placeholder">Añadir un comentario…</string>
+    <string name="comments_send_button_description">Enviar</string>
+
+    <!-- NeuroState Names -->
+    <string name="neuro_state_default">Predeterminado</string>
+    <string name="neuro_state_hyperfocus">Hiperfoco</string>
+    <string name="neuro_state_overload">Sobrecarga</string>
+    <string name="neuro_state_calm">Calma</string>
+
+    <!-- Text Scale Factor Names -->
+    <string name="text_scale_small">Pequeño</string>
+    <string name="text_scale_medium">Mediano</string>
+    <string name="text_scale_large">Grande</string>
+    <string name="text_scale_xlarge">Extra grande</string>
+
+    <!-- Story & Post Creation -->
+    <string name="create_post_title">Crear publicación</string>
+    <string name="create_post_hint">¿Qué tienes en mente?</string>
+    <string name="create_post_image_url_hint">Opcional: URL de imagen</string>
+    <string name="create_post_video_url_hint">Opcional: URL de video</string>
+    <string name="create_post_button">PUBLICAR</string>
+    <string name="create_post_cancel">Cancelar</string>
+
+    <string name="create_story_title">Crear nueva historia</string>
+    <string name="create_story_image_url_hint">URL de imagen para tu historia</string>
+    <string name="create_story_duration_hint">Duración en segundos (ej., 5)</string>
+    <string name="create_story_add_button">AÑADIR HISTORIA</string>
+    <string name="create_story_cancel">Cancelar</string>
+    <string name="story_add_button_content_description">Añadir historia</string>
+    <string name="story_your_story_label">Tu historia</string>
+    <string name="story_user_story_content_description">Historia de %s</string>
+
+    <!-- Story Screen (Viewer) -->
+    <string name="story_content_description">Contenido de la historia</string>
+    <string name="story_close_button_content_description">Cerrar historia</string>
+    <string name="story_delete_button_content_description">Eliminar historia</string>
+    <string name="story_delete_dialog_title">¿Eliminar historia?</string>
+    <string name="story_delete_dialog_text">Esto eliminará permanentemente esta historia. Esta acción no se puede deshacer.</string>
+    <string name="story_delete_dialog_confirm">ELIMINAR</string>
+    <string name="story_delete_dialog_cancel">Cancelar</string>
+
+    <!-- Toast Messages -->
+    <string name="simulate_badge_notification_toast">Simulado: ¡Nueva notificación de insignia!</string>
+    <string name="notification_badge_earned_title">Insignia obtenida: %s</string>
+    <string name="notification_badge_earned_message">Has obtenido el logro: %s</string>
+
+    <!-- Notification Custom View -->
+    <string name="notification_icon_description">Icono de notificación</string>
+    <string name="notification_action_dismiss">Descartar</string>
+    <string name="notification_action_reply">Responder</string>
+    <string name="notification_action_view">Ver</string>
+    <string name="notification_action_mark_read">Marcar como leído</string>
+
+    <!-- Generic content descriptions for FeedScreen -->
+    <string name="user_avatar_content_description">Avatar del usuario</string>
+    <string name="unknown_user_id">Desconocido</string>
+    <string name="more_options_content_description">Más opciones</string>
+    <string name="post_image_content_description">Imagen de la publicación</string>
+    <string name="share_button_content_description">Compartir</string>
+    <string name="comment_button_content_description">Comentar</string>
+    <string name="like_button_content_description">Me gusta</string>
+</resources>

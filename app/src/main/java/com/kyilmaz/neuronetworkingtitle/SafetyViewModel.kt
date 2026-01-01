@@ -9,6 +9,37 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+// Explicit imports for symbols needed from other files in the package
+import com.kyilmaz.neuronetworkingtitle.DevOptionsSettings
+
+// --- Data Models (Consolidated from what was likely in SafetyModels.kt) ---
+
+/**
+ * App-level safety audience.
+ */
+enum class Audience {
+    UNDER_13,
+    TEEN,
+    ADULT
+}
+
+/**
+ * Controls the strength of filtering in UNDER_13 mode.
+ */
+enum class KidsFilterLevel {
+    STRICT, // hide/sanitize more aggressively
+    MODERATE
+}
+
+data class SafetyState(
+    val audience: Audience = Audience.ADULT,
+    val kidsFilterLevel: KidsFilterLevel = KidsFilterLevel.STRICT,
+    val isParentalPinSet: Boolean = false
+) {
+    val isKidsMode: Boolean get() = audience == Audience.UNDER_13
+}
+// --- ViewModel Implementation ---
+
 class SafetyViewModel : ViewModel() {
     private val _state = MutableStateFlow(SafetyState())
     val state: StateFlow<SafetyState> = _state.asStateFlow()
@@ -16,22 +47,30 @@ class SafetyViewModel : ViewModel() {
     fun refresh(application: Application) {
         viewModelScope.launch {
             val devOptions = DevOptionsSettings.get(application)
+            val parentalState = ParentalControlsSettings.getState(application)
 
             // Override audience/filter level if Dev Options are set
             _state.update { currentState ->
                 currentState.copy(
                     audience = devOptions.forceAudience ?: currentState.audience,
                     kidsFilterLevel = devOptions.forceKidsFilterLevel ?: currentState.kidsFilterLevel,
-                    isParentalPinSet = devOptions.forcePinSet || currentState.isParentalPinSet
+                    isParentalPinSet = devOptions.forcePinSet || parentalState.isPinSet
                 )
             }
         }
     }
 
-    // Example of a mutator function used by SettingsScreen
+    // Mutator function used by SettingsScreen
     fun setAudience(audience: Audience, application: Application) {
-        // This setter logic is simplified for demo purposes.
-        // In a real app, changing the audience to UNDER_13 would involve PIN verification.
+        // Only allow changes if not forced by dev options, or if setting back to ADULT
+        _state.update { it.copy(
+            audience = audience, 
+            kidsFilterLevel = if (audience == Audience.UNDER_13) KidsFilterLevel.STRICT else KidsFilterLevel.MODERATE) 
+        }
+    }
+
+    // Allow setting audience directly without Application for age verification flow.
+    fun setAudienceDirect(audience: Audience) {
         _state.update { it.copy(audience = audience, kidsFilterLevel = if (audience == Audience.UNDER_13) KidsFilterLevel.STRICT else KidsFilterLevel.MODERATE) }
     }
 }

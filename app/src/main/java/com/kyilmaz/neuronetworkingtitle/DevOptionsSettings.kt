@@ -1,6 +1,7 @@
 package com.kyilmaz.neuronetworkingtitle
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import androidx.core.content.edit
 
 // Explicit imports for models
@@ -11,6 +12,9 @@ import com.kyilmaz.neuronetworkingtitle.KidsFilterLevel
 
 /**
  * Minimal SharedPreferences-backed dev options store.
+ *
+ * SECURITY: Dev options are only available in debug builds.
+ * Any attempt to enable dev options in a release build will be blocked and logged.
  */
 object DevOptionsSettings {
     private const val PREFS = "dev_options"
@@ -27,9 +31,35 @@ object DevOptionsSettings {
     private const val KEY_FORCE_PIN_SET = "force_pin_set"
     private const val KEY_FORCE_PIN_VERIFY_SUCCESS = "force_pin_verify_success"
 
+    /**
+     * Check if the app is running in a debuggable (development) build.
+     */
+    private fun isDebugBuild(context: Context): Boolean {
+        return (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+    }
+
+    /**
+     * Security check that crashes the app if dev options are accessed in production.
+     */
+    private fun enforceDebugBuild(context: Context, operation: String) {
+        if (!isDebugBuild(context)) {
+            android.util.Log.wtf(
+                "SECURITY",
+                "Attempted to $operation in a production build! This is a security violation."
+            )
+            throw SecurityException(
+                "Developer options are not available in production builds. " +
+                "Operation attempted: $operation"
+            )
+        }
+    }
+
 
     fun get(context: Context): DevOptions {
         val p = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
+        // SECURITY: In production builds, always return disabled dev options
+        val isDebug = isDebugBuild(context)
 
         val moderationOverride = runCatching {
             DevModerationOverride.valueOf(p.getString(KEY_MODERATION_OVERRIDE, DevModerationOverride.OFF.name)!!)
@@ -45,14 +75,31 @@ object DevOptionsSettings {
 
         val minIntervalOverride = p.getLong(KEY_DM_MIN_INTERVAL_OVERRIDE_MS, -1L).takeIf { it >= 0L }
 
+        // In production builds, override all dev options to be disabled
+        if (!isDebug) {
+            return DevOptions(
+                devMenuEnabled = false,
+                showDmDebugOverlay = false,
+                dmForceSendFailure = false,
+                dmArtificialSendDelayMs = 0L, // No artificial delay
+                dmDisableRateLimit = true, // No rate limits
+                dmMinIntervalOverrideMs = null,
+                moderationOverride = DevModerationOverride.OFF,
+                forceAudience = null,
+                forceKidsFilterLevel = null,
+                forcePinSet = false,
+                forcePinVerifySuccess = false
+            )
+        }
+
         return DevOptions(
             devMenuEnabled = p.getBoolean(KEY_DEV_MENU_ENABLED, false),
             showDmDebugOverlay = p.getBoolean(KEY_SHOW_DM_DEBUG_OVERLAY, false),
 
             dmForceSendFailure = p.getBoolean(KEY_DM_FORCE_SEND_FAILURE, false),
-            dmArtificialSendDelayMs = p.getLong(KEY_DM_SEND_DELAY_MS, 450L),
+            dmArtificialSendDelayMs = p.getLong(KEY_DM_SEND_DELAY_MS, 0L), // No delay by default
 
-            dmDisableRateLimit = p.getBoolean(KEY_DM_DISABLE_RATE_LIMIT, false),
+            dmDisableRateLimit = p.getBoolean(KEY_DM_DISABLE_RATE_LIMIT, true), // Rate limits disabled by default
             dmMinIntervalOverrideMs = minIntervalOverride,
 
             moderationOverride = moderationOverride,
@@ -65,6 +112,10 @@ object DevOptionsSettings {
     }
 
     fun setDevMenuEnabled(context: Context, enabled: Boolean) {
+        // SECURITY: Block enabling dev menu in production builds
+        if (enabled) {
+            enforceDebugBuild(context, "enable dev menu")
+        }
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit { putBoolean(KEY_DEV_MENU_ENABLED, enabled) }
     }
 

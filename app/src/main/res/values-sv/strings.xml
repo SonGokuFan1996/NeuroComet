@@ -1,5 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="nav_messages">Meddelanden</string>
-</resources>
+    <string name="app_name">NeuroNet</string>
 
+    <!-- Navigation/Screen Titles -->
+    <string name="nav_feed">Flöde</string>
+    <string name="nav_explore">Utforska</string>
+    <string name="nav_messages">Meddelanden</string>
+    <string name="nav_notifications">Aviseringar</string>
+    <string name="nav_settings">Inställningar</string>
+
+    <!-- Direct Messages (DM) -->
+    <string name="dm_title">Meddelanden</string>
+    <string name="dm_search_placeholder">Sök meddelanden</string>
+    <string name="dm_empty_title">Inga konversationer ännu</string>
+    <string name="dm_empty_subtitle">När någon skickar ett meddelande till dig visas det här.</string>
+    <string name="dm_kids_disabled_title">Meddelanden är avstängda</string>
+    <string name="dm_kids_disabled_body">Direktmeddelanden är avstängda för barnläge (under 13 år). En förälder kan ändra detta i Inställningar → Säkerhet och Föräldrakontroll.</string>
+    <string name="dm_conversation_options">Konversationsalternativ</string>
+    <string name="dm_safety_title">Säkerhet</string>
+    <string name="dm_safety_body">Om något känns fel, rapportera kränkande meddelanden. Konton under 13 år kan inte använda DM.</string>
+    <string name="dm_message_placeholder">Meddelande</string>
+    <string name="dm_send">Skicka</string>
+    <string name="dm_back">Tillbaka</string>
+    <string name="dm_report">Rapportera</string>
+    <string name="dm_flagged_badge">Flaggad</string>
+    <string name="dm_flagged_explainer">Flaggad för granskning</string>
+    <string name="dm_slow_down">Lugna ner dig…</string>
+    <string name="dm_copy">Kopiera</string>
+    <string name="dm_block_user">Blockera användare</string>
+    <string name="dm_unblock_user">Avblockera användare</string>
+    <string name="dm_mute_user">Tysta</string>
+    <string name="dm_unmute_user">Slå på ljud</string>
+    <string name="dm_block_confirm_title">Blockera %s?</string>
+    <string name="dm_block_confirm_body">De kommer inte kunna skicka meddelanden till dig, och denna konversation döljs.</string>
+    <string name="dm_unblock_confirm_title">Avblockera %s?</string>
+    <string name="dm_unblock_confirm_body">De kommer kunna skicka meddelanden till dig igen.</string>
+    <string name="dm_copied">Kopierat</string>
+    <string name="dm_sending">Skickar…</string>
+    <string name="dm_failed">Misslyckades</string>
+    <string name="dm_tap_to_retry">Tryck för att försöka igen</string>
+    <string name="dm_blocked_banner">Du har blockerat denna användare.</string>
+    <string name="dm_rate_limited">För många meddelanden. Vänligen lugna ner dig.</string>
+    <string name="dm_send_failed">Meddelandet kunde inte skickas. Tryck för att försöka igen.</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_profile_group">Profil</string>
+    <string name="settings_badges_title">Utmärkelser</string>
+    <string name="settings_badges_subtitle">Visa dina intjänade prestationer och mål.</string>
+    <string name="settings_visual_comfort_group">Visuell komfort och teman</string>
+    <string name="settings_text_size_title">Textstorlek</string>
+    <string name="settings_text_size_current_label">Nuvarande: %s</string>
+    <string name="settings_dark_mode_title">Mörkt läge</string>
+    <string name="settings_dark_mode_enabled">Aktiverat</string>
+    <string name="settings_dark_mode_disabled">Inaktiverat</string>
+    <string name="settings_high_contrast_title">Högkontrastläge</string>
+    <string name="settings_high_contrast_subtitle_enabled">Aktiverat (Rent svart/vitt)</string>
+    <string name="settings_high_contrast_subtitle_disabled">Inaktiverat</string>
+    <string name="settings_neuro_centric_theme_title">Neuro-centrerat tema</string>
+    <string name="settings_current_state_label">Nuvarande tillstånd: %s</string>
+    <string name="settings_go_premium_title">Bli Premium</string>
+    <string name="settings_go_premium_subtitle">Ta bort annonser och stöd utvecklarna.</string>
+    <string name="settings_account_group">Konto</string>
+    <string name="settings_verified_human_title">Verifierad människa</string>
+    <string name="settings_verified_human_subtitle_verified">Status: Verifierad</string>
+    <string name="settings_verified_human_subtitle_unverified">Status: Ej verifierad</string>
+    <string name="settings_2fa_title">Tvåfaktorsautentisering</string>
+    <string name="settings_2fa_subtitle">Kräv en kod vid inloggning.</string>
+    <string name="settings_developer_options_group">Utvecklaralternativ</string>
+    <string name="settings_force_verify_title">Tvinga verifiering</string>
+    <string name="settings_force_verify_subtitle">Växla användarens verifieringsstatus.</string>
+    <string name="settings_fake_premium_title">Falsk Premium</string>
+    <string name="settings_fake_premium_subtitle">Simulera betald status.</string>
+    <string name="settings_mock_interface_title">Mockgränssnitt</string>
+    <string name="settings_mock_interface_subtitle">Visa falska data för demo.</string>
+    <string name="settings_simulate_badge_title">Simulera utmärkelseavisering</string>
+    <string name="settings_simulate_badge_subtitle">Utlöser avisering för \'%s\'.</string>
+    <string name="settings_nuke_db_title">Radera databas</string>
+    <string name="settings_nuke_db_subtitle">Radera ALLA inlägg. Oåterkalleligt.</string>
+    <string name="settings_nuke_db_dialog_title">Radera databas?</string>
+    <string name="settings_nuke_db_dialog_text">Detta kommer permanent radera alla inlägg från servern. Denna åtgärd kan inte ångras.</string>
+    <string name="settings_nuke_db_dialog_confirm">RADERA</string>
+    <string name="settings_nuke_db_dialog_cancel">Avbryt</string>
+    <string name="settings_language_test_title">Appspråk (Test)</string>
+    <string name="settings_language_test_subtitle">Ställ in språk manuellt. Kräver omstart av appen.</string>
+
+    <!-- Badges Screen -->
+    <string name="badges_screen_title">Dina utmärkelser</string>
+    <string name="badges_earned_section_title">Intjänade utmärkelser</string>
+    <string name="badges_locked_section_title">Låsta utmärkelser</string>
+    <string name="badges_back_button_description">Tillbaka</string>
+    <string name="badge_earned_content_description">Intjänad</string>
+    <string name="badge_locked_content_description">Låst</string>
+    <string name="badge_name_verified_human">Verifierad människa</string>
+    <string name="badge_name_first_post">Första inlägg</string>
+    <string name="badge_name_hyperfocus_master">Hyperfokusmästare</string>
+    <string name="badge_name_community_pillar">Gemenskapspelare</string>
+    <string name="badge_name_quiet_achiever">Tyst presterare</string>
+
+    <!-- Comment Sheet -->
+    <string name="comments_title">Kommentarer</string>
+    <string name="comments_add_comment_placeholder">Lägg till en kommentar…</string>
+    <string name="comments_send_button_description">Skicka</string>
+
+    <!-- NeuroState Names -->
+    <string name="neuro_state_default">Standard</string>
+    <string name="neuro_state_hyperfocus">Hyperfokus</string>
+    <string name="neuro_state_overload">Överbelastning</string>
+    <string name="neuro_state_calm">Lugn</string>
+
+    <!-- Text Scale Factor Names -->
+    <string name="text_scale_small">Liten</string>
+    <string name="text_scale_medium">Medium</string>
+    <string name="text_scale_large">Stor</string>
+    <string name="text_scale_xlarge">Extra stor</string>
+
+    <!-- Story & Post Creation -->
+    <string name="create_post_title">Skapa inlägg</string>
+    <string name="create_post_hint">Vad tänker du på?</string>
+    <string name="create_post_image_url_hint">Valfritt: Bild-URL</string>
+    <string name="create_post_video_url_hint">Valfritt: Video-URL</string>
+    <string name="create_post_button">PUBLICERA</string>
+    <string name="create_post_cancel">Avbryt</string>
+
+    <string name="create_story_title">Skapa ny story</string>
+    <string name="create_story_image_url_hint">Bild-URL för din story</string>
+    <string name="create_story_duration_hint">Längd i sekunder (t.ex. 5)</string>
+    <string name="create_story_add_button">LÄGG TILL STORY</string>
+    <string name="create_story_cancel">Avbryt</string>
+    <string name="story_add_button_content_description">Lägg till story</string>
+    <string name="story_your_story_label">Din story</string>
+    <string name="story_user_story_content_description">%s story</string>
+
+    <!-- Story Screen (Viewer) -->
+    <string name="story_content_description">Story-innehåll</string>
+    <string name="story_close_button_content_description">Stäng story</string>
+    <string name="story_delete_button_content_description">Radera story</string>
+    <string name="story_delete_dialog_title">Radera story?</string>
+    <string name="story_delete_dialog_text">Detta kommer permanent radera denna story. Denna åtgärd kan inte ångras.</string>
+    <string name="story_delete_dialog_confirm">RADERA</string>
+    <string name="story_delete_dialog_cancel">Avbryt</string>
+
+    <!-- Toast Messages -->
+    <string name="simulate_badge_notification_toast">Simulerat: Ny utmärkelseavisering!</string>
+    <string name="notification_badge_earned_title">Utmärkelse intjänad: %s</string>
+    <string name="notification_badge_earned_message">Du har tjänat in prestationen: %s</string>
+
+    <!-- Notification Custom View -->
+    <string name="notification_icon_description">Aviseringsikon</string>
+    <string name="notification_action_dismiss">Avvisa</string>
+    <string name="notification_action_reply">Svara</string>
+    <string name="notification_action_view">Visa</string>
+    <string name="notification_action_mark_read">Markera som läst</string>
+
+    <!-- Generic content descriptions for FeedScreen -->
+    <string name="user_avatar_content_description">Användaravatar</string>
+    <string name="unknown_user_id">Okänd</string>
+    <string name="more_options_content_description">Fler alternativ</string>
+    <string name="post_image_content_description">Inläggsbild</string>
+    <string name="share_button_content_description">Dela</string>
+    <string name="comment_button_content_description">Kommentera</string>
+    <string name="like_button_content_description">Gilla</string>
+</resources>

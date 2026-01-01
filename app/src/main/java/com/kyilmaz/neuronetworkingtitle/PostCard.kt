@@ -42,13 +42,19 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 
 private const val THERAPY_BOT_ID = "Therapy_Bot"
-private const val THERAPY_BOT_AVATAR = "https://api.dicebear.com/7.x/bottts/svg?seed=TherapyBot&radius=50"
+private const val THERAPY_BOT_AVATAR = "https://i.pravatar.cc/150?u=therapybot"
 
+/**
+ * Legacy post card component for quiet mode display.
+ * The main BubblyPostCard is defined in FeedScreen.kt.
+ * This version is kept for backward compatibility with quiet mode styling.
+ */
+@Suppress("unused")
 @Composable
-fun BubblyPostCard(
+fun LegacyBubblyPostCard(
     post: Post,
     isQuietMode: Boolean,
-    isAutoVideoPlayback: Boolean,
+    @Suppress("UNUSED_PARAMETER") isAutoVideoPlayback: Boolean,
     onLike: () -> Unit,
     onDelete: () -> Unit,
     onReplyClick: () -> Unit,
@@ -87,7 +93,7 @@ fun BubblyPostCard(
                 // Header
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     val avatarUrl = if (post.userId == THERAPY_BOT_ID) THERAPY_BOT_AVATAR
-                    else post.userAvatar ?: "https://api.dicebear.com/7.x/avataaars/svg?seed=${post.userId ?: "User"}"
+                    else post.userAvatar ?: "https://i.pravatar.cc/150?u=${post.userId ?: "User"}"
 
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current).data(avatarUrl).crossfade(true).build(),

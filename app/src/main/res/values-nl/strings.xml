@@ -1,5 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="nav_messages">Berichten</string>
-</resources>
+    <string name="app_name">NeuroNet</string>
 
+    <!-- Navigation/Screen Titles -->
+    <string name="nav_feed">Feed</string>
+    <string name="nav_explore">Ontdekken</string>
+    <string name="nav_messages">Berichten</string>
+    <string name="nav_notifications">Meldingen</string>
+    <string name="nav_settings">Instellingen</string>
+
+    <!-- Direct Messages (DM) -->
+    <string name="dm_title">Berichten</string>
+    <string name="dm_search_placeholder">Berichten zoeken</string>
+    <string name="dm_empty_title">Nog geen gesprekken</string>
+    <string name="dm_empty_subtitle">Wanneer iemand je een bericht stuurt, zie je het hier.</string>
+    <string name="dm_kids_disabled_title">Berichten zijn uitgeschakeld</string>
+    <string name="dm_kids_disabled_body">Directe berichten zijn uitgeschakeld voor de kindermodus (jonger dan 13). Een ouder kan dit wijzigen in Instellingen → Veiligheid en Ouderlijk Toezicht.</string>
+    <string name="dm_conversation_options">Gespreksopties</string>
+    <string name="dm_safety_title">Veiligheid</string>
+    <string name="dm_safety_body">Als er iets niet klopt, meld misbruik. Accounts jonger dan 13 kunnen geen DM\'s gebruiken.</string>
+    <string name="dm_message_placeholder">Bericht</string>
+    <string name="dm_send">Versturen</string>
+    <string name="dm_back">Terug</string>
+    <string name="dm_report">Melden</string>
+    <string name="dm_flagged_badge">Gemarkeerd</string>
+    <string name="dm_flagged_explainer">Gemarkeerd voor beoordeling</string>
+    <string name="dm_slow_down">Rustig aan…</string>
+    <string name="dm_copy">Kopiëren</string>
+    <string name="dm_block_user">Gebruiker blokkeren</string>
+    <string name="dm_unblock_user">Gebruiker deblokkeren</string>
+    <string name="dm_mute_user">Dempen</string>
+    <string name="dm_unmute_user">Dempen opheffen</string>
+    <string name="dm_block_confirm_title">%s blokkeren?</string>
+    <string name="dm_block_confirm_body">Ze kunnen je geen berichten meer sturen en dit gesprek wordt verborgen.</string>
+    <string name="dm_unblock_confirm_title">%s deblokkeren?</string>
+    <string name="dm_unblock_confirm_body">Ze kunnen je weer berichten sturen.</string>
+    <string name="dm_copied">Gekopieerd</string>
+    <string name="dm_sending">Verzenden…</string>
+    <string name="dm_failed">Mislukt</string>
+    <string name="dm_tap_to_retry">Tik om opnieuw te proberen</string>
+    <string name="dm_blocked_banner">Je hebt deze gebruiker geblokkeerd.</string>
+    <string name="dm_rate_limited">Te veel berichten. Rustig aan alsjeblieft.</string>
+    <string name="dm_send_failed">Bericht niet verzonden. Tik om opnieuw te proberen.</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_profile_group">Profiel</string>
+    <string name="settings_badges_title">Badges</string>
+    <string name="settings_badges_subtitle">Bekijk je behaalde prestaties en doelen.</string>
+    <string name="settings_visual_comfort_group">Visueel Comfort en Thema\'s</string>
+    <string name="settings_text_size_title">Tekstgrootte</string>
+    <string name="settings_text_size_current_label">Huidig: %s</string>
+    <string name="settings_dark_mode_title">Donkere modus</string>
+    <string name="settings_dark_mode_enabled">Ingeschakeld</string>
+    <string name="settings_dark_mode_disabled">Uitgeschakeld</string>
+    <string name="settings_high_contrast_title">Hoog contrast modus</string>
+    <string name="settings_high_contrast_subtitle_enabled">Ingeschakeld (Puur Zwart/Wit)</string>
+    <string name="settings_high_contrast_subtitle_disabled">Uitgeschakeld</string>
+    <string name="settings_neuro_centric_theme_title">Neuro-Centrisch Thema</string>
+    <string name="settings_current_state_label">Huidige staat: %s</string>
+    <string name="settings_go_premium_title">Premium worden</string>
+    <string name="settings_go_premium_subtitle">Verwijder advertenties en steun de ontwikkelaars.</string>
+    <string name="settings_account_group">Account</string>
+    <string name="settings_verified_human_title">Geverifieerd Mens</string>
+    <string name="settings_verified_human_subtitle_verified">Status: Geverifieerd</string>
+    <string name="settings_verified_human_subtitle_unverified">Status: Niet geverifieerd</string>
+    <string name="settings_2fa_title">Tweefactorauthenticatie</string>
+    <string name="settings_2fa_subtitle">Vereist een code bij inloggen.</string>
+    <string name="settings_developer_options_group">Ontwikkelaarsopties</string>
+    <string name="settings_force_verify_title">Verificatie forceren</string>
+    <string name="settings_force_verify_subtitle">Schakel verificatiestatus van gebruiker.</string>
+    <string name="settings_fake_premium_title">Nep Premium</string>
+    <string name="settings_fake_premium_subtitle">Simuleer betaalde status.</string>
+    <string name="settings_mock_interface_title">Mock Interface</string>
+    <string name="settings_mock_interface_subtitle">Toon nepgegevens voor demo.</string>
+    <string name="settings_simulate_badge_title">Badge melding simuleren</string>
+    <string name="settings_simulate_badge_subtitle">Activeert melding voor \'%s\'.</string>
+    <string name="settings_nuke_db_title">Database wissen</string>
+    <string name="settings_nuke_db_subtitle">Verwijder ALLE berichten. Onomkeerbaar.</string>
+    <string name="settings_nuke_db_dialog_title">Database wissen?</string>
+    <string name="settings_nuke_db_dialog_text">Dit zal permanent alle berichten van de server verwijderen. Deze actie kan niet ongedaan worden gemaakt.</string>
+    <string name="settings_nuke_db_dialog_confirm">WISSEN</string>
+    <string name="settings_nuke_db_dialog_cancel">Annuleren</string>
+    <string name="settings_language_test_title">App Taal (Test)</string>
+    <string name="settings_language_test_subtitle">Taal handmatig instellen. Vereist herstart van de app.</string>
+
+    <!-- Badges Screen -->
+    <string name="badges_screen_title">Jouw Badges</string>
+    <string name="badges_earned_section_title">Behaalde Badges</string>
+    <string name="badges_locked_section_title">Vergrendelde Badges</string>
+    <string name="badges_back_button_description">Terug</string>
+    <string name="badge_earned_content_description">Behaald</string>
+    <string name="badge_locked_content_description">Vergrendeld</string>
+    <string name="badge_name_verified_human">Geverifieerd Mens</string>
+    <string name="badge_name_first_post">Eerste Bericht</string>
+    <string name="badge_name_hyperfocus_master">HyperFocus Meester</string>
+    <string name="badge_name_community_pillar">Gemeenschapspijler</string>
+    <string name="badge_name_quiet_achiever">Stille Presteerder</string>
+
+    <!-- Comment Sheet -->
+    <string name="comments_title">Reacties</string>
+    <string name="comments_add_comment_placeholder">Voeg een reactie toe…</string>
+    <string name="comments_send_button_description">Versturen</string>
+
+    <!-- NeuroState Names -->
+    <string name="neuro_state_default">Standaard</string>
+    <string name="neuro_state_hyperfocus">Hyperfocus</string>
+    <string name="neuro_state_overload">Overbelasting</string>
+    <string name="neuro_state_calm">Kalm</string>
+
+    <!-- Text Scale Factor Names -->
+    <string name="text_scale_small">Klein</string>
+    <string name="text_scale_medium">Gemiddeld</string>
+    <string name="text_scale_large">Groot</string>
+    <string name="text_scale_xlarge">Extra Groot</string>
+
+    <!-- Story & Post Creation -->
+    <string name="create_post_title">Bericht maken</string>
+    <string name="create_post_hint">Wat houdt je bezig?</string>
+    <string name="create_post_image_url_hint">Optioneel: Afbeeldings-URL</string>
+    <string name="create_post_video_url_hint">Optioneel: Video-URL</string>
+    <string name="create_post_button">PLAATSEN</string>
+    <string name="create_post_cancel">Annuleren</string>
+
+    <string name="create_story_title">Nieuw Verhaal maken</string>
+    <string name="create_story_image_url_hint">Afbeeldings-URL voor je verhaal</string>
+    <string name="create_story_duration_hint">Duur in seconden (bijv., 5)</string>
+    <string name="create_story_add_button">VERHAAL TOEVOEGEN</string>
+    <string name="create_story_cancel">Annuleren</string>
+    <string name="story_add_button_content_description">Verhaal toevoegen</string>
+    <string name="story_your_story_label">Jouw Verhaal</string>
+    <string name="story_user_story_content_description">Verhaal van %s</string>
+
+    <!-- Story Screen (Viewer) -->
+    <string name="story_content_description">Verhaal inhoud</string>
+    <string name="story_close_button_content_description">Verhaal sluiten</string>
+    <string name="story_delete_button_content_description">Verhaal verwijderen</string>
+    <string name="story_delete_dialog_title">Verhaal verwijderen?</string>
+    <string name="story_delete_dialog_text">Dit zal dit verhaal permanent verwijderen. Deze actie kan niet ongedaan worden gemaakt.</string>
+    <string name="story_delete_dialog_confirm">VERWIJDEREN</string>
+    <string name="story_delete_dialog_cancel">Annuleren</string>
+
+    <!-- Toast Messages -->
+    <string name="simulate_badge_notification_toast">Gesimuleerd: Nieuwe Badge Melding!</string>
+    <string name="notification_badge_earned_title">Badge behaald: %s</string>
+    <string name="notification_badge_earned_message">Je hebt de prestatie behaald: %s</string>
+
+    <!-- Notification Custom View -->
+    <string name="notification_icon_description">Melding icoon</string>
+    <string name="notification_action_dismiss">Negeren</string>
+    <string name="notification_action_reply">Beantwoorden</string>
+    <string name="notification_action_view">Bekijken</string>
+    <string name="notification_action_mark_read">Markeren als gelezen</string>
+
+    <!-- Generic content descriptions for FeedScreen -->
+    <string name="user_avatar_content_description">Gebruiker Avatar</string>
+    <string name="unknown_user_id">Onbekend</string>
+    <string name="more_options_content_description">Meer opties</string>
+    <string name="post_image_content_description">Bericht afbeelding</string>
+    <string name="share_button_content_description">Delen</string>
+    <string name="comment_button_content_description">Reageren</string>
+    <string name="like_button_content_description">Vind ik leuk</string>
+</resources>

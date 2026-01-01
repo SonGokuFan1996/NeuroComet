@@ -32,7 +32,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import kotlinx.coroutines.delay
-import androidx.lifecycle.viewmodel.compose.viewModel // Import for viewModel()
+import androidx.lifecycle.viewmodel.compose.viewModel 
+
+// Explicit imports for symbols in the same package
+import com.kyilmaz.neuronetworkingtitle.CURRENT_USER 
+import com.kyilmaz.neuronetworkingtitle.FeedViewModel 
 
 @Composable
 fun StoryScreen(

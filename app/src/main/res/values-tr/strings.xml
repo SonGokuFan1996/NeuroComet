@@ -1,5 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="nav_messages">Mesajlar</string>
-</resources>
+    <string name="app_name">NeuroNet</string>
 
+    <!-- Navigation/Screen Titles -->
+    <string name="nav_feed">Akış</string>
+    <string name="nav_explore">Keşfet</string>
+    <string name="nav_messages">Mesajlar</string>
+    <string name="nav_notifications">Bildirimler</string>
+    <string name="nav_settings">Ayarlar</string>
+
+    <!-- Direct Messages (DM) -->
+    <string name="dm_title">Mesajlar</string>
+    <string name="dm_search_placeholder">Mesajlarda ara</string>
+    <string name="dm_empty_title">Henüz sohbet yok</string>
+    <string name="dm_empty_subtitle">Biri size mesaj gönderdiğinde burada görünecek.</string>
+    <string name="dm_kids_disabled_title">Mesajlar kapalı</string>
+    <string name="dm_kids_disabled_body">Doğrudan mesajlar çocuk modu için kapalıdır (13 yaş altı). Bir ebeveyn bunu Ayarlar → Güvenlik ve Ebeveyn Kontrolleri\'nden değiştirebilir.</string>
+    <string name="dm_conversation_options">Sohbet seçenekleri</string>
+    <string name="dm_safety_title">Güvenlik</string>
+    <string name="dm_safety_body">Bir şey yanlış hissediyorsa, uygunsuz mesajları bildirin. 13 yaş altı hesaplar DM kullanamaz.</string>
+    <string name="dm_message_placeholder">Mesaj</string>
+    <string name="dm_send">Gönder</string>
+    <string name="dm_back">Geri</string>
+    <string name="dm_report">Bildir</string>
+    <string name="dm_flagged_badge">İşaretlendi</string>
+    <string name="dm_flagged_explainer">İnceleme için işaretlendi</string>
+    <string name="dm_slow_down">Yavaşla…</string>
+    <string name="dm_copy">Kopyala</string>
+    <string name="dm_block_user">Kullanıcıyı engelle</string>
+    <string name="dm_unblock_user">Engeli kaldır</string>
+    <string name="dm_mute_user">Sessize al</string>
+    <string name="dm_unmute_user">Sessizi kaldır</string>
+    <string name="dm_block_confirm_title">%s engellensin mi?</string>
+    <string name="dm_block_confirm_body">Size mesaj gönderemeyecek ve bu sohbet gizlenecek.</string>
+    <string name="dm_unblock_confirm_title">%s engeli kaldırılsın mı?</string>
+    <string name="dm_unblock_confirm_body">Size tekrar mesaj gönderebilecek.</string>
+    <string name="dm_copied">Kopyalandı</string>
+    <string name="dm_sending">Gönderiliyor…</string>
+    <string name="dm_failed">Başarısız</string>
+    <string name="dm_tap_to_retry">Tekrar denemek için dokun</string>
+    <string name="dm_blocked_banner">Bu kullanıcıyı engellediniz.</string>
+    <string name="dm_rate_limited">Çok fazla mesaj. Lütfen yavaşlayın.</string>
+    <string name="dm_send_failed">Mesaj gönderilemedi. Tekrar denemek için dokunun.</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_profile_group">Profil</string>
+    <string name="settings_badges_title">Rozetler</string>
+    <string name="settings_badges_subtitle">Kazandığınız başarıları ve hedefleri görün.</string>
+    <string name="settings_visual_comfort_group">Görsel Konfor ve Temalar</string>
+    <string name="settings_text_size_title">Yazı boyutu</string>
+    <string name="settings_text_size_current_label">Mevcut: %s</string>
+    <string name="settings_dark_mode_title">Karanlık mod</string>
+    <string name="settings_dark_mode_enabled">Etkin</string>
+    <string name="settings_dark_mode_disabled">Devre dışı</string>
+    <string name="settings_high_contrast_title">Yüksek kontrast modu</string>
+    <string name="settings_high_contrast_subtitle_enabled">Etkin (Saf Siyah/Beyaz)</string>
+    <string name="settings_high_contrast_subtitle_disabled">Devre dışı</string>
+    <string name="settings_neuro_centric_theme_title">Nöro-Merkezli Tema</string>
+    <string name="settings_current_state_label">Mevcut durum: %s</string>
+    <string name="settings_go_premium_title">Premium\'a Geç</string>
+    <string name="settings_go_premium_subtitle">Reklamları kaldırın ve geliştiricileri destekleyin.</string>
+    <string name="settings_account_group">Hesap</string>
+    <string name="settings_verified_human_title">Doğrulanmış İnsan</string>
+    <string name="settings_verified_human_subtitle_verified">Durum: Doğrulanmış</string>
+    <string name="settings_verified_human_subtitle_unverified">Durum: Doğrulanmamış</string>
+    <string name="settings_2fa_title">İki Faktörlü Doğrulama</string>
+    <string name="settings_2fa_subtitle">Girişte kod gerektirir.</string>
+    <string name="settings_developer_options_group">Geliştirici Seçenekleri</string>
+    <string name="settings_force_verify_title">Doğrulamayı Zorla</string>
+    <string name="settings_force_verify_subtitle">Kullanıcı doğrulama durumunu değiştir.</string>
+    <string name="settings_fake_premium_title">Sahte Premium</string>
+    <string name="settings_fake_premium_subtitle">Ödeme durumunu simüle et.</string>
+    <string name="settings_mock_interface_title">Sahte Arayüz</string>
+    <string name="settings_mock_interface_subtitle">Demo için sahte veri göster.</string>
+    <string name="settings_simulate_badge_title">Rozet Bildirimini Simüle Et</string>
+    <string name="settings_simulate_badge_subtitle">\'%s\' için bildirim tetikler.</string>
+    <string name="settings_nuke_db_title">Veritabanını Sil</string>
+    <string name="settings_nuke_db_subtitle">TÜM gönderileri sil. Geri alınamaz.</string>
+    <string name="settings_nuke_db_dialog_title">Veritabanı silinsin mi?</string>
+    <string name="settings_nuke_db_dialog_text">Bu, sunucudaki tüm gönderileri kalıcı olarak silecektir. Bu işlem geri alınamaz.</string>
+    <string name="settings_nuke_db_dialog_confirm">SİL</string>
+    <string name="settings_nuke_db_dialog_cancel">İptal</string>
+    <string name="settings_language_test_title">Uygulama Dili (Test)</string>
+    <string name="settings_language_test_subtitle">Dili manuel olarak ayarlayın. Uygulama yeniden başlatma gerektirir.</string>
+
+    <!-- Badges Screen -->
+    <string name="badges_screen_title">Rozetleriniz</string>
+    <string name="badges_earned_section_title">Kazanılan Rozetler</string>
+    <string name="badges_locked_section_title">Kilitli Rozetler</string>
+    <string name="badges_back_button_description">Geri</string>
+    <string name="badge_earned_content_description">Kazanıldı</string>
+    <string name="badge_locked_content_description">Kilitli</string>
+    <string name="badge_name_verified_human">Doğrulanmış İnsan</string>
+    <string name="badge_name_first_post">İlk Gönderi</string>
+    <string name="badge_name_hyperfocus_master">HyperFocus Ustası</string>
+    <string name="badge_name_community_pillar">Topluluk Direği</string>
+    <string name="badge_name_quiet_achiever">Sessiz Başarıcı</string>
+
+    <!-- Comment Sheet -->
+    <string name="comments_title">Yorumlar</string>
+    <string name="comments_add_comment_placeholder">Yorum ekle…</string>
+    <string name="comments_send_button_description">Gönder</string>
+
+    <!-- NeuroState Names -->
+    <string name="neuro_state_default">Varsayılan</string>
+    <string name="neuro_state_hyperfocus">Aşırı Odaklanma</string>
+    <string name="neuro_state_overload">Aşırı Yüklenme</string>
+    <string name="neuro_state_calm">Sakin</string>
+
+    <!-- Text Scale Factor Names -->
+    <string name="text_scale_small">Küçük</string>
+    <string name="text_scale_medium">Orta</string>
+    <string name="text_scale_large">Büyük</string>
+    <string name="text_scale_xlarge">Çok Büyük</string>
+
+    <!-- Story & Post Creation -->
+    <string name="create_post_title">Gönderi Oluştur</string>
+    <string name="create_post_hint">Aklından ne geçiyor?</string>
+    <string name="create_post_image_url_hint">İsteğe bağlı: Resim URL\'si</string>
+    <string name="create_post_video_url_hint">İsteğe bağlı: Video URL\'si</string>
+    <string name="create_post_button">PAYLAŞ</string>
+    <string name="create_post_cancel">İptal</string>
+
+    <string name="create_story_title">Yeni Hikaye Oluştur</string>
+    <string name="create_story_image_url_hint">Hikayeniz için resim URL\'si</string>
+    <string name="create_story_duration_hint">Saniye cinsinden süre (ör., 5)</string>
+    <string name="create_story_add_button">HİKAYE EKLE</string>
+    <string name="create_story_cancel">İptal</string>
+    <string name="story_add_button_content_description">Hikaye ekle</string>
+    <string name="story_your_story_label">Hikayeniz</string>
+    <string name="story_user_story_content_description">%s\'in Hikayesi</string>
+
+    <!-- Story Screen (Viewer) -->
+    <string name="story_content_description">Hikaye içeriği</string>
+    <string name="story_close_button_content_description">Hikayeyi kapat</string>
+    <string name="story_delete_button_content_description">Hikayeyi sil</string>
+    <string name="story_delete_dialog_title">Hikaye silinsin mi?</string>
+    <string name="story_delete_dialog_text">Bu hikayeyi kalıcı olarak silecektir. Bu işlem geri alınamaz.</string>
+    <string name="story_delete_dialog_confirm">SİL</string>
+    <string name="story_delete_dialog_cancel">İptal</string>
+
+    <!-- Toast Messages -->
+    <string name="simulate_badge_notification_toast">Simüle edildi: Yeni Rozet Bildirimi!</string>
+    <string name="notification_badge_earned_title">Rozet kazanıldı: %s</string>
+    <string name="notification_badge_earned_message">Başarıyı kazandınız: %s</string>
+
+    <!-- Notification Custom View -->
+    <string name="notification_icon_description">Bildirim simgesi</string>
+    <string name="notification_action_dismiss">Kapat</string>
+    <string name="notification_action_reply">Yanıtla</string>
+    <string name="notification_action_view">Görüntüle</string>
+    <string name="notification_action_mark_read">Okundu olarak işaretle</string>
+
+    <!-- Generic content descriptions for FeedScreen -->
+    <string name="user_avatar_content_description">Kullanıcı avatarı</string>
+    <string name="unknown_user_id">Bilinmiyor</string>
+    <string name="more_options_content_description">Daha fazla seçenek</string>
+    <string name="post_image_content_description">Gönderi resmi</string>
+    <string name="share_button_content_description">Paylaş</string>
+    <string name="comment_button_content_description">Yorum yap</string>
+    <string name="like_button_content_description">Beğen</string>
+</resources>

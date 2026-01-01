@@ -25,6 +25,9 @@ class AuthViewModel : ViewModel() {
     private val _is2FARequired = MutableStateFlow(false)
     val is2FARequired = _is2FARequired.asStateFlow()
 
+    private val _ageVerifiedAudience = MutableStateFlow<Audience?>(null)
+    val ageVerifiedAudience = _ageVerifiedAudience.asStateFlow()
+
     fun signIn(email: String, password: String) {
         viewModelScope.launch {
             try {
@@ -56,16 +59,25 @@ class AuthViewModel : ViewModel() {
         _is2FAEnabled.value = enabled
     }
 
-    fun signUp(email: String, password: String) {
+    fun setAgeVerifiedAudience(audience: Audience) {
+        _ageVerifiedAudience.value = audience
+    }
+
+    fun signUp(email: String, password: String, audience: Audience?) {
         viewModelScope.launch {
             delay(1000)
             _user.value = User(id = "mock_user_id", name = "Mock User", avatarUrl = "", isVerified = true, personality = "A mock user.")
+            audience?.let { _ageVerifiedAudience.value = it }
         }
     }
 
     fun signOut() {
         _user.value = null
         _is2FARequired.value = false
+    }
+
+    fun skipAuth() {
+        _user.value = User(id = "guest_user", name = "Guest", avatarUrl = "", isVerified = false, personality = "A guest user.")
     }
 
     fun clearError() {

@@ -25,7 +25,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -35,7 +34,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import com.kyilmaz.neuronetworkingtitle.ui.theme.NeuroNetWorkingTitleTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -230,7 +228,7 @@ fun formatTimestamp(isoString: String?): String {
         // Output format "MMM dd, yyyy"
         val outputFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
         outputFormat.format(date ?: Date())
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         // Fallback in case of parsing error
         isoString.substringBefore("T")
     }
@@ -240,7 +238,7 @@ fun formatTimestamp(isoString: String?): String {
 @Preview(showBackground = true)
 @Composable
 fun PreviewCategoryFeedScreen() {
-    NeuroNetWorkingTitleTheme {
+    NeuroThemeApplication(themeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
         CategoryFeedScreen(categoryName = "Neurobiology", onBack = {})
     }
 }
@@ -248,7 +246,7 @@ fun PreviewCategoryFeedScreen() {
 @Preview(showBackground = true)
 @Composable
 fun PreviewCategoryFeedScreenEmpty() {
-    NeuroNetWorkingTitleTheme {
+    NeuroThemeApplication(themeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
         CategoryFeedScreen(categoryName = "Quantum Physics", onBack = {})
     }
 }
@@ -256,7 +254,7 @@ fun PreviewCategoryFeedScreenEmpty() {
 @Preview
 @Composable
 fun PreviewPostCard() {
-    NeuroNetWorkingTitleTheme {
+    NeuroThemeApplication(themeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
         PostCard(
             post = Post(
                 id = 1,

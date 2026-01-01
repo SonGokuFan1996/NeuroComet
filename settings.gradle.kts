@@ -16,6 +16,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // Required for Stream WebRTC Android
+        maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://maven.getstream.io/repo/release") }
     }
 }
 

@@ -1,5 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="nav_messages">Messages</string>
-</resources>
+    <string name="app_name">NeuroNet</string>
 
+    <!-- Navigation/Screen Titles -->
+    <string name="nav_feed">Fil d\'actualité</string>
+    <string name="nav_explore">Explorer</string>
+    <string name="nav_messages">Messages</string>
+    <string name="nav_notifications">Alertes</string>
+    <string name="nav_settings">Paramètres</string>
+
+    <!-- Direct Messages (DM) -->
+    <string name="dm_title">Messages</string>
+    <string name="dm_search_placeholder">Rechercher des messages</string>
+    <string name="dm_empty_title">Aucune conversation</string>
+    <string name="dm_empty_subtitle">Quand quelqu\'un vous envoie un message, il apparaîtra ici.</string>
+    <string name="dm_kids_disabled_title">Messages désactivés</string>
+    <string name="dm_kids_disabled_body">Les messages directs sont désactivés pour le mode enfant (moins de 13 ans). Un parent peut modifier cela dans Paramètres → Sécurité et Contrôle parental.</string>
+    <string name="dm_conversation_options">Options de conversation</string>
+    <string name="dm_safety_title">Sécurité</string>
+    <string name="dm_safety_body">Si quelque chose ne va pas, signalez les messages abusifs. Les comptes de moins de 13 ans ne peuvent pas utiliser les messages directs.</string>
+    <string name="dm_message_placeholder">Message</string>
+    <string name="dm_send">Envoyer</string>
+    <string name="dm_back">Retour</string>
+    <string name="dm_report">Signaler</string>
+    <string name="dm_flagged_badge">Signalé</string>
+    <string name="dm_flagged_explainer">Signalé pour examen</string>
+    <string name="dm_slow_down">Ralentissez…</string>
+    <string name="dm_copy">Copier</string>
+    <string name="dm_block_user">Bloquer l\'utilisateur</string>
+    <string name="dm_unblock_user">Débloquer l\'utilisateur</string>
+    <string name="dm_mute_user">Mettre en sourdine</string>
+    <string name="dm_unmute_user">Réactiver</string>
+    <string name="dm_block_confirm_title">Bloquer %s ?</string>
+    <string name="dm_block_confirm_body">Cette personne ne pourra plus vous envoyer de messages et cette conversation sera masquée.</string>
+    <string name="dm_unblock_confirm_title">Débloquer %s ?</string>
+    <string name="dm_unblock_confirm_body">Cette personne pourra à nouveau vous envoyer des messages.</string>
+    <string name="dm_copied">Copié</string>
+    <string name="dm_sending">Envoi en cours…</string>
+    <string name="dm_failed">Échec</string>
+    <string name="dm_tap_to_retry">Appuyez pour réessayer</string>
+    <string name="dm_blocked_banner">Vous avez bloqué cet utilisateur.</string>
+    <string name="dm_rate_limited">Trop de messages. Veuillez ralentir.</string>
+    <string name="dm_send_failed">L\'envoi du message a échoué. Appuyez pour réessayer.</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_profile_group">Profil</string>
+    <string name="settings_badges_title">Badges</string>
+    <string name="settings_badges_subtitle">Voir vos réalisations et objectifs atteints.</string>
+    <string name="settings_visual_comfort_group">Confort visuel et thèmes</string>
+    <string name="settings_text_size_title">Taille du texte</string>
+    <string name="settings_text_size_current_label">Actuel : %s</string>
+    <string name="settings_dark_mode_title">Mode sombre</string>
+    <string name="settings_dark_mode_enabled">Activé</string>
+    <string name="settings_dark_mode_disabled">Désactivé</string>
+    <string name="settings_high_contrast_title">Mode contraste élevé</string>
+    <string name="settings_high_contrast_subtitle_enabled">Activé (Noir/Blanc pur)</string>
+    <string name="settings_high_contrast_subtitle_disabled">Désactivé</string>
+    <string name="settings_neuro_centric_theme_title">Thème Neuro-Centré</string>
+    <string name="settings_current_state_label">État actuel : %s</string>
+    <string name="settings_go_premium_title">Passer Premium</string>
+    <string name="settings_go_premium_subtitle">Supprimez les publicités et soutenez les développeurs.</string>
+    <string name="settings_account_group">Compte</string>
+    <string name="settings_verified_human_title">Humain vérifié</string>
+    <string name="settings_verified_human_subtitle_verified">Statut : Vérifié</string>
+    <string name="settings_verified_human_subtitle_unverified">Statut : Non vérifié</string>
+    <string name="settings_2fa_title">Authentification à deux facteurs</string>
+    <string name="settings_2fa_subtitle">Exiger un code à la connexion.</string>
+    <string name="settings_developer_options_group">Options développeur</string>
+    <string name="settings_force_verify_title">Forcer la vérification</string>
+    <string name="settings_force_verify_subtitle">Basculer le statut de vérification de l\'utilisateur.</string>
+    <string name="settings_fake_premium_title">Faux Premium</string>
+    <string name="settings_fake_premium_subtitle">Simuler le statut payant.</string>
+    <string name="settings_mock_interface_title">Interface simulée</string>
+    <string name="settings_mock_interface_subtitle">Afficher des données fictives pour la démo.</string>
+    <string name="settings_simulate_badge_title">Simuler une notification de badge</string>
+    <string name="settings_simulate_badge_subtitle">Déclenche la notification pour \'%s\'.</string>
+    <string name="settings_nuke_db_title">Supprimer la base de données</string>
+    <string name="settings_nuke_db_subtitle">Supprimer TOUTES les publications. Irréversible.</string>
+    <string name="settings_nuke_db_dialog_title">Supprimer la base de données ?</string>
+    <string name="settings_nuke_db_dialog_text">Cela supprimera définitivement toutes les publications du serveur. Cette action est irréversible.</string>
+    <string name="settings_nuke_db_dialog_confirm">SUPPRIMER</string>
+    <string name="settings_nuke_db_dialog_cancel">Annuler</string>
+    <string name="settings_language_test_title">Langue de l\'application (Test)</string>
+    <string name="settings_language_test_subtitle">Définir la langue manuellement. Nécessite un redémarrage de l\'application.</string>
+
+    <!-- Badges Screen -->
+    <string name="badges_screen_title">Vos badges</string>
+    <string name="badges_earned_section_title">Badges obtenus</string>
+    <string name="badges_locked_section_title">Badges verrouillés</string>
+    <string name="badges_back_button_description">Retour</string>
+    <string name="badge_earned_content_description">Obtenu</string>
+    <string name="badge_locked_content_description">Verrouillé</string>
+    <string name="badge_name_verified_human">Humain vérifié</string>
+    <string name="badge_name_first_post">Première publication</string>
+    <string name="badge_name_hyperfocus_master">Maître de l\'hyperfocus</string>
+    <string name="badge_name_community_pillar">Pilier de la communauté</string>
+    <string name="badge_name_quiet_achiever">Réalisateur discret</string>
+
+    <!-- Comment Sheet -->
+    <string name="comments_title">Commentaires</string>
+    <string name="comments_add_comment_placeholder">Ajouter un commentaire…</string>
+    <string name="comments_send_button_description">Envoyer</string>
+
+    <!-- NeuroState Names -->
+    <string name="neuro_state_default">Par défaut</string>
+    <string name="neuro_state_hyperfocus">Hyperfocus</string>
+    <string name="neuro_state_overload">Surcharge</string>
+    <string name="neuro_state_calm">Calme</string>
+
+    <!-- Text Scale Factor Names -->
+    <string name="text_scale_small">Petit</string>
+    <string name="text_scale_medium">Moyen</string>
+    <string name="text_scale_large">Grand</string>
+    <string name="text_scale_xlarge">Très grand</string>
+
+    <!-- Story & Post Creation -->
+    <string name="create_post_title">Créer une publication</string>
+    <string name="create_post_hint">Qu\'avez-vous en tête ?</string>
+    <string name="create_post_image_url_hint">Optionnel : URL de l\'image</string>
+    <string name="create_post_video_url_hint">Optionnel : URL de la vidéo</string>
+    <string name="create_post_button">PUBLIER</string>
+    <string name="create_post_cancel">Annuler</string>
+
+    <string name="create_story_title">Créer une nouvelle story</string>
+    <string name="create_story_image_url_hint">URL de l\'image pour votre story</string>
+    <string name="create_story_duration_hint">Durée en secondes (ex., 5)</string>
+    <string name="create_story_add_button">AJOUTER LA STORY</string>
+    <string name="create_story_cancel">Annuler</string>
+    <string name="story_add_button_content_description">Ajouter une story</string>
+    <string name="story_your_story_label">Votre story</string>
+    <string name="story_user_story_content_description">Story de %s</string>
+
+    <!-- Story Screen (Viewer) -->
+    <string name="story_content_description">Contenu de la story</string>
+    <string name="story_close_button_content_description">Fermer la story</string>
+    <string name="story_delete_button_content_description">Supprimer la story</string>
+    <string name="story_delete_dialog_title">Supprimer la story ?</string>
+    <string name="story_delete_dialog_text">Cela supprimera définitivement cette story. Cette action est irréversible.</string>
+    <string name="story_delete_dialog_confirm">SUPPRIMER</string>
+    <string name="story_delete_dialog_cancel">Annuler</string>
+
+    <!-- Toast Messages -->
+    <string name="simulate_badge_notification_toast">Simulé : Nouvelle notification de badge !</string>
+    <string name="notification_badge_earned_title">Badge obtenu : %s</string>
+    <string name="notification_badge_earned_message">Vous avez obtenu la réalisation : %s</string>
+
+    <!-- Notification Custom View -->
+    <string name="notification_icon_description">Icône de notification</string>
+    <string name="notification_action_dismiss">Ignorer</string>
+    <string name="notification_action_reply">Répondre</string>
+    <string name="notification_action_view">Voir</string>
+    <string name="notification_action_mark_read">Marquer comme lu</string>
+
+    <!-- Generic content descriptions for FeedScreen -->
+    <string name="user_avatar_content_description">Avatar de l\'utilisateur</string>
+    <string name="unknown_user_id">Inconnu</string>
+    <string name="more_options_content_description">Plus d\'options</string>
+    <string name="post_image_content_description">Image de la publication</string>
+    <string name="share_button_content_description">Partager</string>
+    <string name="comment_button_content_description">Commenter</string>
+    <string name="like_button_content_description">J\'aime</string>
+</resources>

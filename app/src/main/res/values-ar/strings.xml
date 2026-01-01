@@ -1,4 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">NeuroNet</string>
+
+    <!-- Navigation/Screen Titles -->
+    <string name="nav_feed">الرئيسية</string>
+    <string name="nav_explore">استكشاف</string>
     <string name="nav_messages">الرسائل</string>
+    <string name="nav_notifications">التنبيهات</string>
+    <string name="nav_settings">الإعدادات</string>
+
+    <!-- Direct Messages (DM) -->
+    <string name="dm_title">الرسائل</string>
+    <string name="dm_search_placeholder">البحث في الرسائل</string>
+    <string name="dm_empty_title">لا توجد محادثات بعد</string>
+    <string name="dm_empty_subtitle">عندما يراسلك شخص ما، ستظهر الرسالة هنا.</string>
+    <string name="dm_kids_disabled_title">الرسائل معطلة</string>
+    <string name="dm_kids_disabled_body">الرسائل المباشرة معطلة لوضع الأطفال (أقل من 13 سنة). يمكن للوالد تغيير ذلك في الإعدادات ← الأمان والرقابة الأبوية.</string>
+    <string name="dm_conversation_options">خيارات المحادثة</string>
+    <string name="dm_safety_title">الأمان</string>
+    <string name="dm_safety_body">إذا شعرت بشيء خاطئ، قم بالإبلاغ عن الرسائل المسيئة. الحسابات التي تقل عن 13 سنة لا يمكنها استخدام الرسائل المباشرة.</string>
+    <string name="dm_message_placeholder">رسالة</string>
+    <string name="dm_send">إرسال</string>
+    <string name="dm_back">رجوع</string>
+    <string name="dm_report">إبلاغ</string>
+    <string name="dm_flagged_badge">مُعلَّم</string>
+    <string name="dm_flagged_explainer">مُعلَّم للمراجعة</string>
+    <string name="dm_slow_down">تمهل…</string>
+    <string name="dm_copy">نسخ</string>
+    <string name="dm_block_user">حظر المستخدم</string>
+    <string name="dm_unblock_user">إلغاء حظر المستخدم</string>
+    <string name="dm_mute_user">كتم</string>
+    <string name="dm_unmute_user">إلغاء الكتم</string>
+    <string name="dm_block_confirm_title">حظر %s؟</string>
+    <string name="dm_block_confirm_body">لن يتمكن من مراسلتك، وستُخفى هذه المحادثة.</string>
+    <string name="dm_unblock_confirm_title">إلغاء حظر %s؟</string>
+    <string name="dm_unblock_confirm_body">سيتمكن من مراسلتك مرة أخرى.</string>
+    <string name="dm_copied">تم النسخ</string>
+    <string name="dm_sending">جارٍ الإرسال…</string>
+    <string name="dm_failed">فشل</string>
+    <string name="dm_tap_to_retry">انقر لإعادة المحاولة</string>
+    <string name="dm_blocked_banner">لقد حظرت هذا المستخدم.</string>
+    <string name="dm_rate_limited">رسائل كثيرة جداً. الرجاء التمهل.</string>
+    <string name="dm_send_failed">فشل إرسال الرسالة. انقر وأعد المحاولة.</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_profile_group">الملف الشخصي</string>
+    <string name="settings_badges_title">الشارات</string>
+    <string name="settings_badges_subtitle">عرض إنجازاتك وأهدافك المحققة.</string>
+    <string name="settings_visual_comfort_group">الراحة البصرية والسمات</string>
+    <string name="settings_text_size_title">حجم النص</string>
+    <string name="settings_text_size_current_label">الحالي: %s</string>
+    <string name="settings_dark_mode_title">الوضع الداكن</string>
+    <string name="settings_dark_mode_enabled">مفعّل</string>
+    <string name="settings_dark_mode_disabled">معطّل</string>
+    <string name="settings_high_contrast_title">وضع التباين العالي</string>
+    <string name="settings_high_contrast_subtitle_enabled">مفعّل (أسود/أبيض نقي)</string>
+    <string name="settings_high_contrast_subtitle_disabled">معطّل</string>
+    <string name="settings_neuro_centric_theme_title">السمة العصبية المركزية</string>
+    <string name="settings_current_state_label">الحالة الحالية: %s</string>
+    <string name="settings_go_premium_title">الترقية للمميز</string>
+    <string name="settings_go_premium_subtitle">إزالة الإعلانات ودعم المطورين.</string>
+    <string name="settings_account_group">الحساب</string>
+    <string name="settings_verified_human_title">إنسان موثق</string>
+    <string name="settings_verified_human_subtitle_verified">الحالة: موثق</string>
+    <string name="settings_verified_human_subtitle_unverified">الحالة: غير موثق</string>
+    <string name="settings_2fa_title">المصادقة الثنائية</string>
+    <string name="settings_2fa_subtitle">طلب رمز عند تسجيل الدخول.</string>
+    <string name="settings_developer_options_group">خيارات المطور</string>
+    <string name="settings_force_verify_title">فرض التحقق</string>
+    <string name="settings_force_verify_subtitle">تبديل حالة التحقق للمستخدم.</string>
+    <string name="settings_fake_premium_title">مميز وهمي</string>
+    <string name="settings_fake_premium_subtitle">محاكاة حالة الدفع.</string>
+    <string name="settings_mock_interface_title">واجهة وهمية</string>
+    <string name="settings_mock_interface_subtitle">عرض بيانات وهمية للعرض التوضيحي.</string>
+    <string name="settings_simulate_badge_title">محاكاة إشعار الشارة</string>
+    <string name="settings_simulate_badge_subtitle">يُطلق الإشعار لـ \'%s\'.</string>
+    <string name="settings_nuke_db_title">حذف قاعدة البيانات</string>
+    <string name="settings_nuke_db_subtitle">حذف جميع المنشورات. لا يمكن التراجع.</string>
+    <string name="settings_nuke_db_dialog_title">حذف قاعدة البيانات؟</string>
+    <string name="settings_nuke_db_dialog_text">سيؤدي هذا إلى حذف جميع المنشورات نهائياً من الخادم. لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="settings_nuke_db_dialog_confirm">حذف</string>
+    <string name="settings_nuke_db_dialog_cancel">إلغاء</string>
+    <string name="settings_language_test_title">لغة التطبيق (اختبار)</string>
+    <string name="settings_language_test_subtitle">تعيين اللغة يدوياً. يتطلب إعادة تشغيل التطبيق.</string>
+
+    <!-- Badges Screen -->
+    <string name="badges_screen_title">شاراتك</string>
+    <string name="badges_earned_section_title">الشارات المكتسبة</string>
+    <string name="badges_locked_section_title">الشارات المقفلة</string>
+    <string name="badges_back_button_description">رجوع</string>
+    <string name="badge_earned_content_description">مكتسبة</string>
+    <string name="badge_locked_content_description">مقفلة</string>
+    <string name="badge_name_verified_human">إنسان موثق</string>
+    <string name="badge_name_first_post">أول منشور</string>
+    <string name="badge_name_hyperfocus_master">سيد التركيز الفائق</string>
+    <string name="badge_name_community_pillar">عمود المجتمع</string>
+    <string name="badge_name_quiet_achiever">المنجز الهادئ</string>
+
+    <!-- Comment Sheet -->
+    <string name="comments_title">التعليقات</string>
+    <string name="comments_add_comment_placeholder">أضف تعليقاً…</string>
+    <string name="comments_send_button_description">إرسال</string>
+
+    <!-- NeuroState Names -->
+    <string name="neuro_state_default">افتراضي</string>
+    <string name="neuro_state_hyperfocus">تركيز فائق</string>
+    <string name="neuro_state_overload">حمل زائد</string>
+    <string name="neuro_state_calm">هدوء</string>
+
+    <!-- Text Scale Factor Names -->
+    <string name="text_scale_small">صغير</string>
+    <string name="text_scale_medium">متوسط</string>
+    <string name="text_scale_large">كبير</string>
+    <string name="text_scale_xlarge">كبير جداً</string>
+
+    <!-- Story & Post Creation -->
+    <string name="create_post_title">إنشاء منشور</string>
+    <string name="create_post_hint">بماذا تفكر؟</string>
+    <string name="create_post_image_url_hint">اختياري: رابط الصورة</string>
+    <string name="create_post_video_url_hint">اختياري: رابط الفيديو</string>
+    <string name="create_post_button">نشر</string>
+    <string name="create_post_cancel">إلغاء</string>
+
+    <string name="create_story_title">إنشاء قصة جديدة</string>
+    <string name="create_story_image_url_hint">رابط الصورة لقصتك</string>
+    <string name="create_story_duration_hint">المدة بالثواني (مثال، 5)</string>
+    <string name="create_story_add_button">إضافة قصة</string>
+    <string name="create_story_cancel">إلغاء</string>
+    <string name="story_add_button_content_description">إضافة قصة</string>
+    <string name="story_your_story_label">قصتك</string>
+    <string name="story_user_story_content_description">قصة %s</string>
+
+    <!-- Story Screen (Viewer) -->
+    <string name="story_content_description">محتوى القصة</string>
+    <string name="story_close_button_content_description">إغلاق القصة</string>
+    <string name="story_delete_button_content_description">حذف القصة</string>
+    <string name="story_delete_dialog_title">حذف القصة؟</string>
+    <string name="story_delete_dialog_text">سيؤدي هذا إلى حذف هذه القصة نهائياً. لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="story_delete_dialog_confirm">حذف</string>
+    <string name="story_delete_dialog_cancel">إلغاء</string>
+
+    <!-- Toast Messages -->
+    <string name="simulate_badge_notification_toast">محاكاة: إشعار شارة جديدة!</string>
+    <string name="notification_badge_earned_title">شارة مكتسبة: %s</string>
+    <string name="notification_badge_earned_message">لقد حصلت على الإنجاز: %s</string>
+
+    <!-- Notification Custom View -->
+    <string name="notification_icon_description">أيقونة الإشعار</string>
+    <string name="notification_action_dismiss">تجاهل</string>
+    <string name="notification_action_reply">رد</string>
+    <string name="notification_action_view">عرض</string>
+    <string name="notification_action_mark_read">تحديد كمقروء</string>
+
+    <!-- Generic content descriptions for FeedScreen -->
+    <string name="user_avatar_content_description">صورة المستخدم</string>
+    <string name="unknown_user_id">غير معروف</string>
+    <string name="more_options_content_description">المزيد من الخيارات</string>
+    <string name="post_image_content_description">صورة المنشور</string>
+    <string name="share_button_content_description">مشاركة</string>
+    <string name="comment_button_content_description">تعليق</string>
+    <string name="like_button_content_description">إعجاب</string>
 </resources>

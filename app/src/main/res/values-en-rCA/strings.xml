@@ -1,4 +1,164 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- No dialect-specific changes needed yet, inherits from default -->
+    <!-- Canadian English regional variations -->
+    <string name="app_name">NeuroNet</string>
+
+    <!-- Navigation/Screen Titles -->
+    <string name="nav_feed">Feed</string>
+    <string name="nav_explore">Explore</string>
+    <string name="nav_messages">Messages</string>
+    <string name="nav_notifications">Alerts</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Direct Messages (DM) -->
+    <string name="dm_title">Messages</string>
+    <string name="dm_search_placeholder">Search messages</string>
+    <string name="dm_empty_title">No conversations yet</string>
+    <string name="dm_empty_subtitle">When someone messages you, you\'ll see it here.</string>
+    <string name="dm_kids_disabled_title">Messages are turned off</string>
+    <string name="dm_kids_disabled_body">Direct Messages are disabled for kids mode (under 13). A parent can change this in Settings → Safety &amp; Parental Controls.</string>
+    <string name="dm_conversation_options">Conversation options</string>
+    <string name="dm_safety_title">Safety</string>
+    <string name="dm_safety_body">If something feels wrong, report abusive messages. Under-13 accounts can\'t use DMs.</string>
+    <string name="dm_message_placeholder">Message</string>
+    <string name="dm_send">Send</string>
+    <string name="dm_back">Back</string>
+    <string name="dm_report">Report</string>
+    <string name="dm_flagged_badge">Flagged</string>
+    <string name="dm_flagged_explainer">Flagged for review</string>
+    <string name="dm_slow_down">Slow down…</string>
+    <string name="dm_copy">Copy</string>
+    <string name="dm_block_user">Block user</string>
+    <string name="dm_unblock_user">Unblock user</string>
+    <string name="dm_mute_user">Mute</string>
+    <string name="dm_unmute_user">Unmute</string>
+    <string name="dm_block_confirm_title">Block %s?</string>
+    <string name="dm_block_confirm_body">They won\'t be able to message you, and this conversation will be hidden.</string>
+    <string name="dm_unblock_confirm_title">Unblock %s?</string>
+    <string name="dm_unblock_confirm_body">They\'ll be able to message you again.</string>
+    <string name="dm_copied">Copied</string>
+    <string name="dm_sending">Sending…</string>
+    <string name="dm_failed">Failed</string>
+    <string name="dm_tap_to_retry">Tap to retry</string>
+    <string name="dm_blocked_banner">You blocked this user.</string>
+    <string name="dm_rate_limited">Too many messages. Please slow down.</string>
+    <string name="dm_send_failed">Message failed to send. Tap and retry.</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_profile_group">Profile</string>
+    <string name="settings_badges_title">Badges</string>
+    <string name="settings_badges_subtitle">View your earned achievements and goals.</string>
+    <string name="settings_visual_comfort_group">Visual Comfort &amp; Theming</string>
+    <string name="settings_text_size_title">Text Size</string>
+    <string name="settings_text_size_current_label">Current: %s</string>
+    <string name="settings_dark_mode_title">Dark Mode</string>
+    <string name="settings_dark_mode_enabled">Enabled</string>
+    <string name="settings_dark_mode_disabled">Disabled</string>
+    <string name="settings_high_contrast_title">High Contrast Mode</string>
+    <string name="settings_high_contrast_subtitle_enabled">Enabled (Pure Black/White)</string>
+    <string name="settings_high_contrast_subtitle_disabled">Disabled</string>
+    <string name="settings_neuro_centric_theme_title">Neuro-Centric Theme</string>
+    <string name="settings_current_state_label">Current State: %s</string>
+    <string name="settings_go_premium_title">Go Premium</string>
+    <string name="settings_go_premium_subtitle">Remove ads and support the developers.</string>
+    <string name="settings_account_group">Account</string>
+    <string name="settings_verified_human_title">Verified Human</string>
+    <string name="settings_verified_human_subtitle_verified">Status: Verified</string>
+    <string name="settings_verified_human_subtitle_unverified">Status: Unverified</string>
+    <string name="settings_2fa_title">Two-Factor Auth</string>
+    <string name="settings_2fa_subtitle">Require a code at login.</string>
+    <string name="settings_developer_options_group">Developer Options</string>
+    <string name="settings_force_verify_title">Force Verify</string>
+    <string name="settings_force_verify_subtitle">Toggle user verified status.</string>
+    <string name="settings_fake_premium_title">Fake Premium</string>
+    <string name="settings_fake_premium_subtitle">Simulate paid status.</string>
+    <string name="settings_mock_interface_title">Mock Interface</string>
+    <string name="settings_mock_interface_subtitle">Show fake data for demo.</string>
+    <string name="settings_simulate_badge_title">Simulate Badge Notification</string>
+    <string name="settings_simulate_badge_subtitle">Triggers notification for \'%s\'.</string>
+    <string name="settings_nuke_db_title">Nuke Database</string>
+    <string name="settings_nuke_db_subtitle">Delete ALL posts. Irreversible.</string>
+    <string name="settings_nuke_db_dialog_title">Nuke Database?</string>
+    <string name="settings_nuke_db_dialog_text">This will permanently delete all posts from the server. This action cannot be undone.</string>
+    <string name="settings_nuke_db_dialog_confirm">NUKE</string>
+    <string name="settings_nuke_db_dialog_cancel">Cancel</string>
+    <string name="settings_language_test_title">App Language (Test)</string>
+    <string name="settings_language_test_subtitle">Set app language manually. Requires app restart.</string>
+
+    <!-- Badges Screen -->
+    <string name="badges_screen_title">Your Badges</string>
+    <string name="badges_earned_section_title">Earned Badges</string>
+    <string name="badges_locked_section_title">Locked Badges</string>
+    <string name="badges_back_button_description">Back</string>
+    <string name="badge_earned_content_description">Earned</string>
+    <string name="badge_locked_content_description">Locked</string>
+    <string name="badge_name_verified_human">Verified Human</string>
+    <string name="badge_name_first_post">First Post</string>
+    <string name="badge_name_hyperfocus_master">HyperFocus Master</string>
+    <string name="badge_name_community_pillar">Community Pillar</string>
+    <string name="badge_name_quiet_achiever">Quiet Achiever</string>
+
+    <!-- Comment Sheet -->
+    <string name="comments_title">Comments</string>
+    <string name="comments_add_comment_placeholder">Add a comment…</string>
+    <string name="comments_send_button_description">Send</string>
+
+    <!-- NeuroState Names -->
+    <string name="neuro_state_default">Default</string>
+    <string name="neuro_state_hyperfocus">Hyperfocus</string>
+    <string name="neuro_state_overload">Overload</string>
+    <string name="neuro_state_calm">Calm</string>
+
+    <!-- Text Scale Factor Names -->
+    <string name="text_scale_small">Small</string>
+    <string name="text_scale_medium">Medium</string>
+    <string name="text_scale_large">Large</string>
+    <string name="text_scale_xlarge">X-Large</string>
+
+    <!-- Story & Post Creation -->
+    <string name="create_post_title">Create Post</string>
+    <string name="create_post_hint">What\'s on your mind?</string>
+    <string name="create_post_image_url_hint">Optional: Image URL</string>
+    <string name="create_post_video_url_hint">Optional: Video URL</string>
+    <string name="create_post_button">POST</string>
+    <string name="create_post_cancel">Cancel</string>
+
+    <string name="create_story_title">Create New Story</string>
+    <string name="create_story_image_url_hint">Image URL for your story</string>
+    <string name="create_story_duration_hint">Duration in seconds (e.g., 5)</string>
+    <string name="create_story_add_button">ADD STORY</string>
+    <string name="create_story_cancel">Cancel</string>
+    <string name="story_add_button_content_description">Add Story</string>
+    <string name="story_your_story_label">Your Story</string>
+    <string name="story_user_story_content_description">%s\'s Story</string>
+
+    <!-- Story Screen (Viewer) -->
+    <string name="story_content_description">Story content</string>
+    <string name="story_close_button_content_description">Close story</string>
+    <string name="story_delete_button_content_description">Delete story</string>
+    <string name="story_delete_dialog_title">Delete Story?</string>
+    <string name="story_delete_dialog_text">This will permanently delete this story. This action cannot be undone.</string>
+    <string name="story_delete_dialog_confirm">DELETE</string>
+    <string name="story_delete_dialog_cancel">Cancel</string>
+
+    <!-- Toast Messages -->
+    <string name="simulate_badge_notification_toast">Simulated: New Badge Notification!</string>
+    <string name="notification_badge_earned_title">Badge Earned: %s</string>
+    <string name="notification_badge_earned_message">You earned the achievement: %s</string>
+
+    <!-- Notification Custom View -->
+    <string name="notification_icon_description">Notification icon</string>
+    <string name="notification_action_dismiss">Dismiss</string>
+    <string name="notification_action_reply">Reply</string>
+    <string name="notification_action_view">View</string>
+    <string name="notification_action_mark_read">Mark as read</string>
+
+    <!-- Generic content descriptions for FeedScreen -->
+    <string name="user_avatar_content_description">User Avatar</string>
+    <string name="unknown_user_id">Unknown</string>
+    <string name="more_options_content_description">More options</string>
+    <string name="post_image_content_description">Post image</string>
+    <string name="share_button_content_description">Share</string>
+    <string name="comment_button_content_description">Comment</string>
+    <string name="like_button_content_description">Like</string>
 </resources>
