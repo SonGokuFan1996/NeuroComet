@@ -1,31 +1,46 @@
 # NeuroNet 🧠
 
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:6366f1,50:a855f7,100:ec4899&height=200&section=header&text=NeuroNet%20🧠&fontSize=60&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=Where%20Every%20Mind%20Belongs&descSize=20&descAlignY=55" alt="NeuroNet Header"/>
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:6366f1,25:8b5cf6,50:a855f7,75:d946ef,100:ec4899&height=220&section=header&text=NeuroNet&fontSize=80&fontColor=ffffff&animation=twinkling&fontAlignY=35&desc=♾️%20Where%20Every%20Mind%20Belongs%20♾️&descSize=24&descAlignY=58&descColor=ffffff" alt="NeuroNet Header"/>
 </p>
 
 <p align="center">
-  🎊✨🎆 <b>Happy New Year 2026!</b> 🎆✨🎊
+  <img src="https://readme-typing-svg.demolab.com?font=Poppins&weight=600&size=24&duration=4000&pause=1000&color=A855F7&center=true&vCenter=true&width=500&lines=🎊+Happy+New+Year+2026!+🎊;✨+New+year%2C+new+connections+✨;🧠+Celebrate+neurodiversity+🧠" alt="New Year Greeting"/>
 </p>
 
 <p align="center">
-  <a href="#"><img src="https://img.shields.io/badge/🎉_Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Platform: Android"/></a>
-  <a href="#"><img src="https://img.shields.io/badge/🚀_Kotlin-2.1.0-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin"/></a>
-  <a href="#"><img src="https://img.shields.io/badge/✨_Compose-Material%203-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Platform: Android"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/Kotlin-2.1.0-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose"/></a>
 </p>
 
 <p align="center">
-  <a href="#"><img src="https://img.shields.io/badge/📱_Min%20SDK-26-FF6F00?style=for-the-badge" alt="Min SDK"/></a>
-  <a href="#"><img src="https://img.shields.io/badge/🎆_Version-1.0.0--beta-FFD600?style=for-the-badge" alt="Version"/></a>
-  <a href="#"><img src="https://img.shields.io/badge/⭐_Stars-Welcome!-FF69B4?style=for-the-badge" alt="Stars Welcome"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/Min_SDK-26_(Oreo)-FF6F00?style=for-the-badge&logo=android&logoColor=white" alt="Min SDK"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/Version-1.0.0--beta-A855F7?style=for-the-badge" alt="Version"/></a>
+  <a href="#"><img src="https://img.shields.io/github/stars/yourusername/neuronet?style=for-the-badge&logo=github&color=FFD600" alt="Stars"/></a>
 </p>
 
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=1000&color=A855F7&center=true&vCenter=true&multiline=true&repeat=true&width=650&height=80&lines=🧠+A+social+platform+for+neurodivergent+minds;🛡️+Built+with+accessibility+%26+safety+first;💜+Join+the+neurodiverse+community+today!" alt="Typing SVG" />
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Brain.png" alt="Brain" width="80"/>
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Infinity.png" alt="Infinity" width="80"/>
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Purple%20Heart.png" alt="Purple Heart" width="80"/>
 </p>
 
 <p align="center">
-  <b>🌟 A social platform designed with neurodivergent users in mind 🌟</b><br/>
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Waving%20Hand.png" alt="Wave" width="35"/>
+  <b>A social platform for neurodivergent minds</b>
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Waving%20Hand.png" alt="Wave" width="35"/>
+  <br/>
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Shield.png" alt="Shield" width="25"/>
+  <sub>Built with accessibility & safety first</sub>
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Shield.png" alt="Shield" width="25"/>
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Glowing%20Star.png" alt="Star" width="30"/>
+  <b>A social platform designed with neurodivergent users in mind</b>
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Glowing%20Star.png" alt="Star" width="30"/>
+  <br/>
   <sub>Built with accessibility, safety, and mental wellness as core priorities</sub>
 </p>
 
@@ -49,9 +64,9 @@
 ---
 
 <h2 align="center">
-  <img src="https://media.giphy.com/media/hvRJCLFzcasrR4ia7z/giphy.gif" width="28"/>
-  ✨ Features ✨
-  <img src="https://media.giphy.com/media/hvRJCLFzcasrR4ia7z/giphy.gif" width="28"/>
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Sparkles.png" alt="Sparkles" width="35"/>
+  Features
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Sparkles.png" alt="Sparkles" width="35"/>
 </h2>
 
 <p align="center">
@@ -76,6 +91,7 @@
 
 ### 🧠 Neuro-Centric Design
 - **Neuro-State Themes** - Adaptive UI themes based on mental states
+- **Smooth Animations** - Gentle, calming logo animations (no jarring movement)
 - **Adjustable Text Sizes** - Small, Medium, Large, X-Large options
 - **High Contrast Mode** - Pure black/white for visual accessibility
 - **Dark Mode** - Reduce eye strain with full dark theme support
@@ -146,7 +162,11 @@
 
 ---
 
-<h2 align="center">🛠️ Tech Stack 🛠️</h2>
+<h2 align="center">
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Hammer%20and%20Wrench.png" alt="Tools" width="35"/>
+  Tech Stack
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Hammer%20and%20Wrench.png" alt="Tools" width="35"/>
+</h2>
 
 <p align="center">
   <img src="https://skillicons.dev/icons?i=kotlin,androidstudio,gradle,firebase,postgres,git&theme=dark" alt="Tech Stack Icons"/>
@@ -178,7 +198,11 @@
 
 ---
 
-<h2 align="center">🚀 Getting Started 🚀</h2>
+<h2 align="center">
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Rocket.png" alt="Rocket" width="35"/>
+  Getting Started
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Rocket.png" alt="Rocket" width="35"/>
+</h2>
 
 <p align="center">
   <i>Get up and running in just a few minutes!</i>
@@ -322,7 +346,11 @@ Developer options are available for testing and debugging. To enable:
 
 ---
 
-<h2 align="center">📱 Screenshots 📱</h2>
+<h2 align="center">
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Mobile%20Phone.png" alt="Phone" width="35"/>
+  Screenshots
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Mobile%20Phone.png" alt="Phone" width="35"/>
+</h2>
 
 <p align="center">
   <i>🚧 Coming soon! 🚧</i>
@@ -340,7 +368,11 @@ Developer options are available for testing and debugging. To enable:
 
 ---
 
-<h2 align="center">🤝 Contributing 🤝</h2>
+<h2 align="center">
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Handshake.png" alt="Handshake" width="35"/>
+  Contributing
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Handshake.png" alt="Handshake" width="35"/>
+</h2>
 
 <p align="center">
   <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=for-the-badge&logo=github" alt="PRs Welcome"/>
@@ -390,17 +422,25 @@ For support, please open an issue on GitHub or contact the development team.
 ---
 
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:6366f1,50:a855f7,100:ec4899&height=120&section=footer" alt="Footer Wave"/>
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:6366f1,25:8b5cf6,50:a855f7,75:d946ef,100:ec4899&height=120&section=footer" alt="Footer Wave"/>
 </p>
 
 <p align="center">
-  <img src="https://media.giphy.com/media/LnQjpWaON8nhr21vNW/giphy.gif" width="40"/>
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Smiling%20Face%20with%20Open%20Hands.png" alt="Hugging Face" width="50"/>
   <br/>
-  <b>Made with ❤️ for the neurodivergent community</b>
+  <b>Made with</b>
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Beating%20Heart.png" alt="Heart" width="25"/>
+  <b>for the neurodivergent community</b>
 </p>
 
 <p align="center">
-  🎆🎇✨ <b><i>Cheers to an amazing 2026!</i></b> ✨🎇🎆
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Party%20Popper.png" alt="Party" width="30"/>
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Fireworks.png" alt="Fireworks" width="30"/>
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Sparkles.png" alt="Sparkles" width="30"/>
+  <b><i>Cheers to an amazing 2026!</i></b>
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Sparkles.png" alt="Sparkles" width="30"/>
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Fireworks.png" alt="Fireworks" width="30"/>
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Party%20Popper.png" alt="Party" width="30"/>
 </p>
 
 <p align="center">

@@ -428,13 +428,13 @@ private fun isSpecialNDCelebration(holiday: HolidayType): Boolean {
 
 /**
  * Get the animation speed multiplier for a holiday
- * Special ND celebrations get faster, more energetic animations!
+ * Keep animations smooth and calming, even for special celebrations
  */
 private fun getHolidayAnimationSpeed(holiday: HolidayType): Float {
     return when {
-        isSpecialNDCelebration(holiday) -> 1.3f  // Extra energetic!
+        isSpecialNDCelebration(holiday) -> 1.0f  // Normal speed for celebrations (was too fast at 1.3f)
         holiday != HolidayType.NONE -> 1.0f      // Normal holiday speed
-        else -> 0.8f                              // Calm default
+        else -> 1.0f                              // Default speed
     }
 }
 
@@ -462,15 +462,15 @@ private fun NeuroNetLogo(
     // Animations for holiday decorations
     val infiniteTransition = rememberInfiniteTransition(label = "holiday-decorations")
 
-    // Bouncy animation for the main emoji - extra bouncy for ND celebrations!
+    // Gentle breathing animation for the main emoji - smooth and calming
     val bounceScale by infiniteTransition.animateFloat(
         initialValue = 1f,
         targetValue = if (animateLogos && isHoliday) {
-            if (isSpecialCelebration) 1.25f else 1.15f
+            if (isSpecialCelebration) 1.08f else 1.05f
         } else 1f,
         animationSpec = infiniteRepeatable(
             animation = tween(
-                durationMillis = if (animateLogos) (600 / animSpeed).toInt() else 1,
+                durationMillis = if (animateLogos) (2000 / animSpeed).toInt() else 1,
                 easing = FastOutSlowInEasing
             ),
             repeatMode = RepeatMode.Reverse
@@ -478,15 +478,15 @@ private fun NeuroNetLogo(
         label = "bounce"
     )
 
-    // Rotation animation for sparkle effect - more wiggly for ND celebrations!
+    // Gentle rotation animation for subtle movement - not shaky!
     val sparkleRotation by infiniteTransition.animateFloat(
-        initialValue = if (isSpecialCelebration) -12f else -8f,
+        initialValue = if (isSpecialCelebration) -3f else -2f,
         targetValue = if (animateLogos && isHoliday) {
-            if (isSpecialCelebration) 12f else 8f
+            if (isSpecialCelebration) 3f else 2f
         } else 0f,
         animationSpec = infiniteRepeatable(
             animation = tween(
-                durationMillis = if (animateLogos) (400 / animSpeed).toInt() else 1,
+                durationMillis = if (animateLogos) (2500 / animSpeed).toInt() else 1,
                 easing = FastOutSlowInEasing
             ),
             repeatMode = RepeatMode.Reverse
@@ -494,15 +494,15 @@ private fun NeuroNetLogo(
         label = "wiggle"
     )
 
-    // Floating animation for decorations - faster for celebrations
+    // Gentle floating animation for decorations - slow and calming
     val floatOffset by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = if (animateLogos && isHoliday) {
-            if (isSpecialCelebration) 6f else 4f
+            if (isSpecialCelebration) 3f else 2f
         } else 0f,
         animationSpec = infiniteRepeatable(
             animation = tween(
-                durationMillis = if (animateLogos) (1500 / animSpeed).toInt() else 1,
+                durationMillis = if (animateLogos) (3000 / animSpeed).toInt() else 1,
                 easing = FastOutSlowInEasing
             ),
             repeatMode = RepeatMode.Reverse
@@ -510,15 +510,15 @@ private fun NeuroNetLogo(
         label = "float"
     )
 
-    // Secondary decoration animation (offset from primary)
+    // Secondary decoration animation (offset from primary) - gentle movement
     val floatOffset2 by infiniteTransition.animateFloat(
-        initialValue = 2f,
+        initialValue = 1f,
         targetValue = if (animateLogos && isHoliday) {
-            if (isSpecialCelebration) -4f else -2f
+            if (isSpecialCelebration) -2f else -1f
         } else 0f,
         animationSpec = infiniteRepeatable(
             animation = tween(
-                durationMillis = if (animateLogos) (1800 / animSpeed).toInt() else 1,
+                durationMillis = if (animateLogos) (3500 / animSpeed).toInt() else 1,
                 easing = FastOutSlowInEasing
             ),
             repeatMode = RepeatMode.Reverse
