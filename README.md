@@ -329,10 +329,13 @@ Developer options are available for testing and debugging. To enable:
 </p>
 
 <p align="center">
-  <img src="https://via.placeholder.com/200x400/6366F1/FFFFFF?text=Feed" alt="Feed"/>
-  <img src="https://via.placeholder.com/200x400/A855F7/FFFFFF?text=Stories" alt="Stories"/>
-  <img src="https://via.placeholder.com/200x400/EC4899/FFFFFF?text=Messages" alt="Messages"/>
-  <img src="https://via.placeholder.com/200x400/10B981/FFFFFF?text=Settings" alt="Settings"/>
+  <img src="https://placehold.co/200x400/6366F1/FFFFFF?text=Feed&font=roboto" alt="Feed"/>
+  &nbsp;&nbsp;
+  <img src="https://placehold.co/200x400/A855F7/FFFFFF?text=Stories&font=roboto" alt="Stories"/>
+  &nbsp;&nbsp;
+  <img src="https://placehold.co/200x400/EC4899/FFFFFF?text=Messages&font=roboto" alt="Messages"/>
+  &nbsp;&nbsp;
+  <img src="https://placehold.co/200x400/10B981/FFFFFF?text=Settings&font=roboto" alt="Settings"/>
 </p>
 
 ---
@@ -340,7 +343,8 @@ Developer options are available for testing and debugging. To enable:
 <h2 align="center">🤝 Contributing 🤝</h2>
 
 <p align="center">
-  <img src="https://contrib.rocks/image?repo=user/neuronet" alt="Contributors"/>
+  <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=for-the-badge&logo=github" alt="PRs Welcome"/>
+  <img src="https://img.shields.io/badge/Contributors-Wanted!-blue?style=for-the-badge&logo=handshake" alt="Contributors Wanted"/>
 </p>
 
 <p align="center">
