@@ -103,12 +103,117 @@
 <details>
 <summary><h3>🎨 Neuro-State Themes (click to expand)</h3></summary>
 
-| Theme | Description |
-|:-----:|-------------|
-| 🌤️ **Default** | Balanced, neutral appearance |
-| ⚡ **Hyperfocus** | High contrast, minimal distractions |
-| 🌊 **Overload** | Calming colors, reduced visual noise |
-| 🍃 **Calm** | Soft, soothing color palette |
+The app includes **25+ specialized themes** organized by category:
+
+| Category | Themes | Description |
+|:--------:|--------|-------------|
+| 🎨 **Basic** | Default, Hyperfocus, Sensory Overload, Calm | Core themes for everyday use |
+| ⚡ **ADHD** | Energized, Low Dopamine, Task Mode | Tailored for ADHD brains |
+| 🔄 **Autism** | Routine, Sensory Seeking, Low Stimulation | Designed for autistic users |
+| 💙 **Anxiety/OCD** | Soothe, Grounding | Calming themes to ease worry |
+| 📖 **Accessibility** | Dyslexia Friendly | Optimized readability |
+| 👁️ **Colorblind** | Deuteranopia, Protanopia, Tritanopia, Monochromacy | Full colorblind support |
+| 🔊 **Blind/Low Vision** | Screen Reader, Maximum Contrast, Large Text | TalkBack optimized |
+| 😊 **Mood-Based** | Tired, Anxious, Happy, Overwhelmed, Creative | Match your current feeling |
+| 🦄 **Secret** | Rainbow Brain | Unlockable celebration theme! |
+
+</details>
+
+<details>
+<summary><h3>🔤 Accessibility Fonts (click to expand)</h3></summary>
+
+Choose from **12+ neurodivergent-friendly fonts**:
+
+| Category | Fonts | Best For |
+|:--------:|-------|----------|
+| 📖 **Dyslexia** | Lexend, Atkinson Hyperlegible, OpenDyslexic | Reduces visual stress |
+| ⚡ **ADHD** | Comic Neue, Nunito, Quicksand | Engaging without overwhelming |
+| 🔄 **Autism** | Inter, Source Sans 3 | Consistent, predictable letterforms |
+| 🌿 **Anxiety** | Outfit, Poppins | Soft, calming appearance |
+| 👁️ **Low Vision** | APHont | Maximum legibility |
+
+**Additional settings:** Letter spacing, line height, and font weight adjustments.
+
+</details>
+
+<details>
+<summary><h3>🎬 Animation Controls (click to expand)</h3></summary>
+
+Fine-grained control over animations for sensory-sensitive users:
+
+| Setting | Description |
+|---------|-------------|
+| 🎛️ **Master Toggle** | Disable all animations at once |
+| ♾️ **Logo Animations** | Rainbow infinity, shimmer text |
+| 📖 **Story Animations** | Story circle spinning effects |
+| 📰 **Feed Animations** | Post card and like animations |
+| 🔄 **Transitions** | Screen transition effects |
+| 🔘 **Button Animations** | Button press effects |
+| ⏳ **Loading Animations** | Spinners and skeleton screens |
+
+**Tip:** Tap the infinity logo on the login screen to quickly toggle animations!
+
+</details>
+
+<details>
+<summary><h3>👋 Interactive Welcome Tutorial (click to expand)</h3></summary>
+
+First-time users get a gentle, step-by-step introduction:
+
+| Step | What You Learn |
+|:----:|----------------|
+| 1️⃣ **Welcome** | Introduction to NeuroNet as a safe, inclusive space |
+| 2️⃣ **Animation Toggle** | Tap the infinity logo to disable/enable animations anytime |
+| 3️⃣ **Get Started** | Sign in or create an account to join the community |
+
+The tutorial uses:
+- 🎯 **Visual highlights** - Pulsing rings draw attention to interactive elements
+- ➡️ **Animated pointers** - Arrows guide you to the next action
+- 📖 **Clear explanations** - Simple, friendly language
+
+</details>
+
+<details>
+<summary><h3>🎄 Holiday & Awareness Theming (click to expand)</h3></summary>
+
+The app automatically celebrates holidays and awareness events with themed logos:
+
+| Date | Event | Special Features |
+|:----:|-------|------------------|
+| 🎆 **Jan 1** | New Year | Gold & silver sparkles |
+| 💖 **Feb 14** | Valentine's Day | Pink & heart colors |
+| ☘️ **Mar 17** | St. Patrick's Day | Green & gold |
+| 🌈 **Mar 13-19** | Neurodiversity Week | Full rainbow celebration! |
+| ♾️ **Apr 2** | World Autism Day | Rainbow infinity colors |
+| 🌍 **Apr 22** | Earth Day | Blue & green palette |
+| 🏳️‍🌈 **June** | Pride Month | Rainbow pride colors |
+| 🎃 **Oct 24-31** | Halloween | Spooky orange & purple |
+| 🧠 **Oct 1-7** | ADHD Awareness | Energetic orange & yellow |
+| 🦃 **Thanksgiving** | Thanksgiving | Warm autumn colors |
+| 🕎 **December** | Hanukkah | Blue & silver |
+| 🎄 **Dec 24-26** | Christmas | Red, green & gold |
+
+**Special ND Celebrations** (extra festive animations!):
+- Autism Awareness Day
+- ADHD Awareness Month
+- Neurodiversity Celebration Week
+- Pride Month
+
+</details>
+
+<details>
+<summary><h3>💡 Quick Tips & Tricks (click to expand)</h3></summary>
+
+| Tip | How To |
+|-----|--------|
+| 🔄 **Quick animation toggle** | Tap the ♾️ infinity logo on the login screen |
+| 🦄 **Unlock Rainbow Brain** | Complete secret achievements (hint: explore everything!) |
+| 🌙 **Reduce eye strain** | Enable Dark Mode + Low Stimulation theme |
+| 📖 **Better readability** | Try Lexend or Atkinson Hyperlegible fonts |
+| 🧘 **Calm experience** | Disable all animations + use Calm theme |
+| ⚡ **Stay focused** | Use ADHD Task Mode + Hyperfocus theme |
+| 👶 **Protect kids** | Set up Parental Controls with PIN |
+| 🔔 **Less overwhelm** | Customize notification settings |
 
 </details>
 
@@ -119,9 +224,12 @@
 ### 👨‍👩‍👧‍👦 Safety & Parental Controls
 - **Age Verification** - Protect younger users
 - **Kids Mode** - Disable DMs for under-13 users
+- **Screen Time Limits** - Set daily usage limits
+- **Bedtime Mode** - Restrict access during sleep hours
 - **Content Filtering** - AI-powered moderation
 - **Block & Mute** - User controls for interactions
 - **Report System** - Flag inappropriate content
+- **PIN Protection** - Secure parental settings
 
 </td>
 <td width="50%">
