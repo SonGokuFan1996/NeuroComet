@@ -25,15 +25,15 @@ kotlin {
 }
 
 android {
-    namespace = "com.kyilmaz.neuronetworkingtitle"
+    namespace = "com.kyilmaz.neurocomet"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.kyilmaz.neuronetworkingtitle"
+        applicationId = "com.kyilmaz.neurocomet"
         minSdk = 26
         targetSdk = 36
-        versionCode = 100
-        versionName = "1.0.0-beta"
+        versionCode = 113
+        versionName = "1.0.0-beta13"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -41,6 +41,8 @@ android {
         val supabaseUrl = localProperties.getProperty("SUPABASE_URL") ?: ""
         val supabaseKey = localProperties.getProperty("SUPABASE_KEY") ?: ""
         val devHash = localProperties.getProperty("DEVELOPER_DEVICE_HASH") ?: ""
+        val geminiApiKey = localProperties.getProperty("GEMINI_API_KEY") ?: ""
+        val revenueCatKey = localProperties.getProperty("REVENUECAT_API_KEY") ?: ""
 
         buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
         buildConfigField("String", "SUPABASE_KEY", "\"$supabaseKey\"")
@@ -48,6 +50,12 @@ android {
         // Set this in local.properties: DEVELOPER_DEVICE_HASH=your_sha256_hash_here
         // To get your hash: run the app in debug, try dev options, check logcat for "DEV_ACCESS"
         buildConfigField("String", "DEVELOPER_DEVICE_HASH", "\"$devHash\"")
+        // Gemini API key for AI-powered testing features
+        // Set this in local.properties: GEMINI_API_KEY=your_api_key_here
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+        // RevenueCat API key for in-app purchases
+        // Set this in local.properties: REVENUECAT_API_KEY=your_api_key_here
+        buildConfigField("String", "REVENUECAT_API_KEY", "\"$revenueCatKey\"")
     }
 
     buildTypes {
@@ -129,12 +137,19 @@ dependencies {
     implementation(libs.supabase.auth)
     implementation(libs.supabase.realtime)
     implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.revenuecat.purchases)
 
     // WebRTC for voice/video calls
     implementation(libs.webrtc)
+
+    // OkHttp is used directly for Gemini API calls (avoids Ktor version conflicts)
+    // The generative-ai SDK has Ktor version conflicts with Supabase
 
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)

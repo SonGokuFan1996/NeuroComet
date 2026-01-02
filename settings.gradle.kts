@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "NeuroNet"
+rootProject.name = "NeuroComet"
 include(":app")

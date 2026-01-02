@@ -14,6 +14,7 @@ revenuecat = "9.18.0"
 coilCompose = "2.7.0"
 coroutinesTest = "1.10.2"
 webrtc = "1.3.7"
+generativeAi = "0.9.0"
 
 # Added versions for manually managed dependencies in app/build.gradle.kts
 firebaseBom = "34.7.0"
@@ -48,10 +49,16 @@ androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", versi
 androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3" }
 supabase-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabaseBom" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktorClientAndroid" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientAndroid" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktorClientAndroid" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorClientAndroid" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorClientAndroid" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 
 webrtc = { module = "io.getstream:stream-webrtc-android", version.ref = "webrtc" }
+
+generative-ai = { module = "com.google.ai.client.generativeai:generativeai", version.ref = "generativeAi" }
 
 revenuecat-purchases = { module = "com.revenuecat.purchases:purchases", version.ref = "revenuecat" }
 

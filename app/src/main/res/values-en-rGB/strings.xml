@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- British English regional variations -->
-    <string name="app_name">NeuroNet</string>
+    <string name="app_name">NeuroComet</string>
 
     <!-- Navigation/Screen Titles -->
     <string name="nav_feed">Feed</string>

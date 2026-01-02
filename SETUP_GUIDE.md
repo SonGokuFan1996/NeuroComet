@@ -1,4 +1,4 @@
-# NeuroNet App - Complete Setup Guide
+# NeuroComet App - Complete Setup Guide
 ## From Start to Finish: Configuration Before Testing
 
 ---
@@ -18,7 +18,7 @@ Before you begin, ensure you have:
 ```bash
 # If cloning from git
 git clone <your-repo-url>
-cd NeuroNetWorkingTitle
+cd NeuroComet
 
 # Open in Android Studio
 # File → Open → Select the project folder
@@ -28,7 +28,7 @@ cd NeuroNetWorkingTitle
 
 ## 🔐 Step 2: Configure local.properties
 
-**Location**: `C:\Users\bkyil\AndroidStudioProjects\NeuroNetWorkingTitle\local.properties`
+**Location**: `C:\Users\bkyil\AndroidStudioProjects\NeuroComet\local.properties`
 
 Add these lines to the file:
 
@@ -72,7 +72,7 @@ DEVELOPER_DEVICE_HASH=your_sha256_hash_here
 1. Go to https://console.firebase.google.com/
 2. Create a new project or select existing one
 3. Click **Add app** → **Android**
-4. Enter package name: `com.kyilmaz.neuronetworkingtitle`
+4. Enter package name: `com.kyilmaz.NeuroComet`
 5. Download `google-services.json`
 6. Replace the existing file at `app/google-services.json`
 
@@ -85,7 +85,7 @@ DEVELOPER_DEVICE_HASH=your_sha256_hash_here
 
 ## 💰 Step 4: Configure RevenueCat (In-App Purchases)
 
-NeuroNet offers two subscription options:
+NeuroComet offers two subscription options:
 - **Monthly**: $2/month ad-free subscription
 - **Lifetime**: $60 one-time purchase for permanent ad-free access
 
@@ -103,16 +103,16 @@ NeuroNet offers two subscription options:
 
 | Product ID | Type | Price | Description |
 |------------|------|-------|-------------|
-| `neuronet_premium_monthly` | Subscription | $2.00/month | Monthly ad-free subscription |
-| `neuronet_premium_lifetime` | In-app product | $60.00 | Lifetime ad-free access |
+| `NeuroComet_premium_monthly` | Subscription | $2.00/month | Monthly ad-free subscription |
+| `NeuroComet_premium_lifetime` | In-app product | $60.00 | Lifetime ad-free access |
 
 ### 4.3 Configure RevenueCat Products
 
 1. In RevenueCat dashboard, go to **Products**
 2. Add both products with the same IDs
 3. Create an **Offering** called "default" containing:
-   - Monthly package: `neuronet_premium_monthly`
-   - Lifetime package: `neuronet_premium_lifetime`
+   - Monthly package: `NeuroComet_premium_monthly`
+   - Lifetime package: `NeuroComet_premium_lifetime`
 4. Create an **Entitlement** called `premium`
 5. Attach both products to the `premium` entitlement
 
@@ -705,7 +705,7 @@ Video and voice calls are fully mocked for testing:
 
 ## 💬 Message Reactions
 
-NeuroNet supports modern message reactions like WhatsApp, Telegram, and iMessage:
+NeuroComet supports modern message reactions like WhatsApp, Telegram, and iMessage:
 
 ### How to React to Messages
 
@@ -732,7 +732,7 @@ To persist reactions, ensure Supabase is configured.
 
 ## 🌍 Supported Languages
 
-NeuroNet supports multiple languages for a global, neurodivergent-friendly experience:
+NeuroComet supports multiple languages for a global, neurodivergent-friendly experience:
 
 ### Currently Supported Languages
 
@@ -803,7 +803,7 @@ Languages like Arabic (`ar`) and Hebrew (`he`) are fully supported with:
 
 ### Firebase Errors
 - Ensure `google-services.json` matches your package name
-- Package name must be: `com.kyilmaz.neuronetworkingtitle`
+- Package name must be: `com.kyilmaz.NeuroComet`
 
 ### App Crashes on Start
 - Check Logcat for the specific error
