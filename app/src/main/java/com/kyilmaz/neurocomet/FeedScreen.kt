@@ -1751,7 +1751,13 @@ fun StoriesRow(
         ) {
             Text(
                 "✨ NeuroMoments",
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.titleSmall.copy(
+                    shadow = Shadow(
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                        offset = Offset(0f, 2f),
+                        blurRadius = 4f
+                    )
+                ),
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -1764,8 +1770,14 @@ fun StoriesRow(
             Spacer(Modifier.width(6.dp))
             Text(
                 "Share your world ☄️",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Medium,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    shadow = Shadow(
+                        color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
+                        offset = Offset(0f, 1.5f),
+                        blurRadius = 3f
+                    )
+                ),
+                fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary
             )
         }
@@ -1973,28 +1985,41 @@ fun NeuroMomentItem(
 
         Spacer(Modifier.height(6.dp))
 
-        // Username - clean, professional styling
+        // Username - clean styling with subtle depth
         Text(
             text = username,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = if (!isViewed || isAddButton) FontWeight.Medium else FontWeight.Normal,
+            style = MaterialTheme.typography.labelSmall.copy(
+                shadow = if (!isViewed || isAddButton) Shadow(
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
+                    offset = Offset(0f, 1f),
+                    blurRadius = 2f
+                ) else null
+            ),
+            fontWeight = if (!isViewed || isAddButton) FontWeight.SemiBold else FontWeight.Normal,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
 
-        // Subtext - subtle status indicator
+        // Subtext - status indicator with depth
         if (subtext.isNotEmpty()) {
+            val subtextColor = when {
+                isAddButton -> MaterialTheme.colorScheme.primary
+                !isViewed -> MaterialTheme.colorScheme.tertiary
+                else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+            }
             Text(
                 text = subtext,
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    shadow = if (!isViewed || isAddButton) Shadow(
+                        color = subtextColor.copy(alpha = 0.3f),
+                        offset = Offset(0f, 1f),
+                        blurRadius = 2f
+                    ) else null
+                ),
                 fontSize = 10.sp,
-                fontWeight = FontWeight.Normal,
-                color = when {
-                    isAddButton -> MaterialTheme.colorScheme.primary
-                    !isViewed -> MaterialTheme.colorScheme.tertiary
-                    else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                },
+                fontWeight = if (!isViewed || isAddButton) FontWeight.Medium else FontWeight.Normal,
+                color = subtextColor,
                 maxLines = 1
             )
         }
