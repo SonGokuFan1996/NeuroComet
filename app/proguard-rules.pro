@@ -14,11 +14,11 @@
 -renamesourcefileattribute SourceFile
 
 # Keep BuildConfig fields (needed for developer device hash check)
--keep class com.kyilmaz.neuronetworkingtitle.BuildConfig { *; }
+-keep class com.kyilmaz.neurocomet.BuildConfig { *; }
 
 # Keep data classes used by Supabase/Ktor serialization
--keep class com.kyilmaz.neuronetworkingtitle.** { *; }
--keepclassmembers class com.kyilmaz.neuronetworkingtitle.** {
+-keep class com.kyilmaz.neurocomet.** { *; }
+-keepclassmembers class com.kyilmaz.neurocomet.** {
     <fields>;
     <methods>;
 }
@@ -33,11 +33,11 @@
 -keepclasseswithmembers class kotlinx.serialization.json.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
--keep,includedescriptorclasses class com.kyilmaz.neuronetworkingtitle.**$$serializer { *; }
--keepclassmembers class com.kyilmaz.neuronetworkingtitle.** {
+-keep,includedescriptorclasses class com.kyilmaz.neurocomet.**$$serializer { *; }
+-keepclassmembers class com.kyilmaz.neurocomet.** {
     *** Companion;
 }
--keepclasseswithmembers class com.kyilmaz.neuronetworkingtitle.** {
+-keepclasseswithmembers class com.kyilmaz.neurocomet.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
 

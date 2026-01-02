@@ -1,7 +1,7 @@
-# NeuroNet 🧠
+# NeuroComet 🧠
 
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:6366f1,25:8b5cf6,50:a855f7,75:d946ef,100:ec4899&height=220&section=header&text=NeuroNet&fontSize=80&fontColor=ffffff&animation=twinkling&fontAlignY=35&desc=♾️%20Where%20Every%20Mind%20Belongs%20♾️&descSize=24&descAlignY=58&descColor=ffffff" alt="NeuroNet Header"/>
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:6366f1,25:8b5cf6,50:a855f7,75:d946ef,100:ec4899&height=220&section=header&text=NeuroComet&fontSize=80&fontColor=ffffff&animation=twinkling&fontAlignY=35&desc=♾️%20Where%20Every%20Mind%20Belongs%20♾️&descSize=24&descAlignY=58&descColor=ffffff" alt="NeuroComet Header"/>
 </p>
 
 <p align="center">
@@ -17,7 +17,7 @@
 <p align="center">
   <a href="#"><img src="https://img.shields.io/badge/Min_SDK-26_(Oreo)-FF6F00?style=for-the-badge&logo=android&logoColor=white" alt="Min SDK"/></a>
   <a href="#"><img src="https://img.shields.io/badge/Version-1.0.0--beta-A855F7?style=for-the-badge" alt="Version"/></a>
-  <a href="#"><img src="https://img.shields.io/github/stars/yourusername/neuronet?style=for-the-badge&logo=github&color=FFD600" alt="Stars"/></a>
+  <a href="#"><img src="https://img.shields.io/github/stars/yourusername/NeuroComet?style=for-the-badge&logo=github&color=FFD600" alt="Stars"/></a>
 </p>
 
 <p align="center">
@@ -211,8 +211,8 @@
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/NeuroNet.git
-cd NeuroNet
+git clone https://github.com/yourusername/NeuroComet.git
+cd NeuroComet
 ```
 
 ### 2. Configure local.properties
@@ -235,7 +235,7 @@ DEVELOPER_DEVICE_HASH=your_device_hash
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
 2. Create a new project or select existing
-3. Add Android app with package: `com.kyilmaz.neuronetworkingtitle`
+3. Add Android app with package: `com.kyilmaz.neurocomet`
 4. Download `google-services.json` and place in `app/` directory
 
 ### 4. Set Up Supabase
@@ -259,9 +259,9 @@ Or use Android Studio: **Run > Run 'app'**
 
 ```
 app/src/main/
-├── java/com/kyilmaz/neuronetworkingtitle/
+├── java/com/kyilmaz/neurocomet/
 │   ├── MainActivity.kt           # App entry point
-│   ├── NeuroNetApplication.kt    # Application class
+│   ├── NeuroCometApplication.kt    # Application class
 │   │
 │   ├── # Authentication
 │   ├── AuthScreen.kt             # Login/Register UI
@@ -323,8 +323,8 @@ app/src/main/
 
 | Product ID | Type | Price |
 |------------|------|-------|
-| `neuronet_premium_monthly` | Subscription | $2.00/month |
-| `neuronet_premium_lifetime` | In-app product | $60.00 |
+| `NeuroComet_premium_monthly` | Subscription | $2.00/month |
+| `NeuroComet_premium_lifetime` | In-app product | $60.00 |
 
 ---
 
@@ -444,7 +444,7 @@ For support, please open an issue on GitHub or contact the development team.
 </p>
 
 <p align="center">
-  <a href="#neuronet-">
+  <a href="#NeuroComet-">
     <img src="https://img.shields.io/badge/⬆️_Back_to_Top-6366F1?style=for-the-badge" alt="Back to Top"/>
   </a>
 </p>
