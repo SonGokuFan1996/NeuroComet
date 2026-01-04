@@ -39,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -104,7 +105,7 @@ fun CommentBottomSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Comments",
+                    text = stringResource(R.string.comments_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -112,7 +113,7 @@ fun CommentBottomSheet(
                 IconButton(onClick = onDismiss) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Close comments",
+                        contentDescription = stringResource(R.string.comments_close),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -120,7 +121,7 @@ fun CommentBottomSheet(
 
             if (postAuthor != null) {
                 Text(
-                    text = "Replying to $postAuthor",
+                    text = stringResource(R.string.comments_replying_to, postAuthor),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp)
@@ -145,13 +146,13 @@ fun CommentBottomSheet(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "No comments yet",
+                            text = stringResource(R.string.comments_no_comments_yet),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            text = "Be the first to share your thoughts!",
+                            text = stringResource(R.string.comments_be_first),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
@@ -183,7 +184,7 @@ fun CommentBottomSheet(
                     onValueChange = { commentText = it },
                     placeholder = {
                         Text(
-                            "Add a comment...",
+                            stringResource(R.string.comments_add_comment_placeholder),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
@@ -206,7 +207,7 @@ fun CommentBottomSheet(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Send,
-                        contentDescription = "Send comment",
+                        contentDescription = stringResource(R.string.comments_send_comment),
                         tint = if (commentText.isNotBlank())
                             MaterialTheme.colorScheme.primary
                         else
@@ -229,10 +230,13 @@ private fun CommentItem(comment: Comment) {
             val now = Instant.now()
             val diff = Duration.between(commentTime, now)
             when {
-                diff.toDays() > 0 -> "${diff.toDays()}d ago"
-                diff.toHours() > 0 -> "${diff.toHours()}h ago"
-                diff.toMinutes() > 0 -> "${diff.toMinutes()}m ago"
-                else -> "Just now"
+                diff.toDays() >= 365 -> "${diff.toDays() / 365}y"
+                diff.toDays() >= 30 -> "${diff.toDays() / 30}mo"
+                diff.toDays() >= 7 -> "${diff.toDays() / 7}w"
+                diff.toDays() > 0 -> "${diff.toDays()}d"
+                diff.toHours() > 0 -> "${diff.toHours()}h"
+                diff.toMinutes() > 0 -> "${diff.toMinutes()}m"
+                else -> "now"
             }
         } catch (_: Exception) {
             ""

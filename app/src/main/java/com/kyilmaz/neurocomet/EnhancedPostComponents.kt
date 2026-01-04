@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -189,7 +190,7 @@ fun EnhancedPostCard(
                         )
                         if (isOwnPost) {
                             DropdownMenuItem(
-                                text = { Text("Delete Post") },
+                                text = { Text(stringResource(R.string.post_delete_post)) },
                                 onClick = {
                                     showDeleteConfirm = true
                                     showMenu = false
@@ -200,7 +201,7 @@ fun EnhancedPostCard(
                             )
                         } else {
                             DropdownMenuItem(
-                                text = { Text("Report Post") },
+                                text = { Text(stringResource(R.string.post_report_post)) },
                                 onClick = {
                                     showReportDialog = true
                                     showMenu = false
@@ -211,7 +212,7 @@ fun EnhancedPostCard(
                             )
                         }
                         DropdownMenuItem(
-                            text = { Text("Copy Link") },
+                            text = { Text(stringResource(R.string.menu_copy_link)) },
                             onClick = {
                                 // Copy post link
                                 showMenu = false
@@ -230,7 +231,7 @@ fun EnhancedPostCard(
 
             if (shouldHide) {
                 Text(
-                    text = "Content hidden for kids mode",
+                    text = stringResource(R.string.post_content_hidden_kids),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 12.dp)
@@ -276,12 +277,12 @@ fun EnhancedPostCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "$likeCount likes",
+                    text = stringResource(R.string.post_likes_count, likeCount),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "${comments.size} comments • ${post.shares} shares",
+                    text = stringResource(R.string.post_comments_shares_count, comments.size, post.shares),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -298,7 +299,7 @@ fun EnhancedPostCard(
             ) {
                 PostActionButton(
                     icon = if (liked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                    label = "Like",
+                    label = stringResource(R.string.post_action_like),
                     isActive = liked,
                     activeColor = Color(0xFFE91E63),
                     onClick = {
@@ -309,17 +310,17 @@ fun EnhancedPostCard(
                 )
                 PostActionButton(
                     icon = Icons.AutoMirrored.Outlined.Comment,
-                    label = "Comment",
+                    label = stringResource(R.string.post_action_comment),
                     onClick = { showComments = !showComments }
                 )
                 PostActionButton(
                     icon = Icons.Filled.Share,
-                    label = "Share",
+                    label = stringResource(R.string.post_action_share),
                     onClick = { showShareSheet = true }
                 )
                 PostActionButton(
                     icon = if (saved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                    label = "Save",
+                    label = stringResource(R.string.post_action_save),
                     isActive = saved,
                     activeColor = MaterialTheme.colorScheme.primary,
                     onClick = {
@@ -344,7 +345,7 @@ fun EnhancedPostCard(
                     Spacer(Modifier.height(8.dp))
 
                     Text(
-                        text = "Comments",
+                        text = stringResource(R.string.comments_title),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -362,7 +363,7 @@ fun EnhancedPostCard(
 
                     if (comments.size > 3) {
                         Text(
-                            text = "View all ${comments.size} comments",
+                            text = stringResource(R.string.comments_view_all, comments.size),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
@@ -381,7 +382,7 @@ fun EnhancedPostCard(
                         OutlinedTextField(
                             value = commentText,
                             onValueChange = { commentText = it },
-                            placeholder = { Text("Add a comment...") },
+                            placeholder = { Text(stringResource(R.string.comments_add_comment_placeholder)) },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(24.dp),
                             maxLines = 3,
@@ -453,8 +454,8 @@ fun EnhancedPostCard(
     if (showDeleteConfirm) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete Post?") },
-            text = { Text("This action cannot be undone.") },
+            title = { Text(stringResource(R.string.delete_post_title)) },
+            text = { Text(stringResource(R.string.delete_post_message)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -465,12 +466,12 @@ fun EnhancedPostCard(
                         containerColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Delete")
+                    Text(stringResource(R.string.button_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.button_cancel))
                 }
             }
         )
@@ -601,7 +602,7 @@ fun ShareSheetDialog(
                 modifier = Modifier.padding(24.dp)
             ) {
                 Text(
-                    text = "Share Post",
+                    text = stringResource(R.string.share_sheet_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -611,29 +612,29 @@ fun ShareSheetDialog(
                 // Share options
                 ShareOptionItem(
                     icon = Icons.Filled.ContentCopy,
-                    title = "Copy Link",
-                    subtitle = "Copy post link to clipboard",
+                    title = stringResource(R.string.share_sheet_copy_link),
+                    subtitle = stringResource(R.string.share_sheet_copy_link_desc),
                     onClick = { onShareVia(ShareType.COPY_LINK) }
                 )
 
                 ShareOptionItem(
                     icon = Icons.Filled.Share,
-                    title = "Share via...",
-                    subtitle = "Share to other apps",
+                    title = stringResource(R.string.share_sheet_share_via),
+                    subtitle = stringResource(R.string.share_sheet_share_via_desc),
                     onClick = { onShareVia(ShareType.SHARE_EXTERNAL) }
                 )
 
                 ShareOptionItem(
                     icon = Icons.Filled.Mail,
-                    title = "Send in DM",
-                    subtitle = "Share directly to a friend",
+                    title = stringResource(R.string.share_sheet_send_dm),
+                    subtitle = stringResource(R.string.share_sheet_send_dm_desc),
                     onClick = { onShareVia(ShareType.SHARE_DM) }
                 )
 
                 ShareOptionItem(
                     icon = Icons.AutoMirrored.Filled.Reply,
-                    title = "Repost",
-                    subtitle = "Share to your feed",
+                    title = stringResource(R.string.share_sheet_repost),
+                    subtitle = stringResource(R.string.share_sheet_repost_desc),
                     onClick = { onShareVia(ShareType.REPOST) }
                 )
 
@@ -643,7 +644,7 @@ fun ShareSheetDialog(
                     onClick = onDismiss,
                     modifier = Modifier.align(Alignment.End)
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.button_cancel))
                 }
             }
         }
@@ -876,13 +877,13 @@ fun EnhancedCreatePostDialog(
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            text = "Create Post",
+                            text = stringResource(R.string.create_post_title),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
                     }
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Filled.Close, contentDescription = "Close")
+                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.create_post_close))
                     }
                 }
 
@@ -890,22 +891,42 @@ fun EnhancedCreatePostDialog(
 
                 // Mood selector
                 Text(
-                    text = "How are you feeling?",
+                    text = stringResource(R.string.create_post_how_feeling),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.height(8.dp))
+
+                // First row of moods (centered)
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
                 ) {
-                    moods.forEach { (emoji, label) ->
+                    moods.take(4).forEach { (emoji, _) ->
                         FilterChip(
                             selected = selectedMood == emoji,
                             onClick = {
                                 selectedMood = if (selectedMood == emoji) null else emoji
                             },
-                            label = { Text(emoji) },
-                            modifier = Modifier.weight(1f)
+                            label = { Text(emoji) }
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(6.dp))
+
+                // Second row of moods (centered)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
+                ) {
+                    moods.drop(4).forEach { (emoji, _) ->
+                        FilterChip(
+                            selected = selectedMood == emoji,
+                            onClick = {
+                                selectedMood = if (selectedMood == emoji) null else emoji
+                            },
+                            label = { Text(emoji) }
                         )
                     }
                 }
@@ -913,13 +934,14 @@ fun EnhancedCreatePostDialog(
                 Spacer(Modifier.height(16.dp))
 
                 // Text input with character count
+                val placeholderText = stringResource(R.string.create_post_placeholder)
                 OutlinedTextField(
                     value = text,
                     onValueChange = { if (it.length <= maxCharacters) text = it },
                     placeholder = {
                         Text(
-                            if (selectedMood != null) "What's on your mind? $selectedMood"
-                            else "What's on your mind?"
+                            if (selectedMood != null) "$placeholderText $selectedMood"
+                            else placeholderText
                         )
                     },
                     modifier = Modifier
@@ -933,7 +955,7 @@ fun EnhancedCreatePostDialog(
                             horizontalArrangement = Arrangement.End
                         ) {
                             Text(
-                                text = "$remainingCharacters characters remaining",
+                                text = stringResource(R.string.create_post_chars_remaining, remainingCharacters),
                                 color = if (remainingCharacters < 50)
                                     MaterialTheme.colorScheme.error
                                 else
@@ -960,11 +982,11 @@ fun EnhancedCreatePostDialog(
                     Spacer(Modifier.width(8.dp))
                     Column {
                         Text(
-                            text = "Add content warning",
+                            text = stringResource(R.string.create_post_content_warning),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Text(
-                            text = "Warn others about sensitive content",
+                            text = stringResource(R.string.create_post_content_warning_desc),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -978,7 +1000,7 @@ fun EnhancedCreatePostDialog(
                         OutlinedTextField(
                             value = imageUrl,
                             onValueChange = { imageUrl = it },
-                            label = { Text("Image URL") },
+                            label = { Text(stringResource(R.string.create_post_image_url)) },
                             placeholder = { Text("https://...") },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
@@ -991,7 +1013,7 @@ fun EnhancedCreatePostDialog(
                         OutlinedTextField(
                             value = videoUrl,
                             onValueChange = { videoUrl = it },
-                            label = { Text("Video URL") },
+                            label = { Text(stringResource(R.string.create_post_video_url)) },
                             placeholder = { Text("https://...") },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
@@ -1031,7 +1053,7 @@ fun EnhancedCreatePostDialog(
                     IconButton(onClick = { showMediaOptions = !showMediaOptions }) {
                         Icon(
                             if (showMediaOptions) Icons.Filled.ExpandLess else Icons.Filled.AttachFile,
-                            contentDescription = "Add media",
+                            contentDescription = stringResource(R.string.create_post_add_media),
                             tint = if (showMediaOptions)
                                 MaterialTheme.colorScheme.primary
                             else
@@ -1041,7 +1063,7 @@ fun EnhancedCreatePostDialog(
 
                     Row {
                         TextButton(onClick = onDismiss) {
-                            Text("Cancel")
+                            Text(stringResource(R.string.create_post_cancel))
                         }
                         Spacer(Modifier.width(8.dp))
                         Button(
@@ -1066,7 +1088,7 @@ fun EnhancedCreatePostDialog(
                         ) {
                             Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
-                            Text("Post")
+                            Text(stringResource(R.string.create_post_post))
                         }
                     }
                 }

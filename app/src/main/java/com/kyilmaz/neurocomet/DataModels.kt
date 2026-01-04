@@ -29,10 +29,13 @@ data class Post(
             val diff = Duration.between(postTime, now)
 
             return when {
-                diff.toDays() > 0 -> "${diff.toDays()}d ago"
-                diff.toHours() > 0 -> "${diff.toHours()}h ago"
-                diff.toMinutes() > 0 -> "${diff.toMinutes()}m ago"
-                else -> "Just now"
+                diff.toDays() >= 365 -> "${diff.toDays() / 365}y"
+                diff.toDays() >= 30 -> "${diff.toDays() / 30}mo"
+                diff.toDays() >= 7 -> "${diff.toDays() / 7}w"
+                diff.toDays() > 0 -> "${diff.toDays()}d"
+                diff.toHours() > 0 -> "${diff.toHours()}h"
+                diff.toMinutes() > 0 -> "${diff.toMinutes()}m"
+                else -> "now"
             }
         }
 }
@@ -115,6 +118,63 @@ val MOCK_USERS = listOf(
         avatarUrl = avatarUrl("spooncounter"),
         isVerified = false,
         personality = "Advocates for chronic illness awareness and practices energy management using spoon theory."
+    ),
+    // LGBTQ+ Community Members
+    User(
+        id = "RainbowNerd",
+        name = "RainbowNerd",
+        avatarUrl = avatarUrl("rainbownerd"),
+        isVerified = true,
+        personality = "Proudly queer and autistic! Shares memes, resources, and celebrates the intersection of LGBTQ+ and neurodivergent identities. 🏳️‍🌈♾️"
+    ),
+    User(
+        id = "TransTechie",
+        name = "TransTechie",
+        avatarUrl = avatarUrl("transtechie"),
+        isVerified = true,
+        personality = "Trans woman in tech. ADHD warrior. Loves coding, cats, and creating accessible software. She/Her 🏳️‍⚧️"
+    ),
+    User(
+        id = "NonBinaryNinja",
+        name = "NonBinaryNinja",
+        avatarUrl = avatarUrl("nonbinaryninja"),
+        isVerified = false,
+        personality = "Enby with AuDHD. Special interest: martial arts history. Uses stim toys between kata practice. They/Them 💜"
+    ),
+    User(
+        id = "BiBookworm",
+        name = "BiBookworm",
+        avatarUrl = avatarUrl("bibookworm"),
+        isVerified = false,
+        personality = "Bisexual booklover with dyslexia. Audiobook enthusiast. Reviews queer YA novels and shares reading accessibility tips. 💗💜💙"
+    ),
+    User(
+        id = "AceExplorer",
+        name = "AceExplorer",
+        avatarUrl = avatarUrl("aceexplorer"),
+        isVerified = true,
+        personality = "Asexual & autistic adventurer! Posts about solo travel, sensory-friendly destinations, and ace pride. 🖤🤍💜"
+    ),
+    User(
+        id = "PanPride_Sam",
+        name = "Pan Pride Sam",
+        avatarUrl = avatarUrl("panpridesam"),
+        isVerified = false,
+        personality = "Pansexual, ADHD, and proud! Artist who creates neurodivergent-affirming LGBTQ+ art. Commissions open! 💖💛💙"
+    ),
+    User(
+        id = "QueerCoder",
+        name = "QueerCoder",
+        avatarUrl = avatarUrl("queercoder"),
+        isVerified = true,
+        personality = "Queer software engineer building inclusive apps. Autistic. Hyperfocuses on accessibility. Open source advocate. 🌈💻"
+    ),
+    User(
+        id = "LesbianLuna",
+        name = "LesbianLuna",
+        avatarUrl = avatarUrl("lesbianluna"),
+        isVerified = false,
+        personality = "Lesbian artist with autism. Creates cozy, sensory-friendly digital art. Cat mom x3. She/They 🧡🤍💗"
     )
 )
 

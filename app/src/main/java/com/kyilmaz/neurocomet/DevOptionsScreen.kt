@@ -19,6 +19,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import com.kyilmaz.neurocomet.ui.components.PhoneNumberTextField
+import com.kyilmaz.neurocomet.ui.components.PhoneFormat
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.BugReport
@@ -49,6 +51,8 @@ import androidx.compose.material.icons.filled.NetworkCheck
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Pin
 import androidx.compose.material.icons.filled.PlayArrow
@@ -59,10 +63,14 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -90,13 +98,22 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material3.AlertDialog
+import androidx.fragment.app.FragmentActivity
+import com.kyilmaz.neurocomet.auth.AuthenticationManager
+import com.kyilmaz.neurocomet.auth.AuthResult
+import com.kyilmaz.neurocomet.auth.BiometricStatus
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -327,7 +344,8 @@ fun DevOptionsScreen(
     onBack: () -> Unit,
     devOptionsViewModel: DevOptionsViewModel,
     safetyViewModel: SafetyViewModel,
-    feedViewModel: FeedViewModel? = null
+    feedViewModel: FeedViewModel? = null,
+    onNavigateToGame: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     val app = context.applicationContext as Application
@@ -420,6 +438,14 @@ fun DevOptionsScreen(
                 }
             }
 
+            // ═══════════════════════════════════════════════════════════════
+            // CATEGORY: GENERAL
+            // ═══════════════════════════════════════════════════════════════
+            DevCategoryHeader(
+                title = "General",
+                icon = Icons.Filled.Info
+            )
+
             // === APP INFO ===
             DevSection(
                 title = "App Information",
@@ -449,6 +475,14 @@ fun DevOptionsScreen(
                     )
                 }
             }
+
+            // ═══════════════════════════════════════════════════════════════
+            // CATEGORY: CONTENT & SAFETY
+            // ═══════════════════════════════════════════════════════════════
+            DevCategoryHeader(
+                title = "Content & Safety",
+                icon = Icons.Filled.Shield
+            )
 
             // === AUDIENCE CONTROLS ===
             DevSection(
@@ -509,6 +543,14 @@ fun DevOptionsScreen(
                     onCheckedChange = { devOptionsViewModel.setForcePinVerifySuccess(app, it) }
                 )
             }
+
+            // ═══════════════════════════════════════════════════════════════
+            // CATEGORY: DEBUGGING
+            // ═══════════════════════════════════════════════════════════════
+            DevCategoryHeader(
+                title = "Debugging",
+                icon = Icons.Filled.BugReport
+            )
 
             // === DM DEBUG OPTIONS ===
             DevSection(
@@ -588,6 +630,14 @@ fun DevOptionsScreen(
                     )
                 }
             }
+
+            // ═══════════════════════════════════════════════════════════════
+            // CATEGORY: RENDERING & PERFORMANCE
+            // ═══════════════════════════════════════════════════════════════
+            DevCategoryHeader(
+                title = "Rendering & Performance",
+                icon = Icons.Filled.Speed
+            )
 
             // === PERFORMANCE ===
             DevSection(
@@ -724,14 +774,52 @@ fun DevOptionsScreen(
             // === SUPABASE TEST DATA ===
             SupabaseTestDataSection()
 
+            // ═══════════════════════════════════════════════════════════════
+            // CATEGORY: AUTHENTICATION
+            // ═══════════════════════════════════════════════════════════════
+            DevCategoryHeader(
+                title = "Authentication",
+                icon = Icons.Filled.Lock
+            )
+
             // === AUTHENTICATION TESTING ===
             AuthenticationTestingSection()
+
+            // === BIOMETRIC & FIDO2 TESTING ===
+            BiometricAndFido2TestingSection()
 
             // === 2FA TESTING ===
             TwoFactorAuthTestingSection()
 
+            // ═══════════════════════════════════════════════════════════════
+            // CATEGORY: LOCALIZATION
+            // ═══════════════════════════════════════════════════════════════
+            DevCategoryHeader(
+                title = "Localization",
+                icon = Icons.Filled.Language
+            )
+
             // === LANGUAGE TESTING ===
             LanguageTestingSection()
+
+            // ═══════════════════════════════════════════════════════════════
+            // CATEGORY: GAMES TESTING
+            // ═══════════════════════════════════════════════════════════════
+            DevCategoryHeader(
+                title = "Games Testing",
+                icon = Icons.Filled.SportsEsports
+            )
+
+            // === GAMES TESTING SECTION ===
+            GamesTestingSection(onNavigateToGame = onNavigateToGame)
+
+            // ═══════════════════════════════════════════════════════════════
+            // CATEGORY: NOTIFICATIONS & SOCIAL
+            // ═══════════════════════════════════════════════════════════════
+            DevCategoryHeader(
+                title = "Notifications & Social",
+                icon = Icons.Filled.Notifications
+            )
 
             // === SMS 2FA TESTING ===
             Sms2FATestingSection()
@@ -951,6 +1039,41 @@ private fun DevSection(
             Spacer(Modifier.height(12.dp))
             content()
         }
+    }
+}
+
+/**
+ * Category header component - similar to Android's developer options categories
+ */
+@Composable
+private fun DevCategoryHeader(
+    title: String,
+    icon: ImageVector
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 16.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(Modifier.width(12.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.width(12.dp))
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+        )
     }
 }
 
@@ -1396,51 +1519,374 @@ private fun TableCountBadge(label: String, count: Int?) {
 // ============================================================================
 
 /**
- * Supported languages for testing
+ * Supported languages for testing - only languages with strings.xml translations
  */
 data class TestLanguage(
     val code: String,
     val name: String,
     val nativeName: String,
-    val flag: String
+    val flag: String,
+    val isRtl: Boolean = false,
+    val isImplemented: Boolean = true
 )
 
+// =============================================================================
+// GAMES TESTING SECTION
+// =============================================================================
+
+/**
+ * Games Testing Section for Developer Options
+ * Allows testing of all NeuroGames, achievement manipulation, and game unlocks
+ */
+@Composable
+fun GamesTestingSection(
+    onNavigateToGame: (String) -> Unit = {}
+) {
+    val context = LocalContext.current
+    var achievementCount by remember { mutableIntStateOf(com.kyilmaz.neurocomet.games.GameUnlockManager.getAchievementCount(context)) }
+    var showToast by remember { mutableStateOf(false) }
+    var toastMessage by remember { mutableStateOf("") }
+
+    // In-screen game preview state
+    var selectedGamePreview by remember { mutableStateOf<String?>(null) }
+
+    // Toast effect
+    LaunchedEffect(showToast) {
+        if (showToast) {
+            android.widget.Toast.makeText(context, toastMessage, android.widget.Toast.LENGTH_SHORT).show()
+            showToast = false
+        }
+    }
+
+    DevSection(
+        title = "🎮 Games Testing",
+        icon = Icons.Filled.SportsEsports
+    ) {
+        Text(
+            "Test NeuroGames system, manipulate achievements, and verify game unlock mechanics.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        // Current achievement count
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            ),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(
+                        "Current Achievements",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        "$achievementCount",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                Icon(
+                    Icons.Filled.EmojiEvents,
+                    contentDescription = null,
+                    tint = Color(0xFFFFD700),
+                    modifier = Modifier.size(48.dp)
+                )
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        // Achievement manipulation buttons
+        Text(
+            "Achievement Controls",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+        Spacer(Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = {
+                    com.kyilmaz.neurocomet.games.GameUnlockManager.addAchievement(context, 1)
+                    achievementCount = com.kyilmaz.neurocomet.games.GameUnlockManager.getAchievementCount(context)
+                    toastMessage = "+1 Achievement!"
+                    showToast = true
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("+1")
+            }
+            Button(
+                onClick = {
+                    com.kyilmaz.neurocomet.games.GameUnlockManager.addAchievement(context, 5)
+                    achievementCount = com.kyilmaz.neurocomet.games.GameUnlockManager.getAchievementCount(context)
+                    toastMessage = "+5 Achievements!"
+                    showToast = true
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("+5")
+            }
+            Button(
+                onClick = {
+                    com.kyilmaz.neurocomet.games.GameUnlockManager.setAchievementCount(context, 20)
+                    achievementCount = 20
+                    toastMessage = "All games unlocked! (20 achievements)"
+                    showToast = true
+                },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
+            ) {
+                Text("Max")
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        OutlinedButton(
+            onClick = {
+                com.kyilmaz.neurocomet.games.GameUnlockManager.setAchievementCount(context, 0)
+                achievementCount = 0
+                toastMessage = "Achievements reset to 0"
+                showToast = true
+            },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = MaterialTheme.colorScheme.error
+            )
+        ) {
+            Icon(Icons.Filled.Refresh, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("Reset Achievements")
+        }
+
+        Spacer(Modifier.height(16.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(16.dp))
+
+        // Game unlock status
+        Text(
+            "Game Unlock Status",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+        Spacer(Modifier.height(8.dp))
+
+        com.kyilmaz.neurocomet.games.ALL_GAMES.forEach { game ->
+            val isUnlocked = achievementCount >= game.requiredAchievements
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    if (isUnlocked) Icons.Filled.CheckCircle else Icons.Filled.Lock,
+                    contentDescription = null,
+                    tint = if (isUnlocked) Color(0xFF4CAF50) else Color.Gray,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        stringResource(game.nameRes),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        "Requires: ${game.requiredAchievements} achievements",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Text(
+                    if (isUnlocked) "✓ Unlocked" else "🔒 Locked",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (isUnlocked) Color(0xFF4CAF50) else Color.Gray
+                )
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(16.dp))
+
+        // Quick game launch buttons
+        Text(
+            "Quick Launch (Bypass Unlock)",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            "Launch games directly for testing, regardless of unlock status",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(8.dp))
+
+        // Create a row of game buttons
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            com.kyilmaz.neurocomet.games.ALL_GAMES.chunked(2).forEach { rowGames ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    rowGames.forEach { game ->
+                        Button(
+                            onClick = {
+                                // Navigate directly to the game
+                                onNavigateToGame(game.id)
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(game.icon, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                stringResource(game.nameRes),
+                                style = MaterialTheme.typography.labelSmall,
+                                maxLines = 1
+                            )
+                        }
+                    }
+                    // Fill remaining space if odd number of games
+                    if (rowGames.size == 1) {
+                        Spacer(Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        // Inline game preview hint
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
+            ),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Filled.Info,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    "Tap any game above to launch it directly for testing!",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Languages that have actual translations in res/values-XX/strings.xml
+ */
+private val IMPLEMENTED_LANGUAGES = listOf(
+    TestLanguage("en", "English (US)", "English", "🇺🇸"),
+    TestLanguage("en-rGB", "English (UK)", "English", "🇬🇧"),
+    TestLanguage("en-rCA", "English (Canada)", "English", "🇨🇦"),
+    TestLanguage("en-rAU", "English (Australia)", "English", "🇦🇺"),
+    TestLanguage("ar", "Arabic", "العربية", "🇸🇦", isRtl = true),
+    TestLanguage("es", "Spanish", "Español", "🇪🇸"),
+    TestLanguage("fr", "French", "Français", "🇫🇷"),
+    TestLanguage("nl", "Dutch", "Nederlands", "🇳🇱"),
+    TestLanguage("sv", "Swedish", "Svenska", "🇸🇪"),
+    TestLanguage("tr", "Turkish", "Türkçe", "🇹🇷")
+)
+
+/**
+ * Additional languages for future implementation testing
+ */
 private val TEST_LANGUAGES = listOf(
     TestLanguage("en", "English", "English", "🇺🇸"),
     TestLanguage("es", "Spanish", "Español", "🇪🇸"),
     TestLanguage("fr", "French", "Français", "🇫🇷"),
-    TestLanguage("de", "German", "Deutsch", "🇩🇪"),
-    TestLanguage("it", "Italian", "Italiano", "🇮🇹"),
-    TestLanguage("pt", "Portuguese", "Português", "🇵🇹"),
-    TestLanguage("ja", "Japanese", "日本語", "🇯🇵"),
-    TestLanguage("ko", "Korean", "한국어", "🇰🇷"),
-    TestLanguage("zh", "Chinese", "中文", "🇨🇳"),
-    TestLanguage("ar", "Arabic", "العربية", "🇸🇦"),
-    TestLanguage("hi", "Hindi", "हिन्दी", "🇮🇳"),
-    TestLanguage("ru", "Russian", "Русский", "🇷🇺"),
+    TestLanguage("de", "German", "Deutsch", "🇩🇪", isImplemented = false),
+    TestLanguage("it", "Italian", "Italiano", "🇮🇹", isImplemented = false),
+    TestLanguage("pt", "Portuguese", "Português", "🇵🇹", isImplemented = false),
+    TestLanguage("ja", "Japanese", "日本語", "🇯🇵", isImplemented = false),
+    TestLanguage("ko", "Korean", "한국어", "🇰🇷", isImplemented = false),
+    TestLanguage("zh", "Chinese", "中文", "🇨🇳", isImplemented = false),
+    TestLanguage("ar", "Arabic", "العربية", "🇸🇦", isRtl = true),
+    TestLanguage("hi", "Hindi", "हिन्दी", "🇮🇳", isImplemented = false),
+    TestLanguage("ru", "Russian", "Русский", "🇷🇺", isImplemented = false),
     TestLanguage("tr", "Turkish", "Türkçe", "🇹🇷"),
     TestLanguage("nl", "Dutch", "Nederlands", "🇳🇱"),
-    TestLanguage("pl", "Polish", "Polski", "🇵🇱"),
-    TestLanguage("vi", "Vietnamese", "Tiếng Việt", "🇻🇳"),
-    TestLanguage("th", "Thai", "ไทย", "🇹🇭"),
-    TestLanguage("id", "Indonesian", "Bahasa Indonesia", "🇮🇩"),
-    TestLanguage("uk", "Ukrainian", "Українська", "🇺🇦"),
-    TestLanguage("he", "Hebrew", "עברית", "🇮🇱")
+    TestLanguage("sv", "Swedish", "Svenska", "🇸🇪"),
+    TestLanguage("pl", "Polish", "Polski", "🇵🇱", isImplemented = false),
+    TestLanguage("vi", "Vietnamese", "Tiếng Việt", "🇻🇳", isImplemented = false),
+    TestLanguage("th", "Thai", "ไทย", "🇹🇭", isImplemented = false),
+    TestLanguage("id", "Indonesian", "Bahasa Indonesia", "🇮🇩", isImplemented = false),
+    TestLanguage("uk", "Ukrainian", "Українська", "🇺🇦", isImplemented = false),
+    TestLanguage("he", "Hebrew", "עברית", "🇮🇱", isRtl = true, isImplemented = false)
 )
 
 /**
  * Language Testing Section for Developer Options
+ * Allows live testing of all implemented languages
  */
 @Composable
-fun LanguageTestingSection() {
+fun LanguageTestingSection(
+    onLanguageChange: (String) -> Unit = {}
+) {
     val context = LocalContext.current
+    // Extract the Activity from potentially wrapped contexts
+    val activity = remember(context) {
+        var ctx = context
+        while (ctx is android.content.ContextWrapper) {
+            if (ctx is android.app.Activity) return@remember ctx
+            ctx = ctx.baseContext
+        }
+        null
+    }
     var selectedLanguage by remember { mutableStateOf("en") }
-    var showLanguageDialog by remember { mutableStateOf(false) }
-    var isExpanded by remember { mutableStateOf(false) }
+    var showPreviewDialog by remember { mutableStateOf(false) }
+    var previewLanguage by remember { mutableStateOf<TestLanguage?>(null) }
 
-    // Get current language from system
-    val currentSystemLanguage = remember {
+    // Force recomposition when language changes
+    var languageRefreshKey by remember { mutableIntStateOf(0) }
+
+    // Get current language from system - recompute on refresh
+    val currentSystemLanguage = remember(languageRefreshKey) {
         java.util.Locale.getDefault().language
+    }
+
+    val currentSystemCountry = remember(languageRefreshKey) {
+        java.util.Locale.getDefault().country
+    }
+
+    val fullLocaleCode = remember(currentSystemLanguage, currentSystemCountry) {
+        if (currentSystemCountry.isNotEmpty()) "$currentSystemLanguage-r$currentSystemCountry" else currentSystemLanguage
     }
 
     DevSection(
@@ -1448,7 +1894,7 @@ fun LanguageTestingSection() {
         icon = Icons.Filled.Language
     ) {
         Text(
-            "Test app UI in different languages to verify translations and RTL layout support.",
+            "Test app UI in different languages. Only implemented languages will show translated strings.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -1469,113 +1915,91 @@ fun LanguageTestingSection() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = TEST_LANGUAGES.find { it.code == currentSystemLanguage }?.flag ?: "🌐",
+                    text = IMPLEMENTED_LANGUAGES.find { it.code == currentSystemLanguage || it.code == fullLocaleCode }?.flag ?: "🌐",
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Spacer(Modifier.width(12.dp))
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        "System Language",
+                        "Current Language",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        TEST_LANGUAGES.find { it.code == currentSystemLanguage }?.name
-                            ?: currentSystemLanguage.uppercase(),
+                        IMPLEMENTED_LANGUAGES.find { it.code == currentSystemLanguage || it.code == fullLocaleCode }?.name
+                            ?: fullLocaleCode.uppercase(),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
-            }
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        // Quick language switcher
-        Text(
-            "Quick Switch",
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        // Popular languages row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            listOf("en", "es", "fr", "de", "ja", "zh").forEach { code ->
-                val lang = TEST_LANGUAGES.find { it.code == code }
-                if (lang != null) {
-                    LanguageChip(
-                        language = lang,
-                        isSelected = selectedLanguage == code,
-                        onClick = {
-                            selectedLanguage = code
-                            android.widget.Toast.makeText(
-                                context,
-                                "Language preview: ${lang.name} (${lang.nativeName})",
-                                android.widget.Toast.LENGTH_SHORT
-                            ).show()
-                        }
+                // Status badge
+                Surface(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = "Active",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
-                }
-            }
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        // Show all languages button
-        OutlinedButton(
-            onClick = { isExpanded = !isExpanded },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(
-                if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                contentDescription = null
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(if (isExpanded) "Hide All Languages" else "Show All ${TEST_LANGUAGES.size} Languages")
-        }
-
-        // Expanded language grid
-        if (isExpanded) {
-            Spacer(Modifier.height(12.dp))
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                TEST_LANGUAGES.chunked(2).forEach { row ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        row.forEach { lang ->
-                            LanguageListItem(
-                                language = lang,
-                                isSelected = selectedLanguage == lang.code,
-                                onClick = { selectedLanguage = lang.code },
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                        // Fill empty space if odd number
-                        if (row.size == 1) {
-                            Spacer(Modifier.weight(1f))
-                        }
-                    }
                 }
             }
         }
 
         Spacer(Modifier.height(16.dp))
 
-        // RTL Test section
+        // Implemented languages section
+        Text(
+            "✅ Implemented Languages (${IMPLEMENTED_LANGUAGES.size})",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Text(
+            "Tap to switch language live",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        // Implemented languages grid
+        Column(
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            IMPLEMENTED_LANGUAGES.chunked(2).forEach { row ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    row.forEach { lang ->
+                        LanguageTestItem(
+                            language = lang,
+                            isSelected = selectedLanguage == lang.code,
+                            isCurrentSystem = lang.code == currentSystemLanguage || lang.code == fullLocaleCode,
+                            onClick = {
+                                selectedLanguage = lang.code
+                                previewLanguage = lang
+                                showPreviewDialog = true
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    if (row.size == 1) {
+                        Spacer(Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
         HorizontalDivider()
         Spacer(Modifier.height(12.dp))
 
+        // RTL Test section
         Text(
-            "RTL Layout Testing",
+            "↔️ RTL Layout Testing",
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.SemiBold
         )
@@ -1586,110 +2010,328 @@ fun LanguageTestingSection() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            OutlinedButton(
-                onClick = {
-                    selectedLanguage = "ar"
-                    android.widget.Toast.makeText(
-                        context,
-                        "Testing RTL: Arabic 🇸🇦",
-                        android.widget.Toast.LENGTH_SHORT
-                    ).show()
-                },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("🇸🇦 Arabic (RTL)")
+            val arabicLang = IMPLEMENTED_LANGUAGES.find { it.code == "ar" }
+            if (arabicLang != null) {
+                Button(
+                    onClick = {
+                        previewLanguage = arabicLang
+                        showPreviewDialog = true
+                    },
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                ) {
+                    Text("🇸🇦 Test Arabic RTL")
+                }
             }
+        }
 
-            OutlinedButton(
-                onClick = {
-                    selectedLanguage = "he"
-                    android.widget.Toast.makeText(
-                        context,
-                        "Testing RTL: Hebrew 🇮🇱",
-                        android.widget.Toast.LENGTH_SHORT
-                    ).show()
-                },
-                modifier = Modifier.weight(1f)
+        Spacer(Modifier.height(12.dp))
+
+        // Reset to system language button
+        OutlinedButton(
+            onClick = {
+                // Clear our SharedPreferences backup
+                context.getSharedPreferences("app_settings", android.content.Context.MODE_PRIVATE)
+                    .edit()
+                    .remove("selected_locale")
+                    .apply()
+
+                android.widget.Toast.makeText(
+                    context,
+                    "Resetting to system language...",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+
+                // Reset to system default using Per-App Language API
+                // Passing empty list clears the per-app preference
+                androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(
+                    androidx.core.os.LocaleListCompat.getEmptyLocaleList()
+                )
+
+                // Force restart app to splash screen for proper language application
+                restartAppToSplashScreen(context)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                Icons.Filled.Refresh,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text("Reset to System Language")
+        }
+
+        Spacer(Modifier.height(16.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(12.dp))
+
+        // String preview section
+        Text(
+            "📝 Live String Preview",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            ),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("🇮🇱 Hebrew (RTL)")
+                StringPreviewRow("nav_feed", stringResource(R.string.nav_feed))
+                StringPreviewRow("nav_explore", stringResource(R.string.nav_explore))
+                StringPreviewRow("nav_messages", stringResource(R.string.nav_messages))
+                StringPreviewRow("nav_notifications", stringResource(R.string.nav_notifications))
+                StringPreviewRow("nav_settings", stringResource(R.string.nav_settings))
             }
         }
 
         Spacer(Modifier.height(8.dp))
 
         Text(
-            "Note: Full language switching requires app restart with updated locale configuration.",
+            "Tap any language above to switch. The app will restart with the new language.",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
         )
     }
-}
 
-@Composable
-private fun LanguageChip(
-    language: TestLanguage,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
-        color = if (isSelected)
-            MaterialTheme.colorScheme.primary
-        else
-            MaterialTheme.colorScheme.surfaceVariant,
-        contentColor = if (isSelected)
-            MaterialTheme.colorScheme.onPrimary
-        else
-            MaterialTheme.colorScheme.onSurfaceVariant
-    ) {
-        Text(
-            text = language.flag,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            style = MaterialTheme.typography.titleMedium
+    // Language preview dialog
+    if (showPreviewDialog && previewLanguage != null) {
+        LanguagePreviewDialog(
+            language = previewLanguage!!,
+            onDismiss = { showPreviewDialog = false },
+            onApply = {
+                val langCode = previewLanguage!!.code
+
+                // Parse the language code into a Locale object
+                // Handle codes like "en-rGB" -> Locale("en", "GB")
+                val locale = when {
+                    langCode.contains("-r") -> {
+                        val parts = langCode.split("-r")
+                        java.util.Locale(parts[0], parts[1])
+                    }
+                    langCode.contains("-") -> {
+                        val parts = langCode.split("-")
+                        java.util.Locale(parts[0], parts[1])
+                    }
+                    else -> java.util.Locale(langCode)
+                }
+
+                // Create locale tag for storage (BCP 47 format)
+                val localeTag = locale.toLanguageTag()
+
+                // Save to SharedPreferences
+                context.getSharedPreferences("app_settings", android.content.Context.MODE_PRIVATE)
+                    .edit()
+                    .putString("selected_locale", localeTag)
+                    .apply()
+
+                android.widget.Toast.makeText(
+                    context,
+                    "Applying ${previewLanguage!!.name}...",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+
+                showPreviewDialog = false
+
+                // Use Per-App Language API with the Locale object
+                val localeList = androidx.core.os.LocaleListCompat.forLanguageTags(localeTag)
+                androidx.appcompat.app.AppCompatDelegate.setApplicationLocales(localeList)
+
+                // Trigger callback
+                onLanguageChange(localeTag)
+
+                // Force restart app to splash screen for proper language application
+                restartAppToSplashScreen(context)
+            }
         )
     }
 }
 
 @Composable
-private fun LanguageListItem(
+private fun StringPreviewRow(key: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = key,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary,
+            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun LanguageTestItem(
     language: TestLanguage,
     isSelected: Boolean,
+    isCurrentSystem: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val borderColor = when {
+        isCurrentSystem -> MaterialTheme.colorScheme.primary
+        isSelected -> MaterialTheme.colorScheme.secondary
+        else -> Color.Transparent
+    }
+
+    // Determine appropriate text colors based on container
+    val containerColor = when {
+        isCurrentSystem -> MaterialTheme.colorScheme.primaryContainer
+        isSelected -> MaterialTheme.colorScheme.secondaryContainer
+        else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    }
+
+    val contentColor = when {
+        isCurrentSystem -> MaterialTheme.colorScheme.onPrimaryContainer
+        isSelected -> MaterialTheme.colorScheme.onSecondaryContainer
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    val secondaryTextColor = when {
+        isCurrentSystem -> MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+        isSelected -> MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+        else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f)
+    }
+
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(8.dp),
-        color = if (isSelected)
-            MaterialTheme.colorScheme.primaryContainer
-        else
-            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        shape = RoundedCornerShape(12.dp),
+        color = containerColor,
+        border = if (borderColor != Color.Transparent)
+            androidx.compose.foundation.BorderStroke(2.dp, borderColor)
+        else null,
         modifier = modifier
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(language.flag, style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.width(8.dp))
-            Column {
-                Text(
-                    language.name,
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Medium
-                )
+            Text(language.flag, style = MaterialTheme.typography.titleLarge)
+            Spacer(Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        language.name,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = contentColor,
+                        maxLines = 1
+                    )
+                    if (language.isRtl) {
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            "RTL",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
                 Text(
                     language.nativeName,
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = secondaryTextColor,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            if (isCurrentSystem) {
+                Icon(
+                    Icons.Filled.Check,
+                    contentDescription = "Current",
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
     }
 }
+
+@Composable
+private fun LanguagePreviewDialog(
+    language: TestLanguage,
+    onDismiss: () -> Unit,
+    onApply: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Text(language.flag, style = MaterialTheme.typography.displaySmall)
+        },
+        title = {
+            Text(
+                "Switch to ${language.name}?",
+                textAlign = TextAlign.Center
+            )
+        },
+        text = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    language.nativeName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                if (language.isRtl) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            "↔️ Right-to-Left Layout",
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                Text(
+                    "The app will need to restart to fully apply the language change.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = onApply) {
+                Text("Apply & Restart")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        },
+        shape = RoundedCornerShape(20.dp)
+    )
+}
+
 
 // ============================================================================
 // AUTHENTICATION TESTING SECTION
@@ -1705,6 +2347,7 @@ fun AuthenticationTestingSection() {
     var selectedAuthMethod by remember { mutableStateOf("email") }
     var testEmail by remember { mutableStateOf("testuser@NeuroComet.dev") }
     var testPassword by remember { mutableStateOf("password123") }
+    var testPasswordVisible by remember { mutableStateOf(false) }
     var isAuthenticating by remember { mutableStateOf(false) }
     var authResult by remember { mutableStateOf<String?>(null) }
     var isSuccess by remember { mutableStateOf(false) }
@@ -1772,21 +2415,26 @@ fun AuthenticationTestingSection() {
                     onValueChange = { testPassword = it },
                     label = { Text("Password") },
                     leadingIcon = { Icon(Icons.Filled.Lock, null) },
+                    trailingIcon = {
+                        IconButton(onClick = { testPasswordVisible = !testPasswordVisible }) {
+                            Icon(
+                                imageVector = if (testPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                                contentDescription = if (testPasswordVisible) "Hide password" else "Show password"
+                            )
+                        }
+                    },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = PasswordVisualTransformation()
+                    visualTransformation = if (testPasswordVisible) VisualTransformation.None else PasswordVisualTransformation()
                 )
             }
             "phone" -> {
-                OutlinedTextField(
-                    value = testEmail,
-                    onValueChange = { testEmail = it.filter { c -> c.isDigit() || c == '+' } },
+                PhoneNumberTextField(
+                    value = testEmail.filter { it.isDigit() },
+                    onValueChange = { testEmail = it },
+                    format = PhoneFormat.US,
                     label = { Text("Phone Number") },
-                    leadingIcon = { Icon(Icons.Filled.Phone, null) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("+1 555 123 4567") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+                    placeholder = { Text("(555) 123-4567") }
                 )
             }
             "oauth" -> {
@@ -2326,6 +2974,438 @@ fun TwoFactorAuthTestingSection() {
                 }
             }
         }
+    }
+}
+
+// ============================================================================
+// SMS 2FA TESTING SECTION
+// ============================================================================
+// BIOMETRIC & FIDO2 TESTING SECTION
+// ============================================================================
+
+/**
+ * Biometric & FIDO2/Passkey Testing Section for Developer Options
+ * Test biometric authentication and FIDO2/Passkey functionality
+ */
+@Composable
+fun BiometricAndFido2TestingSection() {
+    val context = LocalContext.current
+    val activity = context as? FragmentActivity
+    val authManager = remember { AuthenticationManager.getInstance(context) }
+
+    var biometricStatus by remember { mutableStateOf<BiometricStatus?>(null) }
+    var biometricEnabled by remember { mutableStateOf(false) }
+    var fido2Enabled by remember { mutableStateOf(false) }
+    var authResult by remember { mutableStateOf<String?>(null) }
+    var isAuthenticating by remember { mutableStateOf(false) }
+    var newKeyName by remember { mutableStateOf("") }
+    var showAddKeyDialog by remember { mutableStateOf(false) }
+    var fido2Credentials by remember { mutableStateOf(authManager.getFido2Credentials()) }
+
+    // Check biometric status on load
+    LaunchedEffect(Unit) {
+        biometricStatus = authManager.checkBiometricStatus()
+        authManager.biometricEnabled.collect { biometricEnabled = it }
+    }
+
+    LaunchedEffect(Unit) {
+        authManager.fido2Enabled.collect { fido2Enabled = it }
+    }
+
+    DevSection(
+        title = "🔐 Biometric & FIDO2 Testing",
+        icon = Icons.Filled.Fingerprint
+    ) {
+        Text(
+            "Test biometric authentication (fingerprint/face) and FIDO2/Passkey functionality.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        // ==================== BIOMETRIC SECTION ====================
+        Text(
+            "Biometric Authentication",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        // Biometric status card
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = when (biometricStatus) {
+                    BiometricStatus.Available -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                    BiometricStatus.NotEnrolled -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
+                    else -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
+                }
+            ),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    when (biometricStatus) {
+                        BiometricStatus.Available -> Icons.Filled.CheckCircle
+                        BiometricStatus.NotEnrolled -> Icons.Filled.Warning
+                        else -> Icons.Filled.Error
+                    },
+                    contentDescription = null,
+                    tint = when (biometricStatus) {
+                        BiometricStatus.Available -> MaterialTheme.colorScheme.primary
+                        BiometricStatus.NotEnrolled -> MaterialTheme.colorScheme.tertiary
+                        else -> MaterialTheme.colorScheme.error
+                    }
+                )
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        when (biometricStatus) {
+                            BiometricStatus.Available -> "Biometric Available"
+                            BiometricStatus.NotEnrolled -> "No Biometrics Enrolled"
+                            BiometricStatus.NoHardware -> "No Biometric Hardware"
+                            BiometricStatus.SecurityUpdateRequired -> "Security Update Required"
+                            BiometricStatus.Unsupported -> "Biometric Unsupported"
+                            null -> "Checking..."
+                        },
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        when (biometricStatus) {
+                            BiometricStatus.Available -> "Fingerprint or face authentication is ready"
+                            BiometricStatus.NotEnrolled -> "Please enroll fingerprint/face in Settings"
+                            BiometricStatus.NoHardware -> "This device doesn't support biometrics"
+                            BiometricStatus.SecurityUpdateRequired -> "Update device security"
+                            BiometricStatus.Unsupported -> "Biometric authentication not supported"
+                            null -> "Checking biometric availability..."
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        // Biometric enable toggle
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                "Enable Biometric Login",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f)
+            )
+            Switch(
+                checked = biometricEnabled,
+                onCheckedChange = { enabled ->
+                    if (enabled && biometricStatus == BiometricStatus.Available && activity != null) {
+                        // Verify with biometric before enabling
+                        authManager.showBiometricPrompt(
+                            activity = activity,
+                            title = "Enable Biometric Login",
+                            subtitle = "Confirm your identity to enable biometric login"
+                        ) { result ->
+                            if (result is AuthResult.Success) {
+                                authManager.setBiometricEnabled(true)
+                                biometricEnabled = true
+                                authResult = "✅ Biometric login enabled!"
+                            } else {
+                                authResult = "❌ Biometric verification failed"
+                            }
+                        }
+                    } else {
+                        authManager.setBiometricEnabled(false)
+                        biometricEnabled = false
+                        authResult = "🔓 Biometric login disabled"
+                    }
+                },
+                enabled = biometricStatus == BiometricStatus.Available
+            )
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        // Test biometric button
+        Button(
+            onClick = {
+                if (activity != null) {
+                    isAuthenticating = true
+                    authManager.showBiometricPrompt(
+                        activity = activity,
+                        title = "Test Biometric",
+                        subtitle = "Verify your identity"
+                    ) { result ->
+                        isAuthenticating = false
+                        authResult = when (result) {
+                            is AuthResult.Success -> "✅ Biometric authentication successful!"
+                            is AuthResult.Cancelled -> "⚠️ Authentication cancelled"
+                            is AuthResult.Error -> "❌ Error: ${result.message}"
+                            is AuthResult.NotAvailable -> "❌ Biometric not available"
+                            is AuthResult.RequiresSetup -> "⚠️ Please enroll biometrics in Settings"
+                        }
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = biometricStatus == BiometricStatus.Available && !isAuthenticating
+        ) {
+            if (isAuthenticating) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(16.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+                Spacer(Modifier.width(8.dp))
+            }
+            Icon(Icons.Filled.Fingerprint, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("Test Biometric Authentication")
+        }
+
+        Spacer(Modifier.height(24.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(16.dp))
+
+        // ==================== FIDO2/PASSKEY SECTION ====================
+        Text(
+            "FIDO2 / Passkeys",
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = if (authManager.isFido2Supported())
+                    MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
+                else
+                    MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
+            ),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Filled.Key,
+                    contentDescription = null,
+                    tint = if (authManager.isFido2Supported())
+                        MaterialTheme.colorScheme.tertiary
+                    else
+                        MaterialTheme.colorScheme.error
+                )
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        if (authManager.isFido2Supported()) "FIDO2 Supported" else "FIDO2 Not Supported",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        if (authManager.isFido2Supported())
+                            "Passkeys and security keys are supported"
+                        else
+                            "Device doesn't support FIDO2/Passkeys",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        // Registered security keys
+        if (fido2Credentials.isNotEmpty()) {
+            Text(
+                "Registered Security Keys (${fido2Credentials.size})",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(8.dp))
+
+            fido2Credentials.forEach { credential ->
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.padding(vertical = 4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Filled.Key,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                credential.displayName,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                "Added: ${java.text.SimpleDateFormat("MMM d, yyyy", java.util.Locale.getDefault()).format(java.util.Date(credential.createdAt))}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                authManager.removeFido2Credential(credential.credentialId)
+                                fido2Credentials = authManager.getFido2Credentials()
+                                authResult = "🗑️ Security key removed"
+                            }
+                        ) {
+                            Icon(
+                                Icons.Filled.Delete,
+                                contentDescription = "Remove",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+        }
+
+        // Add security key button
+        OutlinedButton(
+            onClick = { showAddKeyDialog = true },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = authManager.isFido2Supported()
+        ) {
+            Icon(Icons.Filled.Key, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("+ Add Security Key / Passkey")
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        // Authenticate with FIDO2
+        Button(
+            onClick = {
+                if (activity != null) {
+                    isAuthenticating = true
+                    authManager.authenticateWithFido2(activity) { result ->
+                        isAuthenticating = false
+                        fido2Credentials = authManager.getFido2Credentials()
+                        authResult = when (result) {
+                            is AuthResult.Success -> "✅ FIDO2 authentication successful!"
+                            is AuthResult.Cancelled -> "⚠️ Authentication cancelled"
+                            is AuthResult.Error -> "❌ Error: ${result.message}"
+                            is AuthResult.NotAvailable -> "❌ FIDO2 not available"
+                            is AuthResult.RequiresSetup -> "⚠️ Please register a security key first"
+                        }
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = fido2Credentials.isNotEmpty() && !isAuthenticating
+        ) {
+            if (isAuthenticating) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(16.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+                Spacer(Modifier.width(8.dp))
+            }
+            Icon(Icons.Filled.Key, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("Authenticate with Security Key")
+        }
+
+        // Result display
+        authResult?.let { result ->
+            Spacer(Modifier.height(12.dp))
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = when {
+                        result.startsWith("✅") -> MaterialTheme.colorScheme.primaryContainer
+                        result.startsWith("⚠️") -> MaterialTheme.colorScheme.tertiaryContainer
+                        else -> MaterialTheme.colorScheme.errorContainer
+                    }
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    result,
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+    }
+
+    // Add Security Key Dialog
+    if (showAddKeyDialog) {
+        AlertDialog(
+            onDismissRequest = { showAddKeyDialog = false },
+            title = { Text("Add Security Key") },
+            text = {
+                Column {
+                    Text(
+                        "Enter a name for this security key:",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = newKeyName,
+                        onValueChange = { newKeyName = it },
+                        label = { Text("Key Name") },
+                        placeholder = { Text("e.g., YubiKey 5") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        if (newKeyName.isNotBlank()) {
+                            authManager.registerFido2Credential(newKeyName) { result ->
+                                fido2Credentials = authManager.getFido2Credentials()
+                                authResult = when (result) {
+                                    is AuthResult.Success -> "✅ Security key '$newKeyName' registered!"
+                                    else -> "❌ Failed to register security key"
+                                }
+                            }
+                            newKeyName = ""
+                            showAddKeyDialog = false
+                        }
+                    },
+                    enabled = newKeyName.isNotBlank()
+                ) {
+                    Text("Add")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAddKeyDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 
@@ -5103,3 +6183,31 @@ private fun SocialSettingsDebugSection(context: android.content.Context) {
     }
 }
 
+/**
+ * Force restart the app to the splash screen for proper language application.
+ * This ensures all UI elements are re-rendered with the new locale.
+ */
+private fun restartAppToSplashScreen(context: android.content.Context) {
+    // Short delay to allow Toast to show and locale to be set
+    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+        // Get the package manager and launch intent
+        val packageManager = context.packageManager
+        val intent = packageManager.getLaunchIntentForPackage(context.packageName)
+
+        if (intent != null) {
+            // Clear all previous activities and start fresh
+            intent.addFlags(
+                android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
+                android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK or
+                android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
+            )
+
+            // Start the launcher activity (splash screen)
+            context.startActivity(intent)
+
+            // Kill the current process to ensure complete restart
+            android.os.Process.killProcess(android.os.Process.myPid())
+            kotlin.system.exitProcess(0)
+        }
+    }, 300) // 300ms delay for Toast to display
+}

@@ -9,9 +9,10 @@
 
 package com.kyilmaz.neurocomet
 
+import android.app.Application
 import android.content.Context
 import android.content.Intent
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,9 +41,11 @@ private const val DINO_USER_ID = "DinoLover99"
 private const val THERAPY_USER_ID = "Therapy_Bot"
 
 // --- SCREENSHOT-WORTHY MOCK DATA ---
+// These are additional posts shown alongside localized mock data
+// IDs start at 100 to avoid conflicts with localized posts (IDs 1-17)
 val MOCK_FEED_POSTS = listOf(
     Post(
-        id = 1L,
+        id = 101L,
         createdAt = Instant.now().toString(),
         content = "✨ Finally got my sensory-friendly workspace set up! Noise-canceling headphones, soft lighting, and my weighted lap pad. Game changer for focus! 🎧💡",
         userId = "FocusQueen",
@@ -54,7 +57,7 @@ val MOCK_FEED_POSTS = listOf(
         imageUrl = "https://images.unsplash.com/photo-1593062096033-9a26b09da705?w=800"
     ),
     Post(
-        id = 2L,
+        id = 102L,
         createdAt = Instant.now().toString(),
         content = "Reminder: Your brain works differently, not wrong. 🧠💜 Embrace your unique way of processing the world!",
         userId = "NeuroDivergentPride",
@@ -65,7 +68,7 @@ val MOCK_FEED_POSTS = listOf(
         userAvatar = "https://i.pravatar.cc/150?u=ndpride"
     ),
     Post(
-        id = 3L,
+        id = 103L,
         createdAt = Instant.now().toString(),
         content = "Just discovered body doubling on NeuroComet and WOW. Studied for 3 hours straight with my virtual study buddy! 📚🎉 Anyone else find this helpful?",
         userId = "ADHDStudent",
@@ -76,7 +79,7 @@ val MOCK_FEED_POSTS = listOf(
         userAvatar = "https://i.pravatar.cc/150?u=adhdstudent"
     ),
     Post(
-        id = 4L,
+        id = 104L,
         createdAt = Instant.now().toString(),
         content = "My stim toy collection is growing! 🌈 These fidget tools have helped me so much in meetings. No shame in stimming! ✨",
         userId = "StimHappy",
@@ -88,7 +91,7 @@ val MOCK_FEED_POSTS = listOf(
         imageUrl = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800"
     ),
     Post(
-        id = 5L,
+        id = 105L,
         createdAt = Instant.now().toString(),
         content = "Pro tip: Create a 'launch pad' by your door with everything you need for the day. Keys, wallet, meds, snacks - all in one spot! 🚀 ADHD life hack #247",
         userId = "LifeHacker_ND",
@@ -99,7 +102,7 @@ val MOCK_FEED_POSTS = listOf(
         userAvatar = "https://i.pravatar.cc/150?u=lifehacker"
     ),
     Post(
-        id = 6L,
+        id = 106L,
         createdAt = Instant.now().toString(),
         content = "Today's win: I remembered to eat lunch! 🎊 Setting phone alarms for basic needs is self-care. Don't let anyone tell you otherwise. 💪",
         userId = "SelfCareSunday",
@@ -132,10 +135,15 @@ data class FeedUiState(
     val notifications: List<NotificationItem> = emptyList()
 )
 
-class FeedViewModel : ViewModel() {
+class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(FeedUiState(isLoading = true))
     val uiState: StateFlow<FeedUiState> = _uiState.asStateFlow()
+
+    private val _localizedNotifications = MockDataProvider.getLocalizedNotifications(application)
+    private val _localizedPosts = MockDataProvider.getLocalizedExplorePosts(application)
+    private val _localizedFeedPosts = MockDataProvider.getLocalizedFeedPosts(application)
+    private val _localizedConversations = MockDataProvider.getLocalizedConversations(application)
 
     private var realPremiumStatus = false
 
@@ -143,13 +151,13 @@ class FeedViewModel : ViewModel() {
     var simulateInfiniteLoading = false
 
     private val _userStories = MutableStateFlow<List<Story>>(emptyList())
-    private val _userConversations = MutableStateFlow<List<Conversation>>(MOCK_CONVERSATIONS)
+    private val _userConversations = MutableStateFlow<List<Conversation>>(_localizedConversations)
 
     // Mock strike counter
     private val _userStrikeCount = MutableStateFlow<Map<String, Int>>(emptyMap())
 
-    // Notifications - must be declared before init block
-    private val _notifications = MutableStateFlow<List<NotificationItem>>(INITIAL_MOCK_NOTIFICATIONS)
+    // Notifications - use localized data
+    private val _notifications = MutableStateFlow<List<NotificationItem>>(_localizedNotifications)
 
     init {
         fetchPosts()
@@ -210,9 +218,9 @@ class FeedViewModel : ViewModel() {
         viewModelScope.launch {
             // No artificial delay
 
-            val combinedConversations = MOCK_CONVERSATIONS.map { staticConv ->
+            val combinedConversations = _localizedConversations.map { staticConv ->
                 _userConversations.value.find { it.id == staticConv.id } ?: staticConv
-            }.plus(_userConversations.value.filter { conv -> MOCK_CONVERSATIONS.none { it.id == conv.id } })
+            }.plus(_userConversations.value.filter { conv -> _localizedConversations.none { it.id == conv.id } })
 
             _uiState.update {
                 it.copy(conversations = combinedConversations.sortedByDescending { conv -> Instant.parse(conv.lastMessageTimestamp) })
@@ -452,7 +460,10 @@ class FeedViewModel : ViewModel() {
                 return@launch
             }
 
-            _uiState.update { it.copy(posts = MOCK_FEED_POSTS, isLoading = false) }
+            // Combine localized explore posts with localized feed posts
+            // All posts are now localized for proper language support
+            val combinedPosts = _localizedPosts + _localizedFeedPosts
+            _uiState.update { it.copy(posts = combinedPosts, isLoading = false) }
         }
     }
 
@@ -469,15 +480,16 @@ class FeedViewModel : ViewModel() {
             // No artificial delay
 
             // Reset posts to original mock data (fresh copies with original like counts)
-            val freshPosts = MOCK_FEED_POSTS.map { it.copy() }
+            // All posts are localized
+            val freshPosts = (_localizedPosts + _localizedFeedPosts).map { it.copy() }
 
             // Reset conversations to original mock data (fresh copies with empty reactions)
-            val freshConversations = MOCK_CONVERSATIONS.map { conv ->
+            val freshConversations = _localizedConversations.map { conv ->
                 conv.copy(
                     messages = conv.messages.map { msg ->
                         msg.copy(reactions = emptyList(), isRead = false)
                     },
-                    unreadCount = conv.messages.count { it.senderId != CURRENT_USER_ID_MOCK }
+                    unreadCount = conv.messages.count { it.senderId != "me" }
                 )
             }
             _userConversations.value = freshConversations
@@ -704,7 +716,7 @@ class FeedViewModel : ViewModel() {
             type = "text/plain"
         }
 
-        val shareIntent = Intent.createChooser(sendIntent, "Share post via")
+           val shareIntent = Intent.createChooser(sendIntent, context.getString(R.string.post_share_post_via))
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(shareIntent)
 

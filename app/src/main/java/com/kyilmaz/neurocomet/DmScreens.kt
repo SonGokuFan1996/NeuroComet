@@ -369,9 +369,12 @@ fun DmInboxScreen(
                         )
                         Text(
                             when {
-                                conversations.isEmpty() -> "No conversations"
-                                filtered.size == conversations.size -> "${conversations.size} conversation${if (conversations.size != 1) "s" else ""}"
-                                else -> "${filtered.size} of ${conversations.size}"
+                                conversations.isEmpty() -> stringResource(R.string.dm_no_conversations)
+                                filtered.size == conversations.size -> if (conversations.size == 1)
+                                    stringResource(R.string.dm_conversation_count, conversations.size)
+                                else
+                                    stringResource(R.string.dm_conversations_count, conversations.size)
+                                else -> stringResource(R.string.dm_filtered_count, filtered.size, conversations.size)
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -381,7 +384,7 @@ fun DmInboxScreen(
                 navigationIcon = {
                     if (onBack != null) {
                         IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.dm_back))
                         }
                     }
                 },
@@ -389,11 +392,11 @@ fun DmInboxScreen(
                     IconButton(onClick = {
                         android.widget.Toast.makeText(
                             context,
-                            "Start a new conversation from someone's profile! 💬",
+                            context.getString(R.string.dm_new_message_hint),
                             android.widget.Toast.LENGTH_SHORT
                         ).show()
                     }) {
-                        Icon(Icons.Filled.Edit, contentDescription = "New Message")
+                        Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.dm_new_message))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -443,7 +446,7 @@ fun DmInboxScreen(
                     FilterChip(
                         selected = !showUnreadOnly,
                         onClick = { showUnreadOnly = false },
-                        label = { Text("All") },
+                        label = { Text(stringResource(R.string.filter_all)) },
                         leadingIcon = {
                             if (!showUnreadOnly) Icon(Icons.Filled.Done, contentDescription = null)
                         }
@@ -451,7 +454,7 @@ fun DmInboxScreen(
                     FilterChip(
                         selected = showUnreadOnly,
                         onClick = { showUnreadOnly = true },
-                        label = { Text("Unread") },
+                        label = { Text(stringResource(R.string.filter_unread)) },
                         leadingIcon = {
                             if (showUnreadOnly) Icon(Icons.Filled.Done, contentDescription = null)
                         }
@@ -462,17 +465,17 @@ fun DmInboxScreen(
             when {
                 conversations.isEmpty() -> {
                     MessagesEmptyState(
-                        title = "No conversations yet",
-                        subtitle = "When you message someone, it will show up here.",
-                        hint = "Tip: Try Explore → tap a profile → Message (mock)."
+                        title = stringResource(R.string.messages_empty_title),
+                        subtitle = stringResource(R.string.messages_empty_subtitle),
+                        hint = stringResource(R.string.messages_empty_hint)
                     )
                 }
 
                 filtered.isEmpty() -> {
                     MessagesEmptyState(
-                        title = "No results",
-                        subtitle = "Try a different search or switch back to All.",
-                        hint = if (showUnreadOnly) "You’re filtering to Unread." else null
+                        title = stringResource(R.string.messages_no_results_title),
+                        subtitle = stringResource(R.string.messages_no_results_subtitle),
+                        hint = if (showUnreadOnly) stringResource(R.string.messages_filtering_unread) else null
                     )
                 }
 
@@ -485,7 +488,8 @@ fun DmInboxScreen(
                             bottom = 12.dp,
                             top = 4.dp
                         ),
-                        verticalArrangement = Arrangement.spacedBy(MessagesTokens.itemSpacing)
+                        verticalArrangement = Arrangement.spacedBy(MessagesTokens.itemSpacing),
+                        flingBehavior = androidx.compose.foundation.gestures.ScrollableDefaults.flingBehavior()
                     ) {
                         items(items = filtered, key = { it.id }) { conversation ->
                             NeuroConversationListItem(
@@ -1027,9 +1031,9 @@ fun DmConversationScreen(
                             )
                             Text(
                                 text = when {
-                                    isUserBlocked -> "Blocked"
-                                    isUserMuted -> "Muted"
-                                    else -> "Online"
+                                    isUserBlocked -> stringResource(R.string.status_blocked)
+                                    isUserMuted -> stringResource(R.string.status_muted)
+                                    else -> stringResource(R.string.status_online)
                                 },
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -1084,7 +1088,7 @@ fun DmConversationScreen(
                             onDismissRequest = { showMenu = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text(if (isUserBlocked) "Unblock" else "Block") },
+                                 text = { Text(stringResource(if (isUserBlocked) R.string.menu_unblock_user else R.string.menu_block_user)) },
                                 onClick = {
                                     if (isUserBlocked) onUnblockUser(recipientId) else onBlockUser(recipientId)
                                     showMenu = false
@@ -1092,7 +1096,7 @@ fun DmConversationScreen(
                                 leadingIcon = { Icon(Icons.Filled.Block, null) }
                             )
                             DropdownMenuItem(
-                                text = { Text(if (isUserMuted) "Unmute" else "Mute") },
+                                text = { Text(stringResource(if (isUserMuted) R.string.menu_unmute_notifications else R.string.menu_mute_notifications)) },
                                 onClick = {
                                     if (isUserMuted) onUnmuteUser(recipientId) else onMuteUser(recipientId)
                                     showMenu = false
@@ -1107,12 +1111,12 @@ fun DmConversationScreen(
                             )
                             HorizontalDivider()
                             DropdownMenuItem(
-                                text = { Text("View profile") },
+                                text = { Text(stringResource(R.string.menu_view_profile)) },
                                 onClick = { showMenu = false },
                                 leadingIcon = { Icon(Icons.Filled.Person, null) }
                             )
                             DropdownMenuItem(
-                                text = { Text("Search") },
+                                text = { Text(stringResource(R.string.menu_search_chat)) },
                                 onClick = { showMenu = false },
                                 leadingIcon = { Icon(Icons.Filled.Search, null) }
                             )
@@ -1405,7 +1409,8 @@ fun DmConversationScreen(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    flingBehavior = androidx.compose.foundation.gestures.ScrollableDefaults.flingBehavior()
                 ) {
                     var lastDay: String? = null
                     items(conversation.messages, key = { it.id }) { message ->
@@ -1660,7 +1665,7 @@ private fun NeuroMessageBubble(
                 }
             ) {
                 DropdownMenuItem(
-                    text = { Text("Copy") },
+                    text = { Text(stringResource(R.string.action_copy)) },
                     onClick = {
                         onCopy()
                         menuOpen = false
@@ -1669,7 +1674,7 @@ private fun NeuroMessageBubble(
                 )
 
                 DropdownMenuItem(
-                    text = { Text("React…") },
+                    text = { Text(stringResource(R.string.action_react)) },
                     onClick = {
                         reactMenuOpen = true
                     },
@@ -1678,7 +1683,7 @@ private fun NeuroMessageBubble(
 
                 if (!isFromMe && message.moderationStatus != ModerationStatus.BLOCKED) {
                     DropdownMenuItem(
-                        text = { Text("Report") },
+                        text = { Text(stringResource(R.string.menu_report)) },
                         onClick = {
                             onReport()
                             menuOpen = false
@@ -1689,7 +1694,7 @@ private fun NeuroMessageBubble(
 
                 if (isFromMe && message.deliveryStatus == MessageDeliveryStatus.FAILED) {
                     DropdownMenuItem(
-                        text = { Text("Retry") },
+                        text = { Text(stringResource(R.string.action_retry)) },
                         onClick = {
                             onRetry()
                             menuOpen = false
@@ -1731,10 +1736,13 @@ private fun NeuroMessageBubble(
                 val now = Instant.now()
                 val diff = Duration.between(messageTime, now)
                 when {
-                    diff.toDays() > 0 -> "${diff.toDays()}d ago"
-                    diff.toHours() > 0 -> "${diff.toHours()}h ago"
-                    diff.toMinutes() > 0 -> "${diff.toMinutes()}m ago"
-                    else -> "Just now"
+                    diff.toDays() >= 365 -> "${diff.toDays() / 365}y"
+                    diff.toDays() >= 30 -> "${diff.toDays() / 30}mo"
+                    diff.toDays() >= 7 -> "${diff.toDays() / 7}w"
+                    diff.toDays() > 0 -> "${diff.toDays()}d"
+                    diff.toHours() > 0 -> "${diff.toHours()}h"
+                    diff.toMinutes() > 0 -> "${diff.toMinutes()}m"
+                    else -> "now"
                 }
             } catch (_: Exception) {
                 ""

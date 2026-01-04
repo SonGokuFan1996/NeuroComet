@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import android.content.res.Configuration
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -715,9 +716,9 @@ fun NeuroConversationScreen(
                             )
                             Text(
                                 text = when {
-                                    isUserBlocked -> "Blocked"
-                                    isUserMuted -> "Muted"
-                                    else -> "Online"
+                                    isUserBlocked -> stringResource(R.string.status_blocked)
+                                    isUserMuted -> stringResource(R.string.status_muted)
+                                    else -> stringResource(R.string.status_online)
                                 },
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant

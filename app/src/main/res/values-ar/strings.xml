@@ -13,7 +13,13 @@
     <string name="dm_title">الرسائل</string>
     <string name="dm_search_placeholder">البحث في الرسائل</string>
     <string name="dm_empty_title">لا توجد محادثات بعد</string>
-    <string name="dm_empty_subtitle">عندما يراسلك شخص ما، ستظهر الرسالة هنا.</string>
+    <string name="dm_empty_subtitle">عندما يراسلك شخص ما، ستراه هنا.</string>
+    <string name="dm_no_conversations">لا توجد محادثات</string>
+    <string name="dm_conversation_count">%d محادثة</string>
+    <string name="dm_conversations_count">%d محادثات</string>
+    <string name="dm_filtered_count">%1$d من %2$d</string>
+    <string name="dm_new_message_hint">ابدأ محادثة جديدة من ملف شخص ما! 💬</string>
+    <string name="dm_new_message">رسالة جديدة</string>
     <string name="dm_kids_disabled_title">الرسائل معطلة</string>
     <string name="dm_kids_disabled_body">الرسائل المباشرة معطلة لوضع الأطفال (أقل من 13 سنة). يمكن للوالد تغيير ذلك في الإعدادات ← الأمان والرقابة الأبوية.</string>
     <string name="dm_conversation_options">خيارات المحادثة</string>
@@ -43,6 +49,13 @@
     <string name="dm_rate_limited">رسائل كثيرة جداً. الرجاء التمهل.</string>
     <string name="dm_send_failed">فشل إرسال الرسالة. انقر وأعد المحاولة.</string>
 
+    <!-- Status Indicators -->
+    <string name="status_online">متصل</string>
+    <string name="status_offline">غير متصل</string>
+    <string name="status_blocked">محظور</string>
+    <string name="status_muted">مكتوم</string>
+    <string name="status_away">بعيد</string>
+
     <!-- Settings Screen -->
     <string name="settings_profile_group">الملف الشخصي</string>
     <string name="settings_badges_title">الشارات</string>
@@ -67,6 +80,8 @@
     <string name="settings_2fa_title">المصادقة الثنائية</string>
     <string name="settings_2fa_subtitle">طلب رمز عند تسجيل الدخول.</string>
     <string name="settings_developer_options_group">خيارات المطور</string>
+    <string name="settings_version">الإصدار %s</string>
+    <string name="settings_more_taps">%d نقرات أخرى…</string>
     <string name="settings_force_verify_title">فرض التحقق</string>
     <string name="settings_force_verify_subtitle">تبديل حالة التحقق للمستخدم.</string>
     <string name="settings_fake_premium_title">مميز وهمي</string>
@@ -131,6 +146,11 @@
     <string name="story_your_story_label">قصتك</string>
     <string name="story_user_story_content_description">قصة %s</string>
 
+    <!-- Moments/Stories Section -->
+    <string name="moments_title">اللحظات</string>
+    <string name="moments_new_count">%d جديد</string>
+    <string name="moments_your_story">قصتك</string>
+
     <!-- Story Screen (Viewer) -->
     <string name="story_content_description">محتوى القصة</string>
     <string name="story_close_button_content_description">إغلاق القصة</string>
@@ -160,4 +180,397 @@
     <string name="share_button_content_description">مشاركة</string>
     <string name="comment_button_content_description">تعليق</string>
     <string name="like_button_content_description">إعجاب</string>
+
+    <!-- Post Actions -->
+    <string name="post_following_indicator">• متابَع</string>
+    <string name="post_follow_user">متابعة @%s</string>
+    <string name="post_unfollow_user">إلغاء متابعة @%s</string>
+    <string name="post_now_following">أنت تتابع @%s</string>
+    <string name="post_unfollowed">ألغيت متابعة @%s</string>
+    <string name="post_not_interested">غير مهتم</string>
+    <string name="post_copy_text">نسخ النص</string>
+    <string name="post_report">إبلاغ</string>
+    <string name="post_bookmark">حفظ</string>
+    <string name="post_unbookmark">إزالة الحفظ</string>
+    <string name="post_delete">حذف</string>
+    <string name="post_bookmarked">تم الحفظ!</string>
+    <string name="post_unbookmarked">تم إزالة الحفظ</string>
+    <string name="post_copied">تم النسخ إلى الحافظة</string>
+    <string name="post_time_just_now">الآن</string>
+    <string name="post_time_minutes_ago">منذ %d د</string>
+    <string name="post_time_hours_ago">منذ %d س</string>
+    <string name="post_time_days_ago">منذ %d ي</string>
+    <string name="post_block_user">حظر @%s</string>
+    <string name="post_report_post">الإبلاغ عن المنشور</string>
+    <string name="post_delete_post">حذف المنشور</string>
+
+    <!-- Report Dialog -->
+    <string name="report_dialog_title">الإبلاغ عن المحتوى</string>
+    <string name="report_dialog_reason_hint">أخبرنا المزيد (اختياري)</string>
+    <string name="report_dialog_submit">إرسال البلاغ</string>
+    <string name="report_dialog_cancel">إلغاء</string>
+
+    <!-- Premium Dialog -->
+    <string name="premium_dialog_title">بريميوم</string>
+    <string name="premium_dialog_message">ترقيات بريميوم غير متاحة في هذا الإصدار التجريبي.</string>
+
+    <!-- Common Buttons -->
+    <string name="button_ok">موافق</string>
+    <string name="button_cancel">إلغاء</string>
+    <string name="button_yes">نعم</string>
+    <string name="button_no">لا</string>
+    <string name="button_close">إغلاق</string>
+    <string name="button_save">حفظ</string>
+    <string name="button_delete">حذف</string>
+    <string name="button_edit">تعديل</string>
+
+    <!-- Menu Items -->
+    <string name="menu_view_profile">عرض الملف الشخصي</string>
+    <string name="menu_search_chat">البحث في المحادثة</string>
+    <string name="menu_mute_notifications">كتم الإشعارات</string>
+    <string name="menu_unmute_notifications">تفعيل الإشعارات</string>
+    <string name="menu_block_user">حظر المستخدم</string>
+    <string name="menu_unblock_user">إلغاء حظر المستخدم</string>
+    <string name="menu_share">مشاركة</string>
+    <string name="menu_copy_link">نسخ الرابط</string>
+    <string name="menu_hide">إخفاء</string>
+    <string name="menu_report">إبلاغ</string>
+
+    <!-- Toast Messages -->
+    <string name="toast_profile_coming_soon">الملف الشخصي قريباً! 👤</string>
+    <string name="toast_search_coming_soon">البحث قريباً! 🔍</string>
+    <string name="toast_notifications_muted">تم كتم الإشعارات 🔕</string>
+    <string name="toast_notifications_unmuted">تم تفعيل الإشعارات 🔔</string>
+    <string name="toast_user_blocked">تم حظر المستخدم ✗</string>
+    <string name="toast_user_unblocked">تم إلغاء حظر المستخدم ✓</string>
+    <string name="toast_copied">تم النسخ!</string>
+    <string name="toast_shared">تمت المشاركة!</string>
+    <string name="toast_reported">تم الإبلاغ، شكراً!</string>
+    <string name="toast_hidden">تم الإخفاء من الخلاصة</string>
+
+    <!-- Message Actions -->
+    <string name="action_copy">نسخ</string>
+    <string name="action_react">تفاعل…</string>
+    <string name="action_retry">إعادة المحاولة</string>
+    <string name="action_pin">تثبيت</string>
+    <string name="action_unpin">إلغاء التثبيت</string>
+    <string name="action_archive">أرشفة</string>
+    <string name="action_delete_chat">حذف المحادثة</string>
+
+    <!-- Explore Screen -->
+    <string name="explore_title">استكشاف</string>
+    <string name="explore_subtitle">اكتشف المجتمعات والموارد</string>
+    <string name="explore_featured">مميز</string>
+    <string name="explore_trending">الأكثر رواجاً</string>
+    <string name="explore_for_you">لك</string>
+    <string name="explore_search_placeholder">ابحث عن المواضيع…</string>
+
+    <!-- Notifications Screen -->
+    <string name="notifications_title">الإشعارات</string>
+    <string name="notifications_empty">لا توجد إشعارات</string>
+    <string name="notifications_mark_all_read">تحديد الكل كمقروء</string>
+    <string name="notifications_unread_count">%d غير مقروء</string>
+
+    <!-- Feed Screen -->
+    <string name="feed_title">الرئيسية</string>
+    <string name="feed_empty">لا توجد منشورات</string>
+    <string name="feed_refresh">اسحب للتحديث</string>
+    <string name="feed_new_posts">منشورات جديدة متاحة</string>
+    <string name="feed_reading_time_seconds">⏱️ ~%d ث قراءة</string>
+    <string name="feed_reading_time_minutes">⏱️ ~%d د قراءة</string>
+    <string name="feed_saved">تم الحفظ!</string>
+    <string name="feed_removed_from_saved">تمت إزالته من المحفوظات</string>
+    <string name="feed_save_post">حفظ المنشور</string>
+    <string name="feed_content_hidden_kids">المحتوى مخفي لوضع الأطفال</string>
+
+    <!-- Create Post Dialog -->
+    <string name="create_post_tone_label">النبرة</string>
+    <string name="create_post_add_image">إضافة صورة</string>
+    <string name="create_post_add_video">إضافة فيديو</string>
+    <string name="create_post_posting">جارٍ النشر…</string>
+
+    <!-- Hide Post -->
+    <string name="post_hide">إخفاء المنشور</string>
+    <string name="post_hidden">تم إخفاء المنشور</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">خيارات المطور</string>
+    <string name="dev_phone_format_test">تنسيق رقم الهاتف</string>
+    <string name="dev_phone_format_test_desc">اختبار التنسيق التلقائي لمناطق مختلفة</string>
+    <string name="dev_phone_format_style">نمط التنسيق</string>
+    <string name="dev_phone_test_input">أدخل رقم الهاتف</string>
+    <string name="dev_phone_format_pattern">النمط</string>
+
+    <!-- Mock Notifications -->
+    <string name="mock_notif_welcome_title">مرحباً بك في NeuroComet! 👋</string>
+    <string name="mock_notif_welcome_msg">يسعدنا وجودك هنا. هذا مكان آمن مصمم للعقول المتباينة عصبياً.</string>
+    <string name="mock_notif_badge_title">شارة جديدة مكتسبة</string>
+    <string name="mock_notif_badge_msg">لقد أثبتت إنسانيتك! 🎉</string>
+    <string name="mock_notif_like_title">أعجب %s بمنشورك</string>
+    <string name="mock_notif_like_msg">المنشور عن لوحات المفاتيح الميكانيكية.</string>
+    <string name="mock_notif_follow_title">متابع جديد</string>
+    <string name="mock_notif_follow_msg">بدأ %s بمتابعتك</string>
+    <string name="mock_notif_reply_title">رد من %s</string>
+    <string name="mock_notif_reply_msg">أوافق تماماً! وجهة نظر رائعة.</string>
+    <string name="mock_notif_mention_title">تمت الإشارة إليك</string>
+    <string name="mock_notif_mention_msg">أشار إليك @%s: \"اطلع على نصيحة إمكانية الوصول هذه!\"</string>
+    <string name="mock_notif_repost_title">تمت إعادة نشر منشورك</string>
+    <string name="mock_notif_repost_msg">شارك %s منشورك عن نصائح ADHD مع %d متابع</string>
+    <string name="mock_notif_safety_title">تذكير بالسلامة</string>
+    <string name="mock_notif_safety_msg">تذكر أن تأخذ استراحة! لقد كنت نشطاً لفترة. 💙</string>
+    <string name="mock_notif_filtered_title">تم تصفية المحتوى</string>
+    <string name="mock_notif_filtered_msg">أخفينا بعض المحتوى الذي قد لا يكون مناسباً. يمكنك ضبط هذا في الإعدادات.</string>
+
+    <!-- Mock Posts - Kids -->
+    <string name="mock_post_puzzle">🌈 أنهيت للتو أحجية قوس قزح! 1000 قطعة مكتملة! من غيري يحب الأحاجي؟ 🧩</string>
+    <string name="mock_post_dinosaur">اليوم تعلمت أن الديناصورات عاشت منذ ملايين السنين! 🦕 التيرانوصور ريكس هو المفضل لدي!</string>
+    <string name="mock_post_cat">تعلم قطي حيلة جديدة اليوم! يمكنها الآن إعطاء خمسة! 🐱✋ فخور جداً بها!</string>
+    <string name="mock_post_game">🎮 حطمت للتو أعلى نتيجة لي! الممارسة تؤدي للإتقان! 🏆</string>
+    <string name="mock_post_bracelet">🌈 صنعت سوار صداقة لأفضل صديق لي! الألوان جميلة جداً معاً! 💕</string>
+    <string name="mock_post_dog">🐕 كلبي هو أفضل مساعد! يجلس معي عندما أعمل واجباتي ويجعلني أشعر بالهدوء! 🐾</string>
+    <string name="mock_post_reading">📖 وقت القراءة هو الأفضل! أنا في الفصل 10 من سلسلة كتبي المفضلة! من غيري يحب القراءة؟ 📚</string>
+    <string name="mock_post_art">🎨 كان درس الفن ممتعاً جداً اليوم! رسمنا غروب الشمس ولوحتي بها كل الألوان! 🌅</string>
+
+    <!-- Mock Posts - Teen -->
+    <string name="mock_post_hyperfocus">حققت للتو اختراقاً في مشروعي! التركيز المفرط قوة خارقة عندما تستطيع توجيهها. جلسات البرمجة الليلية مختلفة.</string>
+    <string name="mock_post_weighted_vest">أجرب سترتي الموزونة الجديدة اليوم. هدوء فوري، أوصي بها بشدة للتنظيم الحسي! تساعد أيضاً في قلقي أثناء الامتحانات.</string>
+    <string name="mock_post_dating_adhd">المواعدة مع ADHD جنونية. التركيز المفرط على شخص جديد ثم نسيان الرد على الرسائل لمدة 3 أيام تماماً 😅 أحد غيري؟</string>
+    <string name="mock_post_school_stress">ضغط المدرسة حقيقي الآن. امتحانات نصف السنة + القلق الاجتماعي = الرغبة في الاختباء في غرفتي لأسبوع. على الأقل سماعاتي العازلة للضوضاء تساعد.</string>
+
+    <!-- Mock Posts - Adult -->
+    <string name="mock_post_quiet_space">أحتاج مساحة هادئة. أدخل وضع الحمل الزائد لبقية بعد الظهر. أراكم غداً. #وضع_الهدوء</string>
+    <string name="mock_post_organizing">انتهيت للتو من ترتيب جميع ملفات مشروعي في مجلدات مصنفة. الترتيب البصري مُرضٍ للغاية. معالجي يقول أن هذه آلية تكيف صحية.</string>
+    <string name="mock_post_workplace">تسهيلات مكان العمل أخيراً في مكانها! استغرق الأمر 6 أشهر من المناصرة لكنني حصلت على موافقة مساحة العمل الهادئة. كانت الموارد البشرية داعمة بشكل مفاجئ بمجرد تقديم الوثائق.</string>
+    <string name="mock_post_adulting">الحياة الراشدة مع ADHD: نسيت دفع الإيجار مرة أخرى، لكنني تذكرت بطريقة ما كل سطر حوار من فيلم شاهدته قبل 10 سنوات. صاحب المنزل غير مسرور.</string>
+    <string name="mock_post_late_diagnosis">تنويه: التشخيص كشخص بالغ صالح. حصلت على تشخيصي في سن 34 وفجأة حياتي كلها لها معنى. حزن \"ما كان يمكن أن يكون\" حقيقي لكن كذلك الراحة من فهم نفسك أخيراً.</string>
+
+    <!-- Mock DM Conversations -->
+    <string name="mock_dm_hey">مرحباً! أحب منشوراتك عن النصائح الحسية! 💜</string>
+    <string name="mock_dm_thanks">شكراً جزيلاً! محتواك مفيد جداً أيضاً!</string>
+    <string name="mock_dm_question">سؤال سريع عن لعبة الفيدجت التي أوصيت بها؟</string>
+    <string name="mock_dm_sure">بالتأكيد، سعيد للمساعدة! ماذا تريد أن تعرف؟</string>
+
+    <!-- Additional Feed Posts -->
+    <string name="mock_post_workspace">✨ أخيراً جهزت مساحة عملي الصديقة للحواس! سماعات عازلة للضوضاء، إضاءة ناعمة، ووسادة الوزن. تغيير جذري للتركيز! 🎧💡</string>
+    <string name="mock_post_brain_different">تذكير: دماغك يعمل بشكل مختلف، ليس خاطئ. 🧠💜 احتضن طريقتك الفريدة في معالجة العالم!</string>
+    <string name="mock_post_body_doubling">اكتشفت للتو body doubling على NeuroComet وواو. درست 3 ساعات متواصلة مع رفيق دراستي الافتراضي! 📚🎉 هل يجد أحد آخر هذا مفيداً؟</string>
+    <string name="mock_post_stim_toys">مجموعة ألعاب التحفيز تنمو! 🌈 أدوات الفيدجت هذه ساعدتني كثيراً في الاجتماعات. لا عيب في التحفيز الذاتي! ✨</string>
+    <string name="mock_post_launch_pad">نصيحة احترافية: أنشئ \'منصة إطلاق\' بجانب بابك بكل ما تحتاجه لليوم. المفاتيح، المحفظة، الأدوية، الوجبات الخفيفة - كلها في مكان واحد! 🚀 حيلة ADHD رقم 247</string>
+    <string name="mock_post_lunch_win">فوز اليوم: تذكرت أن آكل الغداء! 🎊 ضبط منبهات الهاتف للاحتياجات الأساسية هو رعاية ذاتية. لا تدع أحداً يقول لك غير ذلك. 💪</string>
+
+    <!-- Notification Filters -->
+    <string name="filter_all">الكل</string>
+    <string name="filter_unread">غير مقروءة</string>
+    <string name="filter_mentions">الإشارات</string>
+    <string name="filter_likes">الإعجابات</string>
+    <string name="filter_follows">المتابعون</string>
+
+    <!-- Mock DM Messages -->
+    <string name="mock_dm_conv1_msg1">مرحباً، كيف حالك اليوم؟</string>
+    <string name="mock_dm_conv1_msg2">أنا بخير، شكراً! فقط أسترخي.</string>
+    <string name="mock_dm_conv2_msg1">هل رأيت منشور الاحتيال الجديد؟ لا تقع فيه!</string>
+    <string name="mock_dm_conv2_msg2">شكراً على التحذير. رأيت محاولة التصيد.</string>
+    <string name="mock_dm_conv3_msg1">مرحباً! رأيت منشورك عن صعوبات الوظائف التنفيذية. أتفهم تماماً!</string>
+    <string name="mock_dm_conv3_msg2">صحيح؟! بعض الأيام أصعب من غيرها.</string>
+    <string name="mock_dm_conv3_msg3">هل جربت body doubling؟ يساعدني كثيراً على البقاء مركزاً.</string>
+    <string name="mock_dm_conv3_msg4">سمعت عنه لكن لم أجربه. كيف يعمل معك؟</string>
+    <string name="mock_dm_conv3_msg5">أجري مكالمة فيديو مع صديق بينما نعمل كلانا على أشيائنا. المسؤولية تساعد!</string>
+    <string name="mock_dm_conv4_msg1">يو! حيلة الإنتاجية التي شاركتها كانت 🔥</string>
+    <string name="mock_dm_conv4_msg2">سعيد أنها ساعدت! تقنية بومودورو تغير قواعد اللعبة.</string>
+    <string name="mock_dm_conv4_msg3">عدلتها إلى 25 دقيقة عمل / 10 دقائق استراحة تحفيز. تعمل أفضل لدماغي ADHD.</string>
+    <string name="mock_dm_conv4_msg4">هذا عبقري! هل تمانع إذا شاركت هذه النصيحة في منشوري القادم؟</string>
+    <string name="mock_dm_conv4_msg5">تفضل! أشر إليّ 😄</string>
+    <string name="mock_dm_conv5_msg1">🎨 انتهيت للتو من لوحة جديدة خلال جلسة التركيز المفرط!</string>
+    <string name="mock_dm_conv5_msg2">أحتاج أن أراها! أنت موهوب جداً!</string>
+    <string name="mock_dm_conv5_msg3">شكراً! كلها بالأزرق والبنفسجي - ألوان مهدئة جداً. سأنشرها لاحقاً اليوم.</string>
+    <string name="mock_dm_conv5_msg4">هذه ألواني المفضلة أيضاً! تساعد كثيراً عندما أكون متحفزاً زيادة.</string>
+    <string name="mock_dm_conv6_msg1">مرحباً! أردت مشاركة تقنية تأريض ساعدتني اليوم.</string>
+    <string name="mock_dm_conv6_msg2">أنا أستمع! كان لدي أسبوع صعب مع القلق.</string>
+    <string name="mock_dm_conv6_msg3">جرب طريقة 5-4-3-2-1: 5 أشياء تراها، 4 تسمعها، 3 تلمسها، 2 تشمها، 1 تتذوقها.</string>
+    <string name="mock_dm_conv6_msg4">هذا مفيد جداً، شكراً! 💙</string>
+    <string name="mock_dm_conv6_msg5">في أي وقت! كلنا معاً في هذا. 🤗</string>
+    <string name="mock_dm_conv7_msg1">حصلت للتو على لوحة المفاتيح الميكانيكية الجديدة! النقرات مُرضية جداً 🎹</string>
+    <string name="mock_dm_conv7_msg2">أووه أي مفاتيح حصلت؟</string>
+    <string name="mock_dm_conv7_msg3">Cherry MX Blues! التغذية الراجعة اللمسية مثالية لاحتياجات التحفيز.</string>
+    <string name="mock_dm_conv7_msg4">كنت أتطلع لها! هل تساعدك على التركيز أثناء البرمجة؟</string>
+    <string name="mock_dm_conv7_msg5">بالتأكيد! النقر الإيقاعي مثل موسيقى تصويرية للتركيز. أوصي بشدة!</string>
+    <string name="mock_dm_conv7_msg6">أضيفها للسلة الآن 😂</string>
+    <string name="mock_dm_conv8_msg1">يوم طاقة منخفضة اليوم 😴 كيف تتعامل؟</string>
+    <string name="mock_dm_conv8_msg2">نفس الشيء هنا. قررت إلغاء كل الخطط غير الضرورية.</string>
+    <string name="mock_dm_conv8_msg3">هذا ذكي! الرعاية الذاتية ليست أنانية. استرح! 💜</string>
+
+    <!-- Explore Categories -->
+    <string name="explore_adhd">ADHD</string>
+    <string name="explore_autism">التوحد</string>
+    <string name="explore_sensory">الحسي</string>
+    <string name="explore_anxiety">القلق</string>
+
+    <!-- Settings Sections -->
+    <string name="settings_section_account">الحساب</string>
+    <string name="settings_section_premium">بريميوم</string>
+    <string name="settings_section_appearance">المظهر والعرض</string>
+    <string name="settings_section_privacy">الخصوصية والأمان</string>
+    <string name="settings_section_notifications">الإشعارات</string>
+    <string name="settings_section_accessibility">إمكانية الوصول</string>
+    <string name="settings_section_safety">الأمان والرفاهية</string>
+    <string name="settings_section_support">المساعدة والدعم</string>
+    <string name="settings_section_about">حول</string>
+
+    <!-- Settings Items -->
+    <string name="settings_my_profile">ملفي الشخصي</string>
+    <string name="settings_my_profile_desc">عرض وتعديل ملفك الشخصي وحالة الطاقة والتفضيلات</string>
+    <string name="settings_premium_active">بريميوم نشط ✨</string>
+    <string name="settings_premium_thanks">شكراً لدعمك!</string>
+    <string name="settings_go_premium">انتقل إلى بريميوم ⭐</string>
+    <string name="settings_premium_price">تجربة بدون إعلانات • 2$/شهر أو 60$ مدى الحياة</string>
+    <string name="settings_theme">إعدادات المظهر</string>
+    <string name="settings_theme_desc">الألوان والأنماط والمظاهر للعصبية المتباينة</string>
+    <string name="settings_animation">إعدادات الحركة</string>
+    <string name="settings_animation_desc">التحكم في الحركة والتأثيرات المرئية</string>
+    <string name="settings_animation_disabled">جميع الحركات معطلة</string>
+    <string name="settings_dark_mode">الوضع الداكن</string>
+    <string name="settings_dark_mode_desc">استخدم المظهر الداكن للبيئات منخفضة الإضاءة</string>
+    <string name="settings_high_contrast">تباين عالي</string>
+    <string name="settings_high_contrast_desc">أقصى تباين للرؤية</string>
+    <string name="settings_privacy">إعدادات الخصوصية</string>
+    <string name="settings_privacy_desc">من يمكنه رؤية محتواك ومراسلتك</string>
+    <string name="settings_blocked">الحسابات المحظورة</string>
+    <string name="settings_blocked_desc">إدارة المستخدمين الذين حظرتهم</string>
+    <string name="settings_data">البيانات والتخزين</string>
+    <string name="settings_data_desc">ذاكرة التخزين المؤقت والتنزيلات واستخدام البيانات</string>
+    <string name="settings_notif_prefs">تفضيلات الإشعارات</string>
+    <string name="settings_notif_desc">تخصيص الإشعارات التي تتلقاها</string>
+    <string name="settings_quiet_hours">ساعات الهدوء</string>
+    <string name="settings_quiet_hours_desc">جدولة فترات عدم الإزعاج</string>
+    <string name="settings_text_display">النص والعرض</string>
+    <string name="settings_text_display_desc">حجم الخط وخيارات القراءة ودعم عسر القراءة</string>
+    <string name="settings_screen_reader">قارئ الشاشة</string>
+    <string name="settings_screen_reader_desc">تحسين للتقنيات المساعدة</string>
+    <string name="settings_reduce_motion">تقليل الحركة</string>
+    <string name="settings_reduce_motion_desc">تقليل الحركات والتأثيرات</string>
+    <string name="settings_content_filters">فلاتر المحتوى</string>
+    <string name="settings_content_filters_desc">إدارة إعدادات المحتوى الحساس</string>
+    <string name="settings_break_reminders">تذكيرات الاستراحة</string>
+    <string name="settings_break_reminders_desc">الحصول على تذكيرات لأخذ استراحات</string>
+    <string name="settings_parental">الرقابة الأبوية</string>
+    <string name="settings_parental_desc">إعدادات الأمان للمستخدمين الأصغر سناً</string>
+    <string name="settings_parental_pin_set">تم تعيين رمز PIN • اضغط للإدارة</string>
+    <string name="settings_kid_mode">وضع الأطفال</string>
+    <string name="settings_kid_mode_desc">تصفية المحتوى المناسب للعمر</string>
+    <string name="settings_keep_screen_on">إبقاء الشاشة مضاءة</string>
+    <string name="settings_keep_screen_on_desc">منع الشاشة من الخفوت أثناء وقت التركيز</string>
+    <string name="settings_help_center">مركز المساعدة</string>
+    <string name="settings_help_center_desc">الأسئلة الشائعة والأدلة والدروس</string>
+    <string name="settings_report_issue">الإبلاغ عن مشكلة</string>
+    <string name="settings_report_issue_desc">أخبرنا عن الأخطاء أو المشاكل</string>
+    <string name="settings_feedback">إرسال ملاحظات</string>
+    <string name="settings_feedback_desc">شارك أفكارك واقتراحاتك</string>
+    <string name="settings_terms">شروط الخدمة</string>
+    <string name="settings_privacy_policy">سياسة الخصوصية</string>
+    <string name="settings_licenses">تراخيص المصدر المفتوح</string>
+
+    <!-- Explore Section Titles -->
+    <string name="explore_section_daily_living">الحياة اليومية</string>
+    <string name="explore_section_sensory">الحسي والتنظيم</string>
+    <string name="explore_section_social">الاجتماعي والتواصل</string>
+    <string name="explore_section_work">العمل والتعليم</string>
+    <string name="explore_section_interests">الاهتمامات الخاصة والهوايات</string>
+    <string name="explore_section_health">الصحة والعافية</string>
+    <string name="explore_section_family">الأسرة والأبوة</string>
+
+    <!-- Explore Topic Names -->
+    <string name="explore_topic_adhd_hacks">حيل ADHD</string>
+    <string name="explore_topic_adhd_hacks_desc">نصائح الإنتاجية وإدارة الوقت وحيل الحياة لعقول ADHD</string>
+    <string name="explore_topic_safe_foods">الأطعمة الآمنة</string>
+    <string name="explore_topic_safe_foods_desc">شارك واكتشف الأطعمة الصديقة للحواس واستراتيجيات الأكل</string>
+    <string name="explore_topic_sleep">النوم والراحة</string>
+    <string name="explore_topic_sleep_desc">نصائح لنوم أفضل وروتين الراحة وإدارة التعب</string>
+    <string name="explore_topic_executive_function">الوظيفة التنفيذية</string>
+    <string name="explore_topic_executive_function_desc">استراتيجيات للتخطيط والتنظيم وإدارة المهام</string>
+    <string name="explore_topic_stimming">التحفيز الذاتي</string>
+    <string name="explore_topic_stimming_desc">ألعاب التحفيز والحركة والتنظيم الذاتي</string>
+    <string name="explore_topic_sensory_tips">نصائح حسية</string>
+    <string name="explore_topic_sensory_tips_desc">إدارة الحساسيات الحسية وإنشاء مساحات صديقة للحواس</string>
+    <string name="explore_topic_meltdown">دعم الأزمات</string>
+    <string name="explore_topic_meltdown_desc">استراتيجيات الوقاية ونصائح التعافي ودعم الأقران</string>
+    <string name="explore_topic_sensory_diet">الحمية الحسية</string>
+    <string name="explore_topic_sensory_diet_desc">بناء روتين حسي مخصص للتنظيم</string>
+    <string name="explore_topic_social_skills">المهارات الاجتماعية</string>
+    <string name="explore_topic_social_skills_desc">التنقل في المواقف الاجتماعية وتكوين الصداقات ونصائح التواصل</string>
+    <string name="explore_topic_masking">التقنع</string>
+    <string name="explore_topic_masking_desc">تجارب التقنع والإرهاق والتعبير الذاتي الأصيل</string>
+    <string name="explore_topic_relationships">العلاقات</string>
+    <string name="explore_topic_relationships_desc">المواعدة والصداقات وديناميكيات الأسرة والتواصل في العلاقات</string>
+    <string name="explore_topic_aac">AAC والتواصل</string>
+    <string name="explore_topic_aac_desc">أدوات التواصل المعزز والتواصل غير اللفظي</string>
+    <string name="explore_topic_work_school">العمل والمدرسة</string>
+    <string name="explore_topic_work_school_desc">التسهيلات والدفاع والنجاح في البيئات الأكاديمية والمهنية</string>
+    <string name="explore_topic_disclosure">الإفصاح والدفاع</string>
+    <string name="explore_topic_disclosure_desc">متى وكيف تفصح واستراتيجيات الدفاع عن النفس</string>
+    <string name="explore_topic_career">المسارات المهنية</string>
+    <string name="explore_topic_career_desc">إيجاد مهن صديقة للعصبية المتباينة والنجاح في العمل</string>
+    <string name="explore_topic_college">الانتقال للجامعة</string>
+    <string name="explore_topic_college_desc">التحضير والتنقل في التعليم العالي</string>
+    <string name="explore_topic_gaming">الألعاب</string>
+    <string name="explore_topic_gaming_desc">ألعاب الفيديو وألعاب الطاولة ومجتمعات اللاعبين</string>
+    <string name="explore_topic_coding">البرمجة والتقنية</string>
+    <string name="explore_topic_coding_desc">البرمجة ومشاريع التقنية والمطورين ذوي العصبية المتباينة</string>
+    <string name="explore_topic_art">الفن والإبداع</string>
+    <string name="explore_topic_art_desc">الرسم والتلوين والحرف والتعبير الإبداعي</string>
+    <string name="explore_topic_mental_health">الصحة النفسية</string>
+    <string name="explore_topic_mental_health_desc">القلق والاكتئاب والعلاج والصحة العقلية</string>
+    <string name="explore_topic_medication">الأدوية</string>
+    <string name="explore_topic_medication_desc">تجارب الأدوية والأسئلة والدعم</string>
+    <string name="explore_topic_burnout">التعافي من الإرهاق</string>
+    <string name="explore_topic_burnout_desc">التعرف على الإرهاق والوقاية منه والتعافي</string>
+    <string name="explore_topic_parenting">الأبوة ND</string>
+    <string name="explore_topic_parenting_desc">الآباء ذوو العصبية المتباينة وتربية أطفال ND</string>
+    <string name="explore_topic_late_diagnosed">التشخيص المتأخر</string>
+    <string name="explore_topic_late_diagnosed_desc">تجارب التشخيص في مرحلة البلوغ واستكشاف الهوية</string>
+
+    <!-- Explore Stats -->
+    <string name="explore_members">%s عضو</string>
+    <string name="explore_posts">%s منشور</string>
+    <string name="explore_popular">شائع</string>
+    <string name="explore_new">جديد</string>
+    <string name="explore_see_all">عرض الكل</string>
+
+    <!-- Quick Tips & Tricks -->
+    <string name="tips_title">نصائح وحيل سريعة</string>
+    <string name="tips_tap_expand">اضغط لرؤية %d نصيحة مفيدة</string>
+    <string name="tips_tap_collapse">اضغط للطي</string>
+    <string name="tips_expand">توسيع</string>
+    <string name="tips_collapse">طي</string>
+    <string name="tip_animation_toggle_title">تبديل الحركات السريع</string>
+    <string name="tip_animation_toggle_desc">اضغط على شعار ♾️ اللانهاية في شاشة تسجيل الدخول لتفعيل/تعطيل الحركات بسرعة</string>
+    <string name="tip_rainbow_brain_title">افتح قوس قزح الدماغ</string>
+    <string name="tip_rainbow_brain_desc">اضغط على معلومات الإصدار 7 مرات في الإعدادات لفتح ثيم قوس قزح الدماغ السري!</string>
+    <string name="tip_eye_strain_title">تقليل إجهاد العين</string>
+    <string name="tip_eye_strain_desc">فعّل الوضع الداكن + ثيم التوحد منخفض التحفيز للحصول على أهدأ تجربة</string>
+    <string name="tip_readability_title">قراءة أفضل</string>
+    <string name="tip_readability_desc">جرب خطوط Lexend أو Atkinson Hyperlegible - مصممة للقراء ذوي العصبية المتباينة</string>
+    <string name="tip_calm_title">تجربة هادئة</string>
+    <string name="tip_calm_desc">عطّل جميع الحركات في الإعدادات > الحركات واستخدم ثيم الهدوء أو الحمل الزائد</string>
+    <string name="tip_focus_title">ابق مركزاً</string>
+    <string name="tip_focus_desc">استخدم ثيم وضع المهام ADHD + التركيز الفائق للحد الأدنى من التشتت</string>
+    <string name="tip_kids_title">حماية الأطفال</string>
+    <string name="tip_kids_desc">أعد إعداد الرقابة الأبوية برمز PIN لإدارة وقت الشاشة والمحتوى</string>
+    <string name="tip_holiday_title">ثيمات العطلات</string>
+    <string name="tip_holiday_desc">يحتفل الشعار تلقائياً بالعطلات وفعاليات التوعية بألوان خاصة!</string>
+    <string name="tip_themes_title">25+ ثيم</string>
+    <string name="tip_themes_desc">استكشف ثيمات لـ ADHD والتوحد والقلق وعمى الألوان وضعف البصر ومزاجك الحالي</string>
+    <string name="tip_fonts_title">12+ خط</string>
+    <string name="tip_fonts_desc">اختر من الخطوط الصديقة لعسر القراءة و ADHD والإتاحة في الإعدادات > الخط والقراءة</string>
+
+    <!-- App Tutorial -->
+    <string name="tutorial_title">دليل التطبيق</string>
+    <string name="tutorial_description">شاهد دليل البدء مرة أخرى</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">المطور</string>
+    <string name="settings_developer_subtitle">أدوات التصحيح والاختبار</string>
+    <string name="settings_fake_premium">وضع بريميوم وهمي</string>
+    <string name="settings_fake_premium_enabled">ميزات بريميوم مفتوحة للاختبار</string>
+    <string name="settings_fake_premium_disabled">فعّل لاختبار ميزات بريميوم</string>
+    <string name="settings_dev_options_desc">خيارات متقدمة للاختبار والتصحيح</string>
 </resources>

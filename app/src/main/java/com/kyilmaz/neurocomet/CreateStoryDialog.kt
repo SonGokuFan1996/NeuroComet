@@ -167,21 +167,22 @@ fun CreateStoryDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.92f)
-                .padding(12.dp)
+                .wrapContentHeight()
+                .heightIn(max = 680.dp)
+                .padding(horizontal = 16.dp, vertical = 24.dp)
                 .graphicsLayer {
                     scaleX = dialogScale
                     scaleY = dialogScale
                     alpha = dialogAlpha
                 },
-            shape = RoundedCornerShape(28.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 16.dp)
+            shape = RoundedCornerShape(24.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.wrapContentHeight()) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(20.dp)
+                        .wrapContentHeight()
+                        .padding(16.dp)
                 ) {
                     // Header with close button
                     StoryDialogHeader(
@@ -189,7 +190,7 @@ fun CreateStoryDialog(
                         isPosting = isPosting
                     )
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(12.dp))
 
                     // Content Type Tabs with animation
                     AnimatedContentTypeTabs(
@@ -203,7 +204,7 @@ fun CreateStoryDialog(
                         enabled = !isPosting
                     )
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(12.dp))
 
                     // Tab Content with crossfade animation
                     AnimatedContent(
@@ -212,11 +213,12 @@ fun CreateStoryDialog(
                             fadeIn(animationSpec = tween(300)) togetherWith
                                     fadeOut(animationSpec = tween(200))
                         },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.wrapContentHeight(),
                         label = "tabContent"
                     ) { tab ->
                         Column(
-                            modifier = Modifier.verticalScroll(rememberScrollState())
+                            modifier = Modifier.heightIn(max = 380.dp)
+                                .verticalScroll(rememberScrollState())
                         ) {
                             when (tab) {
                                 0 -> MediaTabContent(
@@ -257,7 +259,7 @@ fun CreateStoryDialog(
                                 )
                             }
 
-                            Spacer(Modifier.height(20.dp))
+                            Spacer(Modifier.height(16.dp))
 
                             // Duration selector (for all types)
                             DurationSelector(
@@ -269,14 +271,14 @@ fun CreateStoryDialog(
                             // Text overlay (for media types)
                             if (selectedTab == 0 && selectedUri != null) {
                                 Column {
-                                    Spacer(Modifier.height(16.dp))
+                                    Spacer(Modifier.height(12.dp))
                                     OutlinedTextField(
                                         value = textOverlay,
                                         onValueChange = { if (it.length <= 100) textOverlay = it },
                                         label = { Text("Caption (optional)") },
-                                        placeholder = { Text("Add a caption to your story...") },
+                                        placeholder = { Text("Add a caption...") },
                                         modifier = Modifier.fillMaxWidth(),
-                                        shape = RoundedCornerShape(16.dp),
+                                        shape = RoundedCornerShape(12.dp),
                                         maxLines = 2,
                                         supportingText = { Text("${textOverlay.length}/100") },
                                         enabled = !isPosting
@@ -286,7 +288,7 @@ fun CreateStoryDialog(
                         }
                     }
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(12.dp))
 
                     // Action buttons with validation feedback
                     StoryActionButtons(
@@ -315,21 +317,21 @@ fun CreateStoryDialog(
                 if (showSuccessAnimation) {
                     Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)),
+                            .matchParentSize()
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
                                 Icons.Filled.CheckCircle,
                                 contentDescription = null,
-                                modifier = Modifier.size(64.dp),
+                                modifier = Modifier.size(56.dp),
                                 tint = MaterialTheme.colorScheme.primary
                             )
-                            Spacer(Modifier.height(16.dp))
+                            Spacer(Modifier.height(12.dp))
                             Text(
                                 "Story Posted!",
-                                style = MaterialTheme.typography.titleLarge,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -395,30 +397,30 @@ private fun StoryDialogHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Filled.AutoAwesome,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(28.dp)
-            )
-            Spacer(Modifier.width(12.dp))
             Text(
-                text = "Create Story",
-                style = MaterialTheme.typography.headlineSmall,
+                "✨",
+                fontSize = 22.sp
+            )
+            Spacer(Modifier.width(10.dp))
+            Text(
+                text = "Create Moment",
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
         }
         IconButton(
             onClick = onDismiss,
-            enabled = !isPosting
+            enabled = !isPosting,
+            modifier = Modifier.size(40.dp)
         ) {
             Icon(
                 Icons.Filled.Close,
                 contentDescription = "Close",
+                modifier = Modifier.size(22.dp),
                 tint = if (isPosting)
                     MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                 else
-                    MaterialTheme.colorScheme.onSurface
+                    MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -567,20 +569,16 @@ private fun StoryActionButtons(
     canPost: Boolean,
     isPosting: Boolean
 ) {
-    val buttonScale by animateFloatAsState(
-        targetValue = if (canPost && !isPosting) 1f else 0.98f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "buttonScale"
-    )
-
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         OutlinedButton(
             onClick = onDismiss,
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier
+                .weight(1f)
+                .height(48.dp),
+            shape = RoundedCornerShape(12.dp),
             enabled = !isPosting
         ) {
             Text("Cancel")
@@ -591,15 +589,15 @@ private fun StoryActionButtons(
             enabled = canPost,
             modifier = Modifier
                 .weight(1.5f)
-                .scale(buttonScale),
-            shape = RoundedCornerShape(14.dp),
+                .height(48.dp),
+            shape = RoundedCornerShape(12.dp),
             elevation = ButtonDefaults.buttonElevation(
-                defaultElevation = if (canPost) 4.dp else 0.dp
+                defaultElevation = if (canPost) 2.dp else 0.dp
             )
         ) {
             if (isPosting) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(18.dp),
                     color = MaterialTheme.colorScheme.onPrimary,
                     strokeWidth = 2.dp
                 )
@@ -609,11 +607,11 @@ private fun StoryActionButtons(
                 Icon(
                     Icons.AutoMirrored.Filled.Send,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(16.dp)
                 )
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(6.dp))
                 Text(
-                    "Share Story",
+                    "Share Moment",
                     fontWeight = FontWeight.SemiBold
                 )
             }

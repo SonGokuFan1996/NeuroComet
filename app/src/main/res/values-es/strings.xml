@@ -13,7 +13,13 @@
     <string name="dm_title">Mensajes</string>
     <string name="dm_search_placeholder">Buscar mensajes</string>
     <string name="dm_empty_title">Sin conversaciones aún</string>
-    <string name="dm_empty_subtitle">Cuando alguien te escriba, lo verás aquí.</string>
+    <string name="dm_empty_subtitle">Cuando alguien te envíe un mensaje, lo verás aquí.</string>
+    <string name="dm_no_conversations">Sin conversaciones</string>
+    <string name="dm_conversation_count">%d conversación</string>
+    <string name="dm_conversations_count">%d conversaciones</string>
+    <string name="dm_filtered_count">%1$d de %2$d</string>
+    <string name="dm_new_message_hint">¡Inicia una conversación desde el perfil de alguien! 💬</string>
+    <string name="dm_new_message">Nuevo Mensaje</string>
     <string name="dm_kids_disabled_title">Mensajes desactivados</string>
     <string name="dm_kids_disabled_body">Los mensajes directos están desactivados para el modo infantil (menores de 13). Un padre puede cambiarlo en Ajustes → Seguridad y Controles Parentales.</string>
     <string name="dm_conversation_options">Opciones de conversación</string>
@@ -43,6 +49,13 @@
     <string name="dm_rate_limited">Demasiados mensajes. Por favor, más despacio.</string>
     <string name="dm_send_failed">El mensaje no se pudo enviar. Toca para reintentar.</string>
 
+    <!-- Status Indicators -->
+    <string name="status_online">En línea</string>
+    <string name="status_offline">Desconectado</string>
+    <string name="status_blocked">Bloqueado</string>
+    <string name="status_muted">Silenciado</string>
+    <string name="status_away">Ausente</string>
+
     <!-- Settings Screen -->
     <string name="settings_profile_group">Perfil</string>
     <string name="settings_badges_title">Insignias</string>
@@ -67,6 +80,8 @@
     <string name="settings_2fa_title">Autenticación de dos factores</string>
     <string name="settings_2fa_subtitle">Requiere un código al iniciar sesión.</string>
     <string name="settings_developer_options_group">Opciones de desarrollador</string>
+    <string name="settings_version">Versión %s</string>
+    <string name="settings_more_taps">%d toques más…</string>
     <string name="settings_force_verify_title">Forzar verificación</string>
     <string name="settings_force_verify_subtitle">Alternar estado de verificación del usuario.</string>
     <string name="settings_fake_premium_title">Premium falso</string>
@@ -114,14 +129,7 @@
     <string name="text_scale_large">Grande</string>
     <string name="text_scale_xlarge">Extra grande</string>
 
-    <!-- Story & Post Creation -->
-    <string name="create_post_title">Crear publicación</string>
-    <string name="create_post_hint">¿Qué tienes en mente?</string>
-    <string name="create_post_image_url_hint">Opcional: URL de imagen</string>
-    <string name="create_post_video_url_hint">Opcional: URL de video</string>
-    <string name="create_post_button">PUBLICAR</string>
-    <string name="create_post_cancel">Cancelar</string>
-
+    <!-- Story Creation -->
     <string name="create_story_title">Crear nueva historia</string>
     <string name="create_story_image_url_hint">URL de imagen para tu historia</string>
     <string name="create_story_duration_hint">Duración en segundos (ej., 5)</string>
@@ -130,6 +138,11 @@
     <string name="story_add_button_content_description">Añadir historia</string>
     <string name="story_your_story_label">Tu historia</string>
     <string name="story_user_story_content_description">Historia de %s</string>
+
+    <!-- Moments/Stories Section -->
+    <string name="moments_title">Momentos</string>
+    <string name="moments_new_count">%d nuevo(s)</string>
+    <string name="moments_your_story">Tu historia</string>
 
     <!-- Story Screen (Viewer) -->
     <string name="story_content_description">Contenido de la historia</string>
@@ -160,4 +173,481 @@
     <string name="share_button_content_description">Compartir</string>
     <string name="comment_button_content_description">Comentar</string>
     <string name="like_button_content_description">Me gusta</string>
+
+    <!-- Post Actions -->
+    <string name="post_following_indicator">• Siguiendo</string>
+    <string name="post_follow_user">Seguir a @%s</string>
+    <string name="post_unfollow_user">Dejar de seguir a @%s</string>
+    <string name="post_now_following">Ahora sigues a @%s</string>
+    <string name="post_unfollowed">Dejaste de seguir a @%s</string>
+    <string name="post_not_interested">No me interesa</string>
+    <string name="post_copy_text">Copiar texto</string>
+    <string name="post_save">Guardar publicación</string>
+    <string name="post_unsave">Quitar de guardados</string>
+    <string name="post_hide">Ocultar publicación</string>
+    <string name="post_share">Compartir</string>
+    <string name="post_share_via">Compartir vía…</string>
+    <string name="post_share_post_via">Compartir publicación vía</string>
+    <string name="post_share_story">Compartir Historia</string>
+    <string name="post_share_topic">Compartir Tema</string>
+    <string name="post_report">Reportar</string>
+    <string name="post_bookmark">Guardar</string>
+    <string name="post_unbookmark">Quitar guardado</string>
+    <string name="post_delete">Eliminar</string>
+    <string name="post_bookmarked">¡Guardado!</string>
+    <string name="post_unbookmarked">Guardado eliminado</string>
+    <string name="post_copied">Copiado al portapapeles</string>
+    <string name="post_time_just_now">Ahora</string>
+    <string name="post_time_minutes_ago">hace %d min</string>
+    <string name="post_time_hours_ago">hace %d h</string>
+    <string name="post_time_days_ago">hace %d d</string>
+    <string name="post_block_user">Bloquear a @%s</string>
+    <string name="post_report_post">Reportar publicación</string>
+    <string name="post_delete_post">Eliminar publicación</string>
+
+    <!-- Create Post Dialog -->
+    <string name="create_post_title">Crear Publicación</string>
+    <string name="create_post_close">Cerrar</string>
+    <string name="create_post_how_feeling">¿Cómo te sientes?</string>
+    <string name="create_post_placeholder">¿Qué tienes en mente?</string>
+    <string name="create_post_add_media">Añadir Medios</string>
+    <string name="create_post_image_url">URL de Imagen</string>
+    <string name="create_post_video_url">URL de Video</string>
+    <string name="create_post_content_warning">Advertencia de Contenido</string>
+    <string name="create_post_content_warning_desc">Esta publicación puede contener contenido sensible</string>
+    <string name="create_post_cancel">Cancelar</string>
+    <string name="create_post_post">Publicar</string>
+    <string name="create_post_chars_remaining">%d caracteres restantes</string>
+    <string name="create_post_chars_over">%d caracteres sobre el límite</string>
+
+    <!-- Report Dialog -->
+    <string name="report_dialog_title">Reportar contenido</string>
+    <string name="report_dialog_reason_hint">Cuéntanos más (opcional)</string>
+    <string name="report_dialog_submit">Enviar reporte</string>
+    <string name="report_dialog_cancel">Cancelar</string>
+
+    <!-- Premium Dialog -->
+    <string name="premium_dialog_title">Premium</string>
+    <string name="premium_dialog_message">Las mejoras Premium no están disponibles en esta versión de demostración.</string>
+
+    <!-- Common Buttons -->
+    <string name="button_ok">OK</string>
+    <string name="button_cancel">Cancelar</string>
+    <string name="button_yes">Sí</string>
+    <string name="button_no">No</string>
+    <string name="button_close">Cerrar</string>
+    <string name="button_save">Guardar</string>
+    <string name="button_delete">Eliminar</string>
+    <string name="button_edit">Editar</string>
+
+    <!-- Menu Items -->
+    <string name="menu_view_profile">Ver perfil</string>
+    <string name="menu_search_chat">Buscar en el chat</string>
+    <string name="menu_mute_notifications">Silenciar notificaciones</string>
+    <string name="menu_unmute_notifications">Activar notificaciones</string>
+    <string name="menu_block_user">Bloquear usuario</string>
+    <string name="menu_unblock_user">Desbloquear usuario</string>
+    <string name="menu_share">Compartir</string>
+    <string name="menu_copy_link">Copiar enlace</string>
+    <string name="menu_hide">Ocultar</string>
+    <string name="menu_report">Reportar</string>
+
+    <!-- Toast Messages -->
+    <string name="toast_profile_coming_soon">¡Perfil próximamente! 👤</string>
+    <string name="toast_search_coming_soon">¡Búsqueda próximamente! 🔍</string>
+    <string name="toast_notifications_muted">Notificaciones silenciadas 🔕</string>
+    <string name="toast_notifications_unmuted">Notificaciones activadas 🔔</string>
+    <string name="toast_user_blocked">Usuario bloqueado ✗</string>
+    <string name="toast_user_unblocked">Usuario desbloqueado ✓</string>
+    <string name="toast_copied">¡Copiado!</string>
+    <string name="toast_shared">¡Compartido!</string>
+    <string name="toast_reported">¡Reportado, gracias!</string>
+    <string name="toast_hidden">Oculto del feed</string>
+
+    <!-- Message Actions -->
+    <string name="action_copy">Copiar</string>
+    <string name="action_react">Reaccionar…</string>
+    <string name="action_retry">Reintentar</string>
+    <string name="action_pin">Fijar</string>
+    <string name="action_unpin">Desfijar</string>
+    <string name="action_archive">Archivar</string>
+    <string name="action_delete_chat">Eliminar chat</string>
+
+    <!-- Explore Screen -->
+    <string name="explore_title">Explorar</string>
+    <string name="explore_subtitle">Descubre comunidades y recursos</string>
+    <string name="explore_featured">Destacados</string>
+    <string name="explore_trending">Tendencias</string>
+    <string name="explore_for_you">Para ti</string>
+    <string name="explore_search_placeholder">Buscar temas…</string>
+
+    <!-- Notifications Screen -->
+    <string name="notifications_title">Notificaciones</string>
+    <string name="notifications_empty">Sin notificaciones</string>
+    <string name="notifications_mark_all_read">Marcar todo como leído</string>
+    <string name="notifications_unread_count">%d sin leer</string>
+
+    <!-- Feed Screen -->
+    <string name="feed_title">Inicio</string>
+    <string name="feed_empty">Sin publicaciones</string>
+    <string name="feed_refresh">Desliza para actualizar</string>
+    <string name="feed_new_posts">Nuevas publicaciones disponibles</string>
+    <string name="feed_reading_time_seconds">⏱️ ~%ds lectura</string>
+    <string name="feed_reading_time_minutes">⏱️ ~%dm lectura</string>
+    <string name="feed_saved">¡Guardado!</string>
+    <string name="feed_removed_from_saved">Eliminado de guardados</string>
+    <string name="feed_save_post">Guardar publicación</string>
+    <string name="feed_content_hidden_kids">Contenido oculto para modo infantil</string>
+
+    <!-- Create Post Dialog -->
+    <string name="create_post_tone_label">Tono</string>
+    <string name="create_post_add_image">Añadir imagen</string>
+    <string name="create_post_add_video">Añadir video</string>
+    <string name="create_post_posting">Publicando…</string>
+
+    <!-- Hide Post -->
+    <string name="post_hidden">Publicación oculta</string>
+
+    <!-- Emotional Tones -->
+    <string name="tone_neutral">Neutral</string>
+    <string name="tone_happy">Vibras positivas</string>
+    <string name="tone_excited">¡Emocionante!</string>
+    <string name="tone_sad">Contenido emocional</string>
+    <string name="tone_anxious">Puede sentirse intenso</string>
+    <string name="tone_frustrated">Desahogo</string>
+    <string name="tone_supportive">De apoyo</string>
+    <string name="tone_question">Buscando ayuda</string>
+    <string name="tone_celebration">¡Celebrando!</string>
+    <string name="tone_informative">Informativo</string>
+    <string name="tone_may_be_intense">Puede ser intenso</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">Opciones de desarrollador</string>
+    <string name="dev_phone_format_test">Formato de Número Telefónico</string>
+    <string name="dev_phone_format_test_desc">Prueba el auto-formato para diferentes regiones</string>
+    <string name="dev_phone_format_style">Estilo de Formato</string>
+    <string name="dev_phone_test_input">Ingresa número de teléfono</string>
+    <string name="dev_phone_format_pattern">Patrón</string>
+
+    <!-- Mock Notifications -->
+    <string name="mock_notif_welcome_title">¡Bienvenido a NeuroComet! 👋</string>
+    <string name="mock_notif_welcome_msg">Nos alegra que estés aquí. Este es un espacio seguro diseñado para mentes neurodivergentes.</string>
+    <string name="mock_notif_badge_title">Nueva insignia obtenida</string>
+    <string name="mock_notif_badge_msg">¡Verificaste tu humanidad! 🎉</string>
+    <string name="mock_notif_like_title">A %s le gustó tu publicación</string>
+    <string name="mock_notif_like_msg">La de los teclados mecánicos.</string>
+    <string name="mock_notif_follow_title">Nuevo seguidor</string>
+    <string name="mock_notif_follow_msg">%s comenzó a seguirte</string>
+    <string name="mock_notif_reply_title">Respuesta de %s</string>
+    <string name="mock_notif_reply_msg">¡Estoy totalmente de acuerdo! Gran perspectiva.</string>
+    <string name="mock_notif_mention_title">Te mencionaron</string>
+    <string name="mock_notif_mention_msg">@%s te mencionó: \"¡Mira este consejo de accesibilidad!\"</string>
+    <string name="mock_notif_repost_title">Tu publicación fue compartida</string>
+    <string name="mock_notif_repost_msg">%s compartió tu publicación sobre consejos para TDAH con %d seguidores</string>
+    <string name="mock_notif_safety_title">Recordatorio de seguridad</string>
+    <string name="mock_notif_safety_msg">¡Recuerda tomar descansos! Has estado activo por un tiempo. 💙</string>
+    <string name="mock_notif_filtered_title">Contenido filtrado</string>
+    <string name="mock_notif_filtered_msg">Hemos ocultado contenido que puede no ser apropiado. Puedes ajustar esto en configuración.</string>
+
+    <!-- Mock Posts - Kids -->
+    <string name="mock_post_puzzle">🌈 ¡Terminé mi rompecabezas arcoíris! ¡1000 piezas completadas! ¿A quién más le gustan los rompecabezas? 🧩</string>
+    <string name="mock_post_dinosaur">¡Hoy aprendí que los dinosaurios vivieron hace millones de años! 🦕 ¡El T-Rex es mi favorito!</string>
+    <string name="mock_post_cat">¡Mi gato aprendió un nuevo truco hoy! ¡Ahora puede chocar los cinco! 🐱✋ ¡Muy orgulloso de ella!</string>
+    <string name="mock_post_game">🎮 ¡Acabo de superar mi puntuación más alta! ¡La práctica hace al maestro! 🏆</string>
+    <string name="mock_post_bracelet">🌈 ¡Hice una pulsera de la amistad para mi mejor amigo! ¡Los colores quedan muy bonitos juntos! 💕</string>
+    <string name="mock_post_dog">🐕 ¡Mi perro es mi mejor ayudante! Se sienta conmigo cuando hago la tarea y me hace sentir tranquilo. 🐾</string>
+    <string name="mock_post_reading">📖 ¡El tiempo de lectura es lo MEJOR! ¡Estoy en el capítulo 10 de mi serie de libros favorita! ¿A quién más le gusta leer? 📚</string>
+    <string name="mock_post_art">🎨 ¡La clase de arte fue muy divertida hoy! Pintamos atardeceres y el mío tiene TODOS los colores! 🌅</string>
+
+    <!-- Mock Posts - Teen -->
+    <string name="mock_post_hyperfocus">¡Acabo de tener un avance en mi proyecto! El hiperfoco es un superpoder cuando puedes dirigirlo. Las sesiones de programación nocturnas son diferentes.</string>
+    <string name="mock_post_weighted_vest">Probando mi nuevo chaleco con peso hoy. Calma instantánea, ¡lo recomiendo para la regulación sensorial! También ayuda con mi ansiedad durante los exámenes.</string>
+    <string name="mock_post_dating_adhd">Las citas con TDAH son locas. Hiperfocalizándote en alguien nuevo y luego olvidándote completamente de responder mensajes por 3 días 😅 ¿Alguien más?</string>
+    <string name="mock_post_school_stress">El estrés escolar es real ahora. Exámenes parciales + ansiedad social = querer esconderme en mi habitación por una semana. Al menos mis auriculares con cancelación de ruido ayudan.</string>
+
+    <!-- Mock Posts - Adult -->
+    <string name="mock_post_quiet_space">Necesito un espacio tranquilo. Entrando en Modo Sobrecarga por el resto de la tarde. Nos vemos mañana. #ModoTranquilo</string>
+    <string name="mock_post_organizing">Acabo de terminar de ordenar todos mis archivos de proyecto en carpetas categorizadas. El orden visual es inmensamente satisfactorio. Mi terapeuta dice que es un mecanismo de afrontamiento saludable.</string>
+    <string name="mock_post_workplace">¡Las adaptaciones laborales finalmente están en su lugar! Tomó 6 meses de defensa pero conseguí aprobar mi espacio de trabajo tranquilo. RRHH fue sorprendentemente comprensivo una vez que proporcioné la documentación.</string>
+    <string name="mock_post_adulting">Ser adulto con TDAH: Olvidé pagar el alquiler otra vez, pero de alguna manera recordé cada línea de diálogo de una película que vi hace 10 años. Mi casero no está divertido.</string>
+    <string name="mock_post_late_diagnosis">PSA: Ser diagnosticado como adulto es válido. Recibí el mío a los 34 y de repente toda mi vida tiene sentido. El duelo de \"lo que podría haber sido\" es real pero también lo es el alivio de finalmente entenderte a ti mismo.</string>
+
+    <!-- Mock DM Conversations -->
+    <string name="mock_dm_hey">¡Hola! ¡Me encantan tus publicaciones sobre consejos sensoriales! 💜</string>
+    <string name="mock_dm_thanks">¡Muchas gracias! ¡Tu contenido también es súper útil!</string>
+    <string name="mock_dm_question">¿Pregunta rápida sobre ese juguete fidget que recomendaste?</string>
+    <string name="mock_dm_sure">Claro, ¡feliz de ayudar! ¿Qué te gustaría saber?</string>
+
+    <!-- Additional Feed Posts -->
+    <string name="mock_post_workspace">✨ ¡Por fin configuré mi espacio de trabajo amigable con los sentidos! Auriculares con cancelación de ruido, iluminación suave y mi almohadilla de peso. ¡Un cambio radical para concentrarse! 🎧💡</string>
+    <string name="mock_post_brain_different">Recuerda: Tu cerebro funciona diferente, no mal. 🧠💜 ¡Abraza tu forma única de procesar el mundo!</string>
+    <string name="mock_post_body_doubling">Acabo de descubrir el body doubling en NeuroComet y ¡WOW! ¡Estudié 3 horas seguidas con mi compañero de estudio virtual! 📚🎉 ¿Alguien más lo encuentra útil?</string>
+    <string name="mock_post_stim_toys">¡Mi colección de juguetes de estimulación está creciendo! 🌈 Estas herramientas fidget me han ayudado mucho en reuniones. ¡Sin vergüenza de estimularse! ✨</string>
+    <string name="mock_post_launch_pad">Consejo pro: Crea una \'plataforma de lanzamiento\' junto a tu puerta con todo lo que necesitas para el día. Llaves, billetera, medicamentos, snacks - ¡todo en un solo lugar! 🚀 Truco TDAH #247</string>
+    <string name="mock_post_lunch_win">¡Victoria de hoy: ¡Recordé almorzar! 🎊 Poner alarmas de teléfono para necesidades básicas es autocuidado. No dejes que nadie te diga lo contrario. 💪</string>
+
+    <!-- Notification Filters -->
+    <string name="filter_all">Todas</string>
+    <string name="filter_unread">No leídas</string>
+    <string name="filter_mentions">Menciones</string>
+    <string name="filter_likes">Me gusta</string>
+    <string name="filter_follows">Seguidores</string>
+
+    <!-- Mock DM Messages -->
+    <string name="mock_dm_conv1_msg1">Hola, ¿cómo te sientes hoy?</string>
+    <string name="mock_dm_conv1_msg2">Bien, ¡gracias! Solo relajándome.</string>
+    <string name="mock_dm_conv2_msg1">¿Viste esa nueva publicación de estafa? ¡No caigas!</string>
+    <string name="mock_dm_conv2_msg2">Gracias por la advertencia. Vi el intento de phishing.</string>
+    <string name="mock_dm_conv3_msg1">¡Hola! Vi tu publicación sobre problemas de función ejecutiva. ¡Me identifico totalmente!</string>
+    <string name="mock_dm_conv3_msg2">¿Verdad? Algunos días son más difíciles que otros.</string>
+    <string name="mock_dm_conv3_msg3">¿Has probado el body doubling? Me ayuda mucho a mantenerme enfocado.</string>
+    <string name="mock_dm_conv3_msg4">He oído de eso pero nunca lo probé. ¿Cómo te funciona?</string>
+    <string name="mock_dm_conv3_msg5">Hago videollamada con un amigo mientras ambos trabajamos en nuestras cosas. ¡La responsabilidad ayuda!</string>
+    <string name="mock_dm_conv4_msg1">¡Ey! Ese truco de productividad que compartiste fue 🔥</string>
+    <string name="mock_dm_conv4_msg2">¡Me alegra que ayudó! La técnica Pomodoro es un cambio radical.</string>
+    <string name="mock_dm_conv4_msg3">Lo modifiqué a 25 min trabajo / 10 min pausa de estimulación. Funciona mejor para mi cerebro TDAH.</string>
+    <string name="mock_dm_conv4_msg4">¡Genial! ¿Te importa si comparto ese consejo en mi próxima publicación?</string>
+    <string name="mock_dm_conv4_msg5">¡Adelante! Etiquétame 😄</string>
+    <string name="mock_dm_conv5_msg1">🎨 ¡Terminé una nueva pintura durante mi sesión de hiperfoco!</string>
+    <string name="mock_dm_conv5_msg2">¡Necesito verla! ¡Eres tan talentoso!</string>
+    <string name="mock_dm_conv5_msg3">¡Gracias! Es toda azules y morados - colores muy relajantes. La publicaré hoy.</string>
+    <string name="mock_dm_conv5_msg4">¡Esos son mis colores favoritos también! Ayudan mucho cuando estoy sobreestimulado.</string>
+    <string name="mock_dm_conv6_msg1">¡Hola! Quería compartir una técnica de anclaje que me ayudó hoy.</string>
+    <string name="mock_dm_conv6_msg2">¡Te escucho! He tenido una semana difícil con la ansiedad.</string>
+    <string name="mock_dm_conv6_msg3">Prueba el método 5-4-3-2-1: 5 cosas que ves, 4 que oyes, 3 que tocas, 2 que hueles, 1 que pruebas.</string>
+    <string name="mock_dm_conv6_msg4">¡Esto es muy útil, gracias! 💙</string>
+    <string name="mock_dm_conv6_msg5">¡Cuando quieras! Estamos todos juntos en esto. 🤗</string>
+    <string name="mock_dm_conv7_msg1">¡Acabo de recibir el nuevo teclado mecánico! Los clics son TAN satisfactorios 🎹</string>
+    <string name="mock_dm_conv7_msg2">Oooh ¿qué switches conseguiste?</string>
+    <string name="mock_dm_conv7_msg3">¡Cherry MX Blues! La retroalimentación táctil es perfecta para mis necesidades de estimulación.</string>
+    <string name="mock_dm_conv7_msg4">¡Los he estado mirando! ¿Te ayudan a concentrarte mientras programas?</string>
+    <string name="mock_dm_conv7_msg5">¡Absolutamente! El clic rítmico es como una banda sonora de enfoque. ¡Muy recomendado!</string>
+    <string name="mock_dm_conv7_msg6">Añadiéndolo al carrito ahora mismo 😂</string>
+    <string name="mock_dm_conv8_msg1">Día de pocas cucharas hoy 😴 ¿Cómo lo llevas?</string>
+    <string name="mock_dm_conv8_msg2">Igual aquí. Decidí cancelar todos los planes no esenciales.</string>
+    <string name="mock_dm_conv8_msg3">¡Eso es inteligente! El autocuidado no es egoísmo. ¡Descansa! 💜</string>
+
+    <!-- Explore Categories -->
+    <string name="explore_adhd">TDAH</string>
+    <string name="explore_autism">Autismo</string>
+    <string name="explore_sensory">Sensorial</string>
+    <string name="explore_anxiety">Ansiedad</string>
+
+    <!-- Settings Sections -->
+    <string name="settings_section_account">Cuenta</string>
+    <string name="settings_section_premium">Premium</string>
+    <string name="settings_section_appearance">Apariencia y Pantalla</string>
+    <string name="settings_section_privacy">Privacidad y Seguridad</string>
+    <string name="settings_section_notifications">Notificaciones</string>
+    <string name="settings_section_accessibility">Accesibilidad</string>
+    <string name="settings_section_safety">Seguridad y Bienestar</string>
+    <string name="settings_section_support">Ayuda y Soporte</string>
+    <string name="settings_section_about">Acerca de</string>
+
+    <!-- Settings Items -->
+    <string name="settings_my_profile">Mi Perfil</string>
+    <string name="settings_my_profile_desc">Ver y editar tu perfil, estado de energía y preferencias</string>
+    <string name="settings_premium_active">Premium Activo ✨</string>
+    <string name="settings_premium_thanks">¡Gracias por tu apoyo!</string>
+    <string name="settings_go_premium">Hazte Premium ⭐</string>
+    <string name="settings_premium_price">Sin anuncios • $2/mes o $60 de por vida</string>
+    <string name="settings_theme">Configuración de Tema</string>
+    <string name="settings_theme_desc">Colores, estilos y temas neurodivergentes</string>
+    <string name="settings_animation">Configuración de Animación</string>
+    <string name="settings_animation_desc">Controlar movimiento y efectos visuales</string>
+    <string name="settings_animation_disabled">Todas las animaciones desactivadas</string>
+    <string name="settings_dark_mode">Modo Oscuro</string>
+    <string name="settings_dark_mode_desc">Usar tema oscuro para entornos con poca luz</string>
+    <string name="settings_high_contrast">Alto Contraste</string>
+    <string name="settings_high_contrast_desc">Máximo contraste para visibilidad</string>
+    <string name="settings_privacy">Configuración de Privacidad</string>
+    <string name="settings_privacy_desc">Quién puede ver tu contenido y enviarte mensajes</string>
+    <string name="settings_blocked">Cuentas Bloqueadas</string>
+    <string name="settings_blocked_desc">Administrar usuarios que has bloqueado</string>
+    <string name="settings_data">Datos y Almacenamiento</string>
+    <string name="settings_data_desc">Caché, descargas y uso de datos</string>
+    <string name="settings_notif_prefs">Preferencias de Notificación</string>
+    <string name="settings_notif_desc">Personaliza qué notificaciones recibes</string>
+    <string name="settings_quiet_hours">Horas de Silencio</string>
+    <string name="settings_quiet_hours_desc">Programar períodos de no molestar</string>
+    <string name="settings_text_display">Texto y Pantalla</string>
+    <string name="settings_text_display_desc">Tamaño de fuente, opciones de lectura y soporte para dislexia</string>
+    <string name="settings_screen_reader">Lector de Pantalla</string>
+    <string name="settings_screen_reader_desc">Optimizar para tecnologías de asistencia</string>
+    <string name="settings_reduce_motion">Reducir Movimiento</string>
+    <string name="settings_reduce_motion_desc">Minimizar animaciones y movimiento</string>
+    <string name="settings_content_filters">Filtros de Contenido</string>
+    <string name="settings_content_filters_desc">Administrar configuración de contenido sensible</string>
+    <string name="settings_break_reminders">Recordatorios de Descanso</string>
+    <string name="settings_break_reminders_desc">Recibir avisos para tomar descansos</string>
+    <string name="settings_parental">Controles Parentales</string>
+    <string name="settings_parental_desc">Configuración de seguridad para usuarios más jóvenes</string>
+    <string name="settings_parental_pin_set">PIN establecido • Toca para administrar</string>
+    <string name="settings_kid_mode">Modo Niños</string>
+    <string name="settings_kid_mode_desc">Filtrado de contenido apropiado para la edad</string>
+    <string name="settings_keep_screen_on">Mantener Pantalla Encendida</string>
+    <string name="settings_keep_screen_on_desc">Evitar que la pantalla se atenúe durante el tiempo de concentración</string>
+    <string name="settings_help_center">Centro de Ayuda</string>
+    <string name="settings_help_center_desc">Preguntas frecuentes, guías y tutoriales</string>
+    <string name="settings_report_issue">Reportar un Problema</string>
+    <string name="settings_report_issue_desc">Cuéntanos sobre errores o problemas</string>
+    <string name="settings_feedback">Enviar Comentarios</string>
+    <string name="settings_feedback_desc">Comparte tus pensamientos y sugerencias</string>
+    <string name="settings_terms">Términos de Servicio</string>
+    <string name="settings_privacy_policy">Política de Privacidad</string>
+    <string name="settings_licenses">Licencias de Código Abierto</string>
+
+    <!-- Explore Section Titles -->
+    <string name="explore_section_daily_living">Vida Diaria</string>
+    <string name="explore_section_sensory">Sensorial y Regulación</string>
+    <string name="explore_section_social">Social y Comunicación</string>
+    <string name="explore_section_work">Trabajo y Educación</string>
+    <string name="explore_section_interests">Intereses Especiales y Hobbies</string>
+    <string name="explore_section_health">Salud y Bienestar</string>
+    <string name="explore_section_family">Familia y Crianza</string>
+
+    <!-- Explore Topic Names -->
+    <string name="explore_topic_adhd_hacks">Trucos TDAH</string>
+    <string name="explore_topic_adhd_hacks_desc">Consejos de productividad, gestión del tiempo y trucos de vida para cerebros TDAH</string>
+    <string name="explore_topic_safe_foods">Comidas Seguras</string>
+    <string name="explore_topic_safe_foods_desc">Comparte y descubre comidas amigables con los sentidos y estrategias de alimentación</string>
+    <string name="explore_topic_sleep">Sueño y Descanso</string>
+    <string name="explore_topic_sleep_desc">Consejos para dormir mejor, rutinas de descanso y manejo de la fatiga</string>
+    <string name="explore_topic_executive_function">Función Ejecutiva</string>
+    <string name="explore_topic_executive_function_desc">Estrategias para planificar, organizar y gestionar tareas</string>
+    <string name="explore_topic_stimming">Estimulación</string>
+    <string name="explore_topic_stimming_desc">Juguetes de estimulación, movimiento y autorregulación</string>
+    <string name="explore_topic_sensory_tips">Consejos Sensoriales</string>
+    <string name="explore_topic_sensory_tips_desc">Manejo de sensibilidades sensoriales y creación de espacios amigables</string>
+    <string name="explore_topic_meltdown">Apoyo en Crisis</string>
+    <string name="explore_topic_meltdown_desc">Estrategias de prevención, consejos de recuperación y apoyo entre pares</string>
+    <string name="explore_topic_sensory_diet">Dieta Sensorial</string>
+    <string name="explore_topic_sensory_diet_desc">Construir rutinas sensoriales personalizadas para la regulación</string>
+    <string name="explore_topic_social_skills">Habilidades Sociales</string>
+    <string name="explore_topic_social_skills_desc">Navegando situaciones sociales, haciendo amigos y consejos de comunicación</string>
+    <string name="explore_topic_masking">Enmascaramiento</string>
+    <string name="explore_topic_masking_desc">Experiencias con enmascaramiento, agotamiento y autoexpresión auténtica</string>
+    <string name="explore_topic_relationships">Relaciones</string>
+    <string name="explore_topic_relationships_desc">Citas, amistades, dinámicas familiares y comunicación en relaciones</string>
+    <string name="explore_topic_aac">CAA y Comunicación</string>
+    <string name="explore_topic_aac_desc">Herramientas de comunicación aumentativa y comunicación no verbal</string>
+    <string name="explore_topic_work_school">Trabajo y Escuela</string>
+    <string name="explore_topic_work_school_desc">Adaptaciones, defensa y éxito en entornos académicos y profesionales</string>
+    <string name="explore_topic_disclosure">Divulgación y Defensa</string>
+    <string name="explore_topic_disclosure_desc">Cuándo y cómo divulgar, estrategias de autodefensa</string>
+    <string name="explore_topic_career">Carreras Profesionales</string>
+    <string name="explore_topic_career_desc">Encontrar carreras amigables con neurodivergentes y éxito laboral</string>
+    <string name="explore_topic_college">Transición Universitaria</string>
+    <string name="explore_topic_college_desc">Preparación y navegación de la educación superior</string>
+    <string name="explore_topic_gaming">Videojuegos</string>
+    <string name="explore_topic_gaming_desc">Videojuegos, juegos de mesa y comunidades de juego</string>
+    <string name="explore_topic_coding">Programación y Tecnología</string>
+    <string name="explore_topic_coding_desc">Programación, proyectos tecnológicos y desarrolladores neurodivergentes</string>
+    <string name="explore_topic_art">Arte y Creatividad</string>
+    <string name="explore_topic_art_desc">Dibujo, pintura, manualidades y expresión creativa</string>
+    <string name="explore_topic_mental_health">Salud Mental</string>
+    <string name="explore_topic_mental_health_desc">Ansiedad, depresión, terapia y bienestar mental</string>
+    <string name="explore_topic_medication">Medicación</string>
+    <string name="explore_topic_medication_desc">Experiencias con medicación, preguntas y apoyo</string>
+    <string name="explore_topic_burnout">Recuperación del Agotamiento</string>
+    <string name="explore_topic_burnout_desc">Reconocer, prevenir y recuperarse del agotamiento</string>
+    <string name="explore_topic_parenting">Crianza ND</string>
+    <string name="explore_topic_parenting_desc">Padres neurodivergentes y crianza de hijos ND</string>
+    <string name="explore_topic_late_diagnosed">Diagnóstico Tardío</string>
+    <string name="explore_topic_late_diagnosed_desc">Experiencias de diagnóstico en adultos y exploración de identidad</string>
+
+    <!-- LGBTQ+ Explore Topics -->
+    <string name="explore_section_lgbtq">LGBTQ+ e Identidad</string>
+    <string name="explore_topic_lgbtq_nd">LGBTQ+ y Neurodivergente</string>
+    <string name="explore_topic_lgbtq_nd_desc">Celebrando la intersección de identidades queer y neurodivergentes</string>
+    <string name="explore_topic_trans_nd">Trans y ND</string>
+    <string name="explore_topic_trans_nd_desc">Apoyo para personas transgénero y de género diverso neurodivergentes</string>
+    <string name="explore_topic_queer_pride">Orgullo Queer</string>
+    <string name="explore_topic_queer_pride_desc">Celebrando la alegría queer, eventos de orgullo y comunidad</string>
+    <string name="explore_topic_ace_aro">Espectro Ace/Aro</string>
+    <string name="explore_topic_ace_aro_desc">Experiencias asexuales, arománticas y aroace neurodivergentes</string>
+    <string name="explore_topic_nonbinary">No Binario y ND</string>
+    <string name="explore_topic_nonbinary_desc">Comunidad no binaria, genderqueer y género fluido</string>
+    <string name="explore_topic_coming_out">Historias de Salir del Clóset</string>
+    <string name="explore_topic_coming_out_desc">Compartiendo viajes de salir del clóset y encontrar aceptación</string>
+
+    <!-- Explore Stats -->
+    <string name="explore_members">%s miembros</string>
+    <string name="explore_posts">%s publicaciones</string>
+    <string name="explore_popular">Popular</string>
+    <string name="explore_new">Nuevo</string>
+    <string name="explore_see_all">Ver todo</string>
+    <string name="explore_online_now">%d en línea ahora</string>
+
+    <!-- Social Settings -->
+    <string name="social_show_online_status">Mostrar Estado en Línea</string>
+    <string name="social_show_online_status_desc">Permitir que otros vean cuando estás activo</string>
+
+    <!-- Quick Tips & Tricks -->
+    <string name="tips_title">Consejos y Trucos Rápidos</string>
+    <string name="tips_tap_expand">Toca para ver %d consejos útiles</string>
+    <string name="tips_tap_collapse">Toca para colapsar</string>
+    <string name="tips_expand">Expandir</string>
+    <string name="tips_collapse">Colapsar</string>
+    <string name="tip_animation_toggle_title">Cambio Rápido de Animación</string>
+    <string name="tip_animation_toggle_desc">Toca el logo ♾️ infinito en la pantalla de inicio para activar/desactivar animaciones rápidamente</string>
+    <string name="tip_rainbow_brain_title">Desbloquea Cerebro Arcoíris</string>
+    <string name="tip_rainbow_brain_desc">¡Toca la información de versión 7 veces en Configuración para desbloquear el tema secreto Cerebro Arcoíris!</string>
+    <string name="tip_eye_strain_title">Reduce la Fatiga Visual</string>
+    <string name="tip_eye_strain_desc">Activa Modo Oscuro + tema Autismo Baja Estimulación para la experiencia más tranquila</string>
+    <string name="tip_readability_title">Mejor Legibilidad</string>
+    <string name="tip_readability_desc">Prueba las fuentes Lexend o Atkinson Hyperlegible - diseñadas para lectores neurodivergentes</string>
+    <string name="tip_calm_title">Experiencia Tranquila</string>
+    <string name="tip_calm_desc">Desactiva todas las animaciones en Configuración > Animaciones y usa el tema Calma o Sobrecarga</string>
+    <string name="tip_focus_title">Mantente Enfocado</string>
+    <string name="tip_focus_desc">Usa el tema TDAH Modo Tarea + Hiperfoco para mínimas distracciones</string>
+    <string name="tip_kids_title">Protege a los Niños</string>
+    <string name="tip_kids_desc">Configura Controles Parentales con PIN para gestionar tiempo de pantalla y contenido</string>
+    <string name="tip_holiday_title">Temas Festivos</string>
+    <string name="tip_holiday_desc">¡El logo celebra automáticamente festividades y eventos de concienciación ND con colores especiales!</string>
+    <string name="tip_themes_title">25+ Temas</string>
+    <string name="tip_themes_desc">Explora temas para TDAH, Autismo, Ansiedad, Daltonismo, Baja Visión y tu estado de ánimo actual</string>
+    <string name="tip_fonts_title">12+ Fuentes</string>
+    <string name="tip_fonts_desc">Elige entre fuentes amigables para dislexia, TDAH y accesibilidad en Configuración > Fuente y Lectura</string>
+
+    <!-- App Tutorial -->
+    <string name="tutorial_title">Tutorial de la App</string>
+    <string name="tutorial_description">Ver la guía de inicio de nuevo</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">Desarrollador</string>
+    <string name="settings_developer_subtitle">Herramientas de depuración y pruebas</string>
+    <string name="settings_fake_premium">Modo Premium Falso</string>
+    <string name="settings_fake_premium_enabled">Funciones premium desbloqueadas para pruebas</string>
+    <string name="settings_fake_premium_disabled">Activar para probar funciones premium</string>
+    <string name="settings_dev_options_desc">Opciones avanzadas para pruebas y depuración</string>
+
+    <!-- NeuroGames -->
+    <string name="games_hub_title">NeuroJuegos</string>
+    <string name="games_subtitle">Diversión stim-friendly para tu cerebro</string>
+    <string name="games_play_now">Jugar Ahora</string>
+    <string name="games_play_now_desc">Desbloquea juegos stim-friendly ganando logros</string>
+    <string name="games_unlocked">Juegos Desbloqueados</string>
+    <string name="games_locked">Juegos Bloqueados</string>
+    <string name="games_your_achievements">Tus Logros</string>
+    <string name="games_achievements">logros</string>
+    <string name="games_next_unlock">¡%d más para desbloquear el siguiente juego!</string>
+    <string name="games_requires_achievements">Requiere %d logros</string>
+    <string name="games_coming_soon">Próximamente</string>
+    <string name="games_coming_soon_message">Este juego aún está en desarrollo. ¡Vuelve pronto!</string>
+    <string name="game_bubble_pop">Pop Burbujas</string>
+    <string name="game_bubble_pop_desc">Explota burbujas satisfactorias para una experiencia stim relajante</string>
+    <string name="game_bubble_pop_hint">¡Toca las burbujas para explotarlas! ✨</string>
+    <string name="game_fidget_spinner">Fidget Spinner</string>
+    <string name="game_fidget_spinner_desc">Gira hasta que tu corazón esté contento - sin límites</string>
+    <string name="game_fidget_spinner_hint">¡Desliza para girar! Cuanto más rápido deslices, más rápido gira 🌀</string>
+    <string name="game_color_flow">Flujo de Colores</string>
+    <string name="game_color_flow_desc">Observa gradientes de colores relajantes fluir y mezclarse</string>
+    <string name="game_color_flow_hint">Toca en cualquier lugar para cambiar los colores</string>
+    <string name="game_pattern_tap">Toca Patrones</string>
+    <string name="game_pattern_tap_desc">Toca patrones en secuencia - genial para entrenar el enfoque</string>
+    <string name="game_infinity_draw">Dibujo Infinito</string>
+    <string name="game_infinity_draw_desc">Dibuja patrones infinitos que nunca se desvanecen - pura felicidad stim</string>
+    <string name="game_sensory_rain">Lluvia Sensorial</string>
+    <string name="game_sensory_rain_desc">Observa hermosas gotas de lluvia caer con visuales relajantes</string>
 </resources>

@@ -26,6 +26,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.edit
 
 /**
@@ -467,8 +468,8 @@ fun PrivacySettingsScreen(
 
             item {
                 SocialSettingsToggle(
-                    title = "Show Online Status",
-                    description = "Let others see when you're active",
+                    title = stringResource(R.string.social_show_online_status),
+                    description = stringResource(R.string.social_show_online_status_desc),
                     icon = Icons.Default.Circle,
                     isChecked = settings.showOnlineStatus,
                     onCheckedChange = {
