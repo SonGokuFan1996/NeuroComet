@@ -93,6 +93,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -103,12 +104,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.lazy.rememberLazyListState
 import coil.compose.AsyncImage
 
 /**
@@ -117,8 +121,8 @@ import coil.compose.AsyncImage
 data class ExploreTopic(
     val id: String,
     val emoji: String,
-    val name: String,
-    val description: String,
+    val nameRes: Int,
+    val descriptionRes: Int,
     val icon: ImageVector,
     val memberCount: Int,
     val postCount: Int,
@@ -132,20 +136,20 @@ data class ExploreTopic(
  * Category section grouping related topics
  */
 data class ExploreCategorySection(
-    val title: String,
+    val titleRes: Int,
     val categories: List<ExploreTopic>
 )
 
 // Production-ready explore topics with comprehensive categories
 private val EXPLORE_CATEGORY_SECTIONS = listOf(
     ExploreCategorySection(
-        title = "Daily Living",
+        titleRes = R.string.explore_section_daily_living,
         categories = listOf(
             ExploreTopic(
                 id = "adhd_hacks",
                 emoji = "🧠",
-                name = "ADHD Hacks",
-                description = "Productivity tips, time management, and life hacks for ADHD brains",
+                nameRes = R.string.explore_topic_adhd_hacks,
+                descriptionRes = R.string.explore_topic_adhd_hacks_desc,
                 icon = Icons.Outlined.Lightbulb,
                 memberCount = 45200,
                 postCount = 12400,
@@ -156,8 +160,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "safe_foods",
                 emoji = "🍽️",
-                name = "Safe Foods",
-                description = "Share and discover sensory-friendly foods and eating strategies",
+                nameRes = R.string.explore_topic_safe_foods,
+                descriptionRes = R.string.explore_topic_safe_foods_desc,
                 icon = Icons.Outlined.Restaurant,
                 memberCount = 28900,
                 postCount = 8700,
@@ -168,8 +172,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "sleep_rest",
                 emoji = "😴",
-                name = "Sleep & Rest",
-                description = "Tips for better sleep, rest routines, and managing fatigue",
+                nameRes = R.string.explore_topic_sleep,
+                descriptionRes = R.string.explore_topic_sleep_desc,
                 icon = Icons.Outlined.NightsStay,
                 memberCount = 32100,
                 postCount = 9200,
@@ -180,8 +184,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "executive_function",
                 emoji = "📋",
-                name = "Executive Function",
-                description = "Strategies for planning, organizing, and task management",
+                nameRes = R.string.explore_topic_executive_function,
+                descriptionRes = R.string.explore_topic_executive_function_desc,
                 icon = Icons.Outlined.AccountTree,
                 memberCount = 21500,
                 postCount = 6800,
@@ -191,13 +195,13 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
         )
     ),
     ExploreCategorySection(
-        title = "Sensory & Regulation",
+        titleRes = R.string.explore_section_sensory,
         categories = listOf(
             ExploreTopic(
                 id = "stimming",
                 emoji = "✨",
-                name = "Stimming",
-                description = "Stim toys, movement, and self-regulation through stimming",
+                nameRes = R.string.explore_topic_stimming,
+                descriptionRes = R.string.explore_topic_stimming_desc,
                 icon = Icons.Outlined.Toys,
                 memberCount = 38700,
                 postCount = 11200,
@@ -208,8 +212,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "sensory_tips",
                 emoji = "👁️",
-                name = "Sensory Tips",
-                description = "Managing sensory sensitivities and creating sensory-friendly spaces",
+                nameRes = R.string.explore_topic_sensory_tips,
+                descriptionRes = R.string.explore_topic_sensory_tips_desc,
                 icon = Icons.Outlined.Hearing,
                 memberCount = 41200,
                 postCount = 13500,
@@ -220,8 +224,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "meltdown_support",
                 emoji = "💙",
-                name = "Meltdown Support",
-                description = "Prevention strategies, recovery tips, and peer support",
+                nameRes = R.string.explore_topic_meltdown,
+                descriptionRes = R.string.explore_topic_meltdown_desc,
                 icon = Icons.Outlined.Psychology,
                 memberCount = 19800,
                 postCount = 5400,
@@ -231,8 +235,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "sensory_diet",
                 emoji = "⚖️",
-                name = "Sensory Diet",
-                description = "Building personalized sensory routines for regulation",
+                nameRes = R.string.explore_topic_sensory_diet,
+                descriptionRes = R.string.explore_topic_sensory_diet_desc,
                 icon = Icons.Outlined.Balance,
                 memberCount = 15600,
                 postCount = 4200,
@@ -243,13 +247,13 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
         )
     ),
     ExploreCategorySection(
-        title = "Social & Communication",
+        titleRes = R.string.explore_section_social,
         categories = listOf(
             ExploreTopic(
                 id = "social_skills",
                 emoji = "🤝",
-                name = "Social Skills",
-                description = "Navigating social situations, making friends, and communication tips",
+                nameRes = R.string.explore_topic_social_skills,
+                descriptionRes = R.string.explore_topic_social_skills_desc,
                 icon = Icons.Outlined.Groups,
                 memberCount = 35400,
                 postCount = 10100,
@@ -259,8 +263,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "masking",
                 emoji = "🎭",
-                name = "Masking & Unmasking",
-                description = "Experiences with masking, burnout, and authentic self-expression",
+                nameRes = R.string.explore_topic_masking,
+                descriptionRes = R.string.explore_topic_masking_desc,
                 icon = Icons.Outlined.TheaterComedy,
                 memberCount = 27300,
                 postCount = 7800,
@@ -270,8 +274,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "relationships",
                 emoji = "💕",
-                name = "Relationships",
-                description = "Dating, friendships, family dynamics, and communication in relationships",
+                nameRes = R.string.explore_topic_relationships,
+                descriptionRes = R.string.explore_topic_relationships_desc,
                 icon = Icons.Outlined.Favorite,
                 memberCount = 29100,
                 postCount = 8900,
@@ -281,8 +285,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "communication_aac",
                 emoji = "💬",
-                name = "AAC & Communication",
-                description = "Augmentative communication tools and non-verbal communication",
+                nameRes = R.string.explore_topic_aac,
+                descriptionRes = R.string.explore_topic_aac_desc,
                 icon = Icons.Outlined.RecordVoiceOver,
                 memberCount = 12400,
                 postCount = 3600,
@@ -293,13 +297,13 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
         )
     ),
     ExploreCategorySection(
-        title = "Work & Education",
+        titleRes = R.string.explore_section_work,
         categories = listOf(
             ExploreTopic(
                 id = "work_school",
                 emoji = "💼",
-                name = "Work & School",
-                description = "Accommodations, advocacy, and thriving in academic and professional settings",
+                nameRes = R.string.explore_topic_work_school,
+                descriptionRes = R.string.explore_topic_work_school_desc,
                 icon = Icons.Outlined.School,
                 memberCount = 42600,
                 postCount = 14200,
@@ -309,8 +313,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "disclosure",
                 emoji = "📢",
-                name = "Disclosure & Advocacy",
-                description = "When and how to disclose, self-advocacy strategies",
+                nameRes = R.string.explore_topic_disclosure,
+                descriptionRes = R.string.explore_topic_disclosure_desc,
                 icon = Icons.Outlined.Campaign,
                 memberCount = 18900,
                 postCount = 5100,
@@ -320,8 +324,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "career_paths",
                 emoji = "📈",
-                name = "Career Paths",
-                description = "Finding neurodivergent-friendly careers and workplace success",
+                nameRes = R.string.explore_topic_career,
+                descriptionRes = R.string.explore_topic_career_desc,
                 icon = Icons.AutoMirrored.Outlined.TrendingUp,
                 memberCount = 23700,
                 postCount = 6400,
@@ -331,8 +335,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "college_transition",
                 emoji = "🏫",
-                name = "College Transition",
-                description = "Preparing for and navigating higher education",
+                nameRes = R.string.explore_topic_college,
+                descriptionRes = R.string.explore_topic_college_desc,
                 icon = Icons.Outlined.Apartment,
                 memberCount = 16200,
                 postCount = 4800,
@@ -342,13 +346,13 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
         )
     ),
     ExploreCategorySection(
-        title = "Special Interests & Hobbies",
+        titleRes = R.string.explore_section_interests,
         categories = listOf(
             ExploreTopic(
                 id = "special_interests",
                 emoji = "🎮",
-                name = "Special Interests",
-                description = "Share your passions and connect over deep interests",
+                nameRes = R.string.explore_topic_gaming,
+                descriptionRes = R.string.explore_topic_gaming_desc,
                 icon = Icons.Outlined.Star,
                 memberCount = 51200,
                 postCount = 18700,
@@ -359,8 +363,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "gaming",
                 emoji = "🕹️",
-                name = "Gaming",
-                description = "Video games, board games, and gaming communities",
+                nameRes = R.string.explore_topic_gaming,
+                descriptionRes = R.string.explore_topic_gaming_desc,
                 icon = Icons.Outlined.SportsEsports,
                 memberCount = 38400,
                 postCount = 12100,
@@ -370,8 +374,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "creative_arts",
                 emoji = "🎨",
-                name = "Creative Arts",
-                description = "Art, music, writing, and creative expression",
+                nameRes = R.string.explore_topic_art,
+                descriptionRes = R.string.explore_topic_art_desc,
                 icon = Icons.Outlined.Palette,
                 memberCount = 29800,
                 postCount = 9400,
@@ -381,8 +385,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "tech_science",
                 emoji = "💻",
-                name = "Tech & Science",
-                description = "Technology, programming, science, and research interests",
+                nameRes = R.string.explore_topic_coding,
+                descriptionRes = R.string.explore_topic_coding_desc,
                 icon = Icons.Outlined.Code,
                 memberCount = 34100,
                 postCount = 10800,
@@ -392,13 +396,13 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
         )
     ),
     ExploreCategorySection(
-        title = "Health & Wellness",
+        titleRes = R.string.explore_section_health,
         categories = listOf(
             ExploreTopic(
                 id = "mental_health",
                 emoji = "🧘",
-                name = "Mental Health",
-                description = "Anxiety, depression, and mental health support for neurodivergent folks",
+                nameRes = R.string.explore_topic_mental_health,
+                descriptionRes = R.string.explore_topic_mental_health_desc,
                 icon = Icons.Outlined.SelfImprovement,
                 memberCount = 47800,
                 postCount = 15600,
@@ -408,8 +412,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "therapy_resources",
                 emoji = "🏥",
-                name = "Therapy & Resources",
-                description = "Finding ND-affirming therapists and helpful resources",
+                nameRes = R.string.explore_topic_mental_health,
+                descriptionRes = R.string.explore_topic_mental_health_desc,
                 icon = Icons.Outlined.MedicalServices,
                 memberCount = 21400,
                 postCount = 6200,
@@ -419,8 +423,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "medication",
                 emoji = "💊",
-                name = "Medication Experiences",
-                description = "Sharing experiences with medications (not medical advice)",
+                nameRes = R.string.explore_topic_medication,
+                descriptionRes = R.string.explore_topic_medication_desc,
                 icon = Icons.Outlined.Medication,
                 memberCount = 25600,
                 postCount = 7100,
@@ -430,8 +434,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "burnout_recovery",
                 emoji = "🔋",
-                name = "Burnout & Recovery",
-                description = "Recognizing, preventing, and recovering from autistic burnout",
+                nameRes = R.string.explore_topic_burnout,
+                descriptionRes = R.string.explore_topic_burnout_desc,
                 icon = Icons.Outlined.BatteryAlert,
                 memberCount = 31200,
                 postCount = 8900,
@@ -441,13 +445,13 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
         )
     ),
     ExploreCategorySection(
-        title = "Life Stages",
+        titleRes = R.string.explore_section_family,
         categories = listOf(
             ExploreTopic(
                 id = "late_diagnosis",
                 emoji = "🔍",
-                name = "Late Diagnosis",
-                description = "Support for those diagnosed as teens or adults",
+                nameRes = R.string.explore_topic_late_diagnosed,
+                descriptionRes = R.string.explore_topic_late_diagnosed_desc,
                 icon = Icons.Outlined.Explore,
                 memberCount = 28700,
                 postCount = 8200,
@@ -457,8 +461,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "parenting",
                 emoji = "👨‍👩‍👧",
-                name = "ND Parenting",
-                description = "Neurodivergent parents and parenting ND children",
+                nameRes = R.string.explore_topic_parenting,
+                descriptionRes = R.string.explore_topic_parenting_desc,
                 icon = Icons.Outlined.FamilyRestroom,
                 memberCount = 22100,
                 postCount = 6700,
@@ -469,8 +473,8 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "independent_living",
                 emoji = "🏠",
-                name = "Independent Living",
-                description = "Skills and strategies for living independently",
+                nameRes = R.string.explore_topic_parenting,
+                descriptionRes = R.string.explore_topic_parenting_desc,
                 icon = Icons.Outlined.Home,
                 memberCount = 19400,
                 postCount = 5500,
@@ -480,14 +484,89 @@ private val EXPLORE_CATEGORY_SECTIONS = listOf(
             ExploreTopic(
                 id = "adulting",
                 emoji = "✅",
-                name = "Adulting 101",
-                description = "Navigating adult life skills and responsibilities",
+                nameRes = R.string.explore_topic_executive_function,
+                descriptionRes = R.string.explore_topic_executive_function_desc,
                 icon = Icons.Outlined.Checklist,
                 memberCount = 35800,
                 postCount = 11400,
                 gradientColors = listOf(Color.Unspecified, Color.Unspecified),
                 backgroundColor = Color.Unspecified,
                 isNew = true
+            )
+        )
+    ),
+    // LGBTQ+ & Identity Section
+    ExploreCategorySection(
+        titleRes = R.string.explore_section_lgbtq,
+        categories = listOf(
+            ExploreTopic(
+                id = "lgbtq_nd",
+                emoji = "🏳️‍🌈",
+                nameRes = R.string.explore_topic_lgbtq_nd,
+                descriptionRes = R.string.explore_topic_lgbtq_nd_desc,
+                icon = Icons.Outlined.Groups,
+                memberCount = 42300,
+                postCount = 15800,
+                gradientColors = listOf(Color(0xFFE40303), Color(0xFF004DFF)),
+                backgroundColor = Color(0xFFFFF3E0),
+                isPopular = true
+            ),
+            ExploreTopic(
+                id = "trans_nd",
+                emoji = "🏳️‍⚧️",
+                nameRes = R.string.explore_topic_trans_nd,
+                descriptionRes = R.string.explore_topic_trans_nd_desc,
+                icon = Icons.Outlined.Favorite,
+                memberCount = 28900,
+                postCount = 9400,
+                gradientColors = listOf(Color(0xFF5BCEFA), Color(0xFFF5A9B8)),
+                backgroundColor = Color(0xFFE3F2FD),
+                isPopular = true
+            ),
+            ExploreTopic(
+                id = "queer_pride",
+                emoji = "✨",
+                nameRes = R.string.explore_topic_queer_pride,
+                descriptionRes = R.string.explore_topic_queer_pride_desc,
+                icon = Icons.Outlined.Star,
+                memberCount = 35600,
+                postCount = 12100,
+                gradientColors = listOf(Color(0xFFFF69B4), Color(0xFF9B59B6)),
+                backgroundColor = Color(0xFFFCE4EC)
+            ),
+            ExploreTopic(
+                id = "ace_aro_spectrum",
+                emoji = "🖤",
+                nameRes = R.string.explore_topic_ace_aro,
+                descriptionRes = R.string.explore_topic_ace_aro_desc,
+                icon = Icons.Outlined.Psychology,
+                memberCount = 18700,
+                postCount = 5200,
+                gradientColors = listOf(Color(0xFF000000), Color(0xFF810081)),
+                backgroundColor = Color(0xFFF3E5F5),
+                isNew = true
+            ),
+            ExploreTopic(
+                id = "nonbinary_nd",
+                emoji = "💛",
+                nameRes = R.string.explore_topic_nonbinary,
+                descriptionRes = R.string.explore_topic_nonbinary_desc,
+                icon = Icons.Outlined.Balance,
+                memberCount = 24100,
+                postCount = 7800,
+                gradientColors = listOf(Color(0xFFFFF430), Color(0xFF9C59D1)),
+                backgroundColor = Color(0xFFFFF8E1)
+            ),
+            ExploreTopic(
+                id = "coming_out",
+                emoji = "🚪",
+                nameRes = R.string.explore_topic_coming_out,
+                descriptionRes = R.string.explore_topic_coming_out_desc,
+                icon = Icons.Outlined.Campaign,
+                memberCount = 31400,
+                postCount = 10200,
+                gradientColors = listOf(Color(0xFF4ECDC4), Color(0xFF44A08D)),
+                backgroundColor = Color(0xFFE0F2F1)
             )
         )
     )
@@ -585,26 +664,51 @@ fun ExploreScreen(
         themedTopics.filter { it.isPopular }.take(5)
     }
 
+    // LazyList state for parallax effects
+    val lazyListState = rememberLazyListState()
+
+    // Calculate parallax offset based on scroll
+    val parallaxOffset by remember {
+        derivedStateOf {
+            val firstItemOffset = lazyListState.firstVisibleItemScrollOffset.toFloat()
+            val firstIndex = lazyListState.firstVisibleItemIndex
+            if (firstIndex == 0) firstItemOffset * 0.5f else 0f
+        }
+    }
+
+    val headerAlpha by remember {
+        derivedStateOf {
+            val firstItemOffset = lazyListState.firstVisibleItemScrollOffset.toFloat()
+            val firstIndex = lazyListState.firstVisibleItemIndex
+            if (firstIndex == 0) 1f - (firstItemOffset / 500f).coerceIn(0f, 0.3f) else 0.7f
+        }
+    }
+
     LazyColumn(
+        state = lazyListState,
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 100.dp)
     ) {
-        // Header with status bar padding
+        // Header with status bar padding and parallax effect
         item(key = "explore_header") {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .statusBarsPadding()
                     .padding(horizontal = 20.dp, vertical = 16.dp)
+                    .graphicsLayer {
+                        translationY = -parallaxOffset * 0.3f
+                        alpha = headerAlpha
+                    }
             ) {
                 Text(
-                    text = "Explore",
+                    text = stringResource(R.string.explore_title),
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    text = "Discover communities and resources",
+                    text = stringResource(R.string.explore_subtitle),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -622,12 +726,12 @@ fun ExploreScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Featured",
+                        text = stringResource(R.string.explore_featured),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
                     TextButton(onClick = {}) {
-                        Text("See all")
+                        Text(stringResource(R.string.explore_see_all))
                     }
                 }
 
@@ -638,7 +742,7 @@ fun ExploreScreen(
                     items(featuredTopics) { topic ->
                         FeaturedCategoryCard(
                             topic = topic,
-                            onClick = { onTopicClick(topic.name) }
+                            onClick = { onTopicClick(topic.id) }
                         )
                     }
                 }
@@ -647,9 +751,9 @@ fun ExploreScreen(
 
         // Category Sections
         themedSections.forEach { section ->
-            item(key = "section_header_${section.title}") {
+            item(key = "section_header_${section.titleRes}") {
                 Text(
-                    text = section.title,
+                    text = stringResource(section.titleRes),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(start = 20.dp, top = 24.dp, bottom = 12.dp)
@@ -658,7 +762,7 @@ fun ExploreScreen(
 
             items(
                 items = section.categories.chunked(2),
-                key = { rowCategories -> "section_${section.title}_${rowCategories.map { it.id }.joinToString("_")}" }
+                key = { rowCategories -> "section_${section.titleRes}_${rowCategories.map { it.id }.joinToString("_")}" }
             ) { rowCategories ->
                 Row(
                     modifier = Modifier
@@ -669,7 +773,7 @@ fun ExploreScreen(
                     rowCategories.forEach { topic ->
                         CategoryCard(
                             topic = topic,
-                            onClick = { onTopicClick(topic.name) },
+                            onClick = { onTopicClick(topic.id) },
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -688,7 +792,7 @@ fun ExploreScreen(
             HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp))
             Spacer(Modifier.height(16.dp))
             Text(
-                "Suggested For You",
+                stringResource(R.string.explore_for_you),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
@@ -808,13 +912,13 @@ private fun FeaturedCategoryCard(
 
                 Column {
                     Text(
-                        text = topic.name,
+                        text = stringResource(topic.nameRes),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                     Text(
-                        text = topic.description,
+                        text = stringResource(topic.descriptionRes),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.White.copy(alpha = 0.8f),
                         maxLines = 2,
@@ -825,12 +929,12 @@ private fun FeaturedCategoryCard(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Text(
-                            text = "${formatCount(topic.memberCount)} members",
+                            text = stringResource(R.string.explore_members, formatCount(topic.memberCount)),
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.White.copy(alpha = 0.7f)
                         )
                         Text(
-                            text = "${formatCount(topic.postCount)} posts",
+                            text = stringResource(R.string.explore_posts, formatCount(topic.postCount)),
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.White.copy(alpha = 0.7f)
                         )
@@ -894,7 +998,7 @@ private fun CategoryCard(
                     if (topic.isPopular) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.TrendingUp,
-                            contentDescription = "Trending",
+                            contentDescription = stringResource(R.string.explore_popular),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
@@ -904,7 +1008,7 @@ private fun CategoryCard(
 
             Column {
                 Text(
-                    text = topic.name,
+                    text = stringResource(topic.nameRes),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -912,7 +1016,7 @@ private fun CategoryCard(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = topic.description,
+                    text = stringResource(topic.descriptionRes),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -920,7 +1024,7 @@ private fun CategoryCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${formatCount(topic.memberCount)} members",
+                    text = stringResource(R.string.explore_members, formatCount(topic.memberCount)),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -941,22 +1045,26 @@ private fun formatCount(count: Int): String {
  * Share a category/topic via system share sheet
  */
 private fun shareCategory(context: Context, topic: ExploreTopic) {
-    val shareText = buildString {
-        append("Check out the ${topic.name} community on NeuroComet! ${topic.emoji}\n\n")
-        append("${topic.description}\n\n")
-        append("👥 ${formatCount(topic.memberCount)} members\n")
-        append("📝 ${formatCount(topic.postCount)} posts\n\n")
-        append("Join the conversation: NeuroComet.app/explore/${topic.id}")
-    }
+    val topicName = context.getString(topic.nameRes)
+    val topicDescription = context.getString(topic.descriptionRes)
+    val membersFormatted = formatCount(topic.memberCount)
+    val postsFormatted = formatCount(topic.postCount)
+
+    val shareText = context.getString(
+        R.string.share_explore_topic_text,
+        topicName, topic.emoji, topicDescription, membersFormatted, postsFormatted, topic.id
+    )
+    val shareSubject = context.getString(R.string.share_explore_topic_subject, topic.emoji, topicName)
+    val shareChooser = context.getString(R.string.share_explore_topic_chooser, topicName)
 
     val sendIntent = Intent().apply {
         action = Intent.ACTION_SEND
         putExtra(Intent.EXTRA_TEXT, shareText)
-        putExtra(Intent.EXTRA_SUBJECT, "${topic.emoji} ${topic.name} - NeuroComet Community")
+        putExtra(Intent.EXTRA_SUBJECT, shareSubject)
         type = "text/plain"
     }
 
-    val shareIntent = Intent.createChooser(sendIntent, "Share ${topic.name}")
+    val shareIntent = Intent.createChooser(sendIntent, shareChooser)
     context.startActivity(shareIntent)
 }
 
@@ -982,7 +1090,7 @@ private fun CategoryOptionsMenu(
     ) {
         // Share option
         DropdownMenuItem(
-            text = { Text("Share") },
+            text = { Text(stringResource(R.string.menu_share)) },
             onClick = {
                 onShare()
                 onDismiss()
@@ -998,7 +1106,7 @@ private fun CategoryOptionsMenu(
 
         // Save/Bookmark option
         DropdownMenuItem(
-            text = { Text(if (isSaved) "Unsave" else "Save") },
+            text = { Text(stringResource(if (isSaved) R.string.post_unbookmark else R.string.post_bookmark)) },
             onClick = {
                 onSave()
                 onDismiss()
@@ -1016,7 +1124,7 @@ private fun CategoryOptionsMenu(
 
         // Not interested option
         DropdownMenuItem(
-            text = { Text("Not interested") },
+            text = { Text(stringResource(R.string.post_not_interested)) },
             onClick = {
                 onHide()
                 onDismiss()
@@ -1032,7 +1140,7 @@ private fun CategoryOptionsMenu(
 
         // Report option
         DropdownMenuItem(
-            text = { Text("Report") },
+            text = { Text(stringResource(R.string.menu_report)) },
             onClick = {
                 onReport()
                 onDismiss()
@@ -1073,7 +1181,7 @@ private fun ReportCategoryDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                "Report ${topic.name}",
+                "Report ${stringResource(topic.nameRes)}",
                 style = MaterialTheme.typography.titleLarge
             )
         },
@@ -1301,95 +1409,137 @@ private fun ExplorePostCard(
 private fun getMockPostsForTopic(topicId: String): List<TopicPost> {
     return when (topicId.lowercase().replace(" ", "_")) {
         "adhd_hacks", "adhd hacks" -> listOf(
-            TopicPost("1", "FocusedFinn", "🧠 Just discovered the power of body doubling! Working alongside someone (even virtually) helps me stay on task so much better.", "2h ago", 234, 45, avatarUrl("finn")),
-            TopicPost("2", "TimeBlindTina", "Anyone else use timers for EVERYTHING? I set 25-min work blocks and it's a game changer. Pomodoro for the win! 🍅", "4h ago", 189, 32, avatarUrl("tina")),
-            TopicPost("3", "HyperfocusHarry", "TIP: Put your phone in another room during deep work. Out of sight = out of mind. Finally finishing projects!", "6h ago", 312, 56, avatarUrl("harry")),
-            TopicPost("4", "ScatterbrainSally", "External scaffolding is my superpower! Visual reminders, apps, alarms - my environment remembers so I don't have to 📝", "8h ago", 167, 28, avatarUrl("sally")),
-            TopicPost("5", "ImpulsiveIvy", "Started using 'implementation intentions' - instead of 'I'll exercise' I say 'At 7am, I put on shoes and walk'. Works! 🏃‍♀️", "12h ago", 245, 41, avatarUrl("ivy"))
+            TopicPost("1", R.string.post_adhd_1_author, R.string.post_adhd_1_content, 2, 234, 45, avatarUrl("finn")),
+            TopicPost("2", R.string.post_adhd_2_author, R.string.post_adhd_2_content, 4, 189, 32, avatarUrl("tina")),
+            TopicPost("3", R.string.post_adhd_3_author, R.string.post_adhd_3_content, 6, 312, 56, avatarUrl("harry")),
+            TopicPost("4", R.string.post_adhd_4_author, R.string.post_adhd_4_content, 8, 167, 28, avatarUrl("sally")),
+            TopicPost("5", R.string.post_adhd_5_author, R.string.post_adhd_5_content, 12, 245, 41, avatarUrl("ivy"))
         )
         "safe_foods", "safe foods" -> listOf(
-            TopicPost("1", "TextureSensitive", "Found a new safe food! These rice crackers have the perfect crunch without being too loud. Sharing the brand in comments 🍘", "1h ago", 156, 89, avatarUrl("texture")),
-            TopicPost("2", "BeigeFoodClub", "Reminder that 'safe foods' are valid! Sometimes plain pasta is self-care. No shame in eating what works for you 🍝", "3h ago", 423, 67, avatarUrl("beige")),
-            TopicPost("3", "SensoryChef", "I made a sensory-friendly recipe book! All recipes avoid common texture triggers. Would anyone want me to share it?", "5h ago", 567, 123, avatarUrl("chef")),
-            TopicPost("4", "PicyEaterPete", "Does anyone else have 'safe restaurants'? Places where you know exactly what to order and it's always consistent?", "7h ago", 234, 78, avatarUrl("pete")),
-            TopicPost("5", "MealPrepMolly", "Batch cooking my safe foods on Sunday = less decision fatigue all week! Currently rotating 5 meals I actually enjoy 💪", "10h ago", 189, 45, avatarUrl("molly"))
+            TopicPost("1", R.string.post_safefood_1_author, R.string.post_safefood_1_content, 1, 156, 89, avatarUrl("texture")),
+            TopicPost("2", R.string.post_safefood_2_author, R.string.post_safefood_2_content, 3, 423, 67, avatarUrl("beige")),
+            TopicPost("3", R.string.post_safefood_3_author, R.string.post_safefood_3_content, 5, 567, 123, avatarUrl("chef")),
+            TopicPost("4", R.string.post_safefood_4_author, R.string.post_safefood_4_content, 7, 234, 78, avatarUrl("pete")),
+            TopicPost("5", R.string.post_safefood_5_author, R.string.post_safefood_5_content, 10, 189, 45, avatarUrl("molly"))
         )
         "sleep_rest", "sleep & rest" -> listOf(
-            TopicPost("1", "NightOwlNate", "Finally found a weighted blanket that doesn't make me overheat! Deep pressure + cool fabric = actually sleeping 😴", "45m ago", 345, 78, avatarUrl("nate")),
-            TopicPost("2", "RestlessRachel", "Wind-down routine that works for my brain: dim lights, no screens 1hr before, same playlist every night. Consistency is key!", "2h ago", 278, 56, avatarUrl("rachel")),
-            TopicPost("3", "InsomniaIan", "Anyone else's brain do the 'remember every embarrassing moment' thing at 2am? Started journaling before bed to 'close tabs'", "4h ago", 412, 89, avatarUrl("ian")),
-            TopicPost("4", "SleepySteph", "White noise vs brown noise vs pink noise - which works for you? I'm team brown noise, it's like a hug for my ears 🔊", "6h ago", 234, 67, avatarUrl("steph")),
-            TopicPost("5", "DreamyDan", "Started using blackout curtains AND a sleep mask. Totally dark room = finally getting deep sleep cycles!", "9h ago", 167, 34, avatarUrl("dan"))
+            TopicPost("1", R.string.post_sleep_1_author, R.string.post_sleep_1_content, 1, 345, 78, avatarUrl("nate")),
+            TopicPost("2", R.string.post_sleep_2_author, R.string.post_sleep_2_content, 2, 278, 56, avatarUrl("rachel")),
+            TopicPost("3", R.string.post_sleep_3_author, R.string.post_sleep_3_content, 4, 412, 89, avatarUrl("ian")),
+            TopicPost("4", R.string.post_sleep_4_author, R.string.post_sleep_4_content, 6, 234, 67, avatarUrl("steph")),
+            TopicPost("5", R.string.post_sleep_5_author, R.string.post_sleep_5_content, 9, 167, 34, avatarUrl("dan"))
         )
         "stimming" -> listOf(
-            TopicPost("1", "StimSquad", "New stim toy review! This textured fidget ring is SO satisfying. Quiet enough for meetings, stimmy enough for regulation ✨", "30m ago", 456, 112, avatarUrl("stimsquad")),
-            TopicPost("2", "HappyFlapper", "Normalize stimming in public! I was rocking at the grocery store and a kid said 'she's dancing!' Made my day 💃", "2h ago", 678, 145, avatarUrl("flapper")),
-            TopicPost("3", "ChewySam", "For my fellow oral stimmers - found chewable necklaces that look like actual jewelry. Discreet AND functional!", "4h ago", 234, 67, avatarUrl("chewy")),
-            TopicPost("4", "SpinnerSophie", "Movement is medicine! When I can't stim openly, I do toe-tapping under my desk. Subtle but still helps 🦶", "6h ago", 189, 45, avatarUrl("sophie")),
-            TopicPost("5", "SensorySeeker", "Built a 'stim kit' for my bag: putty, textured cards, fidget cube. Always prepared for regulation needs!", "8h ago", 345, 78, avatarUrl("seeker"))
+            TopicPost("1", R.string.post_stim_1_author, R.string.post_stim_1_content, 1, 456, 112, avatarUrl("stimsquad")),
+            TopicPost("2", R.string.post_stim_2_author, R.string.post_stim_2_content, 2, 678, 145, avatarUrl("flapper")),
+            TopicPost("3", R.string.post_stim_3_author, R.string.post_stim_3_content, 4, 234, 67, avatarUrl("chewy")),
+            TopicPost("4", R.string.post_stim_4_author, R.string.post_stim_4_content, 6, 189, 45, avatarUrl("sophie")),
+            TopicPost("5", R.string.post_stim_5_author, R.string.post_stim_5_content, 8, 345, 78, avatarUrl("seeker"))
         )
         "sensory_tips" -> listOf(
-            TopicPost("1", "OverwhelmOllie", "Loop earplugs CHANGED MY LIFE. Still hear conversations but takes the edge off sensory-overload environments 🎧", "1h ago", 567, 134, avatarUrl("ollie")),
-            TopicPost("2", "LightSensitiveLuna", "Warm-toned light bulbs + dimmer switches made my home a safe haven. Harsh fluorescents are banned!", "3h ago", 345, 89, avatarUrl("luna")),
-            TopicPost("3", "TagHaterTaylor", "Spent an hour removing all clothing tags today. Worth every second. Why do brands make them so scratchy?! 👕", "5h ago", 234, 78, avatarUrl("taylor")),
-            TopicPost("4", "ScentSensitiveAlex", "Unscented everything is the way. Made a list of truly fragrance-free products, happy to share!", "7h ago", 189, 56, avatarUrl("alex")),
-            TopicPost("5", "QuietQuinn", "Created a 'sensory map' of my city - quiet cafes, low-stim stores, accessible escape routes. Super helpful! 🗺️", "10h ago", 423, 97, avatarUrl("quinn"))
+            TopicPost("1", R.string.post_sensory_1_author, R.string.post_sensory_1_content, 1, 567, 134, avatarUrl("ollie")),
+            TopicPost("2", R.string.post_sensory_2_author, R.string.post_sensory_2_content, 3, 345, 89, avatarUrl("luna")),
+            TopicPost("3", R.string.post_sensory_3_author, R.string.post_sensory_3_content, 5, 234, 78, avatarUrl("taylor")),
+            TopicPost("4", R.string.post_sensory_4_author, R.string.post_sensory_4_content, 7, 189, 56, avatarUrl("alex")),
+            TopicPost("5", R.string.post_sensory_5_author, R.string.post_sensory_5_content, 10, 423, 97, avatarUrl("quinn"))
         )
         "meltdown_support" -> listOf(
-            TopicPost("1", "RecoveryRen", "Reminder: Meltdowns aren't 'bad behavior' - they're nervous system overload. Be gentle with yourself after 💙", "2h ago", 678, 156, avatarUrl("ren")),
-            TopicPost("2", "CopingCarla", "My meltdown kit: noise-canceling headphones, sunglasses, weighted lap pad, water, and a 'safe person' contact", "4h ago", 456, 123, avatarUrl("carla")),
-            TopicPost("3", "PreventionPat", "Learning my warning signs: irritability spike, sound sensitivity increase, physical tension. Catching it early helps!", "6h ago", 345, 89, avatarUrl("pat")),
-            TopicPost("4", "SafeSpaceSam", "Created a 'calm corner' in my home with dim lights, soft textures, and NO demands. Essential recovery zone 🏠", "8h ago", 234, 67, avatarUrl("sam")),
-            TopicPost("5", "SupportiveSue", "Post-meltdown self-care: rest, hydration, comfort food, and absolutely NO self-criticism. Recovery takes time 🌸", "12h ago", 512, 134, avatarUrl("sue"))
+            TopicPost("1", R.string.post_meltdown_1_author, R.string.post_meltdown_1_content, 2, 678, 156, avatarUrl("ren")),
+            TopicPost("2", R.string.post_meltdown_2_author, R.string.post_meltdown_2_content, 4, 456, 123, avatarUrl("carla")),
+            TopicPost("3", R.string.post_meltdown_3_author, R.string.post_meltdown_3_content, 6, 345, 89, avatarUrl("pat")),
+            TopicPost("4", R.string.post_meltdown_4_author, R.string.post_meltdown_4_content, 8, 234, 67, avatarUrl("sam")),
+            TopicPost("5", R.string.post_meltdown_5_author, R.string.post_meltdown_5_content, 12, 512, 134, avatarUrl("sue"))
         )
         "social_skills" -> listOf(
-            TopicPost("1", "ConvoCoach", "Scripts for small talk! 'How's your day going?' → 'Any fun weekend plans?' → 'That sounds nice!' Memorized patterns help! 💬", "1h ago", 456, 112, avatarUrl("coach")),
-            TopicPost("2", "FriendshipFred", "Quality over quantity. Having 2-3 close friends who 'get it' is worth more than 100 acquaintances 👥", "3h ago", 567, 134, avatarUrl("fred")),
-            TopicPost("3", "AwkwardAndy", "It's okay to leave social events early! 'I had a great time, heading out now' - no long explanation needed 👋", "5h ago", 389, 89, avatarUrl("andy")),
-            TopicPost("4", "BoundaryBella", "'I need to think about that' is a complete sentence. No pressure to respond immediately!", "7h ago", 423, 97, avatarUrl("bella")),
-            TopicPost("5", "ParallelPaul", "Parallel play is valid adult friendship! Gaming together, crafting in the same room - connection without constant interaction", "10h ago", 345, 78, avatarUrl("paul"))
+            TopicPost("1", R.string.post_social_1_author, R.string.post_social_1_content, 1, 456, 112, avatarUrl("coach")),
+            TopicPost("2", R.string.post_social_2_author, R.string.post_social_2_content, 3, 567, 134, avatarUrl("fred")),
+            TopicPost("3", R.string.post_social_3_author, R.string.post_social_3_content, 5, 389, 89, avatarUrl("andy")),
+            TopicPost("4", R.string.post_social_4_author, R.string.post_social_4_content, 7, 423, 97, avatarUrl("bella")),
+            TopicPost("5", R.string.post_social_5_author, R.string.post_social_5_content, 10, 345, 78, avatarUrl("paul"))
         )
         "masking" -> listOf(
-            TopicPost("1", "UnmaskingUri", "Finally dropping the mask at home. It's exhausting pretending to be 'normal' all day. Safe spaces matter 🎭", "1h ago", 678, 167, avatarUrl("uri")),
-            TopicPost("2", "BurnoutBeth", "Masking led to burnout. Now I'm slowly learning who I am without the performance. It's scary but freeing", "3h ago", 567, 145, avatarUrl("beth")),
-            TopicPost("3", "AuthenticAva", "Found friends who accept the real me - stims, infodumps, and all. They say I'm 'more interesting' unmasked! ✨", "5h ago", 456, 123, avatarUrl("ava")),
-            TopicPost("4", "ExhaustedEli", "The price of masking: migraines, fatigue, identity confusion. Is 'fitting in' worth my wellbeing? Reconsidering...", "7h ago", 389, 89, avatarUrl("eli")),
-            TopicPost("5", "GrowingGrace", "Started stimming publicly. Heart raced at first, but literally no one cared. The fear was bigger than reality 💪", "10h ago", 423, 97, avatarUrl("grace"))
+            TopicPost("1", R.string.post_mask_1_author, R.string.post_mask_1_content, 1, 678, 167, avatarUrl("uri")),
+            TopicPost("2", R.string.post_mask_2_author, R.string.post_mask_2_content, 3, 567, 145, avatarUrl("beth")),
+            TopicPost("3", R.string.post_mask_3_author, R.string.post_mask_3_content, 5, 456, 123, avatarUrl("ava")),
+            TopicPost("4", R.string.post_mask_4_author, R.string.post_mask_4_content, 7, 389, 89, avatarUrl("eli")),
+            TopicPost("5", R.string.post_mask_5_author, R.string.post_mask_5_content, 10, 423, 97, avatarUrl("grace"))
         )
         "special_interests" -> listOf(
-            TopicPost("1", "DinoDave", "Three hours researching dinosaur feather evolution and I regret NOTHING! Who wants to hear about Archaeopteryx? 🦕", "30m ago", 567, 145, avatarUrl("dave")),
-            TopicPost("2", "TrainTracker", "My special interest is train schedules. I can tell you every stop on 47 metro lines. Ask me anything! 🚂", "2h ago", 478, 234, avatarUrl("tracker")),
-            TopicPost("3", "MushroomMike", "Fungi are INCREDIBLE. Did you know there's a mushroom that can break down plastic? Mycelium is the future! 🍄", "4h ago", 345, 89, avatarUrl("mike")),
-            TopicPost("4", "LoreExplorer", "When your special interest has lore, you BECOME the wiki. 400 hours in this game and still learning! 🎮", "6h ago", 512, 123, avatarUrl("lore")),
-            TopicPost("5", "StarStruck", "Space facts incoming! A day on Venus is longer than a year on Venus. Mind = blown every time I think about it ✨", "9h ago", 423, 97, avatarUrl("star"))
+            TopicPost("1", R.string.post_special_1_author, R.string.post_special_1_content, 1, 567, 145, avatarUrl("dave")),
+            TopicPost("2", R.string.post_special_2_author, R.string.post_special_2_content, 2, 478, 234, avatarUrl("tracker")),
+            TopicPost("3", R.string.post_special_3_author, R.string.post_special_3_content, 4, 345, 89, avatarUrl("mike")),
+            TopicPost("4", R.string.post_special_4_author, R.string.post_special_4_content, 6, 512, 123, avatarUrl("lore")),
+            TopicPost("5", R.string.post_special_5_author, R.string.post_special_5_content, 9, 423, 97, avatarUrl("star"))
         )
         "mental_health" -> listOf(
-            TopicPost("1", "AnxietyAlly", "ADHD + anxiety is a rough combo. Tips that help me: structured routines, movement breaks, and lots of self-compassion 🧘", "1h ago", 456, 123, avatarUrl("ally")),
-            TopicPost("2", "DepressionDiana", "Some days, just existing is an achievement. Be proud of the small wins. You're doing better than you think 💙", "3h ago", 678, 178, avatarUrl("diana")),
-            TopicPost("3", "TherapyTom", "Finally found a neurodivergent-affirming therapist! They understand that 'just try harder' isn't helpful. Game changer!", "5h ago", 345, 89, avatarUrl("tom")),
-            TopicPost("4", "HealingHannah", "Journaling prompts for rough days: What's draining me? What's one kind thing I can do for myself right now?", "7h ago", 234, 67, avatarUrl("hannah")),
-            TopicPost("5", "CopingChris", "Medication isn't a failure - it's a tool. Just like glasses for vision. No shame in chemical support 💊", "10h ago", 567, 145, avatarUrl("chris"))
+            TopicPost("1", R.string.post_mental_1_author, R.string.post_mental_1_content, 1, 456, 123, avatarUrl("ally")),
+            TopicPost("2", R.string.post_mental_2_author, R.string.post_mental_2_content, 3, 678, 178, avatarUrl("diana")),
+            TopicPost("3", R.string.post_mental_3_author, R.string.post_mental_3_content, 5, 345, 89, avatarUrl("tom")),
+            TopicPost("4", R.string.post_mental_4_author, R.string.post_mental_4_content, 7, 234, 67, avatarUrl("hannah")),
+            TopicPost("5", R.string.post_mental_5_author, R.string.post_mental_5_content, 10, 567, 145, avatarUrl("chris"))
         )
         "work_school" -> listOf(
-            TopicPost("1", "AccommodationAce", "Got my workplace accommodations approved! Noise-canceling headphones, flexible hours, written instructions. Know your rights! 💼", "1h ago", 567, 145, avatarUrl("ace")),
-            TopicPost("2", "StudentSara", "College disability services changed everything. Extra time, quiet testing rooms, note-taking support. Ask for help! 🎓", "3h ago", 423, 112, avatarUrl("sara")),
-            TopicPost("3", "RemoteRick", "WFH is my dream. No fluorescent lights, no open offices, no surprise social interactions. Productivity skyrocketed!", "5h ago", 345, 89, avatarUrl("rick")),
-            TopicPost("4", "MeetingMary", "Cameras off in meetings when I need them. Standing during calls. These 'small' accommodations make huge differences", "7h ago", 234, 67, avatarUrl("mary")),
-            TopicPost("5", "CareerCoach", "Neurodivergent-friendly career paths: programming, research, art, writing, data analysis. Play to your strengths! 📈", "10h ago", 456, 123, avatarUrl("ccoach"))
+            TopicPost("1", R.string.post_work_1_author, R.string.post_work_1_content, 1, 567, 145, avatarUrl("ace")),
+            TopicPost("2", R.string.post_work_2_author, R.string.post_work_2_content, 3, 423, 112, avatarUrl("sara")),
+            TopicPost("3", R.string.post_work_3_author, R.string.post_work_3_content, 5, 345, 89, avatarUrl("rick")),
+            TopicPost("4", R.string.post_work_4_author, R.string.post_work_4_content, 7, 234, 67, avatarUrl("mary")),
+            TopicPost("5", R.string.post_work_5_author, R.string.post_work_5_content, 10, 456, 123, avatarUrl("ccoach"))
         )
         "late_diagnosis" -> listOf(
-            TopicPost("1", "LateBloomLisa", "Diagnosed at 35. Everything suddenly makes sense - the struggles, the differences, the 'quirks'. Grief and relief mixed 🔍", "1h ago", 678, 189, avatarUrl("lisa")),
-            TopicPost("2", "MidlifeMike", "Spent decades thinking I was broken. Turns out I'm just wired differently. Late diagnosis is still valid diagnosis 💜", "3h ago", 567, 156, avatarUrl("midlife")),
-            TopicPost("3", "IdentityCrisis", "Unmasking after 40 years is HARD. Who am I without the performance? Slowly rediscovering myself", "5h ago", 456, 123, avatarUrl("identity")),
-            TopicPost("4", "GriefAndGrowth", "Grieving the support I could have had growing up. But also grateful for finally understanding myself 🌱", "7h ago", 389, 97, avatarUrl("grief")),
-            TopicPost("5", "NewChapter", "It's never too late to learn about yourself. Late-diagnosed at 52, and life is finally making sense!", "10h ago", 512, 145, avatarUrl("chapter"))
+            TopicPost("1", R.string.post_late_1_author, R.string.post_late_1_content, 1, 678, 189, avatarUrl("lisa")),
+            TopicPost("2", R.string.post_late_2_author, R.string.post_late_2_content, 3, 567, 156, avatarUrl("midlife")),
+            TopicPost("3", R.string.post_late_3_author, R.string.post_late_3_content, 5, 456, 123, avatarUrl("identity")),
+            TopicPost("4", R.string.post_late_4_author, R.string.post_late_4_content, 7, 389, 97, avatarUrl("grief")),
+            TopicPost("5", R.string.post_late_5_author, R.string.post_late_5_content, 10, 512, 145, avatarUrl("chapter"))
+        )
+        "lgbtq_nd" -> listOf(
+            TopicPost("1", R.string.post_lgbtq_1_author, R.string.post_lgbtq_1_content, 1, 567, 145, avatarUrl("rainbow")),
+            TopicPost("2", R.string.post_lgbtq_2_author, R.string.post_lgbtq_2_content, 3, 456, 123, avatarUrl("proud")),
+            TopicPost("3", R.string.post_lgbtq_3_author, R.string.post_lgbtq_3_content, 5, 345, 89, avatarUrl("intersect")),
+            TopicPost("4", R.string.post_lgbtq_4_author, R.string.post_lgbtq_4_content, 7, 234, 67, avatarUrl("community")),
+            TopicPost("5", R.string.post_lgbtq_5_author, R.string.post_lgbtq_5_content, 10, 389, 97, avatarUrl("allied"))
+        )
+        "trans_nd" -> listOf(
+            TopicPost("1", R.string.post_trans_1_author, R.string.post_trans_1_content, 1, 456, 123, avatarUrl("trans1")),
+            TopicPost("2", R.string.post_trans_2_author, R.string.post_trans_2_content, 3, 389, 97, avatarUrl("gender")),
+            TopicPost("3", R.string.post_trans_3_author, R.string.post_trans_3_content, 5, 345, 89, avatarUrl("support")),
+            TopicPost("4", R.string.post_trans_4_author, R.string.post_trans_4_content, 7, 278, 67, avatarUrl("tips")),
+            TopicPost("5", R.string.post_trans_5_author, R.string.post_trans_5_content, 10, 512, 145, avatarUrl("authentic"))
+        )
+        "queer_pride" -> listOf(
+            TopicPost("1", R.string.post_pride_1_author, R.string.post_pride_1_content, 1, 567, 145, avatarUrl("parade")),
+            TopicPost("2", R.string.post_pride_2_author, R.string.post_pride_2_content, 3, 456, 123, avatarUrl("queercommunity")),
+            TopicPost("3", R.string.post_pride_3_author, R.string.post_pride_3_content, 5, 389, 97, avatarUrl("love")),
+            TopicPost("4", R.string.post_pride_4_author, R.string.post_pride_4_content, 7, 345, 89, avatarUrl("joyful")),
+            TopicPost("5", R.string.post_pride_5_author, R.string.post_pride_5_content, 10, 423, 112, avatarUrl("history"))
+        )
+        "ace_aro_spectrum" -> listOf(
+            TopicPost("1", R.string.post_ace_1_author, R.string.post_ace_1_content, 1, 456, 123, avatarUrl("acespace")),
+            TopicPost("2", R.string.post_ace_2_author, R.string.post_ace_2_content, 3, 389, 97, avatarUrl("aroace")),
+            TopicPost("3", R.string.post_ace_3_author, R.string.post_ace_3_content, 5, 345, 89, avatarUrl("spectrum")),
+            TopicPost("4", R.string.post_ace_4_author, R.string.post_ace_4_content, 7, 278, 67, avatarUrl("normalize")),
+            TopicPost("5", R.string.post_ace_5_author, R.string.post_ace_5_content, 10, 423, 112, avatarUrl("acepride"))
+        )
+        "nonbinary_nd" -> listOf(
+            TopicPost("1", R.string.post_nb_1_author, R.string.post_nb_1_content, 1, 567, 145, avatarUrl("nbninja")),
+            TopicPost("2", R.string.post_nb_2_author, R.string.post_nb_2_content, 3, 456, 123, avatarUrl("theythem")),
+            TopicPost("3", R.string.post_nb_3_author, R.string.post_nb_3_content, 5, 389, 97, avatarUrl("fluid")),
+            TopicPost("4", R.string.post_nb_4_author, R.string.post_nb_4_content, 7, 345, 89, avatarUrl("enby")),
+            TopicPost("5", R.string.post_nb_5_author, R.string.post_nb_5_content, 10, 423, 112, avatarUrl("journey"))
+        )
+        "coming_out" -> listOf(
+            TopicPost("1", R.string.post_coming_1_author, R.string.post_coming_1_content, 1, 567, 156, avatarUrl("cameout")),
+            TopicPost("2", R.string.post_coming_2_author, R.string.post_coming_2_content, 3, 456, 123, avatarUrl("safeharbor")),
+            TopicPost("3", R.string.post_coming_3_author, R.string.post_coming_3_content, 5, 389, 97, avatarUrl("journeys")),
+            TopicPost("4", R.string.post_coming_4_author, R.string.post_coming_4_content, 7, 345, 89, avatarUrl("figuring")),
+            TopicPost("5", R.string.post_coming_5_author, R.string.post_coming_5_content, 10, 512, 145, avatarUrl("family"))
         )
         else -> listOf(
-            TopicPost("1", "CommunityMember", "Welcome to this community! Share your experiences and support each other. We're all in this together 💙", "1h ago", 234, 56, avatarUrl("community")),
-            TopicPost("2", "HelpfulHelen", "Remember: everyone's journey is different. What works for one person might not work for another, and that's okay!", "3h ago", 189, 45, avatarUrl("helen")),
-            TopicPost("3", "ResourceRon", "Great resources in the pinned post! Check them out if you're new here 📚", "5h ago", 156, 34, avatarUrl("ron")),
-            TopicPost("4", "SupportiveSue", "This is a judgment-free zone. Ask questions, share struggles, celebrate wins. We've got you! 🌟", "7h ago", 278, 67, avatarUrl("sue")),
-            TopicPost("5", "WelcomingWill", "New members: introduce yourself! What brings you here? What do you hope to learn or share?", "10h ago", 312, 89, avatarUrl("will"))
+            TopicPost("1", R.string.post_default_1_author, R.string.post_default_1_content, 1, 234, 56, avatarUrl("community")),
+            TopicPost("2", R.string.post_default_2_author, R.string.post_default_2_content, 3, 189, 45, avatarUrl("helen")),
+            TopicPost("3", R.string.post_default_3_author, R.string.post_default_3_content, 5, 156, 34, avatarUrl("ron")),
+            TopicPost("4", R.string.post_default_4_author, R.string.post_default_4_content, 7, 278, 67, avatarUrl("sue")),
+            TopicPost("5", R.string.post_default_5_author, R.string.post_default_5_content, 10, 312, 89, avatarUrl("will"))
         )
     }
 }
@@ -1399,9 +1549,9 @@ private fun getMockPostsForTopic(topicId: String): List<TopicPost> {
  */
 data class TopicPost(
     val id: String,
-    val author: String,
-    val content: String,
-    val timeAgo: String,
+    val authorRes: Int,
+    val contentRes: Int,
+    val timeAgoHours: Int,
     val likes: Int,
     val comments: Int,
     val avatarUrl: String
@@ -1412,7 +1562,7 @@ data class TopicPost(
  */
 fun getTopicByName(name: String): ExploreTopic? {
     return EXPLORE_TOPICS.find {
-        it.name.equals(name, ignoreCase = true) ||
+        it.id.equals(name, ignoreCase = true) ||
         it.id.equals(name.lowercase().replace(" ", "_"), ignoreCase = true)
     }
 }
@@ -1434,12 +1584,18 @@ fun TopicDetailScreen(
 ) {
     val topic = remember(topicName) { getTopicByName(topicName) }
     val mockPosts = remember(topicName) { getMockPostsForTopic(topicName) }
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
 
     var isJoined by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableIntStateOf(0) }
 
-    val tabs = listOf("Posts", "Resources", "Events", "Members")
+    val tabPosts = stringResource(R.string.topic_tab_posts)
+    val tabResources = stringResource(R.string.topic_tab_resources)
+    val tabEvents = stringResource(R.string.topic_tab_events)
+    val tabMembers = stringResource(R.string.topic_tab_members)
+    val tabs = remember(tabPosts, tabResources, tabEvents, tabMembers) {
+        listOf(tabPosts, tabResources, tabEvents, tabMembers)
+    }
 
     if (topic == null) {
         // Fallback for unknown topics
@@ -1462,11 +1618,17 @@ fun TopicDetailScreen(
                     .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Topic not found", style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.topic_not_found), style = MaterialTheme.typography.titleLarge)
             }
         }
         return
     }
+
+    // Pre-compute string resources for use in callbacks
+    val topicDisplayName = stringResource(topic.nameRes)
+    val shareTextFormatted = stringResource(R.string.topic_share_text, topicDisplayName) + " #${topicName.replace(" ", "")}"
+    val shareTopicLabel = stringResource(R.string.topic_share)
+    val moreOptionsMessage = stringResource(R.string.topic_more_options_soon)
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -1484,14 +1646,13 @@ fun TopicDetailScreen(
                 },
                 actions = {
                     IconButton(onClick = {
-                        val shareIntent = android.content.Intent().apply {
-                            action = android.content.Intent.ACTION_SEND
-                            putExtra(android.content.Intent.EXTRA_TEXT,
-                                "Check out the $topicName community on NeuroComet! 🧠✨ #${topicName.replace(" ", "")}")
+                        val shareIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, shareTextFormatted)
                             type = "text/plain"
                         }
                         context.startActivity(
-                            android.content.Intent.createChooser(shareIntent, "Share Topic")
+                            Intent.createChooser(shareIntent, shareTopicLabel)
                         )
                     }) {
                         Icon(
@@ -1501,10 +1662,10 @@ fun TopicDetailScreen(
                         )
                     }
                     IconButton(onClick = {
-                        android.widget.Toast.makeText(
+                        Toast.makeText(
                             context,
-                            "More options coming soon! ⚙️",
-                            android.widget.Toast.LENGTH_SHORT
+                            moreOptionsMessage,
+                            Toast.LENGTH_SHORT
                         ).show()
                     }) {
                         Icon(
@@ -1557,13 +1718,13 @@ fun TopicDetailScreen(
                             }
                             Column {
                                 Text(
-                                    text = topic.name,
+                                    text = stringResource(topic.nameRes),
                                     style = MaterialTheme.typography.headlineMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
                                 )
                                 Text(
-                                    text = "${formatCount(topic.memberCount)} members • ${formatCount(topic.postCount)} posts",
+                                    text = stringResource(R.string.topic_members_posts, formatCount(topic.memberCount), formatCount(topic.postCount)),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = Color.White.copy(alpha = 0.8f)
                                 )
@@ -1581,7 +1742,7 @@ fun TopicDetailScreen(
                         .padding(20.dp)
                 ) {
                     Text(
-                        text = topic.description,
+                        text = stringResource(topic.descriptionRes),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1602,7 +1763,7 @@ fun TopicDetailScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = if (isJoined) "Joined" else "Join Community",
+                            text = if (isJoined) stringResource(R.string.topic_joined) else stringResource(R.string.topic_join_community),
                             fontWeight = FontWeight.SemiBold
                         )
                     }
@@ -1650,19 +1811,19 @@ fun TopicDetailScreen(
                 1 -> {
                     // Resources Tab
                     item {
-                        ResourcesSection(topicName = topic.name)
+                        ResourcesSection(topicName = stringResource(topic.nameRes))
                     }
                 }
                 2 -> {
                     // Events Tab
                     item {
-                        EventsSection(topicName = topic.name)
+                        EventsSection(topicName = stringResource(topic.nameRes))
                     }
                 }
                 3 -> {
                     // Members Tab
                     item {
-                        MembersSection(topicName = topic.name)
+                        MembersSection(topicName = stringResource(topic.nameRes))
                     }
                 }
             }
@@ -1685,6 +1846,10 @@ private fun TopicPostCard(
 ) {
     var isLiked by remember { mutableStateOf(false) }
     var likeCount by remember { mutableIntStateOf(post.likes) }
+
+    val author = stringResource(post.authorRes)
+    val content = stringResource(post.contentRes)
+    val timeAgo = stringResource(R.string.time_hours_ago, post.timeAgoHours)
 
     Card(
         modifier = Modifier
@@ -1710,12 +1875,12 @@ private fun TopicPostCard(
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = post.author,
+                        text = author,
                         fontWeight = FontWeight.SemiBold,
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        text = post.timeAgo,
+                        text = timeAgo,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1733,7 +1898,7 @@ private fun TopicPostCard(
 
             // Post Content
             Text(
-                text = post.content,
+                text = content,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -1800,7 +1965,7 @@ private fun TopicPostCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Share",
+                        text = stringResource(R.string.member_share),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1813,17 +1978,17 @@ private fun TopicPostCard(
 @Composable
 private fun ResourcesSection(topicName: String) {
     val resources = listOf(
-        ResourceItem("📚", "Getting Started Guide", "Learn the basics and community guidelines", "Pinned"),
-        ResourceItem("🎨", "25+ Neuro-State Themes", "ADHD, Autism, Anxiety, Colorblind, and Mood themes", "New!"),
-        ResourceItem("🔤", "Accessibility Fonts Guide", "Lexend, OpenDyslexic, Atkinson & 10+ more fonts", "12 fonts"),
-        ResourceItem("🎬", "Animation Controls", "Disable animations for a calmer experience", "7 toggles"),
-        ResourceItem("🎄", "Holiday & Awareness Events", "Special themes for ND awareness days", "15 events"),
-        ResourceItem("🛡️", "Safety & Parental Controls", "Screen time, bedtime mode, content filtering", "Essential"),
-        ResourceItem("💡", "Quick Tips & Tricks", "Unlock Rainbow Brain, reduce eye strain & more", "8 tips"),
-        ResourceItem("🔗", "Helpful Links Collection", "Curated external resources and tools", "Updated 2d ago"),
-        ResourceItem("📝", "Community Wiki", "Collaboratively written knowledge base", "156 articles"),
-        ResourceItem("🎥", "Video Library", "Educational videos and tutorials", "23 videos"),
-        ResourceItem("📖", "Recommended Reading", "Books and articles recommended by members", "45 items")
+        ResourceItem("📚", R.string.resource_getting_started, R.string.resource_getting_started_desc, R.string.resource_pinned),
+        ResourceItem("🎨", R.string.resource_themes, R.string.resource_themes_desc, R.string.resource_new),
+        ResourceItem("🔤", R.string.resource_fonts, R.string.resource_fonts_desc, R.string.resource_fonts_count),
+        ResourceItem("🎬", R.string.resource_animation, R.string.resource_animation_desc, R.string.resource_animation_count),
+        ResourceItem("🎄", R.string.resource_events, R.string.resource_events_desc, R.string.resource_events_count),
+        ResourceItem("🛡️", R.string.resource_safety, R.string.resource_safety_desc, R.string.resource_essential),
+        ResourceItem("💡", R.string.resource_tips, R.string.resource_tips_desc, R.string.resource_tips_count),
+        ResourceItem("🔗", R.string.resource_links, R.string.resource_links_desc, R.string.resource_links_updated),
+        ResourceItem("📝", R.string.resource_wiki, R.string.resource_wiki_desc, R.string.resource_wiki_count),
+        ResourceItem("🎥", R.string.resource_videos, R.string.resource_videos_desc, R.string.resource_videos_count),
+        ResourceItem("📖", R.string.resource_reading, R.string.resource_reading_desc, R.string.resource_reading_count)
     )
 
     Column(
@@ -1833,7 +1998,7 @@ private fun ResourcesSection(topicName: String) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "Resources",
+            text = stringResource(R.string.topic_resources_title),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold
         )
@@ -1859,18 +2024,18 @@ private fun ResourcesSection(topicName: String) {
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = resource.title,
+                            text = stringResource(resource.titleRes),
                             fontWeight = FontWeight.SemiBold,
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Text(
-                            text = resource.description,
+                            text = stringResource(resource.descriptionRes),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Text(
-                        text = resource.meta,
+                        text = stringResource(resource.metaRes),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -1882,19 +2047,19 @@ private fun ResourcesSection(topicName: String) {
 
 private data class ResourceItem(
     val emoji: String,
-    val title: String,
-    val description: String,
-    val meta: String
+    val titleRes: Int,
+    val descriptionRes: Int,
+    val metaRes: Int
 )
 
 @Composable
 private fun EventsSection(topicName: String) {
     val events = listOf(
-        EventItem("🎤", "Weekly Community Chat", "Every Saturday at 3pm EST", "Live Discussion", true),
-        EventItem("📚", "Book Club Meeting", "Jan 5, 2026 at 7pm EST", "Reading Discussion", false),
-        EventItem("🧘", "Mindfulness Session", "Jan 8, 2026 at 10am EST", "Guided Meditation", false),
-        EventItem("🎮", "Game Night", "Jan 12, 2026 at 8pm EST", "Social Gaming", false),
-        EventItem("💬", "Q&A with Expert", "Jan 15, 2026 at 6pm EST", "Ask Me Anything", false)
+        EventItem("🎤", R.string.event_weekly_chat, R.string.event_weekly_chat_time, R.string.event_type_discussion, true),
+        EventItem("📚", R.string.event_book_club, R.string.event_book_club_time, R.string.event_type_reading, false),
+        EventItem("🧘", R.string.event_mindfulness, R.string.event_mindfulness_time, R.string.event_type_meditation, false),
+        EventItem("🎮", R.string.event_game_night, R.string.event_game_night_time, R.string.event_type_social, false),
+        EventItem("💬", R.string.event_qa, R.string.event_qa_time, R.string.event_type_ama, false)
     )
 
     Column(
@@ -1904,7 +2069,7 @@ private fun EventsSection(topicName: String) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "Upcoming Events",
+            text = stringResource(R.string.topic_events_title),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold
         )
@@ -1933,7 +2098,7 @@ private fun EventsSection(topicName: String) {
                     Column(modifier = Modifier.weight(1f)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = event.title,
+                                text = stringResource(event.titleRes),
                                 fontWeight = FontWeight.SemiBold,
                                 style = MaterialTheme.typography.bodyLarge
                             )
@@ -1944,7 +2109,7 @@ private fun EventsSection(topicName: String) {
                                     color = Color(0xFFEF4444)
                                 ) {
                                     Text(
-                                        text = "LIVE",
+                                        text = stringResource(R.string.event_live),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = Color.White,
                                         fontWeight = FontWeight.Bold,
@@ -1954,12 +2119,12 @@ private fun EventsSection(topicName: String) {
                             }
                         }
                         Text(
-                            text = event.datetime,
+                            text = stringResource(event.datetimeRes),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = event.type,
+                            text = stringResource(event.typeRes),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -1970,7 +2135,7 @@ private fun EventsSection(topicName: String) {
                             modifier = Modifier.height(32.dp),
                             contentPadding = PaddingValues(horizontal = 12.dp)
                         ) {
-                            Text("RSVP", style = MaterialTheme.typography.labelMedium)
+                            Text(stringResource(R.string.event_rsvp), style = MaterialTheme.typography.labelMedium)
                         }
                     } else {
                         Button(
@@ -1981,7 +2146,7 @@ private fun EventsSection(topicName: String) {
                                 containerColor = Color(0xFFEF4444)
                             )
                         ) {
-                            Text("Join", style = MaterialTheme.typography.labelMedium)
+                            Text(stringResource(R.string.event_join), style = MaterialTheme.typography.labelMedium)
                         }
                     }
                 }
@@ -1992,21 +2157,21 @@ private fun EventsSection(topicName: String) {
 
 private data class EventItem(
     val emoji: String,
-    val title: String,
-    val datetime: String,
-    val type: String,
+    val titleRes: Int,
+    val datetimeRes: Int,
+    val typeRes: Int,
     val isLive: Boolean
 )
 
 @Composable
 private fun MembersSection(topicName: String) {
     val members = listOf(
-        MemberItem("CommunityMod", "Moderator", "https://i.pravatar.cc/150?u=mod1", true),
-        MemberItem("HelpfulHelper", "Top Contributor", "https://i.pravatar.cc/150?u=helper", true),
-        MemberItem("NewbieFriend", "Active Member", "https://i.pravatar.cc/150?u=newbie", false),
-        MemberItem("WiseOwl", "Veteran", "https://i.pravatar.cc/150?u=owl", true),
-        MemberItem("SupportiveSoul", "Member", "https://i.pravatar.cc/150?u=soul", false),
-        MemberItem("CuriousCat", "New Member", "https://i.pravatar.cc/150?u=cat", false)
+        MemberItem("CommunityMod", R.string.member_role_moderator, "https://i.pravatar.cc/150?u=mod1", true),
+        MemberItem("HelpfulHelper", R.string.member_role_contributor, "https://i.pravatar.cc/150?u=helper", true),
+        MemberItem("NewbieFriend", R.string.member_role_active, "https://i.pravatar.cc/150?u=newbie", false),
+        MemberItem("WiseOwl", R.string.member_role_veteran, "https://i.pravatar.cc/150?u=owl", true),
+        MemberItem("SupportiveSoul", R.string.member_role_member, "https://i.pravatar.cc/150?u=soul", false),
+        MemberItem("CuriousCat", R.string.member_role_new, "https://i.pravatar.cc/150?u=cat", false)
     )
 
     Column(
@@ -2021,12 +2186,12 @@ private fun MembersSection(topicName: String) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Community Members",
+                text = stringResource(R.string.topic_members_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
             TextButton(onClick = { /* See all members */ }) {
-                Text("See All")
+                Text(stringResource(R.string.explore_see_all))
             }
         }
 
@@ -2042,7 +2207,7 @@ private fun MembersSection(topicName: String) {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "${members.count { it.isOnline }} online now",
+                text = stringResource(R.string.explore_online_now, members.count { it.isOnline }),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -2092,7 +2257,7 @@ private fun MembersSection(topicName: String) {
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        text = member.role,
+                        text = stringResource(member.roleRes),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -2102,7 +2267,7 @@ private fun MembersSection(topicName: String) {
                     modifier = Modifier.height(32.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp)
                 ) {
-                    Text("Follow", style = MaterialTheme.typography.labelMedium)
+                    Text(stringResource(R.string.member_follow), style = MaterialTheme.typography.labelMedium)
                 }
             }
         }
@@ -2111,7 +2276,7 @@ private fun MembersSection(topicName: String) {
 
 private data class MemberItem(
     val username: String,
-    val role: String,
+    val roleRes: Int,
     val avatarUrl: String,
     val isOnline: Boolean
 )

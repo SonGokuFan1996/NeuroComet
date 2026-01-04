@@ -71,6 +71,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
@@ -221,18 +222,21 @@ private fun NotificationsTopBar(
     unreadCount: Int,
     onMarkAllAsRead: (() -> Unit)?
 ) {
+    val unreadText = stringResource(R.string.notifications_unread_count, unreadCount)
+    val markAllReadText = stringResource(R.string.notifications_mark_all_read)
+
     TopAppBar(
         modifier = Modifier.statusBarsPadding(),
         title = {
             Column {
                 Text(
-                    text = "Notifications",
+                    text = stringResource(R.string.notifications_title),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold
                 )
                 AnimatedVisibility(visible = unreadCount > 0) {
                     Text(
-                        text = "$unreadCount unread",
+                        text = unreadText,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -244,7 +248,7 @@ private fun NotificationsTopBar(
                 IconButton(
                     onClick = onMarkAllAsRead,
                     modifier = Modifier.semantics {
-                        contentDescription = "Mark all notifications as read"
+                        contentDescription = markAllReadText
                     }
                 ) {
                     Icon(
@@ -265,12 +269,12 @@ private fun NotificationsTopBar(
 // FILTER CHIPS
 // ============================================================================
 
-enum class NotificationFilter(val label: String) {
-    ALL("All"),
-    UNREAD("Unread"),
-    MENTIONS("Mentions"),
-    LIKES("Likes"),
-    FOLLOWS("Follows")
+enum class NotificationFilter(val labelRes: Int) {
+    ALL(R.string.filter_all),
+    UNREAD(R.string.filter_unread),
+    MENTIONS(R.string.filter_mentions),
+    LIKES(R.string.filter_likes),
+    FOLLOWS(R.string.filter_follows)
 }
 
 @Composable
@@ -287,9 +291,10 @@ private fun NotificationFilterRow(
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
         items(NotificationFilter.entries) { filter ->
+            val filterLabel = stringResource(filter.labelRes)
             val displayLabel = when {
-                filter == NotificationFilter.UNREAD && unreadCount > 0 -> "${filter.label} ($unreadCount)"
-                else -> filter.label
+                filter == NotificationFilter.UNREAD && unreadCount > 0 -> "$filterLabel ($unreadCount)"
+                else -> filterLabel
             }
 
             FilterChip(
@@ -307,7 +312,7 @@ private fun NotificationFilterRow(
                 ),
                 modifier = Modifier.semantics {
                     role = Role.Tab
-                    contentDescription = "Filter notifications by ${filter.label}"
+                    contentDescription = "Filter notifications by $filterLabel"
                 }
             )
         }

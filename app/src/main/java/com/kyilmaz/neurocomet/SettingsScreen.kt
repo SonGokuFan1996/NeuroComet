@@ -1,6 +1,7 @@
 package com.kyilmaz.neurocomet
 
 import android.app.Application
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -49,11 +50,18 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.Spa
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.NightsStay
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
+import com.kyilmaz.neurocomet.ui.components.PhoneNumberTextField
+import com.kyilmaz.neurocomet.ui.components.PhoneFormat
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -119,6 +127,7 @@ fun SettingsScreen(
     onOpenFontSettings: () -> Unit = {},
     onOpenSubscription: () -> Unit = {},
     onOpenMyProfile: () -> Unit = {},
+    onOpenGames: () -> Unit = {},
     isPremium: Boolean = false,
     isFakePremiumEnabled: Boolean = false,
     onFakePremiumToggle: (Boolean) -> Unit = {},
@@ -197,7 +206,7 @@ fun SettingsScreen(
                     showEasterEggDialog = false
                     selectedMessage.value = easterEggMessages.random()
                 }) {
-                    Text("You're Awesome! 🙌")
+                    Text(stringResource(R.string.settings_youre_awesome))
                 }
             }
         )
@@ -235,15 +244,15 @@ fun SettingsScreen(
             // ═══════════════════════════════════════════════════════════════
             item(key = "account_header") {
                 SettingsSectionHeader(
-                    title = "Account",
+                    title = stringResource(R.string.settings_section_account),
                     icon = Icons.Outlined.AccountCircle
                 )
             }
             item(key = "my_profile") {
                 SettingsCard {
                     SettingsItem(
-                        title = "My Profile",
-                        description = "View and edit your profile, energy status & preferences",
+                        title = stringResource(R.string.settings_my_profile),
+                        description = stringResource(R.string.settings_my_profile_desc),
                         icon = Icons.Outlined.AccountCircle,
                         onClick = onOpenMyProfile
                     )
@@ -253,7 +262,7 @@ fun SettingsScreen(
                 authUser?.let {
                     AccountInfoCard(user = it, onLogout = onLogout)
                 } ?: run {
-                    Text("User not authenticated.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.settings_not_authenticated), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
@@ -266,7 +275,7 @@ fun SettingsScreen(
             // ═══════════════════════════════════════════════════════════════
             item(key = "premium_header") {
                 SettingsSectionHeader(
-                    title = "Premium",
+                    title = stringResource(R.string.settings_section_premium),
                     icon = Icons.Filled.Star
                 )
             }
@@ -304,20 +313,20 @@ fun SettingsScreen(
                             Spacer(Modifier.width(16.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    "Premium Active ✨",
+                                    stringResource(R.string.settings_premium_active),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.SemiBold,
                                     color = Color(0xFFFFD700)
                                 )
                                 Text(
-                                    "Thank you for your support!",
+                                    stringResource(R.string.settings_premium_thanks),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             Icon(
                                 Icons.Filled.CheckCircle,
-                                contentDescription = "Premium active",
+                                contentDescription = stringResource(R.string.settings_premium_active),
                                 tint = Color(0xFF4CAF50),
                                 modifier = Modifier.size(24.dp)
                             )
@@ -325,8 +334,8 @@ fun SettingsScreen(
                     } else {
                         // Not premium - show upgrade option
                         SettingsItem(
-                            title = "Go Premium ⭐",
-                            description = "Ad-free experience • $2/month or $60 lifetime",
+                            title = stringResource(R.string.settings_go_premium),
+                            description = stringResource(R.string.settings_premium_price),
                             icon = Icons.Filled.Star,
                             onClick = onOpenSubscription
                         )
@@ -341,40 +350,40 @@ fun SettingsScreen(
             // ═══════════════════════════════════════════════════════════════
             item(key = "appearance_header") {
                 SettingsSectionHeader(
-                    title = "Appearance & Display",
+                    title = stringResource(R.string.settings_section_appearance),
                     icon = Icons.Default.Palette
                 )
             }
             item(key = "appearance_card") {
                 SettingsCard {
                     SettingsItem(
-                        title = "Theme Settings",
-                        description = "Colors, styles & neurodivergent themes",
+                        title = stringResource(R.string.settings_theme),
+                        description = stringResource(R.string.settings_theme_desc),
                         icon = Icons.Default.Palette,
                         onClick = onOpenThemeSettings
                     )
                     SettingsDivider()
                     SettingsItem(
-                        title = "Animation Settings",
+                        title = stringResource(R.string.settings_animation),
                         description = if (themeState.animationSettings.disableAllAnimations)
-                            "All animations disabled"
+                            stringResource(R.string.settings_animation_disabled)
                         else
-                            "Control motion and visual effects",
+                            stringResource(R.string.settings_animation_desc),
                         icon = Icons.Default.Animation,
                         onClick = onOpenAnimationSettings
                     )
                     SettingsDivider()
                     SettingsToggleInCard(
-                        title = "Dark Mode",
-                        description = "Use dark theme for low-light environments",
+                        title = stringResource(R.string.settings_dark_mode),
+                        description = stringResource(R.string.settings_dark_mode_desc),
                         icon = Icons.Default.DarkMode,
                         isChecked = themeState.isDarkMode,
                         onCheckedChange = { themeViewModel.setDarkMode(it) }
                     )
                     SettingsDivider()
                     SettingsToggleInCard(
-                        title = "High Contrast",
-                        description = "Maximum contrast for visibility",
+                        title = stringResource(R.string.settings_high_contrast),
+                        description = stringResource(R.string.settings_high_contrast_desc),
                         icon = Icons.Default.Contrast,
                         isChecked = themeState.isHighContrast,
                         onCheckedChange = { themeViewModel.setIsHighContrast(it) }
@@ -389,29 +398,29 @@ fun SettingsScreen(
             // ═══════════════════════════════════════════════════════════════
             item(key = "privacy_header") {
                 SettingsSectionHeader(
-                    title = "Privacy & Security",
+                    title = stringResource(R.string.settings_section_privacy),
                     icon = Icons.Default.Lock
                 )
             }
             item(key = "privacy_card") {
                 SettingsCard {
                     SettingsItem(
-                        title = "Privacy Settings",
-                        description = "Who can see your content & message you",
+                        title = stringResource(R.string.settings_privacy),
+                        description = stringResource(R.string.settings_privacy_desc),
                         icon = Icons.Default.Lock,
                         onClick = onOpenPrivacySettings
                     )
                     SettingsDivider()
                     SettingsItem(
-                        title = "Parental Controls",
-                        description = if (safetyState.isParentalPinSet) "PIN is set • Tap to manage" else "Set up PIN & controls",
+                        title = stringResource(R.string.settings_parental),
+                        description = if (safetyState.isParentalPinSet) stringResource(R.string.settings_parental_pin_set) else stringResource(R.string.settings_parental_desc),
                         icon = Icons.Default.Shield,
                         onClick = onOpenParentalControls
                     )
                     SettingsDivider()
                     SettingsToggleInCard(
-                        title = "Kid Mode",
-                        description = "Age-appropriate content filtering",
+                        title = stringResource(R.string.settings_kid_mode),
+                        description = stringResource(R.string.settings_kid_mode_desc),
                         icon = Icons.Default.ChildFriendly,
                         isChecked = safetyState.isKidsMode,
                         onCheckedChange = { safetyViewModel.setAudience(if (it) Audience.UNDER_13 else Audience.ADULT, app) }
@@ -426,15 +435,15 @@ fun SettingsScreen(
             // ═══════════════════════════════════════════════════════════════
             item(key = "notifications_header") {
                 SettingsSectionHeader(
-                    title = "Notifications",
+                    title = stringResource(R.string.settings_section_notifications),
                     icon = Icons.Default.Notifications
                 )
             }
             item(key = "notifications_card") {
                 SettingsCard {
                     SettingsItem(
-                        title = "Notification Preferences",
-                        description = "Push notifications, sounds & quiet hours",
+                        title = stringResource(R.string.settings_notif_prefs),
+                        description = stringResource(R.string.settings_notif_desc),
                         icon = Icons.Default.Notifications,
                         onClick = onOpenNotificationSettings
                     )
@@ -448,15 +457,15 @@ fun SettingsScreen(
             // ═══════════════════════════════════════════════════════════════
             item(key = "content_header") {
                 SettingsSectionHeader(
-                    title = "Content & Media",
+                    title = stringResource(R.string.settings_content_filters),
                     icon = Icons.Default.PlayCircle
                 )
             }
             item(key = "content_card") {
                 SettingsCard {
                     SettingsItem(
-                        title = "Content Preferences",
-                        description = "Video autoplay, data saver & feed settings",
+                        title = stringResource(R.string.settings_content_filters),
+                        description = stringResource(R.string.settings_content_filters_desc),
                         icon = Icons.Default.PlayCircle,
                         onClick = onOpenContentSettings
                     )
@@ -470,33 +479,35 @@ fun SettingsScreen(
             // ═══════════════════════════════════════════════════════════════
             item(key = "accessibility_header") {
                 SettingsSectionHeader(
-                    title = "Accessibility & Wellbeing",
+                    title = stringResource(R.string.settings_section_accessibility),
                     icon = Icons.Default.Accessibility,
-                    subtitle = "Neurodivergent-friendly options"
+                    subtitle = null
                 )
             }
             item(key = "accessibility_card") {
                 SettingsCard {
                     SettingsItem(
-                        title = "Font & Reading",
-                        description = "Neurodivergent-friendly fonts (Lexend, OpenDyslexic & more)",
+                        title = stringResource(R.string.settings_text_display),
+                        description = stringResource(R.string.settings_text_display_desc),
                         icon = Icons.Default.TextFields,
                         onClick = onOpenFontSettings
                     )
                     SettingsDivider()
                     SettingsItem(
-                        title = "Accessibility Options",
-                        description = "Motion reduction & cognitive support",
+                        title = stringResource(R.string.settings_reduce_motion),
+                        description = stringResource(R.string.settings_reduce_motion_desc),
                         icon = Icons.Default.Accessibility,
                         onClick = onOpenAccessibilitySettings
                     )
                     SettingsDivider()
                     SettingsItem(
-                        title = "NeuroBalance",
-                        description = "Break reminders, usage stats & calm mode",
+                        title = stringResource(R.string.settings_break_reminders),
+                        description = stringResource(R.string.settings_break_reminders_desc),
                         icon = Icons.Default.Spa,
                         onClick = onOpenWellbeingSettings
                     )
+                    SettingsDivider()
+                    ScreenTimeoutToggle()
                 }
             }
 
@@ -506,9 +517,9 @@ fun SettingsScreen(
             item(key = "spacer_before_tips") { Spacer(Modifier.height(8.dp)) }
             item(key = "tips_header") {
                 SettingsSectionHeader(
-                    title = "Tips & Help",
+                    title = stringResource(R.string.settings_section_support),
                     icon = Icons.Default.Star,
-                    subtitle = "Quick tips for a better experience"
+                    subtitle = null
                 )
             }
             item(key = "tips_card") {
@@ -532,13 +543,13 @@ fun SettingsScreen(
                         Spacer(Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "App Tutorial",
+                                text = stringResource(R.string.tutorial_title),
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "Watch the getting started guide again",
+                                text = stringResource(R.string.tutorial_description),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -549,23 +560,45 @@ fun SettingsScreen(
             }
 
             // ═══════════════════════════════════════════════════════════════
+            // GAMES SECTION
+            // ═══════════════════════════════════════════════════════════════
+            item(key = "spacer_before_games") { Spacer(Modifier.height(8.dp)) }
+            item(key = "games_header") {
+                SettingsSectionHeader(
+                    title = stringResource(R.string.games_hub_title),
+                    icon = Icons.Default.SportsEsports,
+                    subtitle = stringResource(R.string.games_subtitle)
+                )
+            }
+            item(key = "games_card") {
+                SettingsCard {
+                    SettingsItem(
+                        title = stringResource(R.string.games_play_now),
+                        description = stringResource(R.string.games_play_now_desc),
+                        icon = Icons.Default.SportsEsports,
+                        onClick = onOpenGames
+                    )
+                }
+            }
+
+            // ═══════════════════════════════════════════════════════════════
             // DEVELOPER OPTIONS (if enabled)
             // ═══════════════════════════════════════════════════════════════
             if (canShowDevOptions) {
                 item(key = "spacer_before_dev") { Spacer(Modifier.height(8.dp)) }
                 item(key = "dev_header") {
                     SettingsSectionHeader(
-                        title = "Developer",
+                        title = stringResource(R.string.settings_section_developer),
                         icon = Icons.Default.Build,
-                        subtitle = "Debug & testing tools"
+                        subtitle = stringResource(R.string.settings_developer_subtitle)
                     )
                 }
                 item(key = "dev_card") {
                     SettingsCard {
                         // Fake Premium Toggle for testing
                         SettingsToggle(
-                            title = "Fake Premium Mode",
-                            description = if (isFakePremiumEnabled) "Premium features unlocked for testing" else "Enable to test premium features",
+                            title = stringResource(R.string.settings_fake_premium),
+                            description = if (isFakePremiumEnabled) stringResource(R.string.settings_fake_premium_enabled) else stringResource(R.string.settings_fake_premium_disabled),
                             icon = Icons.Default.Star,
                             isChecked = isFakePremiumEnabled,
                             onCheckedChange = onFakePremiumToggle
@@ -578,11 +611,16 @@ fun SettingsScreen(
 
                         SettingsItem(
                             title = stringResource(R.string.settings_developer_options_group),
-                            description = "Advanced options for testing & debugging",
+                            description = stringResource(R.string.settings_dev_options_desc),
                             icon = Icons.Default.Build,
                             onClick = onOpenDevOptions
                         )
                     }
+                }
+
+                // Phone Number Format Testing Card
+                item(key = "dev_phone_test") {
+                    PhoneFormatTestCard()
                 }
             }
 
@@ -613,19 +651,19 @@ fun SettingsScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "NeuroComet",
+                        text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "Version ${BuildConfig.VERSION_NAME}",
+                        text = stringResource(R.string.settings_version, BuildConfig.VERSION_NAME),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
                     if (easterEggTapCount in 3..6) {
                         Text(
-                            text = "${7 - easterEggTapCount} more taps...",
+                            text = stringResource(R.string.settings_more_taps, 7 - easterEggTapCount),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                         )
@@ -680,7 +718,7 @@ fun AccountInfoCard(user: User, onLogout: () -> Unit) {
                 )
             }
             TextButton(onClick = onLogout) {
-                Text("Logout")
+                Text(stringResource(R.string.settings_logout))
             }
         }
     }
@@ -744,17 +782,19 @@ fun SettingsItem(
 private fun TipsAndHelpCard() {
     var expanded by remember { mutableStateOf(false) }
 
+    data class TipItemRes(val emoji: String, val titleRes: Int, val descRes: Int)
+
     val tips = listOf(
-        TipItem("🔄", "Quick Animation Toggle", "Tap the ♾️ infinity logo on the login screen to quickly enable/disable animations"),
-        TipItem("🦄", "Unlock Rainbow Brain", "Tap the version info 7 times in Settings to unlock the secret Rainbow Brain theme!"),
-        TipItem("🌙", "Reduce Eye Strain", "Enable Dark Mode + Autism Low Stimulation theme for the calmest experience"),
-        TipItem("📖", "Better Readability", "Try Lexend or Atkinson Hyperlegible fonts - designed for neurodivergent readers"),
-        TipItem("🧘", "Calm Experience", "Disable all animations in Settings > Animations and use the Calm or Overload theme"),
-        TipItem("⚡", "Stay Focused", "Use ADHD Task Mode theme + Hyperfocus for minimal distractions"),
-        TipItem("👶", "Protect Kids", "Set up Parental Controls with a PIN to manage screen time and content"),
-        TipItem("🎄", "Holiday Themes", "The logo automatically celebrates holidays and ND awareness events with special colors!"),
-        TipItem("🎨", "25+ Themes", "Explore themes for ADHD, Autism, Anxiety, Colorblind, Low Vision, and your current mood"),
-        TipItem("🔤", "12+ Fonts", "Choose from dyslexia-friendly, ADHD-friendly, and accessibility fonts in Settings > Font & Reading")
+        TipItemRes("🔄", R.string.tip_animation_toggle_title, R.string.tip_animation_toggle_desc),
+        TipItemRes("🦄", R.string.tip_rainbow_brain_title, R.string.tip_rainbow_brain_desc),
+        TipItemRes("🌙", R.string.tip_eye_strain_title, R.string.tip_eye_strain_desc),
+        TipItemRes("📖", R.string.tip_readability_title, R.string.tip_readability_desc),
+        TipItemRes("🧘", R.string.tip_calm_title, R.string.tip_calm_desc),
+        TipItemRes("⚡", R.string.tip_focus_title, R.string.tip_focus_desc),
+        TipItemRes("👶", R.string.tip_kids_title, R.string.tip_kids_desc),
+        TipItemRes("🎄", R.string.tip_holiday_title, R.string.tip_holiday_desc),
+        TipItemRes("🎨", R.string.tip_themes_title, R.string.tip_themes_desc),
+        TipItemRes("🔤", R.string.tip_fonts_title, R.string.tip_fonts_desc)
     )
 
     SettingsCard {
@@ -774,20 +814,20 @@ private fun TipsAndHelpCard() {
                 Spacer(Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Quick Tips & Tricks",
+                        text = stringResource(R.string.tips_title),
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = if (expanded) "Tap to collapse" else "Tap to see ${tips.size} helpful tips",
+                        text = if (expanded) stringResource(R.string.tips_tap_collapse) else stringResource(R.string.tips_tap_expand, tips.size),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Icon(
                     imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = if (expanded) "Collapse" else "Expand",
+                    contentDescription = if (expanded) stringResource(R.string.tips_collapse) else stringResource(R.string.tips_expand),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
@@ -812,13 +852,13 @@ private fun TipsAndHelpCard() {
                         Spacer(Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = tip.title,
+                                text = stringResource(tip.titleRes),
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = tip.description,
+                                text = stringResource(tip.descRes),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -1312,7 +1352,7 @@ fun ThemeSettingsScreen(
                     showEasterEggDialog = false
                     selectedThemeMessage.value = easterEggMessages.random()
                 }) {
-                    Text("You're Awesome! 🙌")
+                    Text(stringResource(R.string.settings_youre_awesome))
                 }
             }
         )
@@ -1505,19 +1545,19 @@ fun ThemeSettingsScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "NeuroComet",
+                        text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "Version ${BuildConfig.VERSION_NAME}",
+                        text = stringResource(R.string.settings_version, BuildConfig.VERSION_NAME),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
                     if (easterEggTapCount in 3..6) {
                         Text(
-                            text = "${7 - easterEggTapCount} more taps...",
+                            text = stringResource(R.string.settings_more_taps, 7 - easterEggTapCount),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                         )
@@ -1525,6 +1565,210 @@ fun ThemeSettingsScreen(
                 }
             }
         }
+    }
+}
+
+/**
+ * Developer testing card for phone number formatting.
+ * Allows testing different phone format styles with live preview.
+ */
+@Composable
+private fun PhoneFormatTestCard() {
+    var testPhoneNumber by remember { mutableStateOf("") }
+    var selectedFormat by remember { mutableStateOf(PhoneFormat.US) }
+    var isExpanded by remember { mutableStateOf(false) }
+
+    SettingsCard {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { isExpanded = !isExpanded }
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Phone,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.dev_phone_format_test),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = stringResource(R.string.dev_phone_format_test_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = if (isExpanded) "Collapse" else "Expand",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            AnimatedVisibility(visible = isExpanded) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Format selector
+                    Text(
+                        text = stringResource(R.string.dev_phone_format_style),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        PhoneFormat.entries.forEach { format ->
+                            FilterChip(
+                                selected = selectedFormat == format,
+                                onClick = { selectedFormat = format },
+                                label = {
+                                    Text(
+                                        when (format) {
+                                            PhoneFormat.US -> "US"
+                                            PhoneFormat.UK -> "UK"
+                                            PhoneFormat.INTERNATIONAL -> "Int'l"
+                                            PhoneFormat.SIMPLE -> "Simple"
+                                        },
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+
+                    // Phone input field
+                    PhoneNumberTextField(
+                        value = testPhoneNumber,
+                        onValueChange = { testPhoneNumber = it },
+                        format = selectedFormat,
+                        label = { Text(stringResource(R.string.dev_phone_test_input)) },
+                        placeholder = {
+                            Text(
+                                when (selectedFormat) {
+                                    PhoneFormat.US -> "(555) 123-4567"
+                                    PhoneFormat.UK -> "07700 900123"
+                                    PhoneFormat.INTERNATIONAL -> "+1 555 123 4567"
+                                    PhoneFormat.SIMPLE -> "555-123-4567"
+                                }
+                            )
+                        }
+                    )
+
+                    // Format info
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.dev_phone_format_pattern),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = when (selectedFormat) {
+                                    PhoneFormat.US -> "(XXX) XXX-XXXX"
+                                    PhoneFormat.UK -> "XXXXX XXXXXX"
+                                    PhoneFormat.INTERNATIONAL -> "+X XXX XXX XXXX"
+                                    PhoneFormat.SIMPLE -> "XXX-XXX-XXXX"
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Screen Timeout Toggle for keeping the screen on.
+ * Neurodivergent-friendly: Prevents screen dimming during focus time, reading, or meditation.
+ */
+@Composable
+private fun ScreenTimeoutToggle() {
+    val context = LocalContext.current
+    val activity = context as? android.app.Activity
+    var isKeptOn by remember {
+        mutableStateOf(
+            activity?.window?.attributes?.flags?.and(
+                android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            ) != 0
+        )
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                activity?.let {
+                    isKeptOn = !isKeptOn
+                    if (isKeptOn) {
+                        it.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    } else {
+                        it.window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    }
+                }
+            }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = if (isKeptOn) Icons.Default.LightMode else Icons.Default.NightsStay,
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.settings_keep_screen_on),
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                text = stringResource(R.string.settings_keep_screen_on_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Switch(
+            checked = isKeptOn,
+            onCheckedChange = { enabled ->
+                activity?.let {
+                    isKeptOn = enabled
+                    if (enabled) {
+                        it.window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    } else {
+                        it.window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    }
+                }
+            }
+        )
     }
 }
 

@@ -32,8 +32,8 @@ android {
         applicationId = "com.kyilmaz.neurocomet"
         minSdk = 26
         targetSdk = 36
-        versionCode = 113
-        versionName = "1.0.0-beta13"
+        versionCode = 125
+        versionName = "1.0.0-rc11"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -70,6 +70,10 @@ android {
             ndk {
                 debugSymbolLevel = "SYMBOL_TABLE"
             }
+            // Optimize for release - no debugging overhead
+            isDebuggable = false
+            // Enable resource optimization
+            isCrunchPngs = true
         }
         debug {
             applicationIdSuffix = ".debug"
@@ -78,8 +82,21 @@ android {
             // Disable minification in debug for faster builds
             isMinifyEnabled = false
             isShrinkResources = false
+            // Skip PNG crunching in debug for faster builds
+            isCrunchPngs = false
         }
     }
+
+    // Split APKs by ABI for smaller download sizes on Play Store
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            isUniversalApk = true // Also generate a universal APK
+        }
+    }
+
 
     // Enable build optimizations
     packaging {
@@ -120,6 +137,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("androidx.biometric:biometric:1.1.0")
 
 
     implementation(libs.androidx.compose.material.icons.extended)

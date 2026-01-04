@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -362,10 +363,10 @@ fun SubscriptionScreen(
                     Spacer(Modifier.height(4.dp))
                     Text(
                         when (purchaseType) {
-                            "lifetime" -> "You're a Lifetime Member!"
-                            "monthly" -> "You're Now Premium!"
-                            "restored" -> "Welcome Back, Premium Member!"
-                            else -> "Welcome to Premium!"
+                            "lifetime" -> stringResource(R.string.premium_lifetime_member)
+                            "monthly" -> stringResource(R.string.premium_now_premium)
+                            "restored" -> stringResource(R.string.premium_welcome_back)
+                            else -> stringResource(R.string.premium_welcome)
                         },
                         style = MaterialTheme.typography.titleMedium,
                         color = Color(0xFFFFD700),

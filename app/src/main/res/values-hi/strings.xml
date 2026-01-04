@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NeuroComet</string>
+
+    <!-- Navigation/Screen Titles -->
+    <string name="nav_feed">फ़ीड</string>
+    <string name="nav_explore">खोजें</string>
+    <string name="nav_messages">संदेश</string>
+    <string name="nav_notifications">सूचनाएं</string>
+    <string name="nav_settings">सेटिंग्स</string>
+
+    <!-- Direct Messages (DM) -->
+    <string name="dm_title">संदेश</string>
+    <string name="dm_search_placeholder">संदेश खोजें</string>
+    <string name="dm_empty_title">अभी तक कोई बातचीत नहीं</string>
+    <string name="dm_empty_subtitle">जब कोई आपको संदेश भेजेगा, तो वह यहां दिखाई देगा।</string>
+    <string name="dm_no_conversations">कोई बातचीत नहीं</string>
+    <string name="dm_conversation_count">%d बातचीत</string>
+    <string name="dm_conversations_count">%d बातचीतें</string>
+    <string name="dm_filtered_count">%1$d में से %2$d</string>
+    <string name="dm_new_message_hint">किसी की प्रोफ़ाइल से नई बातचीत शुरू करें! 💬</string>
+    <string name="dm_new_message">नया संदेश</string>
+
+    <!-- Message Empty States -->
+    <string name="messages_empty_title">अभी तक कोई बातचीत नहीं</string>
+    <string name="messages_empty_subtitle">जब आप किसी को संदेश भेजेंगे, तो वह यहां दिखाई देगा।</string>
+    <string name="messages_empty_hint">सुझाव: एक्सप्लोर → प्रोफ़ाइल पर टैप करें → संदेश।</string>
+    <string name="messages_no_results_title">कोई परिणाम नहीं</string>
+    <string name="messages_no_results_subtitle">कोई अलग खोज करें या सभी पर वापस जाएं।</string>
+    <string name="messages_filtering_unread">आप अपठित फ़िल्टर कर रहे हैं।</string>
+
+    <string name="dm_kids_disabled_title">संदेश बंद हैं</string>
+    <string name="dm_kids_disabled_body">बच्चों के मोड (13 वर्ष से कम) के लिए डायरेक्ट मैसेज अक्षम हैं। माता-पिता इसे सेटिंग्स → सुरक्षा और अभिभावक नियंत्रण में बदल सकते हैं।</string>
+    <string name="dm_conversation_options">बातचीत विकल्प</string>
+    <string name="dm_safety_title">सुरक्षा</string>
+    <string name="dm_safety_body">अगर कुछ गलत लगे, तो अपमानजनक संदेशों की रिपोर्ट करें। 13 वर्ष से कम उम्र के खाते DM का उपयोग नहीं कर सकते।</string>
+    <string name="dm_message_placeholder">संदेश</string>
+    <string name="dm_send">भेजें</string>
+    <string name="dm_back">वापस</string>
+    <string name="dm_report">रिपोर्ट करें</string>
+    <string name="dm_flagged_badge">चिह्नित</string>
+    <string name="dm_flagged_explainer">समीक्षा के लिए चिह्नित</string>
+    <string name="dm_slow_down">धीरे करें…</string>
+    <string name="dm_copy">कॉपी</string>
+    <string name="dm_block_user">उपयोगकर्ता को ब्लॉक करें</string>
+    <string name="dm_unblock_user">उपयोगकर्ता को अनब्लॉक करें</string>
+    <string name="dm_mute_user">म्यूट करें</string>
+    <string name="dm_unmute_user">अनम्यूट करें</string>
+    <string name="dm_block_confirm_title">%s को ब्लॉक करें?</string>
+    <string name="dm_block_confirm_body">वे आपको संदेश नहीं भेज पाएंगे और यह बातचीत छिपा दी जाएगी।</string>
+    <string name="dm_unblock_confirm_title">%s को अनब्लॉक करें?</string>
+    <string name="dm_unblock_confirm_body">वे फिर से आपको संदेश भेज पाएंगे।</string>
+    <string name="dm_copied">कॉपी किया गया</string>
+    <string name="dm_sending">भेज रहे हैं…</string>
+    <string name="dm_failed">विफल</string>
+    <string name="dm_tap_to_retry">पुनः प्रयास करने के लिए टैप करें</string>
+    <string name="dm_blocked_banner">आपने इस उपयोगकर्ता को ब्लॉक किया है।</string>
+    <string name="dm_rate_limited">बहुत सारे संदेश। कृपया धीरे करें।</string>
+    <string name="dm_send_failed">संदेश भेजने में विफल। टैप करें और पुनः प्रयास करें।</string>
+
+    <!-- Status Indicators -->
+    <string name="status_online">ऑनलाइन</string>
+    <string name="status_offline">ऑफ़लाइन</string>
+    <string name="status_blocked">ब्लॉक किया गया</string>
+    <string name="status_muted">म्यूट किया गया</string>
+    <string name="status_away">दूर</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_profile_group">प्रोफ़ाइल</string>
+    <string name="settings_badges_title">बैज</string>
+    <string name="settings_badges_subtitle">अपनी अर्जित उपलब्धियां और लक्ष्य देखें।</string>
+    <string name="settings_visual_comfort_group">विज़ुअल कम्फर्ट और थीमिंग</string>
+    <string name="settings_text_size_title">टेक्स्ट साइज़</string>
+    <string name="settings_text_size_current_label">वर्तमान: %s</string>
+    <string name="settings_dark_mode_title">डार्क मोड</string>
+    <string name="settings_dark_mode_enabled">सक्षम</string>
+    <string name="settings_dark_mode_disabled">अक्षम</string>
+    <string name="settings_high_contrast_title">हाई कॉन्ट्रास्ट मोड</string>
+    <string name="settings_high_contrast_subtitle_enabled">सक्षम (प्योर ब्लैक/व्हाइट)</string>
+    <string name="settings_high_contrast_subtitle_disabled">अक्षम</string>
+    <string name="settings_neuro_centric_theme_title">न्यूरो-सेंट्रिक थीम</string>
+    <string name="settings_current_state_label">वर्तमान स्थिति: %s</string>
+    <string name="settings_go_premium_title">प्रीमियम लें</string>
+    <string name="settings_go_premium_subtitle">विज्ञापन हटाएं और डेवलपर्स का समर्थन करें।</string>
+    <string name="settings_account_group">खाता</string>
+    <string name="settings_logout">लॉगआउट</string>
+    <string name="settings_youre_awesome">आप अद्भुत हैं! 🙌</string>
+    <string name="settings_not_authenticated">उपयोगकर्ता प्रमाणित नहीं है।</string>
+    <string name="settings_verified_human_title">सत्यापित मानव</string>
+    <string name="settings_verified_human_subtitle_verified">स्थिति: सत्यापित</string>
+    <string name="settings_verified_human_subtitle_unverified">स्थिति: असत्यापित</string>
+    <string name="settings_2fa_title">दो-कारक प्रमाणीकरण</string>
+    <string name="settings_2fa_subtitle">लॉगिन पर कोड की आवश्यकता होगी।</string>
+    <string name="settings_developer_options_group">डेवलपर विकल्प</string>
+    <string name="settings_version">संस्करण %s</string>
+    <string name="settings_more_taps">%d और टैप…</string>
+    <string name="settings_force_verify_title">फोर्स वेरिफाई</string>
+    <string name="settings_force_verify_subtitle">उपयोगकर्ता सत्यापित स्थिति टॉगल करें।</string>
+    <string name="settings_fake_premium_title">फ़ेक प्रीमियम</string>
+    <string name="settings_fake_premium_subtitle">भुगतान स्थिति का अनुकरण करें।</string>
+    <string name="settings_mock_interface_title">मॉक इंटरफ़ेस</string>
+    <string name="settings_mock_interface_subtitle">डेमो के लिए नकली डेटा दिखाएं।</string>
+    <string name="settings_simulate_badge_title">बैज नोटिफिकेशन सिमुलेट करें</string>
+    <string name="settings_simulate_badge_subtitle">\'%s\' के लिए नोटिफिकेशन ट्रिगर करता है।</string>
+    <string name="settings_nuke_db_title">डेटाबेस हटाएं</string>
+    <string name="settings_nuke_db_subtitle">सभी पोस्ट हटाएं। अपरिवर्तनीय।</string>
+    <string name="settings_nuke_db_dialog_title">डेटाबेस हटाएं?</string>
+    <string name="settings_nuke_db_dialog_text">यह सर्वर से सभी पोस्ट स्थायी रूप से हटा देगा। यह क्रिया पूर्ववत नहीं की जा सकती।</string>
+    <string name="settings_nuke_db_dialog_confirm">हटाएं</string>
+    <string name="settings_nuke_db_dialog_cancel">रद्द करें</string>
+    <string name="settings_language_test_title">ऐप भाषा (परीक्षण)</string>
+    <string name="settings_language_test_subtitle">ऐप भाषा मैन्युअली सेट करें। ऐप पुनरारंभ की आवश्यकता।</string>
+    <string name="settings_my_profile">मेरी प्रोफ़ाइल</string>
+
+    <!-- Badges Screen -->
+    <string name="badges_screen_title">आपके बैज</string>
+    <string name="badges_earned_section_title">अर्जित बैज</string>
+    <string name="badges_locked_section_title">लॉक्ड बैज</string>
+    <string name="badges_back_button_description">वापस</string>
+    <string name="badge_earned_content_description">अर्जित</string>
+    <string name="badge_locked_content_description">लॉक्ड</string>
+    <string name="badge_name_verified_human">सत्यापित मानव</string>
+    <string name="badge_name_first_post">पहली पोस्ट</string>
+    <string name="badge_name_hyperfocus_master">हाइपरफोकस मास्टर</string>
+    <string name="badge_name_community_pillar">समुदाय का स्तंभ</string>
+    <string name="badge_name_quiet_achiever">शांत उपलब्धिकर्ता</string>
+
+    <!-- Comment Sheet -->
+    <string name="comments_title">टिप्पणियां</string>
+    <string name="comments_add_comment_placeholder">टिप्पणी जोड़ें…</string>
+    <string name="comments_send_button_description">भेजें</string>
+    <string name="comments_view_all">सभी %d टिप्पणियां देखें</string>
+
+    <!-- NeuroState Names -->
+    <string name="neuro_state_default">डिफ़ॉल्ट</string>
+    <string name="neuro_state_hyperfocus">हाइपरफोकस</string>
+    <string name="neuro_state_overload">ओवरलोड</string>
+    <string name="neuro_state_calm">शांत</string>
+
+    <!-- Text Scale Factor Names -->
+    <string name="text_scale_small">छोटा</string>
+    <string name="text_scale_medium">मध्यम</string>
+    <string name="text_scale_large">बड़ा</string>
+    <string name="text_scale_xlarge">बहुत बड़ा</string>
+
+    <!-- Story Creation -->
+    <string name="create_post_hint">आपके मन में क्या है?</string>
+    <string name="create_post_image_url_hint">वैकल्पिक: इमेज URL</string>
+    <string name="create_post_video_url_hint">वैकल्पिक: वीडियो URL</string>
+    <string name="create_post_button">पोस्ट</string>
+    <string name="create_story_title">नई स्टोरी बनाएं</string>
+    <string name="create_story_image_url_hint">आपकी स्टोरी के लिए इमेज URL</string>
+    <string name="create_story_duration_hint">सेकंड में अवधि (जैसे, 5)</string>
+    <string name="create_story_add_button">स्टोरी जोड़ें</string>
+    <string name="create_story_cancel">रद्द करें</string>
+    <string name="story_add_button_content_description">स्टोरी जोड़ें</string>
+    <string name="story_your_story_label">आपकी स्टोरी</string>
+    <string name="story_user_story_content_description">%s की स्टोरी</string>
+
+    <!-- Moments/Stories Section -->
+    <string name="moments_title">पल</string>
+    <string name="moments_new_count">%d नए</string>
+    <string name="moments_your_story">आपकी स्टोरी</string>
+
+    <!-- Story Screen (Viewer) -->
+    <string name="story_content_description">स्टोरी सामग्री</string>
+    <string name="story_close_button_content_description">स्टोरी बंद करें</string>
+    <string name="story_delete_button_content_description">स्टोरी हटाएं</string>
+    <string name="story_delete_dialog_title">स्टोरी हटाएं?</string>
+    <string name="story_delete_dialog_text">यह इस स्टोरी को स्थायी रूप से हटा देगा। यह क्रिया पूर्ववत नहीं की जा सकती।</string>
+    <string name="story_delete_dialog_confirm">हटाएं</string>
+    <string name="story_delete_dialog_cancel">रद्द करें</string>
+
+    <!-- Toast Messages -->
+    <string name="simulate_badge_notification_toast">सिमुलेटेड: नया बैज नोटिफिकेशन!</string>
+    <string name="notification_badge_earned_title">बैज अर्जित: %s</string>
+    <string name="notification_badge_earned_message">आपने उपलब्धि अर्जित की: %s</string>
+
+    <!-- Notification Custom View -->
+    <string name="notification_icon_description">नोटिफिकेशन आइकन</string>
+    <string name="notification_action_dismiss">खारिज करें</string>
+    <string name="notification_action_reply">जवाब दें</string>
+    <string name="notification_action_view">देखें</string>
+    <string name="notification_action_mark_read">पढ़ा के रूप में चिह्नित करें</string>
+
+    <!-- Generic content descriptions for FeedScreen -->
+    <string name="user_avatar_content_description">उपयोगकर्ता अवतार</string>
+    <string name="unknown_user_id">अज्ञात</string>
+    <string name="more_options_content_description">अधिक विकल्प</string>
+    <string name="post_image_content_description">पोस्ट इमेज</string>
+    <string name="share_button_content_description">साझा करें</string>
+    <string name="comment_button_content_description">टिप्पणी</string>
+    <string name="like_button_content_description">पसंद</string>
+
+    <!-- Post Actions -->
+    <string name="post_following_indicator">• फ़ॉलो कर रहे हैं</string>
+    <string name="post_follow_user">@%s को फ़ॉलो करें</string>
+    <string name="post_unfollow_user">@%s को अनफ़ॉलो करें</string>
+    <string name="post_now_following">@%s को फ़ॉलो कर रहे हैं</string>
+    <string name="post_unfollowed">@%s को अनफ़ॉलो किया</string>
+    <string name="post_not_interested">रुचि नहीं है</string>
+    <string name="post_copy_text">टेक्स्ट कॉपी करें</string>
+    <string name="post_save">पोस्ट सेव करें</string>
+    <string name="post_unsave">सेव से हटाएं</string>
+    <string name="post_hide">पोस्ट छुपाएं</string>
+    <string name="post_share">साझा करें</string>
+    <string name="post_share_via">इसके माध्यम से साझा करें…</string>
+    <string name="post_share_post_via">पोस्ट साझा करें</string>
+    <string name="post_share_story">स्टोरी साझा करें</string>
+    <string name="post_share_topic">विषय साझा करें</string>
+    <string name="post_report">रिपोर्ट करें</string>
+    <string name="post_bookmark">बुकमार्क</string>
+    <string name="post_unbookmark">बुकमार्क हटाएं</string>
+    <string name="post_delete">हटाएं</string>
+    <string name="post_bookmarked">बुकमार्क किया!</string>
+    <string name="post_unbookmarked">बुकमार्क हटाया</string>
+    <string name="post_copied">क्लिपबोर्ड पर कॉपी किया</string>
+    <string name="post_time_just_now">अभी</string>
+    <string name="post_time_minutes_ago">%d मिनट पहले</string>
+    <string name="post_time_hours_ago">%d घंटे पहले</string>
+    <string name="post_time_days_ago">%d दिन पहले</string>
+    <string name="post_block_user">@%s को ब्लॉक करें</string>
+    <string name="post_report_post">पोस्ट रिपोर्ट करें</string>
+    <string name="post_delete_post">पोस्ट हटाएं</string>
+
+    <!-- Create Post Dialog -->
+    <string name="create_post_title">पोस्ट बनाएं</string>
+    <string name="create_post_close">बंद करें</string>
+    <string name="create_post_how_feeling">आप कैसा महसूस कर रहे हैं?</string>
+    <string name="create_post_placeholder">आपके मन में क्या है?</string>
+    <string name="create_post_add_media">मीडिया जोड़ें</string>
+    <string name="create_post_image_url">इमेज URL</string>
+    <string name="create_post_video_url">वीडियो URL</string>
+    <string name="create_post_content_warning">सामग्री चेतावनी</string>
+    <string name="create_post_content_warning_desc">इस पोस्ट में संवेदनशील सामग्री हो सकती है</string>
+    <string name="create_post_cancel">रद्द करें</string>
+    <string name="create_post_post">पोस्ट</string>
+    <string name="create_post_chars_remaining">%d अक्षर शेष</string>
+    <string name="create_post_chars_over">%d अक्षर सीमा से अधिक</string>
+
+    <!-- Report Dialog -->
+    <string name="report_dialog_title">सामग्री रिपोर्ट करें</string>
+    <string name="report_dialog_reason_hint">हमें और बताएं (वैकल्पिक)</string>
+    <string name="report_dialog_submit">रिपोर्ट सबमिट करें</string>
+    <string name="report_dialog_cancel">रद्द करें</string>
+
+    <!-- Premium Dialog -->
+    <string name="premium_dialog_title">प्रीमियम</string>
+    <string name="premium_dialog_message">इस डेमो बिल्ड में प्रीमियम अपग्रेड वायर्ड नहीं हैं।</string>
+    <string name="premium_lifetime_member">आप लाइफटाइम मेंबर हैं!</string>
+    <string name="premium_now_premium">अब आप प्रीमियम हैं!</string>
+    <string name="premium_welcome_back">वापस स्वागत है, प्रीमियम मेंबर!</string>
+    <string name="premium_welcome">प्रीमियम में स्वागत है!</string>
+
+    <!-- Common Buttons -->
+    <string name="button_ok">ठीक है</string>
+    <string name="button_cancel">रद्द करें</string>
+    <string name="button_yes">हां</string>
+    <string name="button_no">नहीं</string>
+    <string name="button_close">बंद करें</string>
+    <string name="button_save">सेव करें</string>
+    <string name="button_delete">हटाएं</string>
+    <string name="button_edit">संपादित करें</string>
+
+    <!-- Menu Items -->
+    <string name="menu_view_profile">प्रोफ़ाइल देखें</string>
+    <string name="menu_search_chat">चैट में खोजें</string>
+    <string name="menu_mute_notifications">नोटिफिकेशन म्यूट करें</string>
+    <string name="menu_unmute_notifications">नोटिफिकेशन अनम्यूट करें</string>
+    <string name="menu_block_user">उपयोगकर्ता ब्लॉक करें</string>
+    <string name="menu_unblock_user">उपयोगकर्ता अनब्लॉक करें</string>
+    <string name="menu_report">रिपोर्ट करें</string>
+    <string name="menu_share">साझा करें</string>
+    <string name="menu_copy_link">लिंक कॉपी करें</string>
+    <string name="menu_hide">छुपाएं</string>
+
+    <!-- Share Sheet -->
+    <string name="share_sheet_title">पोस्ट साझा करें</string>
+    <string name="share_sheet_copy_link">लिंक कॉपी करें</string>
+    <string name="share_sheet_copy_link_desc">पोस्ट लिंक क्लिपबोर्ड पर कॉपी करें</string>
+    <string name="share_sheet_share_via">इसके माध्यम से साझा करें…</string>
+    <string name="share_sheet_share_via_desc">अन्य ऐप्स में साझा करें</string>
+    <string name="share_sheet_send_dm">DM में भेजें</string>
+    <string name="share_sheet_send_dm_desc">सीधे दोस्त को साझा करें</string>
+    <string name="share_sheet_repost">रीपोस्ट</string>
+    <string name="share_sheet_repost_desc">अपनी फ़ीड में साझा करें</string>
+
+    <!-- Post Actions -->
+    <string name="post_action_like">पसंद</string>
+    <string name="post_action_comment">टिप्पणी</string>
+    <string name="post_action_share">साझा करें</string>
+    <string name="post_action_save">सेव करें</string>
+    <string name="post_likes_count">%d पसंद</string>
+    <string name="post_comments_shares_count">%d टिप्पणियां • %d साझा</string>
+    <string name="post_content_hidden_kids">बच्चों के मोड के लिए सामग्री छुपाई गई</string>
+
+    <!-- Delete Post Dialog -->
+    <string name="delete_post_title">पोस्ट हटाएं?</string>
+    <string name="delete_post_message">यह क्रिया पूर्ववत नहीं की जा सकती। क्या आप वाकई इस पोस्ट को हटाना चाहते हैं?</string>
+
+    <!-- Time Formats -->
+    <string name="time_just_now">अभी</string>
+    <string name="time_format_minutes">%d मिनट पहले</string>
+    <string name="time_format_hours">%d घंटे पहले</string>
+    <string name="time_format_days">%d दिन पहले</string>
+
+    <!-- Toast Messages -->
+    <string name="toast_profile_coming_soon">प्रोफ़ाइल व्यू जल्द आ रहा है! 👤</string>
+    <string name="toast_search_coming_soon">चैट सर्च जल्द आ रहा है! 🔍</string>
+    <string name="toast_notifications_muted">नोटिफिकेशन म्यूट किए गए 🔕</string>
+    <string name="toast_notifications_unmuted">नोटिफिकेशन अनम्यूट किए गए 🔔</string>
+    <string name="toast_user_blocked">उपयोगकर्ता ब्लॉक किया ✗</string>
+    <string name="toast_user_unblocked">उपयोगकर्ता अनब्लॉक किया ✓</string>
+    <string name="toast_copied">कॉपी किया!</string>
+    <string name="toast_shared">साझा किया!</string>
+    <string name="toast_reported">रिपोर्ट किया, धन्यवाद!</string>
+    <string name="toast_hidden">फ़ीड से छुपाया</string>
+
+    <!-- Message Actions -->
+    <string name="action_copy">कॉपी</string>
+    <string name="action_react">प्रतिक्रिया…</string>
+    <string name="action_retry">पुनः प्रयास</string>
+    <string name="action_pin">पिन करें</string>
+    <string name="action_unpin">अनपिन करें</string>
+    <string name="action_archive">आर्काइव करें</string>
+    <string name="action_delete_chat">चैट हटाएं</string>
+
+    <!-- Explore Screen -->
+    <string name="explore_title">खोजें</string>
+    <string name="explore_subtitle">समुदाय और संसाधन खोजें</string>
+    <string name="explore_featured">विशेष</string>
+    <string name="explore_trending">ट्रेंडिंग</string>
+    <string name="explore_for_you">आपके लिए</string>
+    <string name="explore_search_placeholder">विषय खोजें…</string>
+    <string name="explore_members">%s सदस्य</string>
+    <string name="explore_posts">%s पोस्ट</string>
+    <string name="explore_popular">लोकप्रिय</string>
+    <string name="explore_new">नया</string>
+    <string name="explore_see_all">सभी देखें</string>
+    <string name="explore_online_now">%d अभी ऑनलाइन</string>
+
+    <!-- Notifications Screen -->
+    <string name="notifications_title">नोटिफिकेशन</string>
+    <string name="notifications_empty">अभी तक कोई नोटिफिकेशन नहीं</string>
+    <string name="notifications_mark_all_read">सभी पढ़े के रूप में चिह्नित करें</string>
+    <string name="notifications_unread_count">%d अपठित</string>
+
+    <!-- Feed Screen -->
+    <string name="feed_title">फ़ीड</string>
+    <string name="feed_empty">अभी तक कोई पोस्ट नहीं</string>
+    <string name="feed_refresh">रिफ्रेश करने के लिए खींचें</string>
+    <string name="feed_new_posts">नई पोस्ट उपलब्ध</string>
+    <string name="feed_reading_time_seconds">⏱️ ~%d सेकंड पढ़ें</string>
+    <string name="feed_reading_time_minutes">⏱️ ~%d मिनट पढ़ें</string>
+    <string name="feed_saved">सेव किया!</string>
+    <string name="feed_removed_from_saved">सेव से हटाया</string>
+    <string name="feed_save_post">पोस्ट सेव करें</string>
+    <string name="feed_content_hidden_kids">बच्चों के मोड के लिए सामग्री छुपाई गई</string>
+
+    <!-- Emotional Tones -->
+    <string name="tone_neutral">तटस्थ</string>
+    <string name="tone_happy">सकारात्मक वाइब्स</string>
+    <string name="tone_excited">रोमांचक!</string>
+    <string name="tone_sad">भावनात्मक सामग्री</string>
+    <string name="tone_anxious">तीव्र लग सकता है</string>
+    <string name="tone_frustrated">निकास</string>
+    <string name="tone_supportive">सहायक</string>
+    <string name="tone_question">मदद मांग रहे हैं</string>
+    <string name="tone_celebration">जश्न मना रहे हैं!</string>
+    <string name="tone_informative">जानकारीपूर्ण</string>
+    <string name="tone_may_be_intense">तीव्र हो सकता है</string>
+
+    <!-- Social Settings -->
+    <string name="social_show_online_status">ऑनलाइन स्थिति दिखाएं</string>
+    <string name="social_show_online_status_desc">दूसरों को देखने दें जब आप सक्रिय हों</string>
+
+    <!-- Community Detail Screen -->
+    <string name="community_back">वापस</string>
+    <string name="community_share">समुदाय साझा करें</string>
+    <string name="community_more_options">अधिक विकल्प</string>
+    <string name="community_join">समुदाय से जुड़ें</string>
+    <string name="community_leave">समुदाय छोड़ें</string>
+    <string name="community_joined_toast">%s से जुड़ गए</string>
+    <string name="community_left_toast">%s छोड़ दिया</string>
+    <string name="community_mute_notifications">नोटिफिकेशन म्यूट करें</string>
+    <string name="community_turn_on_notifications">नोटिफिकेशन चालू करें</string>
+    <string name="community_notifications_on_toast">%s के लिए नोटिफिकेशन चालू</string>
+    <string name="community_notifications_muted_toast">%s के लिए नोटिफिकेशन म्यूट</string>
+    <string name="community_save">समुदाय सेव करें</string>
+    <string name="community_saved_toast">%s बुकमार्क में सेव किया</string>
+    <string name="community_link_copied">लिंक क्लिपबोर्ड पर कॉपी किया</string>
+    <string name="community_rules">समुदाय नियम</string>
+    <string name="community_rules_coming_soon">समुदाय नियम जल्द आ रहे हैं</string>
+    <string name="community_report">समुदाय रिपोर्ट करें</string>
+    <string name="community_reported_toast">रिपोर्ट सबमिट की गई। धन्यवाद!</string>
+    <string name="community_compose">लिखें</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_my_profile">मेरी प्रोफ़ाइल</string>
+    <string name="profile_edit">प्रोफ़ाइल संपादित करें</string>
+    <string name="profile_share">प्रोफ़ाइल साझा करें</string>
+    <string name="profile_more_options">अधिक विकल्प</string>
+    <string name="profile_posts">पोस्ट</string>
+    <string name="profile_followers">फ़ॉलोअर्स</string>
+    <string name="profile_following">फ़ॉलोइंग</string>
+    <string name="profile_follow">फ़ॉलो करें</string>
+    <string name="profile_message">संदेश</string>
+    <string name="profile_mutual_friends">म्यूचुअल फ्रेंड्स</string>
+    <string name="profile_communication_preferences">संवाद प्राथमिकताएं</string>
+    <string name="profile_how_to_communicate">मुझसे कैसे संवाद करें</string>
+    <string name="profile_share_first_post">अपनी पहली पोस्ट साझा करें</string>
+    <string name="profile_no_posts_yet">अभी तक कोई पोस्ट नहीं</string>
+    <string name="profile_posts_will_appear">आपकी पोस्ट यहां दिखाई देंगी</string>
+    <string name="profile_about">के बारे में</string>
+    <string name="profile_joined">शामिल हुए</string>
+    <string name="profile_website">वेबसाइट</string>
+    <string name="profile_special_interests">विशेष रुचियां</string>
+    <string name="profile_interests_subtitle">वे चीजें जिनके बारे में मैं गहराई से जानता/जानती हूं</string>
+    <string name="profile_badges_achievements">बैज और उपलब्धियां</string>
+    <string name="profile_no_badges_yet">अभी तक कोई बैज नहीं</string>
+    <string name="profile_earned">अर्जित</string>
+    <string name="profile_how_feeling">आज आप कैसा महसूस कर रहे हैं?</string>
+    <string name="profile_selected">चयनित</string>
+    <string name="profile_cancel">रद्द करें</string>
+    <string name="profile_got_it">समझ गया</string>
+
+    <!-- Explore Topics -->
+    <string name="explore_section_adhd">ADHD</string>
+    <string name="explore_section_autism">ऑटिज़्म</string>
+    <string name="explore_section_daily_life">दैनिक जीवन</string>
+    <string name="explore_section_lgbtq">LGBTQ+ और पहचान</string>
+
+    <string name="explore_topic_adhd_hacks">ADHD हैक्स</string>
+    <string name="explore_topic_adhd_hacks_desc">उत्पादकता टिप्स और लाइफ हैक्स जो वास्तव में काम करते हैं</string>
+    <string name="explore_topic_safe_foods">सेफ फूड्स</string>
+    <string name="explore_topic_safe_foods_desc">आरामदायक खाद्य पदार्थ, रेसिपी और खाने की चिंता सहायता</string>
+    <string name="explore_topic_sleep">नींद और आराम</string>
+    <string name="explore_topic_sleep_desc">बेहतर नींद के लिए टिप्स और नींद से संबंधित संघर्ष</string>
+    <string name="explore_topic_stimming">स्टिमिंग</string>
+    <string name="explore_topic_stimming_desc">स्टिम टॉयज, तकनीकें और स्टिम-फ्रेंडली स्पेस</string>
+    <string name="explore_topic_sensory">सेंसरी टिप्स</string>
+    <string name="explore_topic_sensory_desc">सेंसरी ओवरलोड और सेंसरी-सीकिंग का प्रबंधन</string>
+    <string name="explore_topic_meltdowns">मेल्टडाउन सपोर्ट</string>
+    <string name="explore_topic_meltdowns_desc">मेल्टडाउन से निपटना, रोकथाम और रिकवरी</string>
+    <string name="explore_topic_social_skills">सामाजिक कौशल</string>
+    <string name="explore_topic_social_skills_desc">सामाजिक स्थितियों को नेविगेट करना और संवाद टिप्स</string>
+    <string name="explore_topic_masking">मास्किंग और अनमास्किंग</string>
+    <string name="explore_topic_masking_desc">मास्किंग के अनुभव और प्रामाणिक रूप से जीना</string>
+    <string name="explore_topic_special_interests">विशेष रुचियां</string>
+    <string name="explore_topic_special_interests_desc">अपने जुनून और गहरे ज्ञान को साझा करें</string>
+    <string name="explore_topic_work">कार्य और स्कूल</string>
+    <string name="explore_topic_work_desc">कार्यस्थल और शैक्षणिक सहायता और अनुकूलन</string>
+    <string name="explore_topic_late_diagnosed">देर से निदान</string>
+    <string name="explore_topic_late_diagnosed_desc">वयस्क निदान अनुभव और पहचान अन्वेषण</string>
+    <string name="explore_topic_parenting">ND पेरेंटिंग</string>
+    <string name="explore_topic_parenting_desc">न्यूरोडाइवर्जेंट माता-पिता और ND बच्चों की परवरिश</string>
+    <string name="explore_topic_executive_function">एग्जीक्यूटिव फंक्शन</string>
+    <string name="explore_topic_executive_function_desc">कार्य प्रबंधन, संगठन और वयस्कता</string>
+
+    <!-- LGBTQ+ Topics -->
+    <string name="explore_topic_lgbtq_nd">LGBTQ+ और न्यूरोडाइवर्जेंट</string>
+    <string name="explore_topic_lgbtq_nd_desc">क्वीर और न्यूरोडाइवर्जेंट पहचान का जश्न</string>
+    <string name="explore_topic_trans_nd">ट्रांस और ND</string>
+    <string name="explore_topic_trans_nd_desc">ट्रांसजेंडर और जेंडर-डाइवर्स न्यूरोडाइवर्जेंट लोगों के लिए सहायता</string>
+    <string name="explore_topic_queer_pride">क्वीर प्राइड</string>
+    <string name="explore_topic_queer_pride_desc">क्वीर खुशी, प्राइड इवेंट्स और समुदाय का जश्न</string>
+    <string name="explore_topic_ace_aro">एसेक्सुअल/एरोमांटिक स्पेक्ट्रम</string>
+    <string name="explore_topic_ace_aro_desc">एसेक्सुअल, एरोमांटिक न्यूरोडाइवर्जेंट अनुभव</string>
+    <string name="explore_topic_nonbinary">नॉन-बाइनरी और ND</string>
+    <string name="explore_topic_nonbinary_desc">नॉन-बाइनरी, जेंडरक्वीर समुदाय</string>
+    <string name="explore_topic_coming_out">कमिंग आउट स्टोरीज</string>
+    <string name="explore_topic_coming_out_desc">कमिंग आउट यात्राएं और स्वीकृति खोजना</string>
+
+    <!-- Security Messages -->
+    <string name="security_rooted_device">यह ऐप आपकी सुरक्षा के लिए रूटेड डिवाइस पर नहीं चल सकता।</string>
+    <string name="security_debug_not_allowed">प्रोडक्शन बिल्ड में डिबगिंग की अनुमति नहीं है।</string>
+    <string name="security_tampering_detected">सुरक्षा फ्रेमवर्क टैम्परिंग का पता चला।</string>
+    <string name="security_integrity_failed">ऐप इंटीग्रिटी सत्यापन विफल।</string>
+    <string name="security_emulator_not_allowed">यह ऐप एमुलेटर पर नहीं चल सकता।</string>
+    <string name="security_status_excellent">✅ डिवाइस सुरक्षा: उत्कृष्ट</string>
+    <string name="security_status_good">✅ डिवाइस सुरक्षा: अच्छी</string>
+    <string name="security_status_fair">⚠️ डिवाइस सुरक्षा: ठीक - कुछ सुविधाएं प्रतिबंधित हो सकती हैं</string>
+    <string name="security_status_at_risk">🔴 डिवाइस सुरक्षा: जोखिम में - सुरक्षा सुविधाएं सक्षम</string>
+    <string name="security_status_critical">🚨 डिवाइस सुरक्षा: गंभीर - ऐप प्रतिबंध सक्रिय</string>
+
+</resources>
+

@@ -24,6 +24,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import com.kyilmaz.neurocomet.Post
 import com.kyilmaz.neurocomet.BubblyPostCard
 import java.time.Instant
@@ -61,7 +62,7 @@ fun MockCategoryDetailScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.community_back))
                     }
                 },
                 actions = {
@@ -69,13 +70,13 @@ fun MockCategoryDetailScreen(
                     IconButton(onClick = {
                         shareCommunity(context, categoryName)
                     }) {
-                        Icon(Icons.Filled.Share, contentDescription = "Share community")
+                        Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.community_share))
                     }
 
                     // 3-dot menu
                     Box {
                         IconButton(onClick = { showMenu = true }) {
-                            Icon(Icons.Filled.MoreVert, contentDescription = "More options")
+                            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.community_more_options))
                         }
 
                         DropdownMenu(
@@ -84,13 +85,13 @@ fun MockCategoryDetailScreen(
                         ) {
                             // Join/Leave
                             DropdownMenuItem(
-                                text = { Text(if (isJoined) "Leave Community" else "Join Community") },
+                                text = { Text(if (isJoined) stringResource(R.string.community_leave) else stringResource(R.string.community_join)) },
                                 onClick = {
                                     isJoined = !isJoined
                                     showMenu = false
                                     Toast.makeText(
                                         context,
-                                        if (isJoined) "Joined $categoryName" else "Left $categoryName",
+                                        if (isJoined) context.getString(R.string.community_joined_toast, categoryName) else context.getString(R.string.community_left_toast, categoryName),
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 },
@@ -104,13 +105,13 @@ fun MockCategoryDetailScreen(
 
                             // Notifications
                             DropdownMenuItem(
-                                text = { Text(if (isNotificationsOn) "Mute Notifications" else "Turn On Notifications") },
+                                text = { Text(if (isNotificationsOn) stringResource(R.string.community_mute_notifications) else stringResource(R.string.community_turn_on_notifications)) },
                                 onClick = {
                                     isNotificationsOn = !isNotificationsOn
                                     showMenu = false
                                     Toast.makeText(
                                         context,
-                                        if (isNotificationsOn) "Notifications on for $categoryName" else "Notifications muted for $categoryName",
+                                        if (isNotificationsOn) context.getString(R.string.community_notifications_on_toast, categoryName) else context.getString(R.string.community_notifications_muted_toast, categoryName),
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 },
@@ -126,10 +127,10 @@ fun MockCategoryDetailScreen(
 
                             // Save/Bookmark
                             DropdownMenuItem(
-                                text = { Text("Save Community") },
+                                text = { Text(stringResource(R.string.community_save)) },
                                 onClick = {
                                     showMenu = false
-                                    Toast.makeText(context, "$categoryName saved to bookmarks", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.community_saved_toast, categoryName), Toast.LENGTH_SHORT).show()
                                 },
                                 leadingIcon = {
                                     Icon(Icons.Outlined.BookmarkBorder, contentDescription = null)
@@ -138,13 +139,13 @@ fun MockCategoryDetailScreen(
 
                             // Copy Link
                             DropdownMenuItem(
-                                text = { Text("Copy Link") },
+                                text = { Text(stringResource(R.string.menu_copy_link)) },
                                 onClick = {
                                     showMenu = false
                                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                                     val clip = android.content.ClipData.newPlainText("Community Link", "https://NeuroComet.app/community/${categoryName.lowercase().replace(" ", "-")}")
                                     clipboard.setPrimaryClip(clip)
-                                    Toast.makeText(context, "Link copied to clipboard", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.community_link_copied), Toast.LENGTH_SHORT).show()
                                 },
                                 leadingIcon = {
                                     Icon(Icons.Outlined.Link, contentDescription = null)
@@ -155,10 +156,10 @@ fun MockCategoryDetailScreen(
 
                             // Community Rules
                             DropdownMenuItem(
-                                text = { Text("Community Rules") },
+                                text = { Text(stringResource(R.string.community_rules)) },
                                 onClick = {
                                     showMenu = false
-                                    Toast.makeText(context, "Community rules coming soon", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.community_rules_coming_soon), Toast.LENGTH_SHORT).show()
                                 },
                                 leadingIcon = {
                                     Icon(Icons.Outlined.Gavel, contentDescription = null)
@@ -167,10 +168,10 @@ fun MockCategoryDetailScreen(
 
                             // Report
                             DropdownMenuItem(
-                                text = { Text("Report Community") },
+                                text = { Text(stringResource(R.string.community_report)) },
                                 onClick = {
                                     showMenu = false
-                                    Toast.makeText(context, "Report submitted. Thank you!", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.community_reported_toast), Toast.LENGTH_SHORT).show()
                                 },
                                 leadingIcon = {
                                     Icon(Icons.Outlined.Flag, contentDescription = null)
@@ -190,7 +191,7 @@ fun MockCategoryDetailScreen(
             ExtendedFloatingActionButton(
                 onClick = { showComposeDialog = true },
                 icon = { Icon(Icons.Filled.Edit, contentDescription = null) },
-                text = { Text("Compose") },
+                text = { Text(stringResource(R.string.community_compose)) },
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             )
@@ -349,19 +350,18 @@ private fun ComposePostDialog(
  * Share a community via system share sheet
  */
 private fun shareCommunity(context: Context, categoryName: String) {
-    val shareText = buildString {
-        append("Check out the $categoryName community on NeuroComet! 🧠✨\n\n")
-        append("Join a supportive space for neurodivergent individuals.\n\n")
-        append("https://NeuroComet.app/community/${categoryName.lowercase().replace(" ", "-")}")
-    }
+    val categorySlug = categoryName.lowercase().replace(" ", "-")
+    val shareText = context.getString(R.string.share_category_text, categoryName, categorySlug)
+    val shareSubject = context.getString(R.string.share_category_subject, categoryName)
+    val shareChooser = context.getString(R.string.share_category_chooser, categoryName)
 
     val intent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
-        putExtra(Intent.EXTRA_SUBJECT, "$categoryName - NeuroComet Community")
+        putExtra(Intent.EXTRA_SUBJECT, shareSubject)
         putExtra(Intent.EXTRA_TEXT, shareText)
     }
 
-    context.startActivity(Intent.createChooser(intent, "Share $categoryName"))
+    context.startActivity(Intent.createChooser(intent, shareChooser))
 }
 
 private fun generateMockPostsForCategory(category: String): List<Post> {

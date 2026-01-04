@@ -12,9 +12,15 @@
     <!-- Direct Messages (DM) -->
     <string name="dm_title">Meddelanden</string>
     <string name="dm_search_placeholder">Sök meddelanden</string>
-    <string name="dm_empty_title">Inga konversationer ännu</string>
-    <string name="dm_empty_subtitle">När någon skickar ett meddelande till dig visas det här.</string>
-    <string name="dm_kids_disabled_title">Meddelanden är avstängda</string>
+    <string name="dm_empty_title">Inga konversationer än</string>
+    <string name="dm_empty_subtitle">När någon skickar ett meddelande till dig ser du det här.</string>
+    <string name="dm_no_conversations">Inga konversationer</string>
+    <string name="dm_conversation_count">%d konversation</string>
+    <string name="dm_conversations_count">%d konversationer</string>
+    <string name="dm_filtered_count">%1$d av %2$d</string>
+    <string name="dm_new_message_hint">Starta en ny konversation från någons profil! 💬</string>
+    <string name="dm_new_message">Nytt Meddelande</string>
+    <string name="dm_kids_disabled_title">Meddelanden avstängda</string>
     <string name="dm_kids_disabled_body">Direktmeddelanden är avstängda för barnläge (under 13 år). En förälder kan ändra detta i Inställningar → Säkerhet och Föräldrakontroll.</string>
     <string name="dm_conversation_options">Konversationsalternativ</string>
     <string name="dm_safety_title">Säkerhet</string>
@@ -43,6 +49,13 @@
     <string name="dm_rate_limited">För många meddelanden. Vänligen lugna ner dig.</string>
     <string name="dm_send_failed">Meddelandet kunde inte skickas. Tryck för att försöka igen.</string>
 
+    <!-- Status Indicators -->
+    <string name="status_online">Online</string>
+    <string name="status_offline">Offline</string>
+    <string name="status_blocked">Blockerad</string>
+    <string name="status_muted">Tyst</string>
+    <string name="status_away">Borta</string>
+
     <!-- Settings Screen -->
     <string name="settings_profile_group">Profil</string>
     <string name="settings_badges_title">Utmärkelser</string>
@@ -67,6 +80,8 @@
     <string name="settings_2fa_title">Tvåfaktorsautentisering</string>
     <string name="settings_2fa_subtitle">Kräv en kod vid inloggning.</string>
     <string name="settings_developer_options_group">Utvecklaralternativ</string>
+    <string name="settings_version">Version %s</string>
+    <string name="settings_more_taps">%d tryck till…</string>
     <string name="settings_force_verify_title">Tvinga verifiering</string>
     <string name="settings_force_verify_subtitle">Växla användarens verifieringsstatus.</string>
     <string name="settings_fake_premium_title">Falsk Premium</string>
@@ -131,6 +146,11 @@
     <string name="story_your_story_label">Din story</string>
     <string name="story_user_story_content_description">%s story</string>
 
+    <!-- Moments/Stories Section -->
+    <string name="moments_title">Ögonblick</string>
+    <string name="moments_new_count">%d nya</string>
+    <string name="moments_your_story">Din story</string>
+
     <!-- Story Screen (Viewer) -->
     <string name="story_content_description">Story-innehåll</string>
     <string name="story_close_button_content_description">Stäng story</string>
@@ -160,4 +180,397 @@
     <string name="share_button_content_description">Dela</string>
     <string name="comment_button_content_description">Kommentera</string>
     <string name="like_button_content_description">Gilla</string>
+
+    <!-- Post Actions -->
+    <string name="post_following_indicator">• Följer</string>
+    <string name="post_follow_user">Följ @%s</string>
+    <string name="post_unfollow_user">Sluta följa @%s</string>
+    <string name="post_now_following">Du följer nu @%s</string>
+    <string name="post_unfollowed">Du följer inte längre @%s</string>
+    <string name="post_not_interested">Inte intresserad</string>
+    <string name="post_copy_text">Kopiera text</string>
+    <string name="post_report">Rapportera</string>
+    <string name="post_bookmark">Spara</string>
+    <string name="post_unbookmark">Ta bort sparad</string>
+    <string name="post_delete">Radera</string>
+    <string name="post_bookmarked">Sparad!</string>
+    <string name="post_unbookmarked">Sparad borttagen</string>
+    <string name="post_copied">Kopierat till urklipp</string>
+    <string name="post_time_just_now">Nyss</string>
+    <string name="post_time_minutes_ago">%d min sedan</string>
+    <string name="post_time_hours_ago">%d tim sedan</string>
+    <string name="post_time_days_ago">%d d sedan</string>
+    <string name="post_block_user">Blockera @%s</string>
+    <string name="post_report_post">Rapportera inlägg</string>
+    <string name="post_delete_post">Radera inlägg</string>
+
+    <!-- Report Dialog -->
+    <string name="report_dialog_title">Rapportera innehåll</string>
+    <string name="report_dialog_reason_hint">Berätta mer (valfritt)</string>
+    <string name="report_dialog_submit">Skicka rapport</string>
+    <string name="report_dialog_cancel">Avbryt</string>
+
+    <!-- Premium Dialog -->
+    <string name="premium_dialog_title">Premium</string>
+    <string name="premium_dialog_message">Premium-uppgraderingar är inte anslutna i denna demoversion.</string>
+
+    <!-- Common Buttons -->
+    <string name="button_ok">OK</string>
+    <string name="button_cancel">Avbryt</string>
+    <string name="button_yes">Ja</string>
+    <string name="button_no">Nej</string>
+    <string name="button_close">Stäng</string>
+    <string name="button_save">Spara</string>
+    <string name="button_delete">Radera</string>
+    <string name="button_edit">Redigera</string>
+
+    <!-- Menu Items -->
+    <string name="menu_view_profile">Visa profil</string>
+    <string name="menu_search_chat">Sök i chatten</string>
+    <string name="menu_mute_notifications">Tysta aviseringar</string>
+    <string name="menu_unmute_notifications">Aktivera aviseringar</string>
+    <string name="menu_block_user">Blockera användare</string>
+    <string name="menu_unblock_user">Avblockera användare</string>
+    <string name="menu_share">Dela</string>
+    <string name="menu_copy_link">Kopiera länk</string>
+    <string name="menu_hide">Dölj</string>
+    <string name="menu_report">Rapportera</string>
+
+    <!-- Toast Messages -->
+    <string name="toast_profile_coming_soon">Profil kommer snart! 👤</string>
+    <string name="toast_search_coming_soon">Sök kommer snart! 🔍</string>
+    <string name="toast_notifications_muted">Aviseringar tystade 🔕</string>
+    <string name="toast_notifications_unmuted">Aviseringar aktiverade 🔔</string>
+    <string name="toast_user_blocked">Användare blockerad ✗</string>
+    <string name="toast_user_unblocked">Användare avblockerad ✓</string>
+    <string name="toast_copied">Kopierat!</string>
+    <string name="toast_shared">Delat!</string>
+    <string name="toast_reported">Rapporterat, tack!</string>
+    <string name="toast_hidden">Dold från flödet</string>
+
+    <!-- Message Actions -->
+    <string name="action_copy">Kopiera</string>
+    <string name="action_react">Reagera…</string>
+    <string name="action_retry">Försök igen</string>
+    <string name="action_pin">Fäst</string>
+    <string name="action_unpin">Ta bort nål</string>
+    <string name="action_archive">Arkivera</string>
+    <string name="action_delete_chat">Radera chatt</string>
+
+    <!-- Explore Screen -->
+    <string name="explore_title">Utforska</string>
+    <string name="explore_subtitle">Upptäck gemenskaper och resurser</string>
+    <string name="explore_featured">Utvalda</string>
+    <string name="explore_trending">Trendande</string>
+    <string name="explore_for_you">För dig</string>
+    <string name="explore_search_placeholder">Sök ämnen…</string>
+
+    <!-- Notifications Screen -->
+    <string name="notifications_title">Aviseringar</string>
+    <string name="notifications_empty">Inga aviseringar</string>
+    <string name="notifications_mark_all_read">Markera allt som läst</string>
+    <string name="notifications_unread_count">%d olästa</string>
+
+    <!-- Feed Screen -->
+    <string name="feed_title">Flöde</string>
+    <string name="feed_empty">Inga inlägg än</string>
+    <string name="feed_refresh">Dra för att uppdatera</string>
+    <string name="feed_new_posts">Nya inlägg tillgängliga</string>
+    <string name="feed_reading_time_seconds">⏱️ ~%ds läsning</string>
+    <string name="feed_reading_time_minutes">⏱️ ~%dm läsning</string>
+    <string name="feed_saved">Sparat!</string>
+    <string name="feed_removed_from_saved">Borttaget från sparade</string>
+    <string name="feed_save_post">Spara inlägg</string>
+    <string name="feed_content_hidden_kids">Innehåll dolt för barnläge</string>
+
+    <!-- Create Post Dialog -->
+    <string name="create_post_tone_label">Ton</string>
+    <string name="create_post_add_image">Lägg till bild</string>
+    <string name="create_post_add_video">Lägg till video</string>
+    <string name="create_post_posting">Publicerar…</string>
+
+    <!-- Hide Post -->
+    <string name="post_hide">Dölj inlägg</string>
+    <string name="post_hidden">Inlägg dolt</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">Utvecklaralternativ</string>
+    <string name="dev_phone_format_test">Telefonnummerformatering</string>
+    <string name="dev_phone_format_test_desc">Testa automatisk formatering för olika regioner</string>
+    <string name="dev_phone_format_style">Formatstil</string>
+    <string name="dev_phone_test_input">Ange telefonnummer</string>
+    <string name="dev_phone_format_pattern">Mönster</string>
+
+    <!-- Mock Notifications -->
+    <string name="mock_notif_welcome_title">Välkommen till NeuroComet! 👋</string>
+    <string name="mock_notif_welcome_msg">Vi är så glada att du är här. Det här är ett tryggt utrymme designat för neurodivergenta sinnen.</string>
+    <string name="mock_notif_badge_title">Nytt märke intjänat</string>
+    <string name="mock_notif_badge_msg">Du verifierade din mänsklighet! 🎉</string>
+    <string name="mock_notif_like_title">%s gillade ditt inlägg</string>
+    <string name="mock_notif_like_msg">Det om mekaniska tangentbord.</string>
+    <string name="mock_notif_follow_title">Ny följare</string>
+    <string name="mock_notif_follow_msg">%s började följa dig</string>
+    <string name="mock_notif_reply_title">Svar från %s</string>
+    <string name="mock_notif_reply_msg">Jag håller helt med! Bra perspektiv.</string>
+    <string name="mock_notif_mention_title">Du nämndes</string>
+    <string name="mock_notif_mention_msg">@%s nämnde dig: \"Kolla in detta tillgänglighetstips!\"</string>
+    <string name="mock_notif_repost_title">Ditt inlägg delades</string>
+    <string name="mock_notif_repost_msg">%s delade ditt inlägg om ADHD-tips med %d följare</string>
+    <string name="mock_notif_safety_title">Säkerhetspåminnelse</string>
+    <string name="mock_notif_safety_msg">Kom ihåg att ta pauser! Du har varit aktiv ett tag. 💙</string>
+    <string name="mock_notif_filtered_title">Innehåll filtrerat</string>
+    <string name="mock_notif_filtered_msg">Vi har gömt innehåll som kanske inte är lämpligt. Du kan justera detta i inställningarna.</string>
+
+    <!-- Mock Posts - Kids -->
+    <string name="mock_post_puzzle">🌈 Precis klart med mitt regnbågspussel! 1000 bitar klara! Vem mer älskar pussel? 🧩</string>
+    <string name="mock_post_dinosaur">Idag lärde jag mig att dinosaurier levde för miljontals år sedan! 🦕 T-Rex är min favorit!</string>
+    <string name="mock_post_cat">Min katt lärde sig ett nytt trick idag! Hon kan ge high five nu! 🐱✋ Så stolt över henne!</string>
+    <string name="mock_post_game">🎮 Slog precis mitt högsta poäng! Övning ger färdighet! 🏆</string>
+    <string name="mock_post_bracelet">🌈 Gjorde ett vänskapsarmband till min bästa vän! Färgerna är så fina tillsammans! 💕</string>
+    <string name="mock_post_dog">🐕 Min hund är min bästa hjälpare! Han sitter med mig när jag gör läxor och det gör mig lugn! 🐾</string>
+    <string name="mock_post_reading">📖 Lästid är det BÄSTA! Jag är på kapitel 10 i min favoritbokserie! Vem mer älskar att läsa? 📚</string>
+    <string name="mock_post_art">🎨 Konstlektionen var så rolig idag! Vi målade solnedgångar och min har ALLA färger! 🌅</string>
+
+    <!-- Mock Posts - Teen -->
+    <string name="mock_post_hyperfocus">Precis haft ett genombrott i mitt projekt! Hyperfokus är en superkraft när du kan styra den. Sena nattskodningssessioner känns annorlunda.</string>
+    <string name="mock_post_weighted_vest">Provar min nya tyngdväst idag. Omedelbart lugn, rekommenderar starkt för sensorisk reglering! Hjälper också med min ångest under prov.</string>
+    <string name="mock_post_dating_adhd">Dejta med ADHD är vilt. Hyperfokusera på någon ny sen helt glömma att svara i 3 dagar 😅 Någon annan?</string>
+    <string name="mock_post_school_stress">Skolstress är verklig just nu. Tentaplugg + social ångest = vilja gömma mig i mitt rum i en vecka. Åtminstone hjälper mina brusreducerande hörlurar.</string>
+
+    <!-- Mock Posts - Adult -->
+    <string name="mock_post_quiet_space">Behöver ett tyst utrymme. Går in i Överbelastningsläge resten av eftermiddagen. Vi ses imorgon. #TystLäge</string>
+    <string name="mock_post_organizing">Precis klart med att sortera alla mina projektfiler i kategoriserade mappar. Den visuella ordningen är oerhört tillfredsställande. Min terapeut säger att detta är en hälsosam copingmekanism.</string>
+    <string name="mock_post_workplace">Arbetsplatsanpassningar är äntligen på plats! Tog 6 månaders påverkansarbete men fick min tysta arbetsplats godkänd. HR var förvånansvärt stödjande när jag lämnade dokumentationen.</string>
+    <string name="mock_post_adulting">Vuxenliv med ADHD: Glömde betala hyran igen, men kom på något sätt ihåg varje replik från en film jag såg för 10 år sedan. Min hyresvärd är inte road.</string>
+    <string name="mock_post_late_diagnosis">PSA: Att bli diagnostiserad som vuxen är giltigt. Fick min vid 34 och plötsligt är hela mitt liv begripligt. Sorgen över \"vad som kunde ha varit\" är verklig men så är också lättnaden av att äntligen förstå sig själv.</string>
+
+    <!-- Mock DM Conversations -->
+    <string name="mock_dm_hey">Hej! Älskar dina inlägg om sensoriska tips! 💜</string>
+    <string name="mock_dm_thanks">Tack så mycket! Ditt innehåll är super hjälpsamt också!</string>
+    <string name="mock_dm_question">Snabb fråga om den fidgetleksaken du rekommenderade?</string>
+    <string name="mock_dm_sure">Visst, glad att hjälpa! Vad vill du veta?</string>
+
+    <!-- Additional Feed Posts -->
+    <string name="mock_post_workspace">✨ Äntligen fixat mitt sensoriskt vänliga arbetsutrymme! Brusreducerande hörlurar, mjuk belysning och min viktade knädyna. En game changer för fokus! 🎧💡</string>
+    <string name="mock_post_brain_different">Påminnelse: Din hjärna fungerar annorlunda, inte fel. 🧠💜 Omfamna ditt unika sätt att bearbeta världen!</string>
+    <string name="mock_post_body_doubling">Upptäckte just body doubling på NeuroComet och WOW. Studerade i 3 timmar i sträck med min virtuella studiepolare! 📚🎉 Någon annan som tycker det är hjälpsamt?</string>
+    <string name="mock_post_stim_toys">Min stimleksakssamling växer! 🌈 Dessa fidgetverktyg har hjälpt mig så mycket på möten. Ingen skam i att stimma! ✨</string>
+    <string name="mock_post_launch_pad">Profftips: Skapa en \'startplatta\' vid din dörr med allt du behöver för dagen. Nycklar, plånbok, mediciner, snacks - allt på ett ställe! 🚀 ADHD-lifehack #247</string>
+    <string name="mock_post_lunch_win">Dagens vinst: Jag kom ihåg att äta lunch! 🎊 Att sätta telefonlarm för grundläggande behov är egenvård. Låt ingen säga något annat. 💪</string>
+
+    <!-- Notification Filters -->
+    <string name="filter_all">Alla</string>
+    <string name="filter_unread">Olästa</string>
+    <string name="filter_mentions">Omnämnanden</string>
+    <string name="filter_likes">Gillar</string>
+    <string name="filter_follows">Följare</string>
+
+    <!-- Mock DM Messages -->
+    <string name="mock_dm_conv1_msg1">Hej, hur mår du idag?</string>
+    <string name="mock_dm_conv1_msg2">Bra, tack! Bara chillar.</string>
+    <string name="mock_dm_conv2_msg1">Såg du det nya bluffinlägget? Gå inte på det!</string>
+    <string name="mock_dm_conv2_msg2">Tack för varningen. Jag såg phishing-försöket.</string>
+    <string name="mock_dm_conv3_msg1">Hej! Jag såg ditt inlägg om problem med exekutiva funktioner. Jag känner igen mig helt!</string>
+    <string name="mock_dm_conv3_msg2">Eller hur? Vissa dagar är bara svårare än andra.</string>
+    <string name="mock_dm_conv3_msg3">Har du provat body doubling? Det hjälper mig verkligen att hålla fokus.</string>
+    <string name="mock_dm_conv3_msg4">Jag har hört talas om det men aldrig provat. Hur funkar det för dig?</string>
+    <string name="mock_dm_conv3_msg5">Jag videosamtalar med en vän medan vi båda jobbar med våra grejer. Ansvarskänslan hjälper!</string>
+    <string name="mock_dm_conv4_msg1">Yo! Det produktivitetstricket du delade var 🔥</string>
+    <string name="mock_dm_conv4_msg2">Glad att det hjälpte! Pomodorotekniken är en game changer.</string>
+    <string name="mock_dm_conv4_msg3">Jag modifierade det till 25 min jobb / 10 min stimpaus. Funkar mycket bättre för min ADHD-hjärna.</string>
+    <string name="mock_dm_conv4_msg4">Det är genialt! Har du något emot om jag delar det tipset i mitt nästa inlägg?</string>
+    <string name="mock_dm_conv4_msg5">Kör på! Tagga mig 😄</string>
+    <string name="mock_dm_conv5_msg1">🎨 Precis klart med en ny målning under min hyperfokus-session!</string>
+    <string name="mock_dm_conv5_msg2">Jag måste se den! Du är så talangfull!</string>
+    <string name="mock_dm_conv5_msg3">Tack! Det är bara blått och lila - väldigt lugnande färger. Jag lägger upp den senare idag.</string>
+    <string name="mock_dm_conv5_msg4">Det är mina favoritfärger också! De hjälper verkligen när jag är överstimulerad.</string>
+    <string name="mock_dm_conv6_msg1">Hej! Ville dela en jordningsteknik som hjälpte mig idag.</string>
+    <string name="mock_dm_conv6_msg2">Jag lyssnar! Har haft en tuff vecka med ångest.</string>
+    <string name="mock_dm_conv6_msg3">Prova 5-4-3-2-1-metoden: 5 saker du ser, 4 du hör, 3 du rör vid, 2 du luktar, 1 du smakar.</string>
+    <string name="mock_dm_conv6_msg4">Det här är verkligen hjälpsamt, tack! 💙</string>
+    <string name="mock_dm_conv6_msg5">När som helst! Vi är alla med i det här tillsammans. 🤗</string>
+    <string name="mock_dm_conv7_msg1">Fick precis det nya mekaniska tangentbordet! Klicken är SÅ tillfredsställande 🎹</string>
+    <string name="mock_dm_conv7_msg2">Oooh vilka switchar fick du?</string>
+    <string name="mock_dm_conv7_msg3">Cherry MX Blues! Den taktila återkopplingen är perfekt för mina stim-behov.</string>
+    <string name="mock_dm_conv7_msg4">Jag har spanat på dem! Hjälper de dig fokusera när du kodar?</string>
+    <string name="mock_dm_conv7_msg5">Absolut! Det rytmiska klickandet är som ett inbyggt fokus-soundtrack. Rekommenderas starkt!</string>
+    <string name="mock_dm_conv7_msg6">Lägger i varukorgen nu 😂</string>
+    <string name="mock_dm_conv8_msg1">Lågenergiddag idag 😴 Hur hanterar du det?</string>
+    <string name="mock_dm_conv8_msg2">Samma här. Bestämde mig för att avboka alla icke-nödvändiga planer.</string>
+    <string name="mock_dm_conv8_msg3">Det är smart! Egenvård är inte själviskt. Vila ordentligt! 💜</string>
+
+    <!-- Explore Categories -->
+    <string name="explore_adhd">ADHD</string>
+    <string name="explore_autism">Autism</string>
+    <string name="explore_sensory">Sensoriskt</string>
+    <string name="explore_anxiety">Ångest</string>
+
+    <!-- Settings Sections -->
+    <string name="settings_section_account">Konto</string>
+    <string name="settings_section_premium">Premium</string>
+    <string name="settings_section_appearance">Utseende och Visning</string>
+    <string name="settings_section_privacy">Sekretess och Säkerhet</string>
+    <string name="settings_section_notifications">Aviseringar</string>
+    <string name="settings_section_accessibility">Tillgänglighet</string>
+    <string name="settings_section_safety">Säkerhet och Välmående</string>
+    <string name="settings_section_support">Hjälp och Support</string>
+    <string name="settings_section_about">Om</string>
+
+    <!-- Settings Items -->
+    <string name="settings_my_profile">Min Profil</string>
+    <string name="settings_my_profile_desc">Visa och redigera din profil, energistatus och preferenser</string>
+    <string name="settings_premium_active">Premium Aktiv ✨</string>
+    <string name="settings_premium_thanks">Tack för ditt stöd!</string>
+    <string name="settings_go_premium">Bli Premium ⭐</string>
+    <string name="settings_premium_price">Reklamfri upplevelse • $2/månad eller $60 livstid</string>
+    <string name="settings_theme">Temainställningar</string>
+    <string name="settings_theme_desc">Färger, stilar och neurodivergent teman</string>
+    <string name="settings_animation">Animationsinställningar</string>
+    <string name="settings_animation_desc">Kontrollera rörelse och visuella effekter</string>
+    <string name="settings_animation_disabled">Alla animationer inaktiverade</string>
+    <string name="settings_dark_mode">Mörkt Läge</string>
+    <string name="settings_dark_mode_desc">Använd mörkt tema för svaga ljusförhållanden</string>
+    <string name="settings_high_contrast">Hög Kontrast</string>
+    <string name="settings_high_contrast_desc">Maximal kontrast för synlighet</string>
+    <string name="settings_privacy">Sekretessinställningar</string>
+    <string name="settings_privacy_desc">Vem kan se ditt innehåll och skicka meddelanden till dig</string>
+    <string name="settings_blocked">Blockerade Konton</string>
+    <string name="settings_blocked_desc">Hantera användare du har blockerat</string>
+    <string name="settings_data">Data och Lagring</string>
+    <string name="settings_data_desc">Cache, nedladdningar och dataanvändning</string>
+    <string name="settings_notif_prefs">Aviseringspreferenser</string>
+    <string name="settings_notif_desc">Anpassa vilka aviseringar du får</string>
+    <string name="settings_quiet_hours">Tysta Timmar</string>
+    <string name="settings_quiet_hours_desc">Schemalägg stör-ej-perioder</string>
+    <string name="settings_text_display">Text och Visning</string>
+    <string name="settings_text_display_desc">Teckenstorlek, läsalternativ och dyslexistöd</string>
+    <string name="settings_screen_reader">Skärmläsare</string>
+    <string name="settings_screen_reader_desc">Optimera för hjälpmedel</string>
+    <string name="settings_reduce_motion">Minska Rörelse</string>
+    <string name="settings_reduce_motion_desc">Minimera animationer och rörelse</string>
+    <string name="settings_content_filters">Innehållsfilter</string>
+    <string name="settings_content_filters_desc">Hantera känsligt innehåll-inställningar</string>
+    <string name="settings_break_reminders">Pausepåminnelser</string>
+    <string name="settings_break_reminders_desc">Få påminnelser att ta pauser</string>
+    <string name="settings_parental">Föräldrakontroll</string>
+    <string name="settings_parental_desc">Säkerhetsinställningar för yngre användare</string>
+    <string name="settings_parental_pin_set">PIN inställd • Tryck för att hantera</string>
+    <string name="settings_kid_mode">Barnläge</string>
+    <string name="settings_kid_mode_desc">Åldersanpassad innehållsfiltrering</string>
+    <string name="settings_keep_screen_on">Håll Skärmen På</string>
+    <string name="settings_keep_screen_on_desc">Förhindra att skärmen dimmas under fokustid</string>
+    <string name="settings_help_center">Hjälpcenter</string>
+    <string name="settings_help_center_desc">Vanliga frågor, guider och handledningar</string>
+    <string name="settings_report_issue">Rapportera ett Problem</string>
+    <string name="settings_report_issue_desc">Berätta för oss om buggar eller problem</string>
+    <string name="settings_feedback">Skicka Feedback</string>
+    <string name="settings_feedback_desc">Dela dina tankar och förslag</string>
+    <string name="settings_terms">Användarvillkor</string>
+    <string name="settings_privacy_policy">Sekretesspolicy</string>
+    <string name="settings_licenses">Öppen Källkod Licenser</string>
+
+    <!-- Explore Section Titles -->
+    <string name="explore_section_daily_living">Dagligt Liv</string>
+    <string name="explore_section_sensory">Sensoriskt och Reglering</string>
+    <string name="explore_section_social">Socialt och Kommunikation</string>
+    <string name="explore_section_work">Arbete och Utbildning</string>
+    <string name="explore_section_interests">Specialintressen och Hobbyer</string>
+    <string name="explore_section_health">Hälsa och Välmående</string>
+    <string name="explore_section_family">Familj och Föräldraskap</string>
+
+    <!-- Explore Topic Names -->
+    <string name="explore_topic_adhd_hacks">ADHD-tips</string>
+    <string name="explore_topic_adhd_hacks_desc">Produktivitetstips, tidshantering och livshacks för ADHD-hjärnor</string>
+    <string name="explore_topic_safe_foods">Säker Mat</string>
+    <string name="explore_topic_safe_foods_desc">Dela och upptäck sensoriskt vänlig mat och ätstrategier</string>
+    <string name="explore_topic_sleep">Sömn och Vila</string>
+    <string name="explore_topic_sleep_desc">Tips för bättre sömn, vilorutiner och trötthetshantering</string>
+    <string name="explore_topic_executive_function">Exekutiva Funktioner</string>
+    <string name="explore_topic_executive_function_desc">Strategier för planering, organisering och uppgiftshantering</string>
+    <string name="explore_topic_stimming">Stimming</string>
+    <string name="explore_topic_stimming_desc">Stimleksaker, rörelse och självreglering genom stimming</string>
+    <string name="explore_topic_sensory_tips">Sensoriska Tips</string>
+    <string name="explore_topic_sensory_tips_desc">Hantera sensoriska känslighetersoch skapa sensoriskt vänliga utrymmen</string>
+    <string name="explore_topic_meltdown">Meltdown-stöd</string>
+    <string name="explore_topic_meltdown_desc">Förebyggande strategier, återhämtningstips och kamratstöd</string>
+    <string name="explore_topic_sensory_diet">Sensorisk Diet</string>
+    <string name="explore_topic_sensory_diet_desc">Bygga personliga sensoriska rutiner för reglering</string>
+    <string name="explore_topic_social_skills">Sociala Färdigheter</string>
+    <string name="explore_topic_social_skills_desc">Navigera sociala situationer, skaffa vänner och kommunikationstips</string>
+    <string name="explore_topic_masking">Maskering</string>
+    <string name="explore_topic_masking_desc">Erfarenheter av maskering, utbrändhet och autentiskt självuttryck</string>
+    <string name="explore_topic_relationships">Relationer</string>
+    <string name="explore_topic_relationships_desc">Dejting, vänskaper, familjedynamik och kommunikation i relationer</string>
+    <string name="explore_topic_aac">AAC och Kommunikation</string>
+    <string name="explore_topic_aac_desc">Augmentativa kommunikationsverktyg och icke-verbal kommunikation</string>
+    <string name="explore_topic_work_school">Arbete och Skola</string>
+    <string name="explore_topic_work_school_desc">Anpassningar, självförespråkande och framgång i akademiska och professionella miljöer</string>
+    <string name="explore_topic_disclosure">Avslöjande och Förespråkande</string>
+    <string name="explore_topic_disclosure_desc">När och hur man avslöjar, självförespråkande strategier</string>
+    <string name="explore_topic_career">Karriärvägar</string>
+    <string name="explore_topic_career_desc">Hitta neurodivergent-vänliga karriärer och arbetsframgång</string>
+    <string name="explore_topic_college">Universitetsövergång</string>
+    <string name="explore_topic_college_desc">Förbereda för och navigera högre utbildning</string>
+    <string name="explore_topic_gaming">Gaming</string>
+    <string name="explore_topic_gaming_desc">Videospel, brädspel och gaming-communities</string>
+    <string name="explore_topic_coding">Programmering och Tech</string>
+    <string name="explore_topic_coding_desc">Programmering, tech-projekt och neurodivergent utvecklare</string>
+    <string name="explore_topic_art">Konst och Kreativitet</string>
+    <string name="explore_topic_art_desc">Teckning, målning, hantverk och kreativt uttryck</string>
+    <string name="explore_topic_mental_health">Mental Hälsa</string>
+    <string name="explore_topic_mental_health_desc">Ångest, depression, terapi och mental välmående</string>
+    <string name="explore_topic_medication">Medicin</string>
+    <string name="explore_topic_medication_desc">Medicinerfarenheter, frågor och stöd</string>
+    <string name="explore_topic_burnout">Utbrändhet-återhämtning</string>
+    <string name="explore_topic_burnout_desc">Känna igen, förebygga och återhämta sig från utbrändhet</string>
+    <string name="explore_topic_parenting">ND Föräldraskap</string>
+    <string name="explore_topic_parenting_desc">Neurodivergent föräldrar och uppfostra ND-barn</string>
+    <string name="explore_topic_late_diagnosed">Sent Diagnostiserad</string>
+    <string name="explore_topic_late_diagnosed_desc">Vuxendiagnos erfarenheter och identitetsutforskning</string>
+
+    <!-- Explore Stats -->
+    <string name="explore_members">%s medlemmar</string>
+    <string name="explore_posts">%s inlägg</string>
+    <string name="explore_popular">Populär</string>
+    <string name="explore_new">Ny</string>
+    <string name="explore_see_all">Visa alla</string>
+
+    <!-- Quick Tips & Tricks -->
+    <string name="tips_title">Snabba Tips och Tricks</string>
+    <string name="tips_tap_expand">Tryck för att se %d användbara tips</string>
+    <string name="tips_tap_collapse">Tryck för att minimera</string>
+    <string name="tips_expand">Expandera</string>
+    <string name="tips_collapse">Minimera</string>
+    <string name="tip_animation_toggle_title">Snabb Animationsväxling</string>
+    <string name="tip_animation_toggle_desc">Tryck på ♾️ oändlighetssymbolen på inloggningsskärmen för att snabbt aktivera/inaktivera animationer</string>
+    <string name="tip_rainbow_brain_title">Lås upp Regnbågshjärna</string>
+    <string name="tip_rainbow_brain_desc">Tryck på versionsinformationen 7 gånger i Inställningar för att låsa upp det hemliga Regnbågshjärna-temat!</string>
+    <string name="tip_eye_strain_title">Minska Ögonbelastning</string>
+    <string name="tip_eye_strain_desc">Aktivera Mörkt Läge + Autism Låg Stimulering tema för den lugnaste upplevelsen</string>
+    <string name="tip_readability_title">Bättre Läsbarhet</string>
+    <string name="tip_readability_desc">Testa Lexend eller Atkinson Hyperlegible typsnitt - designade för neurodivergenta läsare</string>
+    <string name="tip_calm_title">Lugn Upplevelse</string>
+    <string name="tip_calm_desc">Inaktivera alla animationer i Inställningar > Animationer och använd Lugn eller Överbelastning tema</string>
+    <string name="tip_focus_title">Håll Fokus</string>
+    <string name="tip_focus_desc">Använd ADHD Uppgiftsläge tema + Hyperfokus för minimala distraktioner</string>
+    <string name="tip_kids_title">Skydda Barn</string>
+    <string name="tip_kids_desc">Ställ in Föräldrakontroll med PIN för att hantera skärmtid och innehåll</string>
+    <string name="tip_holiday_title">Högtidsteman</string>
+    <string name="tip_holiday_desc">Logotypen firar automatiskt högtider och ND-medvetenhetsevenemang med speciella färger!</string>
+    <string name="tip_themes_title">25+ Teman</string>
+    <string name="tip_themes_desc">Utforska teman för ADHD, Autism, Ångest, Färgblindhet, Nedsatt syn och ditt nuvarande humör</string>
+    <string name="tip_fonts_title">12+ Typsnitt</string>
+    <string name="tip_fonts_desc">Välj bland dyslexivänliga, ADHD-vänliga och tillgänglighetstypsnitt i Inställningar > Typsnitt och Läsning</string>
+
+    <!-- App Tutorial -->
+    <string name="tutorial_title">Apphandledning</string>
+    <string name="tutorial_description">Se startguiden igen</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">Utvecklare</string>
+    <string name="settings_developer_subtitle">Felsöknings- och testverktyg</string>
+    <string name="settings_fake_premium">Falskt Premiumläge</string>
+    <string name="settings_fake_premium_enabled">Premiumfunktioner upplåsta för testning</string>
+    <string name="settings_fake_premium_disabled">Aktivera för att testa premiumfunktioner</string>
+    <string name="settings_dev_options_desc">Avancerade alternativ för testning och felsökning</string>
 </resources>

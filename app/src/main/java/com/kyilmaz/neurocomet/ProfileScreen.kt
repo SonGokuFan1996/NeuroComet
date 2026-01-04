@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -350,26 +351,26 @@ fun ProfileScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = if (isOwnProfile) "My Profile" else profile.user.name,
+                        text = if (isOwnProfile) stringResource(R.string.profile_my_profile) else profile.user.name,
                         fontWeight = FontWeight.Bold
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.badges_back_button_description))
                     }
                 },
                 actions = {
                     if (isOwnProfile) {
                         IconButton(onClick = onEditProfile) {
-                            Icon(Icons.Outlined.Edit, contentDescription = "Edit Profile")
+                            Icon(Icons.Outlined.Edit, contentDescription = stringResource(R.string.profile_edit))
                         }
                     } else {
                         IconButton(onClick = { /* Share profile */ }) {
-                            Icon(Icons.Outlined.Share, contentDescription = "Share Profile")
+                            Icon(Icons.Outlined.Share, contentDescription = stringResource(R.string.profile_share))
                         }
                         IconButton(onClick = { /* More options */ }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "More Options")
+                            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.profile_more_options))
                         }
                     }
                 },
@@ -606,9 +607,9 @@ private fun ProfileHeader(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            StatItem(value = profile.postCount.toString(), label = "Posts")
-            StatItem(value = formatCount(profile.followerCount), label = "Followers")
-            StatItem(value = formatCount(profile.followingCount), label = "Following")
+            StatItem(value = profile.postCount.toString(), label = stringResource(R.string.profile_posts))
+            StatItem(value = formatCount(profile.followerCount), label = stringResource(R.string.profile_followers))
+            StatItem(value = formatCount(profile.followingCount), label = stringResource(R.string.profile_following))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -638,7 +639,7 @@ private fun ProfileHeader(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(if (isFollowing) "Following" else "Follow")
+                    Text(if (isFollowing) stringResource(R.string.profile_following) else stringResource(R.string.profile_follow))
                 }
 
                 // Message Button
@@ -652,7 +653,7 @@ private fun ProfileHeader(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Message")
+                    Text(stringResource(R.string.profile_message))
                 }
             }
 
@@ -675,7 +676,7 @@ private fun ProfileHeader(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            "Mutual Friends",
+                            stringResource(R.string.profile_mutual_friends),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSecondaryContainer
                         )
@@ -690,7 +691,7 @@ private fun ProfileHeader(
             ) {
                 Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("Edit Profile")
+                Text(stringResource(R.string.profile_edit))
             }
         }
     }
@@ -771,7 +772,7 @@ private fun TraitsSection(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Communication & Preferences",
+                text = stringResource(R.string.profile_communication_preferences),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -845,7 +846,7 @@ private fun CommunicationNotesCard(notes: String) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "How to communicate with me",
+                    text = stringResource(R.string.profile_how_to_communicate),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.tertiary
@@ -907,14 +908,14 @@ private fun EmptyPostsPlaceholder(isOwnProfile: Boolean) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = if (isOwnProfile) "Share your first post!" else "No posts yet",
+            text = if (isOwnProfile) stringResource(R.string.profile_share_first_post) else stringResource(R.string.profile_no_posts_yet),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         if (isOwnProfile) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "When you share photos or videos, they'll appear here.",
+                text = stringResource(R.string.profile_posts_will_appear),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
@@ -925,6 +926,10 @@ private fun EmptyPostsPlaceholder(isOwnProfile: Boolean) {
 
 @Composable
 private fun AboutSection(profile: UserProfile) {
+    val aboutLabel = stringResource(R.string.profile_about)
+    val joinedLabel = stringResource(R.string.profile_joined)
+    val websiteLabel = stringResource(R.string.profile_website)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -935,7 +940,7 @@ private fun AboutSection(profile: UserProfile) {
         if (profile.user.personality.isNotEmpty()) {
             AboutItem(
                 icon = Icons.Outlined.Person,
-                label = "About",
+                label = aboutLabel,
                 value = profile.user.personality
             )
         }
@@ -944,7 +949,7 @@ private fun AboutSection(profile: UserProfile) {
         if (profile.joinedDate.isNotEmpty()) {
             AboutItem(
                 icon = Icons.Outlined.CalendarMonth,
-                label = "Joined",
+                label = joinedLabel,
                 value = profile.joinedDate
             )
         }
@@ -953,7 +958,7 @@ private fun AboutSection(profile: UserProfile) {
         if (profile.website.isNotEmpty()) {
             AboutItem(
                 icon = Icons.Outlined.Link,
-                label = "Website",
+                label = websiteLabel,
                 value = profile.website
             )
         }
@@ -998,13 +1003,13 @@ private fun InterestsSection(interests: List<String>) {
             .padding(16.dp)
     ) {
         Text(
-            text = "Special Interests ✨",
+            text = stringResource(R.string.profile_special_interests),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "These topics bring them joy - ask about them!",
+            text = stringResource(R.string.profile_interests_subtitle),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -1062,7 +1067,7 @@ private fun BadgesSection(badges: List<Badge>) {
             .padding(16.dp)
     ) {
         Text(
-            text = "Badges & Achievements",
+            text = stringResource(R.string.profile_badges_achievements),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
@@ -1084,7 +1089,7 @@ private fun BadgesSection(badges: List<Badge>) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "No badges yet",
+                        text = stringResource(R.string.profile_no_badges_yet),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1133,7 +1138,7 @@ private fun BadgeItem(badge: Badge) {
         if (badge.isEarned) {
             Icon(
                 Icons.Default.CheckCircle,
-                contentDescription = "Earned",
+                contentDescription = stringResource(R.string.profile_earned),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp)
             )
@@ -1151,7 +1156,7 @@ private fun EnergyStatusPickerDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                "How are you feeling?",
+                stringResource(R.string.profile_how_feeling),
                 style = MaterialTheme.typography.titleLarge
             )
         },
@@ -1201,7 +1206,7 @@ private fun EnergyStatusPickerDialog(
                             if (status == currentStatus) {
                                 Icon(
                                     Icons.Default.Check,
-                                    contentDescription = "Selected",
+                                    contentDescription = stringResource(R.string.profile_selected),
                                     tint = status.color
                                 )
                             }
@@ -1212,7 +1217,7 @@ private fun EnergyStatusPickerDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.profile_cancel))
             }
         }
     )
@@ -1246,7 +1251,7 @@ private fun TraitInfoDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Got it!")
+                Text(stringResource(R.string.profile_got_it))
             }
         },
         containerColor = trait.color.copy(alpha = 0.1f)

@@ -75,6 +75,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
@@ -189,41 +190,50 @@ fun DmConversationScreenV2(
                         IconButton(onClick = { showMenu = true }) {
                             Icon(Icons.Filled.MoreVert, contentDescription = "Conversation options")
                         }
+
+                        // Pre-fetch strings for Toast messages
+                        val toastProfileComingSoon = stringResource(R.string.toast_profile_coming_soon)
+                        val toastSearchComingSoon = stringResource(R.string.toast_search_coming_soon)
+                        val toastNotificationsMuted = stringResource(R.string.toast_notifications_muted)
+                        val toastNotificationsUnmuted = stringResource(R.string.toast_notifications_unmuted)
+                        val toastUserBlocked = stringResource(R.string.toast_user_blocked)
+                        val toastUserUnblocked = stringResource(R.string.toast_user_unblocked)
+
                         DropdownMenu(
                             expanded = showMenu,
                             onDismissRequest = { showMenu = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("View Profile") },
+                                text = { Text(stringResource(R.string.menu_view_profile)) },
                                 onClick = {
                                     showMenu = false
                                     android.widget.Toast.makeText(
                                         context,
-                                        "Profile view coming soon! 👤",
+                                        toastProfileComingSoon,
                                         android.widget.Toast.LENGTH_SHORT
                                     ).show()
                                 },
                                 leadingIcon = { Icon(Icons.Filled.Person, null) }
                             )
                             DropdownMenuItem(
-                                text = { Text("Search in Chat") },
+                                text = { Text(stringResource(R.string.menu_search_chat)) },
                                 onClick = {
                                     showMenu = false
                                     android.widget.Toast.makeText(
                                         context,
-                                        "Chat search coming soon! 🔍",
+                                        toastSearchComingSoon,
                                         android.widget.Toast.LENGTH_SHORT
                                     ).show()
                                 },
                                 leadingIcon = { Icon(Icons.Filled.Search, null) }
                             )
                             DropdownMenuItem(
-                                text = { Text("Mute Notifications") },
+                                text = { Text(stringResource(if (isUserMuted) R.string.menu_unmute_notifications else R.string.menu_mute_notifications)) },
                                 onClick = {
                                     showMenu = false
                                     android.widget.Toast.makeText(
                                         context,
-                                        if (isUserMuted) "Notifications unmuted 🔔" else "Notifications muted 🔕",
+                                        if (isUserMuted) toastNotificationsUnmuted else toastNotificationsMuted,
                                         android.widget.Toast.LENGTH_SHORT
                                     ).show()
                                 },
@@ -236,12 +246,12 @@ fun DmConversationScreenV2(
                             )
                             HorizontalDivider()
                             DropdownMenuItem(
-                                text = { Text(if (isUserBlocked) "Unblock User" else "Block User") },
+                                text = { Text(stringResource(if (isUserBlocked) R.string.menu_unblock_user else R.string.menu_block_user)) },
                                 onClick = {
                                     showMenu = false
                                     android.widget.Toast.makeText(
                                         context,
-                                        if (isUserBlocked) "User unblocked ✓" else "User blocked ✗",
+                                        if (isUserBlocked) toastUserUnblocked else toastUserBlocked,
                                         android.widget.Toast.LENGTH_SHORT
                                     ).show()
                                 },

@@ -1,5 +1,8 @@
 package com.kyilmaz.neurocomet
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -8,6 +11,11 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,10 +37,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -65,6 +75,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -346,31 +357,45 @@ fun AuthScreen(
                             onPasswordVisibilityToggle = { passwordVisible = !passwordVisible }
                         )
 
-                        // Confirm password for sign up
-                        if (!isSignIn) {
-                            NeuroTextField(
-                                value = confirmPassword,
-                                onValueChange = { confirmPassword = it; localError = null },
-                                label = "Confirm Password",
-                                isPassword = true,
-                                passwordVisible = confirmPasswordVisible,
-                                onPasswordVisibilityToggle = { confirmPasswordVisible = !confirmPasswordVisible }
-                            )
+                        // Confirm password for sign up - with smooth animation
+                        AnimatedVisibility(
+                            visible = !isSignIn,
+                            enter = fadeIn(animationSpec = tween(300)) +
+                                    slideInHorizontally(
+                                        animationSpec = tween(300, easing = FastOutSlowInEasing),
+                                        initialOffsetX = { it / 2 }
+                                    ),
+                            exit = fadeOut(animationSpec = tween(200)) +
+                                   slideOutHorizontally(
+                                       animationSpec = tween(200, easing = FastOutSlowInEasing),
+                                       targetOffsetX = { it / 2 }
+                                   )
+                        ) {
+                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                NeuroTextField(
+                                    value = confirmPassword,
+                                    onValueChange = { confirmPassword = it; localError = null },
+                                    label = "Confirm Password",
+                                    isPassword = true,
+                                    passwordVisible = confirmPasswordVisible,
+                                    onPasswordVisibilityToggle = { confirmPasswordVisible = !confirmPasswordVisible }
+                                )
 
-                            // Password requirements
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = Color(0xFF4ECDC4).copy(alpha = 0.15f)
-                                )
-                            ) {
-                                Text(
-                                    text = "🔒 Password must be 12+ characters with uppercase, lowercase, number, and symbol.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color(0xFF4ECDC4),
-                                    modifier = Modifier.padding(12.dp)
-                                )
+                                // Password requirements
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = Color(0xFF4ECDC4).copy(alpha = 0.15f)
+                                    )
+                                ) {
+                                    Text(
+                                        text = "🔒 Password must be 12+ characters with uppercase, lowercase, number, and symbol.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color(0xFF4ECDC4),
+                                        modifier = Modifier.padding(12.dp)
+                                    )
+                                }
                             }
                         }
 
@@ -461,10 +486,11 @@ fun AuthScreen(
     if (showTutorial) {
         AuthTutorialOverlay(
             currentStep = tutorialStep,
+            totalSteps = 7, // Must match the number of TutorialStep items in AuthTutorialOverlay
             animationsEnabled = animationsEnabled,
             onDismiss = { showTutorial = false },
             onNextStep = {
-                if (tutorialStep < 2) {
+                if (tutorialStep < 6) { // 7 total steps (0-6)
                     tutorialStep++
                 } else {
                     showTutorial = false
@@ -881,162 +907,226 @@ private fun TutorialPointer(modifier: Modifier = Modifier) {
 @Composable
 private fun AuthTutorialOverlay(
     currentStep: Int,
+    totalSteps: Int,
     animationsEnabled: Boolean,
     onDismiss: () -> Unit,
     onNextStep: () -> Unit
 ) {
+    // Production-ready, neurodivergent-centric tutorial steps with LGBTQ+ inclusion
     val tutorialSteps = listOf(
         TutorialStep(
-            title = "Welcome to NeuroComet! 👋",
-            description = "A safe, inclusive space designed for neurodivergent minds. Built with accessibility, safety, and mental wellness as core priorities.",
-            emoji = "✨",
-            showRainbowInfinity = false
+            title = "Welcome Home 💜",
+            description = "NeuroComet is a safe, affirming space for neurodivergent and LGBTQ+ minds. You belong here exactly as you are—no masking required.",
+            emoji = "🏠",
+            showRainbowInfinity = false,
+            accentColor = Color(0xFF9B59B6) // Purple for inclusivity
         ),
         TutorialStep(
-            title = "Tap the Logo",
+            title = "Your Comfort Matters ∞",
             description = if (animationsEnabled)
-                "Tap the infinity symbol anytime to disable animations if you prefer a calmer experience."
+                "Tap the infinity symbol anytime to reduce visual motion. We designed this for sensory-friendly browsing."
             else
-                "Great! You've disabled animations. Tap again to re-enable them anytime.",
+                "Perfect! You've activated calm mode. Tap again whenever you need more or less motion.",
             emoji = "∞",
-            showRainbowInfinity = true
+            showRainbowInfinity = true,
+            accentColor = Color(0xFF4ECDC4) // Teal for calm
         ),
         TutorialStep(
             title = "25+ Neuro-State Themes 🎨",
-            description = "Choose from ADHD, Autism, Anxiety, Colorblind, Low Vision, and Mood-based themes. Find what works for YOUR brain!",
+            description = "Choose themes designed for ADHD focus, autism comfort, anxiety relief, colorblind accessibility, and mood support. Your brain, your way.",
             emoji = "🎨",
-            showRainbowInfinity = false
+            showRainbowInfinity = false,
+            accentColor = Color(0xFFE74C3C) // Warm red
         ),
         TutorialStep(
-            title = "Accessibility Fonts 🔤",
-            description = "12+ fonts including Lexend, OpenDyslexic, and Atkinson Hyperlegible. Adjust letter spacing, line height, and weight too!",
+            title = "Dyslexia-Friendly Fonts 📖",
+            description = "12+ accessibility fonts including OpenDyslexic, Lexend, and Atkinson Hyperlegible. Adjust spacing, weight, and size to match how YOUR brain reads best.",
             emoji = "📖",
-            showRainbowInfinity = false
+            showRainbowInfinity = false,
+            accentColor = Color(0xFF3498DB) // Blue for clarity
         ),
         TutorialStep(
-            title = "Holiday Celebrations 🎄",
-            description = "The logo changes for holidays and ND awareness events! Look for special themes on Autism Day, ADHD Month, and Pride!",
+            title = "Community & Pride 🌈",
+            description = "Connect with people who get it. Neurodivergent, LGBTQ+, and allies—all brains, all identities, all beautiful. Special themes for Pride, Autism Day, and ADHD Month!",
             emoji = "🌈",
-            showRainbowInfinity = false
+            showRainbowInfinity = false,
+            accentColor = Color(0xFFF39C12) // Gold for celebration
         ),
         TutorialStep(
-            title = "Safety First 🛡️",
-            description = "Parental controls, content filtering, screen time limits, and bedtime mode keep you and your family safe.",
+            title = "Built for Safety 🛡️",
+            description = "Content filtering, parental controls, screen time limits, and bedtime mode protect your wellbeing. You control what you see and when.",
             emoji = "🛡️",
-            showRainbowInfinity = false
+            showRainbowInfinity = false,
+            accentColor = Color(0xFF27AE60) // Green for safety
         ),
         TutorialStep(
-            title = "You're All Set! 🚀",
-            description = "Sign in or create an account to join our community. Remember, this is YOUR safe space. All brains are beautiful!",
-            emoji = "🚀",
-            showRainbowInfinity = false
+            title = "Ready to Begin! ✨",
+            description = "Sign in or create your account to join thousands of neurodivergent and LGBTQ+ individuals. This is YOUR space—explore at your own pace.",
+            emoji = "✨",
+            showRainbowInfinity = false,
+            accentColor = Color(0xFF9B59B6) // Return to purple
         )
     )
 
     val step = tutorialSteps.getOrNull(currentStep) ?: return
 
+    // Smooth fade animation for step transitions
+    val stepAlpha by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = tween(300),
+        label = "stepAlpha"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.7f))
+            .background(Color.Black.copy(alpha = 0.85f))
             .clickable(onClick = onNextStep),
         contentAlignment = Alignment.Center
     ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(32.dp),
-            shape = RoundedCornerShape(24.dp),
+                .padding(24.dp)
+                .alpha(stepAlpha),
+            shape = RoundedCornerShape(28.dp),
             colors = CardDefaults.cardColors(
                 containerColor = Color(0xFF1a1a2e)
             ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
         ) {
             Column(
-                modifier = Modifier.padding(24.dp),
+                modifier = Modifier.padding(28.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Icon - either emoji or rainbow infinity
-                if (step.showRainbowInfinity) {
-                    Box(
-                        modifier = Modifier.size(80.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        StaticRainbowInfinity(modifier = Modifier.size(60.dp))
-                    }
-                } else {
-                    Text(
-                        text = step.emoji,
-                        style = MaterialTheme.typography.displayMedium
-                    )
-                }
-
-                Spacer(Modifier.height(16.dp))
-
-                // Title
-                Text(
-                    text = step.title,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    textAlign = TextAlign.Center
+                // Accent bar at top
+                Box(
+                    modifier = Modifier
+                        .width(60.dp)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(step.accentColor)
                 )
 
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(20.dp))
 
-                // Description
-                Text(
-                    text = step.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.8f),
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(Modifier.height(24.dp))
-
-                // Progress dots
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                // Icon container with subtle glow effect
+                Box(
+                    modifier = Modifier
+                        .size(88.dp)
+                        .clip(CircleShape)
+                        .background(step.accentColor.copy(alpha = 0.15f)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    repeat(tutorialSteps.size) { index ->
-                        Box(
-                            modifier = Modifier
-                                .size(if (index == currentStep) 10.dp else 8.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    if (index == currentStep) Color(0xFF4ECDC4)
-                                    else Color.White.copy(alpha = 0.3f)
-                                )
+                    if (step.showRainbowInfinity) {
+                        StaticRainbowInfinity(modifier = Modifier.size(56.dp))
+                    } else {
+                        Text(
+                            text = step.emoji,
+                            style = MaterialTheme.typography.displayMedium
                         )
                     }
                 }
 
                 Spacer(Modifier.height(20.dp))
 
-                // Buttons
+                // Title with accent color
+                Text(
+                    text = step.title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(Modifier.height(16.dp))
+
+                // Description with better readability
+                Text(
+                    text = step.description,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.White.copy(alpha = 0.9f),
+                    textAlign = TextAlign.Center,
+                    lineHeight = 24.sp
+                )
+
+                Spacer(Modifier.height(28.dp))
+
+                // Progress indicator - pills instead of dots for better visibility
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                ) {
+                    repeat(tutorialSteps.size) { index ->
+                        val isActive = index == currentStep
+                        val isPast = index < currentStep
+                        Box(
+                            modifier = Modifier
+                                .height(6.dp)
+                                .weight(if (isActive) 1.5f else 1f)
+                                .clip(RoundedCornerShape(3.dp))
+                                .background(
+                                    when {
+                                        isActive -> step.accentColor
+                                        isPast -> step.accentColor.copy(alpha = 0.5f)
+                                        else -> Color.White.copy(alpha = 0.2f)
+                                    }
+                                )
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                // Step counter
+                Text(
+                    text = "${currentStep + 1} of ${tutorialSteps.size}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.5f)
+                )
+
+                Spacer(Modifier.height(24.dp))
+
+                // Buttons with enhanced styling
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TextButton(onClick = onDismiss) {
+                    TextButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
                         Text(
-                            "Skip Tutorial",
-                            color = Color.White.copy(alpha = 0.6f)
+                            "Skip",
+                            color = Color.White.copy(alpha = 0.5f),
+                            style = MaterialTheme.typography.labelLarge
                         )
                     }
 
                     Button(
                         onClick = onNextStep,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF4ECDC4)
+                            containerColor = step.accentColor
                         ),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(16.dp),
+                        contentPadding = PaddingValues(horizontal = 32.dp, vertical = 14.dp)
                     ) {
                         Text(
-                            text = if (currentStep == tutorialSteps.size - 1) "Get Started" else "Next",
-                            color = Color(0xFF1a1a2e),
-                            fontWeight = FontWeight.SemiBold
+                            text = if (currentStep == tutorialSteps.size - 1) "Let's Go! ✨" else "Continue",
+                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold,
+                            style = MaterialTheme.typography.labelLarge
                         )
+                        if (currentStep < tutorialSteps.size - 1) {
+                            Spacer(Modifier.width(4.dp))
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = Color.White
+                            )
+                        }
                     }
                 }
             }
@@ -1045,13 +1135,14 @@ private fun AuthTutorialOverlay(
 }
 
 /**
- * Data class for tutorial steps
+ * Data class for tutorial steps with enhanced styling
  */
 private data class TutorialStep(
     val title: String,
     val description: String,
     val emoji: String,
-    val showRainbowInfinity: Boolean = false
+    val showRainbowInfinity: Boolean = false,
+    val accentColor: Color = Color(0xFF4ECDC4)
 )
 
 /**
@@ -1105,7 +1196,7 @@ private fun NeuroTextField(
 }
 
 /**
- * Custom tab button for sign in/sign up toggle
+ * Custom tab button for sign in/sign up toggle with smooth animations
  */
 @Composable
 private fun NeuroTabButton(
@@ -1114,17 +1205,37 @@ private fun NeuroTabButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val backgroundColor by animateFloatAsState(
-        targetValue = if (isSelected) 1f else 0f,
-        animationSpec = tween(200),
-        label = "tabBg"
+    // Animated background color
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isSelected) Color(0xFF4ECDC4) else Color.Transparent,
+        animationSpec = tween(300, easing = FastOutSlowInEasing),
+        label = "tabBgColor"
+    )
+
+    // Animated text color
+    val textColor by animateColorAsState(
+        targetValue = if (isSelected) Color(0xFF1a1a2e) else Color.White.copy(alpha = 0.7f),
+        animationSpec = tween(300, easing = FastOutSlowInEasing),
+        label = "tabTextColor"
+    )
+
+    // Animated scale for a subtle "pop" effect
+    val scale by animateFloatAsState(
+        targetValue = if (isSelected) 1f else 0.95f,
+        animationSpec = tween(200, easing = FastOutSlowInEasing),
+        label = "tabScale"
     )
 
     Surface(
         onClick = onClick,
-        modifier = modifier.height(44.dp),
+        modifier = modifier
+            .height(44.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            },
         shape = RoundedCornerShape(12.dp),
-        color = if (isSelected) Color(0xFF4ECDC4) else Color.Transparent
+        color = backgroundColor
     ) {
         Box(
             contentAlignment = Alignment.Center,
@@ -1134,7 +1245,7 @@ private fun NeuroTabButton(
                 text = text,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                color = if (isSelected) Color(0xFF1a1a2e) else Color.White.copy(alpha = 0.7f)
+                color = textColor
             )
         }
     }

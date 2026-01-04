@@ -2,11 +2,14 @@ package com.kyilmaz.neurocomet
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,20 +20,27 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import kotlinx.coroutines.launch
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /**
  * Full-screen production-ready story viewer with:
@@ -55,10 +65,23 @@ fun StoryViewerDialog(
     var isLiked by remember { mutableStateOf(false) }
     var showShareSheet by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val appContext = remember { context.applicationContext }
+
+    // Swipe-down to dismiss state (neurodivergent-centric: smooth, predictable motion)
+    val swipeOffsetY = remember { Animatable(0f) }
+    val dismissThreshold = 300f // Generous threshold for easier dismissal
+    var isDragging by remember { mutableStateOf(false) }
+    var showDismissHint by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    // Calculate visual feedback for swipe
+    val swipeProgress = (swipeOffsetY.value / dismissThreshold).coerceIn(0f, 1f)
+    val contentScale = 1f - (swipeProgress * 0.15f) // Subtle scale down (max 15%)
+    val contentAlpha = 1f - (swipeProgress * 0.4f) // Fade out as swiping
+    val cornerRadius = (swipeProgress * 32).dp // Rounded corners appear during swipe
 
     val currentItem = story.items.getOrNull(currentItemIndex)
     val progress = remember { Animatable(0f) }
-    val scope = rememberCoroutineScope()
 
     // Mark story as viewed
     LaunchedEffect(story.id) {
@@ -93,38 +116,134 @@ fun StoryViewerDialog(
             dismissOnClickOutside = false
         )
     ) {
+        // Outer container for swipe-down dismiss
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black)
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onTap = { offset ->
-                            val width = size.width
-                            if (offset.x < width / 3) {
-                                // Tap left - go back
-                                if (currentItemIndex > 0) {
-                                    currentItemIndex--
-                                    scope.launch { progress.snapTo(0f) }
+                .background(Color.Black.copy(alpha = contentAlpha))
+        ) {
+            // Swipe-down hint indicator (neurodivergent-friendly: clear visual cue)
+            if (showDismissHint || swipeProgress > 0.1f) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 48.dp)
+                        .alpha(swipeProgress.coerceIn(0.3f, 1f))
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Swipe down to close",
+                            tint = Color.White,
+                            modifier = Modifier
+                                .size(32.dp)
+                                .alpha(0.8f + (swipeProgress * 0.2f))
+                        )
+                        if (swipeProgress > 0.5f) {
+                            Text(
+                                text = "Release to close",
+                                color = Color.White.copy(alpha = 0.9f),
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Main content with swipe offset and visual transformations
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .offset { IntOffset(0, swipeOffsetY.value.roundToInt()) }
+                    .graphicsLayer {
+                        scaleX = contentScale
+                        scaleY = contentScale
+                        alpha = contentAlpha
+                    }
+                    .clip(RoundedCornerShape(cornerRadius))
+                    .background(Color.Black)
+                    // Swipe-down gesture detector
+                    .pointerInput(Unit) {
+                        detectVerticalDragGestures(
+                            onDragStart = {
+                                isDragging = true
+                                isPaused = true // Pause story during swipe
+                                showDismissHint = true
+                            },
+                            onDragEnd = {
+                                isDragging = false
+                                showDismissHint = false
+                                scope.launch {
+                                    if (swipeOffsetY.value > dismissThreshold) {
+                                        // Dismiss with smooth animation
+                                        swipeOffsetY.animateTo(
+                                            targetValue = 1500f,
+                                            animationSpec = tween(200)
+                                        )
+                                        onDismiss()
+                                    } else {
+                                        // Snap back with gentle spring (less jarring for sensory sensitivity)
+                                        swipeOffsetY.animateTo(
+                                            targetValue = 0f,
+                                            animationSpec = spring(
+                                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                stiffness = Spring.StiffnessLow
+                                            )
+                                        )
+                                        isPaused = false
+                                    }
                                 }
-                            } else if (offset.x > width * 2 / 3) {
-                                // Tap right - go forward
-                                if (currentItemIndex < story.items.size - 1) {
-                                    currentItemIndex++
-                                    scope.launch { progress.snapTo(0f) }
-                                } else {
-                                    onDismiss()
+                            },
+                            onDragCancel = {
+                                isDragging = false
+                                showDismissHint = false
+                                scope.launch {
+                                    swipeOffsetY.animateTo(0f)
+                                    isPaused = false
+                                }
+                            },
+                            onVerticalDrag = { _, dragAmount ->
+                                // Only allow downward swipe (positive Y)
+                                if (dragAmount > 0 || swipeOffsetY.value > 0) {
+                                    scope.launch {
+                                        val newOffset = (swipeOffsetY.value + dragAmount).coerceAtLeast(0f)
+                                        swipeOffsetY.snapTo(newOffset)
+                                    }
                                 }
                             }
-                        },
-                        onLongPress = { isPaused = true },
-                        onPress = {
-                            tryAwaitRelease()
-                            isPaused = false
-                        }
-                    )
-                }
-        ) {
+                        )
+                    }
+                    // Tap gestures for navigation (separate from swipe)
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onTap = { offset ->
+                                val width = size.width
+                                if (offset.x < width / 3) {
+                                    // Tap left - go back
+                                    if (currentItemIndex > 0) {
+                                        currentItemIndex--
+                                        scope.launch { progress.snapTo(0f) }
+                                    }
+                                } else if (offset.x > width * 2 / 3) {
+                                    // Tap right - go forward
+                                    if (currentItemIndex < story.items.size - 1) {
+                                        currentItemIndex++
+                                        scope.launch { progress.snapTo(0f) }
+                                    } else {
+                                        onDismiss()
+                                    }
+                                }
+                            },
+                            onLongPress = { isPaused = true },
+                            onPress = {
+                                tryAwaitRelease()
+                                if (!isDragging) isPaused = false
+                            }
+                        )
+                    }
+            ) {
             // Story content - detect if video or image
             currentItem?.let { item ->
                 val isVideo = item.imageUrl.let { url ->
@@ -317,6 +436,9 @@ fun StoryViewerDialog(
                         }
                     }
                 } else {
+                    // Pre-compute string resources for share functionality
+                    val shareChooserLabel = stringResource(R.string.share_story_chooser)
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -326,33 +448,34 @@ fun StoryViewerDialog(
                     ) {
                         StoryActionButton(
                             icon = Icons.Filled.ChatBubbleOutline,
-                            label = "Reply",
+                            label = stringResource(R.string.story_reply),
                             onClick = { showReplyField = true }
                         )
                         StoryActionButton(
                             icon = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                            label = if (isLiked) "Liked" else "Like",
+                            label = if (isLiked) stringResource(R.string.story_liked) else stringResource(R.string.story_like),
                             onClick = {
                                 isLiked = !isLiked
                                 // Haptic feedback
-                                android.view.HapticFeedbackConstants.CONFIRM
+                                @Suppress("DEPRECATION")
+                                android.os.Build.VERSION.SDK_INT
                             },
                             tint = if (isLiked) Color(0xFFFF6B6B) else Color.White
                         )
                         StoryActionButton(
                             icon = Icons.Filled.Share,
-                            label = "Share",
+                            label = stringResource(R.string.post_share),
                             onClick = {
                                 // Share the current story item
                                 currentItem?.let { item ->
+                                    val shareText = appContext.getString(R.string.share_story_text, story.userName, item.imageUrl)
                                     val shareIntent = android.content.Intent().apply {
                                         action = android.content.Intent.ACTION_SEND
-                                        putExtra(android.content.Intent.EXTRA_TEXT,
-                                            "Check out ${story.userName}'s story! ${item.imageUrl}")
+                                        putExtra(android.content.Intent.EXTRA_TEXT, shareText)
                                         type = "text/plain"
                                     }
                                     context.startActivity(
-                                        android.content.Intent.createChooser(shareIntent, "Share Story")
+                                        android.content.Intent.createChooser(shareIntent, shareChooserLabel)
                                     )
                                 }
                             }
@@ -360,7 +483,8 @@ fun StoryViewerDialog(
                     }
                 }
             }
-        }
+            } // End of swipe-down content Box
+        } // End of outer container Box
     }
 }
 

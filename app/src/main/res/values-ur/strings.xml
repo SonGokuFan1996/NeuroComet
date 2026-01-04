@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NeuroComet</string>
+
+    <!-- Navigation/Screen Titles -->
+    <string name="nav_feed">فیڈ</string>
+    <string name="nav_explore">دریافت کریں</string>
+    <string name="nav_messages">پیغامات</string>
+    <string name="nav_notifications">اطلاعات</string>
+    <string name="nav_settings">ترتیبات</string>
+
+    <!-- Direct Messages (DM) -->
+    <string name="dm_title">پیغامات</string>
+    <string name="dm_search_placeholder">پیغامات تلاش کریں</string>
+    <string name="dm_empty_title">ابھی تک کوئی گفتگو نہیں</string>
+    <string name="dm_empty_subtitle">جب کوئی آپ کو پیغام بھیجے گا، یہ یہاں دکھائی دے گا۔</string>
+    <string name="dm_no_conversations">کوئی گفتگو نہیں</string>
+    <string name="dm_conversation_count">%d گفتگو</string>
+    <string name="dm_conversations_count">%d گفتگوئیں</string>
+    <string name="dm_filtered_count">%2$d میں سے %1$d</string>
+    <string name="dm_new_message_hint">کسی کی پروفائل سے نئی گفتگو شروع کریں! 💬</string>
+    <string name="dm_new_message">نیا پیغام</string>
+
+    <!-- Message Empty States -->
+    <string name="messages_empty_title">ابھی تک کوئی گفتگو نہیں</string>
+    <string name="messages_empty_subtitle">جب آپ کسی کو پیغام بھیجیں گے، یہ یہاں دکھائی دے گا۔</string>
+    <string name="messages_empty_hint">مشورہ: دریافت → پروفائل پر ٹیپ کریں → پیغام۔</string>
+    <string name="messages_no_results_title">کوئی نتائج نہیں</string>
+    <string name="messages_no_results_subtitle">کوئی مختلف تلاش کریں یا سب پر واپس جائیں۔</string>
+    <string name="messages_filtering_unread">آپ غیر پڑھے ہوئے فلٹر کر رہے ہیں۔</string>
+
+    <string name="dm_kids_disabled_title">پیغامات بند ہیں</string>
+    <string name="dm_kids_disabled_body">بچوں کے موڈ (13 سال سے کم) کے لیے براہ راست پیغامات غیر فعال ہیں۔ والدین اسے ترتیبات → حفاظت اور والدین کے کنٹرول میں تبدیل کر سکتے ہیں۔</string>
+    <string name="dm_conversation_options">گفتگو کے اختیارات</string>
+    <string name="dm_safety_title">حفاظت</string>
+    <string name="dm_safety_body">اگر کچھ غلط لگے، تو بدسلوکی والے پیغامات کی رپورٹ کریں۔ 13 سال سے کم عمر کے اکاؤنٹس DM استعمال نہیں کر سکتے۔</string>
+    <string name="dm_message_placeholder">پیغام</string>
+    <string name="dm_send">بھیجیں</string>
+    <string name="dm_back">واپس</string>
+    <string name="dm_report">رپورٹ کریں</string>
+    <string name="dm_flagged_badge">نشان زد</string>
+    <string name="dm_flagged_explainer">جائزہ کے لیے نشان زد</string>
+    <string name="dm_slow_down">آہستہ کریں…</string>
+    <string name="dm_copy">کاپی</string>
+    <string name="dm_block_user">صارف کو بلاک کریں</string>
+    <string name="dm_unblock_user">صارف کو ان بلاک کریں</string>
+    <string name="dm_mute_user">خاموش کریں</string>
+    <string name="dm_unmute_user">غیر خاموش کریں</string>
+    <string name="dm_block_confirm_title">%s کو بلاک کریں؟</string>
+    <string name="dm_block_confirm_body">وہ آپ کو پیغام نہیں بھیج سکیں گے اور یہ گفتگو چھپا دی جائے گی۔</string>
+    <string name="dm_unblock_confirm_title">%s کو ان بلاک کریں؟</string>
+    <string name="dm_unblock_confirm_body">وہ دوبارہ آپ کو پیغام بھیج سکیں گے۔</string>
+    <string name="dm_copied">کاپی ہو گیا</string>
+    <string name="dm_sending">بھیج رہے ہیں…</string>
+    <string name="dm_failed">ناکام</string>
+    <string name="dm_tap_to_retry">دوبارہ کوشش کے لیے ٹیپ کریں</string>
+    <string name="dm_blocked_banner">آپ نے اس صارف کو بلاک کیا ہے۔</string>
+    <string name="dm_rate_limited">بہت زیادہ پیغامات۔ براہ کرم آہستہ کریں۔</string>
+    <string name="dm_send_failed">پیغام بھیجنے میں ناکام۔ ٹیپ کریں اور دوبارہ کوشش کریں۔</string>
+
+    <!-- Status Indicators -->
+    <string name="status_online">آن لائن</string>
+    <string name="status_offline">آف لائن</string>
+    <string name="status_blocked">بلاک شدہ</string>
+    <string name="status_muted">خاموش</string>
+    <string name="status_away">دور</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_profile_group">پروفائل</string>
+    <string name="settings_badges_title">بیجز</string>
+    <string name="settings_badges_subtitle">اپنی حاصل کردہ کامیابیاں اور اہداف دیکھیں۔</string>
+    <string name="settings_visual_comfort_group">بصری آرام اور تھیمنگ</string>
+    <string name="settings_text_size_title">متن کا سائز</string>
+    <string name="settings_text_size_current_label">موجودہ: %s</string>
+    <string name="settings_dark_mode_title">ڈارک موڈ</string>
+    <string name="settings_dark_mode_enabled">فعال</string>
+    <string name="settings_dark_mode_disabled">غیر فعال</string>
+    <string name="settings_high_contrast_title">ہائی کنٹراسٹ موڈ</string>
+    <string name="settings_high_contrast_subtitle_enabled">فعال (خالص سیاہ/سفید)</string>
+    <string name="settings_high_contrast_subtitle_disabled">غیر فعال</string>
+    <string name="settings_neuro_centric_theme_title">نیورو سینٹرک تھیم</string>
+    <string name="settings_current_state_label">موجودہ حالت: %s</string>
+    <string name="settings_go_premium_title">پریمیم حاصل کریں</string>
+    <string name="settings_go_premium_subtitle">اشتہارات ہٹائیں اور ڈویلپرز کی مدد کریں۔</string>
+    <string name="settings_account_group">اکاؤنٹ</string>
+    <string name="settings_logout">لاگ آؤٹ</string>
+    <string name="settings_youre_awesome">آپ شاندار ہیں! 🙌</string>
+    <string name="settings_not_authenticated">صارف تصدیق شدہ نہیں ہے۔</string>
+    <string name="settings_verified_human_title">تصدیق شدہ انسان</string>
+    <string name="settings_verified_human_subtitle_verified">حیثیت: تصدیق شدہ</string>
+    <string name="settings_verified_human_subtitle_unverified">حیثیت: غیر تصدیق شدہ</string>
+    <string name="settings_2fa_title">دو عنصری تصدیق</string>
+    <string name="settings_2fa_subtitle">لاگ ان پر کوڈ کی ضرورت ہوگی۔</string>
+    <string name="settings_developer_options_group">ڈویلپر اختیارات</string>
+    <string name="settings_version">ورژن %s</string>
+    <string name="settings_more_taps">%d مزید ٹیپ…</string>
+    <string name="settings_force_verify_title">فورس ویریفائی</string>
+    <string name="settings_force_verify_subtitle">صارف کی تصدیق شدہ حیثیت ٹوگل کریں۔</string>
+    <string name="settings_fake_premium_title">جعلی پریمیم</string>
+    <string name="settings_fake_premium_subtitle">ادائیگی کی حیثیت کی نقل کریں۔</string>
+    <string name="settings_mock_interface_title">ماک انٹرفیس</string>
+    <string name="settings_mock_interface_subtitle">ڈیمو کے لیے جعلی ڈیٹا دکھائیں۔</string>
+    <string name="settings_simulate_badge_title">بیج نوٹیفکیشن سمولیٹ کریں</string>
+    <string name="settings_simulate_badge_subtitle">\'%s\' کے لیے نوٹیفکیشن ٹرگر کرتا ہے۔</string>
+    <string name="settings_nuke_db_title">ڈیٹابیس حذف کریں</string>
+    <string name="settings_nuke_db_subtitle">تمام پوسٹس حذف کریں۔ ناقابل واپسی۔</string>
+    <string name="settings_nuke_db_dialog_title">ڈیٹابیس حذف کریں؟</string>
+    <string name="settings_nuke_db_dialog_text">یہ سرور سے تمام پوسٹس مستقل طور پر حذف کر دے گا۔ یہ عمل واپس نہیں کیا جا سکتا۔</string>
+    <string name="settings_nuke_db_dialog_confirm">حذف کریں</string>
+    <string name="settings_nuke_db_dialog_cancel">منسوخ کریں</string>
+    <string name="settings_language_test_title">ایپ زبان (ٹیسٹ)</string>
+    <string name="settings_language_test_subtitle">ایپ زبان دستی طور پر سیٹ کریں۔ ایپ دوبارہ شروع کرنا ضروری ہے۔</string>
+    <string name="settings_my_profile">میری پروفائل</string>
+
+    <!-- Badges Screen -->
+    <string name="badges_screen_title">آپ کے بیجز</string>
+    <string name="badges_earned_section_title">حاصل کردہ بیجز</string>
+    <string name="badges_locked_section_title">لاک شدہ بیجز</string>
+    <string name="badges_back_button_description">واپس</string>
+    <string name="badge_earned_content_description">حاصل کردہ</string>
+    <string name="badge_locked_content_description">لاک شدہ</string>
+    <string name="badge_name_verified_human">تصدیق شدہ انسان</string>
+    <string name="badge_name_first_post">پہلی پوسٹ</string>
+    <string name="badge_name_hyperfocus_master">ہائپر فوکس ماسٹر</string>
+    <string name="badge_name_community_pillar">کمیونٹی کا ستون</string>
+    <string name="badge_name_quiet_achiever">خاموش کامیاب</string>
+
+    <!-- Comment Sheet -->
+    <string name="comments_title">تبصرے</string>
+    <string name="comments_add_comment_placeholder">تبصرہ شامل کریں…</string>
+    <string name="comments_send_button_description">بھیجیں</string>
+    <string name="comments_view_all">تمام %d تبصرے دیکھیں</string>
+
+    <!-- NeuroState Names -->
+    <string name="neuro_state_default">ڈیفالٹ</string>
+    <string name="neuro_state_hyperfocus">ہائپر فوکس</string>
+    <string name="neuro_state_overload">اوور لوڈ</string>
+    <string name="neuro_state_calm">پرسکون</string>
+
+    <!-- Text Scale Factor Names -->
+    <string name="text_scale_small">چھوٹا</string>
+    <string name="text_scale_medium">درمیانہ</string>
+    <string name="text_scale_large">بڑا</string>
+    <string name="text_scale_xlarge">بہت بڑا</string>
+
+    <!-- Story Creation -->
+    <string name="create_post_hint">آپ کے ذہن میں کیا ہے؟</string>
+    <string name="create_post_image_url_hint">اختیاری: تصویر URL</string>
+    <string name="create_post_video_url_hint">اختیاری: ویڈیو URL</string>
+    <string name="create_post_button">پوسٹ</string>
+    <string name="create_story_title">نئی سٹوری بنائیں</string>
+    <string name="create_story_image_url_hint">آپ کی سٹوری کے لیے تصویر URL</string>
+    <string name="create_story_duration_hint">سیکنڈز میں مدت (مثال، 5)</string>
+    <string name="create_story_add_button">سٹوری شامل کریں</string>
+    <string name="create_story_cancel">منسوخ کریں</string>
+    <string name="story_add_button_content_description">سٹوری شامل کریں</string>
+    <string name="story_your_story_label">آپ کی سٹوری</string>
+    <string name="story_user_story_content_description">%s کی سٹوری</string>
+
+    <!-- Moments/Stories Section -->
+    <string name="moments_title">لمحات</string>
+    <string name="moments_new_count">%d نئے</string>
+    <string name="moments_your_story">آپ کی سٹوری</string>
+
+    <!-- Story Screen (Viewer) -->
+    <string name="story_content_description">سٹوری مواد</string>
+    <string name="story_close_button_content_description">سٹوری بند کریں</string>
+    <string name="story_delete_button_content_description">سٹوری حذف کریں</string>
+    <string name="story_delete_dialog_title">سٹوری حذف کریں؟</string>
+    <string name="story_delete_dialog_text">یہ اس سٹوری کو مستقل طور پر حذف کر دے گا۔ یہ عمل واپس نہیں کیا جا سکتا۔</string>
+    <string name="story_delete_dialog_confirm">حذف کریں</string>
+    <string name="story_delete_dialog_cancel">منسوخ کریں</string>
+
+    <!-- Toast Messages -->
+    <string name="simulate_badge_notification_toast">سمولیٹڈ: نیا بیج نوٹیفکیشن!</string>
+    <string name="notification_badge_earned_title">بیج حاصل ہوا: %s</string>
+    <string name="notification_badge_earned_message">آپ نے کامیابی حاصل کی: %s</string>
+
+    <!-- Notification Custom View -->
+    <string name="notification_icon_description">نوٹیفکیشن آئیکن</string>
+    <string name="notification_action_dismiss">خارج کریں</string>
+    <string name="notification_action_reply">جواب دیں</string>
+    <string name="notification_action_view">دیکھیں</string>
+    <string name="notification_action_mark_read">پڑھا ہوا نشان لگائیں</string>
+
+    <!-- Generic content descriptions for FeedScreen -->
+    <string name="user_avatar_content_description">صارف اوتار</string>
+    <string name="unknown_user_id">نامعلوم</string>
+    <string name="more_options_content_description">مزید اختیارات</string>
+    <string name="post_image_content_description">پوسٹ تصویر</string>
+    <string name="share_button_content_description">شیئر کریں</string>
+    <string name="comment_button_content_description">تبصرہ</string>
+    <string name="like_button_content_description">پسند</string>
+
+    <!-- Post Actions -->
+    <string name="post_following_indicator">• فالو کر رہے ہیں</string>
+    <string name="post_follow_user">\@%s کو فالو کریں</string>
+    <string name="post_unfollow_user">\@%s کو ان فالو کریں</string>
+    <string name="post_now_following">\@%s کو فالو کر رہے ہیں</string>
+    <string name="post_unfollowed">\@%s کو ان فالو کیا</string>
+    <string name="post_not_interested">دلچسپی نہیں ہے</string>
+    <string name="post_copy_text">متن کاپی کریں</string>
+    <string name="post_save">پوسٹ محفوظ کریں</string>
+    <string name="post_unsave">محفوظ سے ہٹائیں</string>
+    <string name="post_hide">پوسٹ چھپائیں</string>
+    <string name="post_share">شیئر کریں</string>
+    <string name="post_share_via">اس کے ذریعے شیئر کریں…</string>
+    <string name="post_share_post_via">پوسٹ شیئر کریں</string>
+    <string name="post_share_story">سٹوری شیئر کریں</string>
+    <string name="post_share_topic">موضوع شیئر کریں</string>
+    <string name="post_report">رپورٹ کریں</string>
+    <string name="post_bookmark">بُک مارک</string>
+    <string name="post_unbookmark">بُک مارک ہٹائیں</string>
+    <string name="post_delete">حذف کریں</string>
+    <string name="post_bookmarked">بُک مارک ہو گیا!</string>
+    <string name="post_unbookmarked">بُک مارک ہٹایا</string>
+    <string name="post_copied">کلپ بورڈ پر کاپی ہو گیا</string>
+    <string name="post_time_just_now">ابھی</string>
+    <string name="post_time_minutes_ago">%d منٹ پہلے</string>
+    <string name="post_time_hours_ago">%d گھنٹے پہلے</string>
+    <string name="post_time_days_ago">%d دن پہلے</string>
+    <string name="post_block_user">\@%s کو بلاک کریں</string>
+    <string name="post_report_post">پوسٹ رپورٹ کریں</string>
+    <string name="post_delete_post">پوسٹ حذف کریں</string>
+
+    <!-- Create Post Dialog -->
+    <string name="create_post_title">پوسٹ بنائیں</string>
+    <string name="create_post_close">بند کریں</string>
+    <string name="create_post_how_feeling">آپ کیسا محسوس کر رہے ہیں؟</string>
+    <string name="create_post_placeholder">آپ کے ذہن میں کیا ہے؟</string>
+    <string name="create_post_add_media">میڈیا شامل کریں</string>
+    <string name="create_post_image_url">تصویر URL</string>
+    <string name="create_post_video_url">ویڈیو URL</string>
+    <string name="create_post_content_warning">مواد کی وارننگ</string>
+    <string name="create_post_content_warning_desc">اس پوسٹ میں حساس مواد ہو سکتا ہے</string>
+    <string name="create_post_cancel">منسوخ کریں</string>
+    <string name="create_post_post">پوسٹ</string>
+    <string name="create_post_chars_remaining">%d حروف باقی</string>
+    <string name="create_post_chars_over">%d حروف حد سے زیادہ</string>
+
+    <!-- Report Dialog -->
+    <string name="report_dialog_title">مواد رپورٹ کریں</string>
+    <string name="report_dialog_reason_hint">ہمیں مزید بتائیں (اختیاری)</string>
+    <string name="report_dialog_submit">رپورٹ جمع کریں</string>
+    <string name="report_dialog_cancel">منسوخ کریں</string>
+
+    <!-- Premium Dialog -->
+    <string name="premium_dialog_title">پریمیم</string>
+    <string name="premium_dialog_message">اس ڈیمو بلڈ میں پریمیم اپ گریڈز وائرڈ نہیں ہیں۔</string>
+    <string name="premium_lifetime_member">آپ لائف ٹائم ممبر ہیں!</string>
+    <string name="premium_now_premium">اب آپ پریمیم ہیں!</string>
+    <string name="premium_welcome_back">واپسی پر خوش آمدید، پریمیم ممبر!</string>
+    <string name="premium_welcome">پریمیم میں خوش آمدید!</string>
+
+    <!-- Common Buttons -->
+    <string name="button_ok">ٹھیک ہے</string>
+    <string name="button_cancel">منسوخ کریں</string>
+    <string name="button_yes">ہاں</string>
+    <string name="button_no">نہیں</string>
+    <string name="button_close">بند کریں</string>
+    <string name="button_save">محفوظ کریں</string>
+    <string name="button_delete">حذف کریں</string>
+    <string name="button_edit">ترمیم کریں</string>
+
+    <!-- Menu Items -->
+    <string name="menu_view_profile">پروفائل دیکھیں</string>
+    <string name="menu_search_chat">چیٹ میں تلاش کریں</string>
+    <string name="menu_mute_notifications">نوٹیفکیشن خاموش کریں</string>
+    <string name="menu_unmute_notifications">نوٹیفکیشن غیر خاموش کریں</string>
+    <string name="menu_block_user">صارف بلاک کریں</string>
+    <string name="menu_unblock_user">صارف ان بلاک کریں</string>
+    <string name="menu_report">رپورٹ کریں</string>
+    <string name="menu_share">شیئر کریں</string>
+    <string name="menu_copy_link">لنک کاپی کریں</string>
+    <string name="menu_hide">چھپائیں</string>
+
+    <!-- Share Sheet -->
+    <string name="share_sheet_title">پوسٹ شیئر کریں</string>
+    <string name="share_sheet_copy_link">لنک کاپی کریں</string>
+    <string name="share_sheet_copy_link_desc">پوسٹ لنک کلپ بورڈ پر کاپی کریں</string>
+    <string name="share_sheet_share_via">اس کے ذریعے شیئر کریں…</string>
+    <string name="share_sheet_share_via_desc">دوسری ایپس میں شیئر کریں</string>
+    <string name="share_sheet_send_dm">DM میں بھیجیں</string>
+    <string name="share_sheet_send_dm_desc">سیدھے دوست کو شیئر کریں</string>
+    <string name="share_sheet_repost">ری پوسٹ</string>
+    <string name="share_sheet_repost_desc">اپنی فیڈ میں شیئر کریں</string>
+
+    <!-- Post Actions -->
+    <string name="post_action_like">پسند</string>
+    <string name="post_action_comment">تبصرہ</string>
+    <string name="post_action_share">شیئر کریں</string>
+    <string name="post_action_save">محفوظ کریں</string>
+    <string name="post_likes_count">%d پسند</string>
+    <string name="post_comments_shares_count">%d تبصرے • %d شیئرز</string>
+    <string name="post_content_hidden_kids">بچوں کے موڈ کے لیے مواد چھپایا گیا</string>
+
+    <!-- Delete Post Dialog -->
+    <string name="delete_post_title">پوسٹ حذف کریں؟</string>
+    <string name="delete_post_message">یہ عمل واپس نہیں کیا جا سکتا۔ کیا آپ واقعی اس پوسٹ کو حذف کرنا چاہتے ہیں؟</string>
+
+    <!-- Time Formats -->
+    <string name="time_just_now">ابھی</string>
+    <string name="time_format_minutes">%d منٹ پہلے</string>
+    <string name="time_format_hours">%d گھنٹے پہلے</string>
+    <string name="time_format_days">%d دن پہلے</string>
+
+    <!-- Toast Messages -->
+    <string name="toast_profile_coming_soon">پروفائل ویو جلد آ رہا ہے! 👤</string>
+    <string name="toast_search_coming_soon">چیٹ سرچ جلد آ رہا ہے! 🔍</string>
+    <string name="toast_notifications_muted">نوٹیفکیشن خاموش کیے گئے 🔕</string>
+    <string name="toast_notifications_unmuted">نوٹیفکیشن غیر خاموش کیے گئے 🔔</string>
+    <string name="toast_user_blocked">صارف بلاک کیا ✗</string>
+    <string name="toast_user_unblocked">صارف ان بلاک کیا ✓</string>
+    <string name="toast_copied">کاپی ہو گیا!</string>
+    <string name="toast_shared">شیئر ہو گیا!</string>
+    <string name="toast_reported">رپورٹ کیا، شکریہ!</string>
+    <string name="toast_hidden">فیڈ سے چھپایا</string>
+
+    <!-- Message Actions -->
+    <string name="action_copy">کاپی</string>
+    <string name="action_react">رد عمل…</string>
+    <string name="action_retry">دوبارہ کوشش</string>
+    <string name="action_pin">پن کریں</string>
+    <string name="action_unpin">ان پن کریں</string>
+    <string name="action_archive">آرکائیو کریں</string>
+    <string name="action_delete_chat">چیٹ حذف کریں</string>
+
+    <!-- Explore Screen -->
+    <string name="explore_title">دریافت کریں</string>
+    <string name="explore_subtitle">کمیونٹیز اور وسائل دریافت کریں</string>
+    <string name="explore_featured">نمایاں</string>
+    <string name="explore_trending">ٹرینڈنگ</string>
+    <string name="explore_for_you">آپ کے لیے</string>
+    <string name="explore_search_placeholder">موضوعات تلاش کریں…</string>
+    <string name="explore_members">%s ممبران</string>
+    <string name="explore_posts">%s پوسٹس</string>
+    <string name="explore_popular">مقبول</string>
+    <string name="explore_new">نیا</string>
+    <string name="explore_see_all">سب دیکھیں</string>
+    <string name="explore_online_now">%d ابھی آن لائن</string>
+
+    <!-- Notifications Screen -->
+    <string name="notifications_title">نوٹیفکیشنز</string>
+    <string name="notifications_empty">ابھی تک کوئی نوٹیفکیشن نہیں</string>
+    <string name="notifications_mark_all_read">سب پڑھے ہوئے نشان لگائیں</string>
+    <string name="notifications_unread_count">%d غیر پڑھے</string>
+
+    <!-- Feed Screen -->
+    <string name="feed_title">فیڈ</string>
+    <string name="feed_empty">ابھی تک کوئی پوسٹ نہیں</string>
+    <string name="feed_refresh">ریفریش کے لیے کھینچیں</string>
+    <string name="feed_new_posts">نئی پوسٹس دستیاب</string>
+    <string name="feed_reading_time_seconds">⏱️ ~%d سیکنڈ پڑھیں</string>
+    <string name="feed_reading_time_minutes">⏱️ ~%d منٹ پڑھیں</string>
+    <string name="feed_saved">محفوظ ہو گیا!</string>
+    <string name="feed_removed_from_saved">محفوظ سے ہٹایا</string>
+    <string name="feed_save_post">پوسٹ محفوظ کریں</string>
+    <string name="feed_content_hidden_kids">بچوں کے موڈ کے لیے مواد چھپایا گیا</string>
+
+    <!-- Emotional Tones -->
+    <string name="tone_neutral">غیر جانبدار</string>
+    <string name="tone_happy">مثبت وائبز</string>
+    <string name="tone_excited">پرجوش!</string>
+    <string name="tone_sad">جذباتی مواد</string>
+    <string name="tone_anxious">شدید لگ سکتا ہے</string>
+    <string name="tone_frustrated">اخراج</string>
+    <string name="tone_supportive">معاون</string>
+    <string name="tone_question">مدد مانگ رہے ہیں</string>
+    <string name="tone_celebration">جشن منا رہے ہیں!</string>
+    <string name="tone_informative">معلوماتی</string>
+    <string name="tone_may_be_intense">شدید ہو سکتا ہے</string>
+
+    <!-- Social Settings -->
+    <string name="social_show_online_status">آن لائن حیثیت دکھائیں</string>
+    <string name="social_show_online_status_desc">دوسروں کو دیکھنے دیں جب آپ فعال ہوں</string>
+
+    <!-- Community Detail Screen -->
+    <string name="community_back">واپس</string>
+    <string name="community_share">کمیونٹی شیئر کریں</string>
+    <string name="community_more_options">مزید اختیارات</string>
+    <string name="community_join">کمیونٹی میں شامل ہوں</string>
+    <string name="community_leave">کمیونٹی چھوڑیں</string>
+    <string name="community_joined_toast">%s میں شامل ہو گئے</string>
+    <string name="community_left_toast">%s چھوڑ دیا</string>
+    <string name="community_mute_notifications">نوٹیفکیشن خاموش کریں</string>
+    <string name="community_turn_on_notifications">نوٹیفکیشن چالو کریں</string>
+    <string name="community_notifications_on_toast">%s کے لیے نوٹیفکیشن چالو</string>
+    <string name="community_notifications_muted_toast">%s کے لیے نوٹیفکیشن خاموش</string>
+    <string name="community_save">کمیونٹی محفوظ کریں</string>
+    <string name="community_saved_toast">%s بُک مارکس میں محفوظ کیا</string>
+    <string name="community_link_copied">لنک کلپ بورڈ پر کاپی ہو گیا</string>
+    <string name="community_rules">کمیونٹی قواعد</string>
+    <string name="community_rules_coming_soon">کمیونٹی قواعد جلد آ رہے ہیں</string>
+    <string name="community_report">کمیونٹی رپورٹ کریں</string>
+    <string name="community_reported_toast">رپورٹ جمع ہو گئی۔ شکریہ!</string>
+    <string name="community_compose">لکھیں</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_my_profile">میری پروفائل</string>
+    <string name="profile_edit">پروفائل ترمیم کریں</string>
+    <string name="profile_share">پروفائل شیئر کریں</string>
+    <string name="profile_more_options">مزید اختیارات</string>
+    <string name="profile_posts">پوسٹس</string>
+    <string name="profile_followers">فالوورز</string>
+    <string name="profile_following">فالونگ</string>
+    <string name="profile_follow">فالو کریں</string>
+    <string name="profile_message">پیغام</string>
+    <string name="profile_mutual_friends">مشترکہ دوست</string>
+    <string name="profile_communication_preferences">گفتگو کی ترجیحات</string>
+    <string name="profile_how_to_communicate">مجھ سے کیسے گفتگو کریں</string>
+    <string name="profile_share_first_post">اپنی پہلی پوسٹ شیئر کریں</string>
+    <string name="profile_no_posts_yet">ابھی تک کوئی پوسٹ نہیں</string>
+    <string name="profile_posts_will_appear">آپ کی پوسٹس یہاں دکھائی دیں گی</string>
+    <string name="profile_about">کے بارے میں</string>
+    <string name="profile_joined">شامل ہوئے</string>
+    <string name="profile_website">ویب سائٹ</string>
+    <string name="profile_special_interests">خصوصی دلچسپیاں</string>
+    <string name="profile_interests_subtitle">وہ چیزیں جن کے بارے میں میں گہرائی سے جانتا/جانتی ہوں</string>
+    <string name="profile_badges_achievements">بیجز اور کامیابیاں</string>
+    <string name="profile_no_badges_yet">ابھی تک کوئی بیج نہیں</string>
+    <string name="profile_earned">حاصل کردہ</string>
+    <string name="profile_how_feeling">آج آپ کیسا محسوس کر رہے ہیں؟</string>
+    <string name="profile_selected">منتخب شدہ</string>
+    <string name="profile_cancel">منسوخ کریں</string>
+    <string name="profile_got_it">سمجھ گیا</string>
+
+    <!-- Explore Topics -->
+
+    <string name="explore_topic_adhd_hacks">ADHD ہیکس</string>
+    <string name="explore_topic_adhd_hacks_desc">پیداواریت کی تجاویز اور لائف ہیکس جو واقعی کام کرتے ہیں</string>
+    <string name="explore_topic_safe_foods">محفوظ کھانے</string>
+    <string name="explore_topic_safe_foods_desc">آرام دہ کھانے، پکوان اور کھانے کی تشویش کی مدد</string>
+    <string name="explore_topic_sleep">نیند اور آرام</string>
+    <string name="explore_topic_sleep_desc">بہتر نیند کے لیے تجاویز اور نیند سے متعلق مسائل</string>
+    <string name="explore_topic_stimming">اسٹیمنگ</string>
+    <string name="explore_topic_stimming_desc">اسٹیم کھلونے، تکنیک اور اسٹیم دوستانہ جگہیں</string>
+    <string name="explore_topic_social_skills">سماجی مہارتیں</string>
+    <string name="explore_topic_social_skills_desc">سماجی حالات کو نیویگیٹ کرنا اور گفتگو کی تجاویز</string>
+    <string name="explore_topic_masking">ماسکنگ اور ان ماسکنگ</string>
+    <string name="explore_topic_masking_desc">ماسکنگ کے تجربات اور اصلی طور پر جینا</string>
+    <string name="explore_topic_late_diagnosed">دیر سے تشخیص</string>
+    <string name="explore_topic_late_diagnosed_desc">بالغ تشخیص کے تجربات اور شناخت کی تلاش</string>
+    <string name="explore_topic_parenting">ND والدین</string>
+    <string name="explore_topic_parenting_desc">نیوروڈائیورجنٹ والدین اور ND بچوں کی پرورش</string>
+    <string name="explore_topic_executive_function">ایگزیکٹو فنکشن</string>
+    <string name="explore_topic_executive_function_desc">کام کا انتظام، تنظیم اور بالغ ہونا</string>
+
+    <!-- LGBTQ+ Topics -->
+    <string name="explore_topic_lgbtq_nd">LGBTQ+ اور نیوروڈائیورجنٹ</string>
+    <string name="explore_topic_lgbtq_nd_desc">کوئیر اور نیوروڈائیورجنٹ شناخت کا جشن</string>
+    <string name="explore_topic_trans_nd">ٹرانس اور ND</string>
+    <string name="explore_topic_trans_nd_desc">ٹرانسجینڈر اور جینڈر ڈائیورس نیوروڈائیورجنٹ لوگوں کے لیے مدد</string>
+    <string name="explore_topic_queer_pride">کوئیر پرائیڈ</string>
+    <string name="explore_topic_queer_pride_desc">کوئیر خوشی، پرائیڈ ایونٹس اور کمیونٹی کا جشن</string>
+    <string name="explore_topic_ace_aro">ایسیکسوئل/ایرومینٹک سپیکٹرم</string>
+    <string name="explore_topic_ace_aro_desc">ایسیکسوئل، ایرومینٹک نیوروڈائیورجنٹ تجربات</string>
+    <string name="explore_topic_nonbinary">نان بائنری اور ND</string>
+    <string name="explore_topic_nonbinary_desc">نان بائنری، جینڈر کوئیر کمیونٹی</string>
+    <string name="explore_topic_coming_out">کمنگ آؤٹ سٹوریز</string>
+    <string name="explore_topic_coming_out_desc">کمنگ آؤٹ سفر اور قبولیت تلاش کرنا</string>
+
+    <!-- Security Messages -->
+    <string name="security_rooted_device">یہ ایپ آپ کی حفاظت کے لیے روٹڈ ڈیوائسز پر نہیں چل سکتی۔</string>
+    <string name="security_debug_not_allowed">پروڈکشن بلڈز میں ڈیبگنگ کی اجازت نہیں ہے۔</string>
+    <string name="security_tampering_detected">سیکورٹی فریم ورک ٹیمپرنگ کا پتہ چلا۔</string>
+    <string name="security_integrity_failed">ایپ انٹیگریٹی تصدیق ناکام۔</string>
+    <string name="security_emulator_not_allowed">یہ ایپ ایمولیٹرز پر نہیں چل سکتی۔</string>
+    <string name="security_check_failed">سیکورٹی چیک ناکام۔ یہ ایپ اس ڈیوائس پر نہیں چل سکتی۔</string>
+    <string name="security_status_excellent">✅ ڈیوائس سیکورٹی: بہترین</string>
+    <string name="security_status_good">✅ ڈیوائس سیکورٹی: اچھی</string>
+    <string name="security_status_fair">⚠️ ڈیوائس سیکورٹی: ٹھیک - کچھ خصوصیات محدود ہو سکتی ہیں</string>
+    <string name="security_status_at_risk">🔴 ڈیوائس سیکورٹی: خطرے میں - سیکورٹی خصوصیات فعال</string>
+    <string name="security_status_critical">🚨 ڈیوائس سیکورٹی: نازک - ایپ پابندیاں فعال</string>
+
+
+</resources>
+

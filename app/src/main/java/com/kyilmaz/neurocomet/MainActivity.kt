@@ -12,7 +12,7 @@ import android.os.Bundle
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -43,36 +43,7 @@ import com.kyilmaz.neurocomet.calling.PracticeCallScreen
 import com.kyilmaz.neurocomet.calling.PracticeCallSelectionScreen
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.Locale
 
-
-// Mock for Shared Preferences to persist locale across recreates (needed for on-the-fly switch)
-private const val PREFS_NAME = "app_settings"
-private const val KEY_LOCALE = "selected_locale"
-
-private fun getLocaleCode(context: Context): String {
-    return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(KEY_LOCALE, "") ?: ""
-}
-
-// Helper function to apply the locale, must be called before super.onCreate in Activity
-private fun Context.applyLocale(localeCode: String): Context {
-    if (localeCode.isBlank()) return this
-
-    val locale = if (localeCode.contains("-")) {
-        val parts = localeCode.split("-")
-        Locale.Builder()
-            .setLanguage(parts[0])
-            .setRegion(parts.getOrNull(1)?.removePrefix("r") ?: "")
-            .build()
-    } else {
-        Locale.Builder().setLanguage(localeCode).build()
-    }
-
-    Locale.setDefault(locale)
-    val config = resources.configuration
-    config.setLocale(locale)
-    return createConfigurationContext(config)
-}
 
 
 // --- 1. NAVIGATION & ROUTES ---
@@ -109,6 +80,10 @@ sealed class Screen(val route: String, val labelId: Int, val iconFilled: ImageVe
         fun route(userId: String) = "profile/$userId"
     }
     data object MyProfile : Screen("my_profile", R.string.nav_settings, Icons.Filled.AccountCircle, Icons.Outlined.AccountCircle)
+    data object GamesHub : Screen("games_hub", R.string.games_hub_title, Icons.Filled.SportsEsports, Icons.Outlined.SportsEsports)
+    data object GamePlay : Screen("game/{gameId}", R.string.games_hub_title, Icons.Filled.SportsEsports, Icons.Outlined.SportsEsports) {
+        fun route(gameId: String) = "game/$gameId"
+    }
 }
 
 // --- 3. MOCK DATA & ASSETS (Relies on DataModels.kt) ---
@@ -848,13 +823,43 @@ val MOCK_EXPLORE_POSTS = listOf(
     )
 )
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+
+    /**
+     * Configure screen orientation based on device type.
+     * - Phones and foldable outer screens: Portrait only (easier to use one-handed)
+     * - Tablets and large displays: Allow rotation for better content viewing
+     *
+     * Uses 600dp as the threshold (standard for tablet classification).
+     */
+    private fun configureOrientationForDevice() {
+        val displayMetrics = resources.displayMetrics
+        val widthDp = displayMetrics.widthPixels / displayMetrics.density
+        val heightDp = displayMetrics.heightPixels / displayMetrics.density
+        val smallestWidthDp = minOf(widthDp, heightDp)
+
+        // 600dp is the standard breakpoint for tablets
+        // Also check if it's a foldable in outer screen mode (narrow width)
+        requestedOrientation = if (smallestWidthDp >= 600) {
+            // Tablet or large display - allow any orientation
+            android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        } else {
+            // Phone or foldable outer screen - lock to portrait
+            android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        }
+    }
+
+    /**
+     * Override attachBaseContext to ensure proper locale handling on all Android versions.
+     * This is critical for Per-App Language support on pre-Android 13 devices.
+     */
     override fun attachBaseContext(newBase: Context) {
-        val localeCode = getLocaleCode(newBase)
-        super.attachBaseContext(newBase.applyLocale(localeCode))
+        // Let AppCompatDelegate handle the locale wrapping
+        super.attachBaseContext(newBase)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         // Enable edge-to-edge display with transparent navigation bar
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(
@@ -867,6 +872,45 @@ class MainActivity : ComponentActivity() {
             )
         )
         super.onCreate(savedInstanceState)
+
+        // ========================================================================
+        // SECURITY: Perform comprehensive security check at app startup
+        // Detects root, hooks, debuggers, emulators, and app tampering
+        // ========================================================================
+        try {
+            val securityResult = SecurityManager.performSecurityCheck(this)
+
+            // Log security status for debugging (removed in release builds by ProGuard)
+            android.util.Log.d("Security", "Security check: ${securityResult.threatLevel}")
+
+            // For parental controls, we need stricter security
+            if (!SecurityManager.isParentalControlsSafe(this)) {
+                android.util.Log.w("Security", "⚠️ Parental controls may be bypassed on this device")
+            }
+
+            // In release builds, enforce security for critical threats
+            if (!BuildConfig.DEBUG) {
+                SecurityManager.enforceSecurity(
+                    context = this,
+                    allowEmulator = false,  // Don't allow emulators in production
+                    allowDeveloperOptions = true  // Allow dev options (common for power users)
+                )
+            }
+        } catch (e: SecurityException) {
+            // Security violation detected - show error and exit
+            android.util.Log.e("Security", "Security check failed: ${e.message}")
+            android.widget.Toast.makeText(
+                this,
+                "Security check failed. This app cannot run on this device.",
+                android.widget.Toast.LENGTH_LONG
+            ).show()
+            finish()
+            return
+        }
+
+        // Restrict orientation to portrait on phones and foldable outer screens
+        // but allow rotation on tablets and larger displays
+        configureOrientationForDevice()
 
         // Request notification permission on Android 13+
         if (!NotificationChannels.hasNotificationPermission(this)) {
@@ -886,6 +930,13 @@ class MainActivity : ComponentActivity() {
             val authViewModel: AuthViewModel = viewModel()
             val themeViewModel: ThemeViewModel = viewModel()
             val safetyViewModel: SafetyViewModel = viewModel()
+
+            // Initialize AuthViewModel with context for biometric/FIDO2 support
+            val context = LocalContext.current
+            LaunchedEffect(Unit) {
+                authViewModel.initialize(context)
+            }
+
             val authState by authViewModel.user.collectAsState()
             val authError by authViewModel.error.collectAsState()
             val is2FARequired by authViewModel.is2FARequired.collectAsState()
@@ -900,7 +951,14 @@ class MainActivity : ComponentActivity() {
             }
 
             LaunchedEffect(Unit) {
-                themeViewModel.setLanguageCode(getLocaleCode(this@MainActivity))
+                // Get current app locale from Per-App Language preferences
+                val currentLocales = androidx.appcompat.app.AppCompatDelegate.getApplicationLocales()
+                val languageTag = if (!currentLocales.isEmpty) {
+                    currentLocales.get(0)?.toLanguageTag() ?: ""
+                } else {
+                    ""
+                }
+                themeViewModel.setLanguageCode(languageTag)
 
                 Purchases.sharedInstance.getCustomerInfo(object : ReceiveCustomerInfoCallback {
                     override fun onReceived(customerInfo: CustomerInfo) {
@@ -971,9 +1029,9 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
-        }
-    }
-}
+        } // End setContent
+    } // End onCreate
+} // End MainActivity
 
 // All composables below this point were stripped
 // in their respective files (ThemeComposables.kt, DmScreens.kt, ExploreScreen.kt, etc.)
@@ -1134,6 +1192,7 @@ fun NeuroCometApp(
                         posts = feedState.posts,
                         stories = feedState.stories,
                         currentUser = CURRENT_USER.copy(isVerified = isUserVerified),
+                        isLoading = feedState.isLoading,
                         onLikePost = { postId: Long -> feedViewModel.toggleLike(postId) },
                         onReplyPost = { post: Post -> feedViewModel.openCommentSheet(post) },
                         onSharePost = { ctx: Context, post: Post -> feedViewModel.sharePost(ctx, post) },
@@ -1169,7 +1228,7 @@ fun NeuroCometApp(
                 }
                 composable(Screen.Explore.route) {
                     ExploreScreen(
-                        posts = MOCK_EXPLORE_POSTS,
+                        posts = feedState.posts, // Use localized posts from FeedViewModel
                         safetyState = safetyState,
                         onLikePost = { postId -> feedViewModel.toggleLike(postId) },
                         onSharePost = { ctx, post -> feedViewModel.sharePost(ctx, post) },
@@ -1337,6 +1396,9 @@ fun NeuroCometApp(
                         onOpenMyProfile = {
                             navController.navigate(Screen.MyProfile.route)
                         },
+                        onOpenGames = {
+                            navController.navigate(Screen.GamesHub.route)
+                        },
                         isPremium = feedState.isPremium,
                         isFakePremiumEnabled = feedState.isFakePremiumEnabled,
                         onFakePremiumToggle = { enabled ->
@@ -1393,7 +1455,10 @@ fun NeuroCometApp(
                         onBack = { navController.popBackStack() },
                         devOptionsViewModel = devOptionsViewModel,
                         safetyViewModel = safetyViewModel,
-                        feedViewModel = feedViewModel
+                        feedViewModel = feedViewModel,
+                        onNavigateToGame = { gameId ->
+                            navController.navigate(Screen.GamePlay.route(gameId))
+                        }
                     )
                 }
                 composable(Screen.ParentalControls.route) {
@@ -1488,16 +1553,33 @@ fun NeuroCometApp(
                         onEditProfile = { /* Open edit profile dialog/screen */ }
                     )
                 }
+                // Games Hub
+                composable(Screen.GamesHub.route) {
+                    com.kyilmaz.neurocomet.games.GamesHubScreen(
+                        onBack = { navController.popBackStack() },
+                        onGameSelected = { game ->
+                            navController.navigate(Screen.GamePlay.route(game.id))
+                        }
+                    )
+                }
+                // Individual Game
+                composable(Screen.GamePlay.route) { backStackEntry ->
+                    val gameId = backStackEntry.arguments?.getString("gameId") ?: "bubble_pop"
+                    com.kyilmaz.neurocomet.games.GameScreen(
+                        gameId = gameId,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
             }
         }
 
         if (showPremiumDialog) {
             AlertDialog(
                 onDismissRequest = { showPremiumDialog = false },
-                title = { Text("Premium") },
-                text = { Text("Premium upgrades are not wired in this demo build.") },
+                title = { Text(stringResource(R.string.premium_dialog_title)) },
+                text = { Text(stringResource(R.string.premium_dialog_message)) },
                 confirmButton = {
-                    TextButton(onClick = { showPremiumDialog = false }) { Text("OK") }
+                    TextButton(onClick = { showPremiumDialog = false }) { Text(stringResource(R.string.button_ok)) }
                 }
             )
         }

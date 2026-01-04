@@ -44,10 +44,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.kyilmaz.neurocomet.ui.components.NeuroLinkedText
+import com.kyilmaz.neurocomet.ui.components.defaultNeuroLinkStyle
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.StrokeCap
@@ -119,6 +123,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 
 // Explicit imports for symbols in the same package (to address compiler ambiguity in various contexts)
 import com.kyilmaz.neurocomet.SafetyState
@@ -130,21 +135,21 @@ import com.kyilmaz.neurocomet.ContentFiltering
  */
 enum class EmotionalTone(
     val emoji: String,
-    val label: String,
+    val labelResId: Int,
     val backgroundColor: Color,
     val textColor: Color,
     val showWarning: Boolean = false
 ) {
-    NEUTRAL("💭", "Neutral", Color(0xFF9E9E9E), Color(0xFF616161)),
-    HAPPY("😊", "Positive vibes", Color(0xFF81C784), Color(0xFF2E7D32)),
-    EXCITED("🎉", "Exciting!", Color(0xFFFFD54F), Color(0xFFF57F17)),
-    SAD("💙", "Emotional content", Color(0xFF64B5F6), Color(0xFF1565C0), true),
-    ANXIOUS("🫂", "May feel intense", Color(0xFFCE93D8), Color(0xFF7B1FA2), true),
-    FRUSTRATED("😤", "Venting", Color(0xFFFFAB91), Color(0xFFD84315), true),
-    SUPPORTIVE("💜", "Supportive", Color(0xFFB39DDB), Color(0xFF512DA8)),
-    QUESTION("❓", "Seeking help", Color(0xFF80DEEA), Color(0xFF00838F)),
-    CELEBRATION("✨", "Celebrating!", Color(0xFFF48FB1), Color(0xFFC2185B)),
-    INFORMATIVE("📚", "Informative", Color(0xFF90CAF9), Color(0xFF1976D2))
+    NEUTRAL("💭", R.string.tone_neutral, Color(0xFF9E9E9E), Color(0xFF616161)),
+    HAPPY("😊", R.string.tone_happy, Color(0xFF81C784), Color(0xFF2E7D32)),
+    EXCITED("🎉", R.string.tone_excited, Color(0xFFFFD54F), Color(0xFFF57F17)),
+    SAD("💙", R.string.tone_sad, Color(0xFF64B5F6), Color(0xFF1565C0), true),
+    ANXIOUS("🫂", R.string.tone_anxious, Color(0xFFCE93D8), Color(0xFF7B1FA2), true),
+    FRUSTRATED("😤", R.string.tone_frustrated, Color(0xFFFFAB91), Color(0xFFD84315), true),
+    SUPPORTIVE("💜", R.string.tone_supportive, Color(0xFFB39DDB), Color(0xFF512DA8)),
+    QUESTION("❓", R.string.tone_question, Color(0xFF80DEEA), Color(0xFF00838F)),
+    CELEBRATION("✨", R.string.tone_celebration, Color(0xFFF48FB1), Color(0xFFC2185B)),
+    INFORMATIVE("📚", R.string.tone_informative, Color(0xFF90CAF9), Color(0xFF1976D2))
 }
 
 /**
@@ -556,109 +561,45 @@ private fun NeuroCometLogo(
     animateLogos: Boolean = true
 ) {
     val currentHoliday = remember { detectCurrentHoliday() }
-    val holidayEmoji = remember { getHolidayEmoji(currentHoliday) }
     val holidayColors = remember { getHolidayColors(currentHoliday) }
-    val holidayDecorations = remember { getHolidayDecorations(currentHoliday) }
     val isHoliday = currentHoliday != HolidayType.NONE
     val isSpecialCelebration = remember { isSpecialNDCelebration(currentHoliday) }
-    val animSpeed = remember { getHolidayAnimationSpeed(currentHoliday) }
 
-    // Animations for holiday decorations
-    val infiniteTransition = rememberInfiniteTransition(label = "holiday-decorations")
+    // Only create animations when needed to save resources
+    val shouldAnimate = animateLogos && isHoliday
 
-    // Gentle breathing animation for the main emoji - smooth and calming
-    val bounceScale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = if (animateLogos && isHoliday) {
-            if (isSpecialCelebration) 1.08f else 1.05f
-        } else 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = if (animateLogos) (2000 / animSpeed).toInt() else 1,
-                easing = FastOutSlowInEasing
+    // Single animation values - only created when holiday is active
+    val bounceScale: Float
+    val glowAlpha: Float
+
+    if (shouldAnimate) {
+        val infiniteTransition = rememberInfiniteTransition(label = "holiday-decorations")
+
+        val animatedBounce by infiniteTransition.animateFloat(
+            initialValue = 1f,
+            targetValue = if (isSpecialCelebration) 1.08f else 1.05f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(2000, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse
             ),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "bounce"
-    )
+            label = "bounce"
+        )
+        bounceScale = animatedBounce
 
-    // Gentle rotation animation for subtle movement - not shaky!
-    val sparkleRotation by infiniteTransition.animateFloat(
-        initialValue = if (isSpecialCelebration) -3f else -2f,
-        targetValue = if (animateLogos && isHoliday) {
-            if (isSpecialCelebration) 3f else 2f
-        } else 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = if (animateLogos) (2500 / animSpeed).toInt() else 1,
-                easing = FastOutSlowInEasing
+        val animatedGlow by infiniteTransition.animateFloat(
+            initialValue = if (isSpecialCelebration) 0.15f else 0.1f,
+            targetValue = if (isSpecialCelebration) 0.35f else 0.25f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(2000, easing = FastOutSlowInEasing),
+                repeatMode = RepeatMode.Reverse
             ),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "wiggle"
-    )
-
-    // Gentle floating animation for decorations - slow and calming
-    val floatOffset by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = if (animateLogos && isHoliday) {
-            if (isSpecialCelebration) 3f else 2f
-        } else 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = if (animateLogos) (3000 / animSpeed).toInt() else 1,
-                easing = FastOutSlowInEasing
-            ),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "float"
-    )
-
-    // Secondary decoration animation (offset from primary) - gentle movement
-    val floatOffset2 by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = if (animateLogos && isHoliday) {
-            if (isSpecialCelebration) -2f else -1f
-        } else 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = if (animateLogos) (3500 / animSpeed).toInt() else 1,
-                easing = FastOutSlowInEasing
-            ),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "float2"
-    )
-
-    // Extra sparkle rotation for special celebrations
-    val sparkleDecorationRotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = if (animateLogos && isSpecialCelebration) 360f else 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = if (animateLogos) 3000 else 1,
-                easing = LinearEasing
-            ),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "sparkle-rotation"
-    )
-
-    // Glow pulse for holiday background - more intense for special celebrations
-    val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = if (isSpecialCelebration) 0.15f else 0.1f,
-        targetValue = if (animateLogos && isHoliday) {
-            if (isSpecialCelebration) 0.35f else 0.25f
-        } else 0.1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = if (animateLogos) (2000 / animSpeed).toInt() else 1,
-                easing = FastOutSlowInEasing
-            ),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "glow"
-    )
+            label = "glow"
+        )
+        glowAlpha = animatedGlow
+    } else {
+        bounceScale = 1f
+        glowAlpha = 0.1f
+    }
 
     // Get primary glow color from holiday palette
     val glowColor = if (isHoliday && holidayColors.isNotEmpty()) {
@@ -1016,6 +957,7 @@ fun FeedScreen(
     posts: List<Post>,
     stories: List<Story>,
     currentUser: User,
+    isLoading: Boolean = false,
     onLikePost: (Long) -> Unit,
     onReplyPost: (Post) -> Unit,
     onSharePost: (Context, Post) -> Unit,
@@ -1077,6 +1019,38 @@ fun FeedScreen(
         // Optimized scroll state for high refresh rate displays
         val lazyListState = rememberLazyListState()
 
+        // Track scroll state to pause animations during scroll for smoother performance
+        val isFeedScrolling by remember {
+            derivedStateOf { lazyListState.isScrollInProgress }
+        }
+
+        // Show loading indicator when loading and no posts yet
+        if (isLoading && posts.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(48.dp),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        text = "Loading your feed...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+
+        // Main content - always render (will be empty when loading)
         LazyColumn(
             state = lazyListState,
             modifier = Modifier.fillMaxSize(),
@@ -1095,7 +1069,7 @@ fun FeedScreen(
                     stories = stories,
                     currentUser = currentUser,
                     isMockInterfaceEnabled = isMockInterfaceEnabled,
-                    animateStories = animateStories,
+                    animateStories = animateStories && !isFeedScrolling,
                     onViewStory = onViewStory,
                     onAddStoryClick = { showCreateStoryDialog = true } // Pass callback to open story dialog
                 )
@@ -1195,7 +1169,15 @@ fun BubblyPostCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 1.dp,
+            pressedElevation = 0.5.dp
+        )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Neurodivergent feature: Emotional tone indicator
@@ -1217,14 +1199,14 @@ fun BubblyPostCard(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = emotionalTone.label,
+                        text = stringResource(emotionalTone.labelResId),
                         style = MaterialTheme.typography.labelSmall,
                         color = emotionalTone.textColor
                     )
                     Spacer(Modifier.weight(1f))
                     if (emotionalTone.showWarning) {
                         Text(
-                            text = "May be intense",
+                            text = stringResource(R.string.tone_may_be_intense),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
@@ -1240,28 +1222,49 @@ fun BubblyPostCard(
                     post.userAvatar
                 }
 
-                if (!isMockInterfaceEnabled && avatarUrl.isNullOrBlank()) {
-                    Icon(
-                        Icons.Default.AccountCircle, 
-                        contentDescription = stringResource(R.string.user_avatar_content_description),
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .clickable { post.userId?.let { onProfileClick(it) } },
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                    )
-                } else {
-                    AsyncImage(
-                        model = avatarUrl ?: "https://i.pravatar.cc/150?u=${post.userId}",
-                        contentDescription = stringResource(R.string.user_avatar_content_description),
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .clickable { post.userId?.let { onProfileClick(it) } }
-                    )
+                // Avatar with subtle border ring
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            shape = CircleShape
+                        )
+                        .border(
+                            width = 1.5.dp,
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f),
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (!isMockInterfaceEnabled && avatarUrl.isNullOrBlank()) {
+                        Icon(
+                            Icons.Default.AccountCircle,
+                            contentDescription = stringResource(R.string.user_avatar_content_description),
+                            modifier = Modifier
+                                .size(42.dp)
+                                .clip(CircleShape)
+                                .clickable { post.userId?.let { onProfileClick(it) } },
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        )
+                    } else {
+                        AsyncImage(
+                            model = ImageRequest.Builder(context)
+                                .data(avatarUrl ?: "https://i.pravatar.cc/150?u=${post.userId}")
+                                .crossfade(150)
+                                .memoryCacheKey(avatarUrl ?: post.userId)
+                                .build(),
+                            contentDescription = stringResource(R.string.user_avatar_content_description),
+                            modifier = Modifier
+                                .size(42.dp)
+                                .clip(CircleShape)
+                                .clickable { post.userId?.let { onProfileClick(it) } },
+                            contentScale = ContentScale.Crop
+                        )
+                    }
                 }
 
-                Spacer(Modifier.width(16.dp))
+                Spacer(Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -1269,23 +1272,28 @@ fun BubblyPostCard(
                     ) {
                         Text(
                             post.userId ?: stringResource(R.string.unknown_user_id),
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodyMedium,
+                            letterSpacing = 0.1.sp
                         )
                         // Following indicator
                         if (isFollowing) {
-                            Spacer(Modifier.width(4.dp))
+                            Spacer(Modifier.width(6.dp))
                             Text(
-                                text = "• Following",
+                                text = stringResource(R.string.post_following_indicator),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     }
+                    Spacer(Modifier.height(2.dp))
                     Text(
                         post.timeAgo,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f)
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                        letterSpacing = 0.15.sp
                     )
                 }
 
@@ -1310,7 +1318,7 @@ fun BubblyPostCard(
                                     )
                                     Spacer(Modifier.width(12.dp))
                                     Text(
-                                        if (isBookmarked) "Remove from Saved" else "Save Post",
+                                        if (isBookmarked) stringResource(R.string.post_unsave) else stringResource(R.string.post_save),
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                 }
@@ -1320,7 +1328,7 @@ fun BubblyPostCard(
                                 showMenu = false
                                 Toast.makeText(
                                     context,
-                                    if (isBookmarked) "Post saved" else "Post removed from saved",
+                                    if (isBookmarked) context.getString(R.string.post_bookmarked) else context.getString(R.string.post_unbookmarked),
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
@@ -1332,13 +1340,13 @@ fun BubblyPostCard(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Filled.ContentCopy, contentDescription = null, modifier = Modifier.size(20.dp))
                                     Spacer(Modifier.width(12.dp))
-                                    Text("Copy Text", color = MaterialTheme.colorScheme.onSurface)
+                                    Text(stringResource(R.string.post_copy_text), color = MaterialTheme.colorScheme.onSurface)
                                 }
                             },
                             onClick = {
                                 clipboardManager.setText(AnnotatedString(post.content))
                                 showMenu = false
-                                Toast.makeText(context, "Text copied", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.post_copied), Toast.LENGTH_SHORT).show()
                             }
                         )
 
@@ -1348,7 +1356,7 @@ fun BubblyPostCard(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.size(20.dp))
                                     Spacer(Modifier.width(12.dp))
-                                    Text("Share", color = MaterialTheme.colorScheme.onSurface)
+                                    Text(stringResource(R.string.post_share), color = MaterialTheme.colorScheme.onSurface)
                                 }
                             },
                             onClick = {
@@ -1371,7 +1379,10 @@ fun BubblyPostCard(
                                         )
                                         Spacer(Modifier.width(12.dp))
                                         Text(
-                                            if (isFollowing) "Unfollow @${post.userId}" else "Follow @${post.userId}",
+                                            stringResource(
+                                                if (isFollowing) R.string.post_unfollow_user else R.string.post_follow_user,
+                                                post.userId ?: ""
+                                            ),
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                     }
@@ -1381,7 +1392,10 @@ fun BubblyPostCard(
                                     showMenu = false
                                     Toast.makeText(
                                         context,
-                                        if (isFollowing) "Following @${post.userId}" else "Unfollowed @${post.userId}",
+                                        context.getString(
+                                            if (isFollowing) R.string.post_now_following else R.string.post_unfollowed,
+                                            post.userId ?: ""
+                                        ),
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
@@ -1394,7 +1408,7 @@ fun BubblyPostCard(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Filled.NotInterested, contentDescription = null, modifier = Modifier.size(20.dp))
                                     Spacer(Modifier.width(12.dp))
-                                    Text("Not Interested", color = MaterialTheme.colorScheme.onSurface)
+                                    Text(stringResource(R.string.post_not_interested), color = MaterialTheme.colorScheme.onSurface)
                                 }
                             },
                             onClick = {
@@ -1409,12 +1423,12 @@ fun BubblyPostCard(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Filled.VisibilityOff, contentDescription = null, modifier = Modifier.size(20.dp))
                                     Spacer(Modifier.width(12.dp))
-                                    Text("Hide Post", color = MaterialTheme.colorScheme.onSurface)
+                                    Text(stringResource(R.string.post_hide), color = MaterialTheme.colorScheme.onSurface)
                                 }
                             },
                             onClick = {
                                 showMenu = false
-                                Toast.makeText(context, "Post hidden", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.post_hide), Toast.LENGTH_SHORT).show()
                             }
                         )
 
@@ -1432,7 +1446,7 @@ fun BubblyPostCard(
                                             tint = MaterialTheme.colorScheme.error
                                         )
                                         Spacer(Modifier.width(12.dp))
-                                        Text("Block @${post.userId}", color = MaterialTheme.colorScheme.error)
+                                        Text(stringResource(R.string.post_block_user, post.userId ?: ""), color = MaterialTheme.colorScheme.error)
                                     }
                                 },
                                 onClick = {
@@ -1453,7 +1467,7 @@ fun BubblyPostCard(
                                         tint = MaterialTheme.colorScheme.error
                                     )
                                     Spacer(Modifier.width(12.dp))
-                                    Text("Report Post", color = MaterialTheme.colorScheme.error)
+                                    Text(stringResource(R.string.post_report_post), color = MaterialTheme.colorScheme.error)
                                 }
                             },
                             onClick = {
@@ -1474,7 +1488,7 @@ fun BubblyPostCard(
                                             tint = MaterialTheme.colorScheme.error
                                         )
                                         Spacer(Modifier.width(12.dp))
-                                        Text("Delete Post", color = MaterialTheme.colorScheme.error)
+                                        Text(stringResource(R.string.post_delete_post), color = MaterialTheme.colorScheme.error)
                                     }
                                 },
                                 onClick = {
@@ -1499,11 +1513,32 @@ fun BubblyPostCard(
                 val textToShow = if (safetyState.isKidsMode) {
                     ContentFiltering.sanitizeForKids(post.content, safetyState.kidsFilterLevel)
                 } else post.content
-                Text(
+
+                // Use NeuroLinkedText for automatic link detection
+                // Supports URLs, @mentions, #hashtags, emails, and phone numbers
+                NeuroLinkedText(
                     text = textToShow,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
-                    lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.15f
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
+                        lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.15f
+                    ),
+                    linkStyle = defaultNeuroLinkStyle(),
+                    onLinkClick = { link ->
+                        // Handle internal links (mentions, hashtags)
+                        when (link.type) {
+                            com.kyilmaz.neurocomet.ui.components.LinkType.MENTION -> {
+                                val username = link.text.removePrefix("@")
+                                onProfileClick(username)
+                            }
+                            com.kyilmaz.neurocomet.ui.components.LinkType.HASHTAG -> {
+                                Toast.makeText(context, "Exploring ${link.text}...", Toast.LENGTH_SHORT).show()
+                            }
+                            else -> {
+                                // Let the default handler open URLs, emails, phones
+                                null
+                            }
+                        }
+                    }
                 )
             }
 
@@ -1512,23 +1547,29 @@ fun BubblyPostCard(
             val showMedia = !safetyState.isKidsMode
 
             if (showMedia && post.videoUrl != null) {
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(12.dp))
                 VideoPlayerView(
                     videoUrl = post.videoUrl,
-                    modifier = Modifier.fillMaxWidth().height(200.dp).clip(CardDefaults.shape)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(12.dp))
                 )
             } else if (showMedia && post.imageUrl != null) {
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(12.dp))
                 AsyncImage(
                     model = post.imageUrl,
                     contentDescription = stringResource(R.string.post_image_content_description),
-                    modifier = Modifier.fillMaxWidth().height(200.dp).clip(CardDefaults.shape),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(12.dp)),
                     contentScale = ContentScale.Crop
                 )
             }
             // End Media Display logic
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(12.dp))
 
             // Neurodivergent feature: Reading time estimate
             val wordCount = post.content.split("\\s+".toRegex()).size
@@ -1541,11 +1582,17 @@ fun BubblyPostCard(
             ) {
                 // Reading time indicator (helpful for ADHD/time blindness)
                 if (wordCount > 20) {
-                    Text(
-                        text = "⏱️ ~${if (readingTimeSeconds < 60) "${readingTimeSeconds}s" else "${readingTimeSeconds / 60}m"} read",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f)
-                    )
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(6.dp)
+                    ) {
+                        Text(
+                            text = "⏱️ ~${if (readingTimeSeconds < 60) "${readingTimeSeconds}s" else "${readingTimeSeconds / 60}m"} read",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
                 } else {
                     Spacer(Modifier.width(1.dp))
                 }
@@ -1563,32 +1610,55 @@ fun BubblyPostCard(
                                 if (isBookmarked) "Saved!" else "Removed from saved",
                                 Toast.LENGTH_SHORT
                             ).show()
-                        }
+                        },
+                        modifier = Modifier.size(40.dp)
                     ) {
                         Icon(
                             if (isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
                             "Save post",
-                            tint = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            modifier = Modifier.size(22.dp)
                         )
                     }
-                    IconButton(onClick = { onShare(context, post) }) {
-                        Icon(Icons.Default.Share, stringResource(R.string.share_button_content_description))
+                    IconButton(
+                        onClick = { onShare(context, post) },
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Share,
+                            stringResource(R.string.share_button_content_description),
+                            modifier = Modifier.size(22.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
                     }
-                    IconButton(onClick = onReplyPost) {
-                        Icon(Icons.AutoMirrored.Outlined.Comment, stringResource(R.string.comment_button_content_description))
+                    IconButton(
+                        onClick = onReplyPost,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Outlined.Comment,
+                            stringResource(R.string.comment_button_content_description),
+                            modifier = Modifier.size(22.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
                     }
-                    Spacer(Modifier.width(4.dp))
-                    IconButton(onClick = onLike) {
+                    Spacer(Modifier.width(2.dp))
+                    IconButton(
+                        onClick = onLike,
+                        modifier = Modifier.size(40.dp)
+                    ) {
                         Icon(
                             if (post.isLikedByMe) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                             stringResource(R.string.like_button_content_description),
-                            tint = if (post.isLikedByMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = if (post.isLikedByMe) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                     Text(
                         post.likes.toString(),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f)
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
+                        fontWeight = FontWeight.Medium
                     )
                 }
             }
@@ -1637,7 +1707,7 @@ private fun ReportPostDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                "Report Post",
+                stringResource(R.string.report_dialog_title),
                 fontWeight = FontWeight.Bold
             )
         },
@@ -1697,7 +1767,7 @@ private fun ReportPostDialog(
                     OutlinedTextField(
                         value = additionalInfo,
                         onValueChange = { additionalInfo = it },
-                        label = { Text("Tell us more (optional)") },
+                        label = { Text(stringResource(R.string.report_dialog_reason_hint)) },
                         modifier = Modifier.fillMaxWidth(),
                         maxLines = 3
                     )
@@ -1711,25 +1781,39 @@ private fun ReportPostDialog(
                 },
                 enabled = selectedReason != null
             ) {
-                Text("Submit Report")
+                Text(stringResource(R.string.report_dialog_submit))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.report_dialog_cancel))
             }
         }
     )
 }
 
 /**
+ * Format time indicator for moments - provides balanced, readable time text
+ */
+private fun formatMomentTime(itemCount: Int): String {
+    // For mock data, generate realistic time strings based on item count
+    return when {
+        itemCount <= 1 -> "Just now"
+        itemCount == 2 -> "2h"
+        itemCount == 3 -> "5h"
+        itemCount >= 4 -> "12h"
+        else -> ""
+    }
+}
+
+/**
  * NeuroMoments - A uniquely neurodivergent story bar
  *
  * Design philosophy:
- * - Hexagonal shapes represent the interconnected neural pathways
+ * - Clean, modern design with subtle gradient accents
  * - Soft pulsing animations are calming rather than distracting
  * - "Moments" terminology emphasizes capturing authentic experiences
- * - Neurodivergent-friendly color gradients (avoiding harsh contrasts)
+ * - Neurodivergent-friendly with clear visual hierarchy
  */
 @Composable
 fun StoriesRow(
@@ -1741,61 +1825,76 @@ fun StoriesRow(
     onAddStoryClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val unseenCount = stories.count { !it.isViewed }
+
     Column(modifier = modifier) {
-        // Section header with neurodivergent branding
+        // Production-ready section header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                "✨ NeuroMoments",
-                style = MaterialTheme.typography.titleSmall.copy(
-                    shadow = Shadow(
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                        offset = Offset(0f, 2f),
-                        blurRadius = 4f
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    "✨",
+                    fontSize = 16.sp
+                )
+                Text(
+                    stringResource(R.string.moments_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    letterSpacing = 0.15.sp
+                )
+            }
+
+            if (unseenCount > 0) {
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(16.dp),
+                    tonalElevation = 1.dp
+                ) {
+                    Text(
+                        text = stringResource(R.string.moments_new_count, unseenCount),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                        letterSpacing = 0.25.sp
                     )
-                ),
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(Modifier.width(6.dp))
-            Text(
-                "·",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-            )
-            Spacer(Modifier.width(6.dp))
-            Text(
-                "Share your world ☄️",
-                style = MaterialTheme.typography.labelLarge.copy(
-                    shadow = Shadow(
-                        color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
-                        offset = Offset(0f, 1.5f),
-                        blurRadius = 3f
-                    )
-                ),
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary
-            )
+                }
+            }
+        }
+
+        // Optimized LazyRow with smooth scrolling for high-refresh rate displays
+        val momentsListState = rememberLazyListState()
+
+        // Pause animations during scroll for smoother performance
+        val isScrolling by remember {
+            derivedStateOf { momentsListState.isScrollInProgress }
         }
 
         LazyRow(
+            state = momentsListState,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
+            flingBehavior = ScrollableDefaults.flingBehavior()
         ) {
             // "Add Moment" item - current user creates a new moment
-            item {
+            item(key = "add_moment") {
                 NeuroMomentItem(
                     userAvatar = currentUser.avatarUrl,
-                    username = "Your story",
-                    subtext = "Add new",
+                    username = stringResource(R.string.moments_your_story),
+                    timeAgo = null,
                     isAddButton = true,
                     isViewed = false,
                     isMockInterfaceEnabled = isMockInterfaceEnabled,
-                    animationEnabled = animateStories,
+                    animationEnabled = animateStories && !isScrolling,
                     onClick = onAddStoryClick
                 )
             }
@@ -1804,34 +1903,43 @@ fun StoriesRow(
             items(stories, key = { it.id }) { story ->
                 NeuroMomentItem(
                     userAvatar = story.userAvatar,
-                    username = story.userName,
-                    subtext = if (story.isViewed) "Seen" else if (story.items.size == 1) "New" else "${story.items.size} new",
+                    username = story.userName.split(" ").firstOrNull()?.take(10) ?: story.userName.take(10),
+                    timeAgo = formatMomentTime(story.items.size),
                     isAddButton = false,
                     isViewed = story.isViewed,
                     isMockInterfaceEnabled = isMockInterfaceEnabled,
-                    animationEnabled = animateStories,
+                    animationEnabled = animateStories && !isScrolling,
                     onClick = { onViewStory(story) }
                 )
             }
         }
+
+        Spacer(Modifier.height(8.dp))
+
+        HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            thickness = 0.5.dp,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+        )
     }
 }
 
 
 /**
- * NeuroMoment Item - A unique hexagon-inspired story bubble
+ * NeuroMoment Item - Production-ready story bubble
  *
  * Features:
- * - Soft gradient borders with neurodivergent-friendly colors
- * - Gentle pulse animation instead of spinning (less overwhelming)
- * - Clear visual distinction between viewed/unviewed
- * - Accessible tap targets
+ * - Elegant gradient ring for unseen stories
+ * - Subtle dimming for viewed stories
+ * - Clean visual hierarchy with balanced time indicators
+ * - Accessible tap targets (minimum 48dp)
+ * - Optimized for high-refresh rate displays
  */
 @Composable
 fun NeuroMomentItem(
     userAvatar: String?,
     username: String,
-    subtext: String = "",
+    timeAgo: String? = null,
     isAddButton: Boolean,
     isViewed: Boolean,
     isMockInterfaceEnabled: Boolean,
@@ -1839,48 +1947,42 @@ fun NeuroMomentItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Neurodivergent-friendly color palettes
-    val unviewedGradient = remember {
+    // Clean gradient colors
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val tertiaryColor = MaterialTheme.colorScheme.tertiary
+
+    val unviewedGradient = remember(primaryColor, tertiaryColor) {
         listOf(
-            Color(0xFF9F70FD), // Soft purple
-            Color(0xFF487DE7), // Calm blue
-            Color(0xFF5AC8FA), // Sky blue
-            Color(0xFF78C850), // Soft green
-            Color(0xFFFFD700), // Warm gold
-            Color(0xFFFF9F43), // Gentle orange
-            Color(0xFFFF6B9D), // Soft pink
-            Color(0xFF9F70FD)  // Back to purple (seamless)
+            primaryColor,
+            Color(0xFF7C4DFF), // Deep purple
+            tertiaryColor,
+            Color(0xFF00BCD4), // Cyan accent
+            primaryColor
         )
     }
     
-    val viewedColor = MaterialTheme.colorScheme.outlineVariant
-    val addButtonGradient = listOf(
-        MaterialTheme.colorScheme.primary,
-        MaterialTheme.colorScheme.tertiary
-    )
+    val viewedColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+    val addButtonColor = MaterialTheme.colorScheme.primary
 
-    // Gentle pulse animation for unviewed moments
-    val infiniteTransition = rememberInfiniteTransition(label = "moment-pulse")
-    val pulseScale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = if (animationEnabled && !isViewed && !isAddButton) 1.05f else 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "pulse"
-    )
+    // Only animate gradient rotation when enabled and story is unseen
+    val shouldAnimate = animationEnabled && !isViewed && !isAddButton
 
-    // Gradient rotation for unviewed stories
-    val gradientRotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = if (animationEnabled && !isViewed && !isAddButton) 360f else 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(4000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "gradient-rotation"
-    )
+    // Use a stable rotation value when not animating to avoid recomposition
+    val gradientRotation = if (shouldAnimate) {
+        val infiniteTransition = rememberInfiniteTransition(label = "moment-glow")
+        val rotation by infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(8000, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "gradient-rotation"
+        )
+        rotation
+    } else {
+        0f
+    }
 
     Column(
         modifier = modifier
@@ -1888,27 +1990,29 @@ fun NeuroMomentItem(
             .clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Outer glow/border container
         Box(
-            modifier = Modifier
-                .size(68.dp)
-                .scale(pulseScale),
+            modifier = Modifier.size(66.dp),
             contentAlignment = Alignment.Center
         ) {
-            // Gradient border ring
+            // Ring border
             Canvas(modifier = Modifier.fillMaxSize()) {
-                val strokeWidth = if (isViewed) 2.dp.toPx() else 3.dp.toPx()
+                val strokeWidth = if (isViewed) 1.5.dp.toPx() else 2.8.dp.toPx()
                 val radius = (size.minDimension - strokeWidth) / 2
 
                 if (isAddButton) {
-                    // Add button uses primary gradient
+                    // Add button: dashed primary ring
                     drawCircle(
-                        brush = Brush.linearGradient(addButtonGradient),
+                        color = addButtonColor,
                         radius = radius,
-                        style = Stroke(width = strokeWidth)
+                        style = Stroke(
+                            width = strokeWidth,
+                            pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(
+                                floatArrayOf(8f, 6f), 0f
+                            )
+                        )
                     )
                 } else if (!isViewed) {
-                    // Unviewed: rotating rainbow gradient
+                    // Unseen: rotating gradient
                     rotate(gradientRotation) {
                         drawCircle(
                             brush = Brush.sweepGradient(unviewedGradient),
@@ -1917,7 +2021,7 @@ fun NeuroMomentItem(
                         )
                     }
                 } else {
-                    // Viewed: simple outline
+                    // Viewed: subtle outline
                     drawCircle(
                         color = viewedColor,
                         radius = radius,
@@ -1926,38 +2030,24 @@ fun NeuroMomentItem(
                 }
             }
 
-            // Inner content circle
+            // Avatar container
             Box(
                 modifier = Modifier
                     .size(58.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surface),
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 if (isAddButton) {
-                    // Add button with gradient icon
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.linearGradient(
-                                    colors = listOf(
-                                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
-                                        MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f)
-                                    )
-                                )
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.Add,
-                            contentDescription = stringResource(R.string.story_add_button_content_description),
-                            modifier = Modifier.size(28.dp),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
+                    // Add button icon
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = stringResource(R.string.story_add_button_content_description),
+                        modifier = Modifier.size(26.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 } else {
-                    // User avatar
+                    // User avatar with dimming for viewed
                     val avatarUrl = if (isMockInterfaceEnabled) {
                         userAvatar ?: "https://i.pravatar.cc/150?u=$username"
                     } else {
@@ -1969,58 +2059,99 @@ fun NeuroMomentItem(
                             Icons.Default.AccountCircle,
                             contentDescription = stringResource(R.string.story_user_story_content_description, username),
                             modifier = Modifier.fillMaxSize(),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                         )
                     } else {
+                        val context = LocalContext.current
                         AsyncImage(
-                            model = avatarUrl,
+                            model = ImageRequest.Builder(context)
+                                .data(avatarUrl)
+                                .crossfade(100)
+                                .memoryCacheKey(avatarUrl)
+                                .size(116) // 58dp * 2 for density
+                                .build(),
                             contentDescription = stringResource(R.string.story_user_story_content_description, username),
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .graphicsLayer { alpha = if (isViewed) 0.6f else 1f },
                             contentScale = ContentScale.Crop
                         )
                     }
+                }
+            }
+
+            // Plus badge for add button
+            if (isAddButton) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(20.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = CircleShape
+                        )
+                        .border(
+                            width = 2.dp,
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(12.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
                 }
             }
         }
 
         Spacer(Modifier.height(6.dp))
 
-        // Username - clean styling with subtle depth
+        // Username - clean, legible, and centered
         Text(
             text = username,
             style = MaterialTheme.typography.labelSmall.copy(
-                shadow = if (!isViewed || isAddButton) Shadow(
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
-                    offset = Offset(0f, 1f),
-                    blurRadius = 2f
-                ) else null
+                shadow = androidx.compose.ui.graphics.Shadow(
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                    offset = Offset(0f, 0.5f),
+                    blurRadius = 1f
+                )
             ),
-            fontWeight = if (!isViewed || isAddButton) FontWeight.SemiBold else FontWeight.Normal,
-            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.SemiBold,
+            color = if (isViewed) {
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+            } else {
+                MaterialTheme.colorScheme.onSurface
+            },
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+            fontSize = 11.sp,
+            lineHeight = 13.sp,
+            letterSpacing = 0.1.sp
         )
 
-        // Subtext - status indicator with depth
-        if (subtext.isNotEmpty()) {
-            val subtextColor = when {
-                isAddButton -> MaterialTheme.colorScheme.primary
-                !isViewed -> MaterialTheme.colorScheme.tertiary
-                else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-            }
+        // Time indicator - balanced, subtle but readable
+        if (!isAddButton && !timeAgo.isNullOrEmpty()) {
             Text(
-                text = subtext,
+                text = timeAgo,
                 style = MaterialTheme.typography.labelSmall.copy(
-                    shadow = if (!isViewed || isAddButton) Shadow(
-                        color = subtextColor.copy(alpha = 0.3f),
-                        offset = Offset(0f, 1f),
-                        blurRadius = 2f
-                    ) else null
+                    shadow = androidx.compose.ui.graphics.Shadow(
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
+                        offset = Offset(0f, 0.5f),
+                        blurRadius = 0.5f
+                    )
                 ),
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                maxLines = 1,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
                 fontSize = 10.sp,
-                fontWeight = if (!isViewed || isAddButton) FontWeight.Medium else FontWeight.Normal,
-                color = subtextColor,
-                maxLines = 1
+                lineHeight = 12.sp
             )
         }
     }
