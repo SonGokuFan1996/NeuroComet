@@ -68,6 +68,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -865,7 +866,7 @@ private fun PinSetupDialog(
                 OutlinedTextField(
                     value = pin,
                     onValueChange = { if (it.length <= 8 && it.all { c -> c.isDigit() }) pin = it },
-                    label = { Text("PIN") },
+                    label = { Text(stringResource(R.string.parental_pin_label)) },
                     visualTransformation = if (showPin) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     trailingIcon = {
@@ -885,7 +886,7 @@ private fun PinSetupDialog(
                 OutlinedTextField(
                     value = confirmPin,
                     onValueChange = { if (it.length <= 8 && it.all { c -> c.isDigit() }) confirmPin = it },
-                    label = { Text("Confirm PIN") },
+                    label = { Text(stringResource(R.string.parental_pin_confirm_label)) },
                     visualTransformation = if (showPin) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     modifier = Modifier.fillMaxWidth(),
@@ -938,7 +939,7 @@ private fun PinVerifyDialog(
                 OutlinedTextField(
                     value = pin,
                     onValueChange = { if (it.length <= 8 && it.all { c -> c.isDigit() }) pin = it },
-                    label = { Text("PIN") },
+                    label = { Text(stringResource(R.string.parental_pin_label)) },
                     visualTransformation = if (showPin) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     trailingIcon = {
@@ -1014,7 +1015,7 @@ private fun ChangePinDialog(
                 OutlinedTextField(
                     value = oldPin,
                     onValueChange = { if (it.length <= 8 && it.all { c -> c.isDigit() }) oldPin = it },
-                    label = { Text("Current PIN") },
+                    label = { Text(stringResource(R.string.parental_pin_current_label)) },
                     visualTransformation = if (showPins) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     modifier = Modifier.fillMaxWidth(),
@@ -1026,7 +1027,7 @@ private fun ChangePinDialog(
                 OutlinedTextField(
                     value = newPin,
                     onValueChange = { if (it.length <= 8 && it.all { c -> c.isDigit() }) newPin = it },
-                    label = { Text("New PIN") },
+                    label = { Text(stringResource(R.string.parental_pin_new_label)) },
                     visualTransformation = if (showPins) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     modifier = Modifier.fillMaxWidth(),
@@ -1038,7 +1039,7 @@ private fun ChangePinDialog(
                 OutlinedTextField(
                     value = confirmPin,
                     onValueChange = { if (it.length <= 8 && it.all { c -> c.isDigit() }) confirmPin = it },
-                    label = { Text("Confirm New PIN") },
+                    label = { Text(stringResource(R.string.parental_pin_confirm_new_label)) },
                     visualTransformation = if (showPins) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     trailingIcon = {
@@ -1112,7 +1113,7 @@ private fun RemoveControlsDialog(
                 OutlinedTextField(
                     value = pin,
                     onValueChange = { if (it.length <= 8 && it.all { c -> c.isDigit() }) pin = it },
-                    label = { Text("Enter PIN to confirm") },
+                    label = { Text(stringResource(R.string.parental_pin_enter_confirm)) },
                     visualTransformation = if (showPin) VisualTransformation.None else PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     trailingIcon = {

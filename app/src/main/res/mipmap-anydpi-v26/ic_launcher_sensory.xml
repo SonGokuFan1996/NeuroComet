@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sensory Friendly Icon - Muted gray/charcoal gradient for reduced stimulation -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/icon_sensory_background"/>
+    <foreground android:drawable="@drawable/neuro_comet_icon_foreground_vector"/>
+    <monochrome android:drawable="@drawable/neuro_comet_icon_monochrome"/>
+</adaptive-icon>
+

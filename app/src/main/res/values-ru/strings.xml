@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core UI -->
+    <string name="app_name">NeuroComet</string>
+    <string name="nav_feed">Лента</string>
+    <string name="nav_explore">Обзор</string>
+    <string name="nav_messages">Сообщения</string>
+    <string name="nav_notifications">Уведомления</string>
+    <string name="nav_settings">Настройки</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in">Войти</string>
+    <string name="auth_sign_up">Регистрация</string>
+    <string name="auth_email_label">Электронная почта</string>
+    <string name="auth_password_label">Пароль</string>
+    <string name="auth_create_account">Создать аккаунт</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">Внешний вид и отображение</string>
+    <string name="settings_section_privacy">Конфиденциальность и безопасность</string>
+    <string name="settings_section_notifications">Уведомления</string>
+    <string name="settings_section_accessibility">Специальные возможности</string>
+
+    <!-- Explore -->
+    <string name="explore_title">Обзор</string>
+    <string name="explore_autism">Аутизм</string>
+    <string name="explore_adhd">СДВГ</string>
+    <string name="explore_anxiety">Тревога</string>
+    <string name="explore_sensory">Сенсорное</string>
+
+    <!-- Games -->
+    <string name="games_hub_title">Игровой центр</string>
+    <string name="game_bubble_pop">Лопни пузырь</string>
+    <string name="game_fidget_spinner">Спиннер</string>
+
+    <!-- Feedback -->
+    <string name="feedback_hub_title">Центр отзывов</string>
+    <string name="feedback_report_bug_title">Сообщить об ошибке</string>
+    <string name="feedback_request_feature_title">Запросить функцию</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">Разработчик</string>
+    <string name="settings_developer_subtitle">Инструменты отладки и тестирования</string>
+    <string name="settings_developer_options_group">Параметры разработчика</string>
+    <string name="settings_dev_options_desc">Расширенные параметры для тестирования и отладки</string>
+    <string name="settings_force_verify_title">Принудительная верификация</string>
+    <string name="settings_force_verify_subtitle">Переключить статус верификации пользователя.</string>
+    <string name="settings_fake_premium_title">Фейк Премиум</string>
+    <string name="settings_fake_premium_subtitle">Симулировать платный статус.</string>
+    <string name="settings_fake_premium">Режим фейк-премиум</string>
+    <string name="settings_fake_premium_enabled">Премиум-функции разблокированы для тестирования</string>
+    <string name="settings_fake_premium_disabled">Включите для тестирования премиум-функций</string>
+    <string name="settings_mock_interface_title">Мок-интерфейс</string>
+    <string name="settings_mock_interface_subtitle">Показать фейковые данные для демо.</string>
+    <string name="settings_simulate_badge_title">Симулировать уведомление о значке</string>
+    <string name="settings_simulate_badge_subtitle">Запускает уведомление для \'%s\'.</string>
+    <string name="settings_nuke_db_title">Очистить базу данных</string>
+    <string name="settings_nuke_db_subtitle">Удалить ВСЕ посты. Необратимо.</string>
+    <string name="settings_nuke_db_dialog_title">Очистить базу данных?</string>
+    <string name="settings_nuke_db_dialog_text">Это навсегда удалит все посты с сервера. Это действие нельзя отменить.</string>
+    <string name="settings_nuke_db_dialog_confirm">ОЧИСТИТЬ</string>
+    <string name="settings_nuke_db_dialog_cancel">Отмена</string>
+    <string name="settings_language_test_title">Язык приложения (Тест)</string>
+    <string name="settings_language_test_subtitle">Установить язык вручную. Требуется перезапуск.</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">Параметры разработчика</string>
+    <string name="dev_phone_format_test">Форматирование номера телефона</string>
+    <string name="dev_phone_format_test_desc">Тестирование автоматического форматирования для разных регионов</string>
+    <string name="dev_phone_format_style">Стиль формата</string>
+    <string name="dev_phone_test_input">Введите номер телефона</string>
+    <string name="dev_phone_format_pattern">Шаблон</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">Хранилище учетных данных</string>
+    <string name="dev_credential_test_save">Тест сохранения</string>
+    <string name="dev_credential_test_retrieve">Тест получения</string>
+    <string name="dev_credential_clear_all">Очистить все учетные данные</string>
+    <string name="dev_credential_session_status">Статус сессии</string>
+    <string name="dev_credential_biometric_status">Статус биометрии</string>
+    <string name="dev_credential_create_session">Создать тестовую сессию</string>
+    <string name="dev_credential_end_session">Завершить сессию</string>
+    <string name="dev_credential_extend_session">Продлить сессию</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">Инструменты отладки</string>
+    <string name="debug_performance_overlay">Оверлей производительности</string>
+    <string name="debug_performance_desc">Показывает FPS, память и статистику прокрутки</string>
+    <string name="debug_reset_counters">Сбросить счётчики</string>
+
+    <!-- General Settings -->
+    <string name="settings_profile_group">Профиль</string>
+    <string name="settings_badges_title">Значки</string>
+    <string name="settings_badges_subtitle">Просмотрите полученные достижения и цели.</string>
+    <string name="settings_visual_comfort_group">Визуальный комфорт и темы</string>
+    <string name="settings_text_size_title">Размер текста</string>
+    <string name="settings_dark_mode_title">Тёмный режим</string>
+    <string name="settings_dark_mode_enabled">Включено</string>
+    <string name="settings_dark_mode_disabled">Отключено</string>
+    <string name="settings_high_contrast_title">Режим высокой контрастности</string>
+    <string name="settings_high_contrast_subtitle_enabled">Включено (чистый чёрный/белый)</string>
+    <string name="settings_high_contrast_subtitle_disabled">Отключено</string>
+    <string name="settings_neuro_centric_theme_title">Нейро-центрированная тема</string>
+    <string name="settings_go_premium_title">Стать премиум</string>
+    <string name="settings_go_premium_subtitle">Удалите рекламу и поддержите разработчиков.</string>
+    <string name="settings_account_group">Аккаунт</string>
+    <string name="settings_logout">Выйти</string>
+    <string name="settings_verified_human_title">Подтверждённый человек</string>
+    <string name="settings_verified_human_subtitle_verified">Статус: Подтверждён</string>
+    <string name="settings_verified_human_subtitle_unverified">Статус: Не подтверждён</string>
+    <string name="settings_2fa_title">Двухфакторная аутентификация</string>
+    <string name="settings_2fa_subtitle">Требовать код при входе.</string>
+</resources>
+

@@ -40,59 +40,78 @@ import kotlin.math.abs
 
 /**
  * Tutorial step definitions for first-time users
+ * Enhanced with accent colors and emojis for better visual hierarchy
  */
 enum class AppTutorialStep(
     val title: String,
     val description: String,
     val icon: ImageVector,
+    val emoji: String,
+    val accentColor: Color,
     val highlightArea: HighlightArea
 ) {
     WELCOME(
-        title = "Welcome to NeuroComet! ☄️",
+        title = "Welcome to NeuroComet!",
         description = "A safe space designed with neurodivergent minds in mind. Let's take a gentle tour to help you feel at home.",
         icon = Icons.Filled.Celebration,
+        emoji = "☄️",
+        accentColor = Color(0xFF9B59B6), // Purple for inclusivity
         highlightArea = HighlightArea.NONE
     ),
     FEED(
-        title = "Your Home Feed 🏠",
+        title = "Your Home Feed",
         description = "This is where you'll see posts from people you follow. It's a calm, supportive space with no algorithmic pressure.",
         icon = Icons.Filled.Home,
+        emoji = "🏠",
+        accentColor = Color(0xFF4ECDC4), // Teal for calm
         highlightArea = HighlightArea.BOTTOM_NAV_FEED
     ),
     EXPLORE(
-        title = "Explore Communities 🔍",
+        title = "Explore Communities",
         description = "Discover topics and communities that match your interests. Find your people!",
         icon = Icons.Filled.Search,
+        emoji = "🔍",
+        accentColor = Color(0xFF3498DB), // Blue for discovery
         highlightArea = HighlightArea.BOTTOM_NAV_EXPLORE
     ),
     MESSAGES(
-        title = "Messages & Practice Calls 💬",
+        title = "Messages & Practice Calls",
         description = "Chat with friends and practice phone calls with AI personas. Great for building communication confidence!",
         icon = Icons.Filled.Mail,
+        emoji = "💬",
+        accentColor = Color(0xFFF39C12), // Gold for connection
         highlightArea = HighlightArea.BOTTOM_NAV_MESSAGES
     ),
     PRACTICE_CALLS(
-        title = "Practice Calls Feature 📞",
+        title = "Practice Calls Feature",
         description = "Tap the phone icon in Messages to access Practice Calls. You can practice conversations with AI personas who understand neurodivergent experiences.",
         icon = Icons.Filled.Phone,
+        emoji = "📞",
+        accentColor = Color(0xFF27AE60), // Green for growth
         highlightArea = HighlightArea.NONE
     ),
     NOTIFICATIONS(
-        title = "Stay Updated 🔔",
+        title = "Stay Updated",
         description = "Check notifications for likes, comments, and new followers. You control what notifications you receive.",
         icon = Icons.Filled.Notifications,
+        emoji = "🔔",
+        accentColor = Color(0xFFE74C3C), // Red for alerts
         highlightArea = HighlightArea.BOTTOM_NAV_NOTIFICATIONS
     ),
     SETTINGS(
-        title = "Personalize Your Experience ⚙️",
+        title = "Personalize Your Experience",
         description = "Customize themes, fonts, animations, and accessibility options to make the app comfortable for you.",
         icon = Icons.Filled.Settings,
+        emoji = "⚙️",
+        accentColor = Color(0xFF8E44AD), // Deep purple
         highlightArea = HighlightArea.BOTTOM_NAV_SETTINGS
     ),
     COMPLETE(
-        title = "You're All Set! 🎉",
+        title = "You're All Set!",
         description = "You can always access help from Settings. Enjoy connecting with your community!",
         icon = Icons.Filled.CheckCircle,
+        emoji = "✨",
+        accentColor = Color(0xFF9B59B6), // Return to purple
         highlightArea = HighlightArea.NONE
     )
 }
@@ -260,8 +279,8 @@ private val rainbowGradient = listOf(
 )
 
 /**
- * Tutorial overlay that guides users through the app with neurodivergent-friendly animations
- * Themed to match the feed design with rainbow infinity colors
+ * Tutorial overlay that guides users through the app with neurodivergent-friendly design
+ * Overhauled to match the AuthScreen tutorial's clean, production-ready style
  */
 @Composable
 fun TutorialOverlay(
@@ -284,14 +303,11 @@ fun TutorialOverlay(
     var accumulatedDrag by remember { mutableFloatStateOf(0f) }
     var isDragging by remember { mutableStateOf(false) }
 
-    // Visual feedback during swipe
-    val swipeOffset by animateFloatAsState(
-        targetValue = if (isDragging) accumulatedDrag.coerceIn(-120f, 120f) else 0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "swipeOffset"
+    // Smooth fade animation for step transitions
+    val stepAlpha by animateFloatAsState(
+        targetValue = 1f,
+        animationSpec = tween(300),
+        label = "stepAlpha"
     )
 
     Dialog(
@@ -305,7 +321,7 @@ fun TutorialOverlay(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
+                .background(Color(0xFF0D0D1A))
                 .pointerInput(currentStepIndex) {
                     detectHorizontalDragGestures(
                         onDragStart = {
@@ -328,77 +344,47 @@ fun TutorialOverlay(
                             accumulatedDrag += dragAmount
                         }
                     )
-                }
+                },
+            contentAlignment = Alignment.Center
         ) {
-            // Animated rainbow gradient background
-            RainbowGradientBackground()
+            // Subtle animated background
+            CleanAnimatedBackground(accentColor = currentStep.accentColor)
 
-            // Header with NeuroComet branding
-            TutorialHeader(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 48.dp)
-            )
-
-            // Tutorial card with key-based recomposition for reliable animations
-            Box(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .graphicsLayer {
-                        translationX = swipeOffset * 0.3f
-                        rotationZ = swipeOffset * 0.015f
-                    }
-            ) {
-                // Key forces recomposition when transitionKey changes
-                key(transitionKey) {
-                    FeedThemedTutorialCard(
-                        step = currentStep,
-                        stepIndex = currentStepIndex,
-                        totalSteps = totalSteps,
-                        direction = navigationDirection,
-                        onNext = {
-                            if (isLastStep) {
-                                TutorialManager.completeTutorial(context)
-                                onDismiss()
-                            } else {
-                                TutorialManager.nextStep()
-                            }
-                        },
-                        onBack = { TutorialManager.previousStep() },
-                        onSkip = {
-                            TutorialManager.skipTutorial(context)
+            // Tutorial card with key-based recomposition
+            key(transitionKey) {
+                CleanTutorialCard(
+                    step = currentStep,
+                    stepIndex = currentStepIndex,
+                    totalSteps = totalSteps,
+                    direction = navigationDirection,
+                    onNext = {
+                        if (isLastStep) {
+                            TutorialManager.completeTutorial(context)
                             onDismiss()
-                        },
-                        isFirstStep = isFirstStep,
-                        isLastStep = isLastStep
-                    )
-                }
-            }
-
-            // Interactive progress indicator with rainbow colors
-            RainbowProgressIndicator(
-                currentStep = currentStepIndex,
-                totalSteps = totalSteps,
-                onStepClick = { index -> TutorialManager.goToStep(index) },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 48.dp)
-            )
-
-            // Swipe hint for first-time users
-            if (isFirstStep) {
-                SwipeHint(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 100.dp)
+                        } else {
+                            TutorialManager.nextStep()
+                        }
+                    },
+                    onBack = { TutorialManager.previousStep() },
+                    onSkip = {
+                        TutorialManager.skipTutorial(context)
+                        onDismiss()
+                    },
+                    isFirstStep = isFirstStep,
+                    isLastStep = isLastStep,
+                    modifier = Modifier.alpha(stepAlpha)
                 )
             }
 
-            // Highlight indicator arrow for navigation items
-            if (currentStep.highlightArea != HighlightArea.NONE) {
-                HighlightArrow(
-                    highlightArea = currentStep.highlightArea,
-                    modifier = Modifier.align(Alignment.BottomCenter)
+            // Swipe hint for first step
+            if (isFirstStep) {
+                Text(
+                    text = "Swipe to navigate",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.4f),
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 32.dp)
                 )
             }
         }
@@ -406,183 +392,80 @@ fun TutorialOverlay(
 }
 
 /**
- * Animated rainbow gradient background matching the feed theme
+ * Clean animated background with subtle accent color glow
  */
 @Composable
-private fun RainbowGradientBackground() {
-    val infiniteTransition = rememberInfiniteTransition(label = "rainbow-bg")
-
-    val gradientOffset by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(8000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "gradientOffset"
-    )
+private fun CleanAnimatedBackground(accentColor: Color) {
+    val infiniteTransition = rememberInfiniteTransition(label = "bg")
 
     val pulseAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.03f,
-        targetValue = 0.08f,
+        initialValue = 0.08f,
+        targetValue = 0.15f,
         animationSpec = infiniteRepeatable(
-            animation = tween(3000, easing = gentleEasing),
+            animation = tween(4000, easing = calmEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "pulseAlpha"
     )
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Subtle rainbow sweep gradient
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            drawRect(
-                brush = Brush.sweepGradient(
-                    colors = rainbowGradient.map { it.copy(alpha = pulseAlpha) },
-                    center = androidx.compose.ui.geometry.Offset(
-                        size.width * 0.5f,
-                        size.height * 0.3f
-                    )
-                )
-            )
-        }
-
-        // Floating accent orbs
-        FloatingAccentOrbs()
-    }
-}
-
-/**
- * Floating accent orbs for visual interest
- */
-@Composable
-private fun FloatingAccentOrbs() {
-    val infiniteTransition = rememberInfiniteTransition(label = "orbs")
-
-    val orbs = remember {
-        listOf(
-            OrbState(0.1f, 0.15f, 80f, Color(0xFF9F70FD), 10000),
-            OrbState(0.9f, 0.25f, 60f, Color(0xFF5AC8FA), 12000),
-            OrbState(0.5f, 0.8f, 70f, Color(0xFFFF6B9D), 14000),
-            OrbState(0.15f, 0.7f, 50f, Color(0xFF78C850), 11000),
-            OrbState(0.85f, 0.65f, 65f, Color(0xFFFFD700), 13000)
-        )
-    }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        orbs.forEachIndexed { index, orb ->
-            val animatedY by infiniteTransition.animateFloat(
-                initialValue = orb.y,
-                targetValue = orb.y + 0.04f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(orb.duration, easing = calmEasing),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "orbY_$index"
-            )
-
-            val animatedAlpha by infiniteTransition.animateFloat(
-                initialValue = 0.08f,
-                targetValue = 0.15f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(orb.duration / 2, easing = calmEasing),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "orbAlpha_$index"
-            )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        translationX = orb.x * size.width
-                        translationY = animatedY * size.height
-                    }
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(orb.size.dp)
-                        .clip(CircleShape)
-                        .background(
-                            Brush.radialGradient(
-                                colors = listOf(
-                                    orb.color.copy(alpha = animatedAlpha),
-                                    orb.color.copy(alpha = 0f)
-                                )
-                            )
-                        )
-                )
-            }
-        }
-    }
-}
-
-private data class OrbState(
-    val x: Float,
-    val y: Float,
-    val size: Float,
-    val color: Color,
-    val duration: Int
-)
-
-/**
- * Tutorial header with NeuroComet branding
- */
-@Composable
-private fun TutorialHeader(modifier: Modifier = Modifier) {
-    val infiniteTransition = rememberInfiniteTransition(label = "header")
-
-    val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.6f,
-        targetValue = 1f,
+    val glowOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 20f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = gentleEasing),
+            animation = tween(6000, easing = gentleEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "glow"
+        label = "glowOffset"
     )
 
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Rainbow infinity symbol container
-        Box(
-            modifier = Modifier
-                .size(56.dp)
-                .clip(CircleShape)
-                .background(
-                    Brush.sweepGradient(rainbowGradient.map { it.copy(alpha = glowAlpha * 0.3f) })
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        // Large subtle glow in top-right
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    accentColor.copy(alpha = pulseAlpha),
+                    Color.Transparent
                 ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                "♾️",
-                style = MaterialTheme.typography.headlineMedium
+                center = androidx.compose.ui.geometry.Offset(
+                    size.width * 0.85f,
+                    size.height * 0.15f + glowOffset
+                ),
+                radius = size.minDimension * 0.6f
+            ),
+            radius = size.minDimension * 0.6f,
+            center = androidx.compose.ui.geometry.Offset(
+                size.width * 0.85f,
+                size.height * 0.15f + glowOffset
             )
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        Text(
-            "☄️ NeuroComet",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
         )
 
-        Text(
-            "Your neurodivergent-friendly space",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+        // Smaller glow in bottom-left
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    accentColor.copy(alpha = pulseAlpha * 0.5f),
+                    Color.Transparent
+                ),
+                center = androidx.compose.ui.geometry.Offset(
+                    size.width * 0.15f,
+                    size.height * 0.85f - glowOffset
+                ),
+                radius = size.minDimension * 0.4f
+            ),
+            radius = size.minDimension * 0.4f,
+            center = androidx.compose.ui.geometry.Offset(
+                size.width * 0.15f,
+                size.height * 0.85f - glowOffset
+            )
         )
     }
 }
 
 /**
- * Feed-themed tutorial card with proper animations
+ * Clean, production-ready tutorial card matching AuthScreen style
  */
 @Composable
-private fun FeedThemedTutorialCard(
+private fun CleanTutorialCard(
     step: AppTutorialStep,
     stepIndex: Int,
     totalSteps: Int,
@@ -591,7 +474,8 @@ private fun FeedThemedTutorialCard(
     onBack: () -> Unit,
     onSkip: () -> Unit,
     isFirstStep: Boolean,
-    isLastStep: Boolean
+    isLastStep: Boolean,
+    modifier: Modifier = Modifier
 ) {
     // Entrance animation states
     var isVisible by remember { mutableStateOf(false) }
@@ -604,9 +488,9 @@ private fun FeedThemedTutorialCard(
 
     // Smooth scale entrance
     val scale by animateFloatAsState(
-        targetValue = if (isVisible) 1f else 0.9f,
+        targetValue = if (isVisible) 1f else 0.95f,
         animationSpec = spring(
-            dampingRatio = 0.7f,
+            dampingRatio = 0.8f,
             stiffness = Spring.StiffnessLow
         ),
         label = "cardScale"
@@ -621,7 +505,7 @@ private fun FeedThemedTutorialCard(
 
     // Slide from direction
     val offsetX by animateFloatAsState(
-        targetValue = if (isVisible) 0f else (direction * 100f),
+        targetValue = if (isVisible) 0f else (direction * 60f),
         animationSpec = spring(
             dampingRatio = 0.8f,
             stiffness = Spring.StiffnessLow
@@ -629,71 +513,496 @@ private fun FeedThemedTutorialCard(
         label = "cardOffset"
     )
 
-    Box(
-        modifier = Modifier
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(24.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
                 this.alpha = alpha
                 translationX = offsetX
-            }
+            },
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF1a1a2e)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
     ) {
-        Card(
-            modifier = Modifier
-                .padding(24.dp)
-                .widthIn(max = 360.dp),
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        Column(
+            modifier = Modifier.padding(28.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            // Accent bar at top
+            Box(
+                modifier = Modifier
+                    .width(60.dp)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(step.accentColor)
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            // Icon container with glow effect
+            Box(
+                modifier = Modifier
+                    .size(88.dp)
+                    .clip(CircleShape)
+                    .background(step.accentColor.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
             ) {
-                // Step indicator with rainbow border
-                StepIndicatorBadge(
-                    stepIndex = stepIndex,
-                    totalSteps = totalSteps
-                )
-
-                Spacer(Modifier.height(20.dp))
-
-                // Animated icon
-                AnimatedStepIcon(step = step)
-
-                Spacer(Modifier.height(20.dp))
-
                 Text(
-                    text = step.title,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Spacer(Modifier.height(12.dp))
-
-                Text(
-                    text = step.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
-                    lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.3f
-                )
-
-                Spacer(Modifier.height(28.dp))
-
-                // Navigation buttons
-                TutorialNavigationButtons(
-                    isFirstStep = isFirstStep,
-                    isLastStep = isLastStep,
-                    onBack = onBack,
-                    onNext = onNext,
-                    onSkip = onSkip
+                    text = step.emoji,
+                    style = MaterialTheme.typography.displayMedium
                 )
             }
+
+            Spacer(Modifier.height(24.dp))
+
+            // Title with accent color influence
+            Text(
+                text = step.title,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            // Description with better readability
+            Text(
+                text = step.description,
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.White.copy(alpha = 0.85f),
+                textAlign = TextAlign.Center,
+                lineHeight = MaterialTheme.typography.bodyLarge.lineHeight * 1.2f
+            )
+
+            // Show navigation preview for steps that highlight navigation items
+            if (step.highlightArea != HighlightArea.NONE) {
+                Spacer(Modifier.height(20.dp))
+                NavigationPreview(
+                    highlightArea = step.highlightArea,
+                    accentColor = step.accentColor
+                )
+            }
+
+            // Show Practice Calls preview for that specific step
+            if (step == AppTutorialStep.PRACTICE_CALLS) {
+                Spacer(Modifier.height(20.dp))
+                PracticeCallsPreview(accentColor = step.accentColor)
+            }
+
+            Spacer(Modifier.height(28.dp))
+
+            // Progress indicator - pills for better visibility
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(horizontal = 16.dp)
+            ) {
+                repeat(totalSteps) { index ->
+                    val isActive = index == stepIndex
+                    val isPast = index < stepIndex
+
+                    val pillWidth by animateDpAsState(
+                        targetValue = if (isActive) 24.dp else 8.dp,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        label = "pillWidth"
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .height(6.dp)
+                            .width(pillWidth)
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(
+                                when {
+                                    isActive -> step.accentColor
+                                    isPast -> step.accentColor.copy(alpha = 0.5f)
+                                    else -> Color.White.copy(alpha = 0.2f)
+                                }
+                            )
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = { TutorialManager.goToStep(index) }
+                            )
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            // Step counter
+            Text(
+                text = "Step ${stepIndex + 1} of $totalSteps",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White.copy(alpha = 0.5f)
+            )
+
+            Spacer(Modifier.height(28.dp))
+
+            // Navigation buttons with enhanced styling
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (isFirstStep) {
+                    TextButton(
+                        onClick = onSkip,
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        Text(
+                            "Skip",
+                            color = Color.White.copy(alpha = 0.5f),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                } else {
+                    TextButton(
+                        onClick = onBack,
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = Color.White.copy(alpha = 0.7f)
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            "Back",
+                            color = Color.White.copy(alpha = 0.7f),
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                }
+
+                Button(
+                    onClick = onNext,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = step.accentColor
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    contentPadding = PaddingValues(horizontal = 28.dp, vertical = 14.dp)
+                ) {
+                    Text(
+                        text = if (isLastStep) "Get Started!" else "Continue",
+                        color = Color.White,
+                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                    if (!isLastStep) {
+                        Spacer(Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Visual preview of the bottom navigation showing which item to look for
+ * This provides guidance without overlaying the actual interface
+ */
+@Composable
+private fun NavigationPreview(
+    highlightArea: HighlightArea,
+    accentColor: Color
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "navPreview")
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = gentleEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "navPulse"
+    )
+
+    // Navigation items with their icons and labels
+    data class NavItem(
+        val icon: ImageVector,
+        val label: String,
+        val area: HighlightArea
+    )
+
+    val navItems = listOf(
+        NavItem(Icons.Filled.Home, "Feed", HighlightArea.BOTTOM_NAV_FEED),
+        NavItem(Icons.Filled.Search, "Explore", HighlightArea.BOTTOM_NAV_EXPLORE),
+        NavItem(Icons.Filled.Mail, "Messages", HighlightArea.BOTTOM_NAV_MESSAGES),
+        NavItem(Icons.Filled.Notifications, "Alerts", HighlightArea.BOTTOM_NAV_NOTIFICATIONS),
+        NavItem(Icons.Filled.Settings, "Settings", HighlightArea.BOTTOM_NAV_SETTINGS)
+    )
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Label
+        Text(
+            text = "Look for this in the navigation bar:",
+            style = MaterialTheme.typography.labelSmall,
+            color = Color.White.copy(alpha = 0.5f)
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        // Mini navigation bar preview
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = Color(0xFF252540),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp, horizontal = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                navItems.forEach { item ->
+                    val isHighlighted = item.area == highlightArea
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .then(
+                                if (isHighlighted) {
+                                    Modifier.scale(pulseScale)
+                                } else {
+                                    Modifier
+                                }
+                            )
+                    ) {
+                        // Icon with highlight effect
+                        Box(
+                            contentAlignment = Alignment.Center
+                        ) {
+                            // Glow effect for highlighted item
+                            if (isHighlighted) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(CircleShape)
+                                        .background(accentColor.copy(alpha = 0.3f))
+                                )
+                            }
+
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.label,
+                                modifier = Modifier.size(24.dp),
+                                tint = if (isHighlighted) accentColor else Color.White.copy(alpha = 0.4f)
+                            )
+                        }
+
+                        Spacer(Modifier.height(4.dp))
+
+                        // Label
+                        Text(
+                            text = item.label,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (isHighlighted) accentColor else Color.White.copy(alpha = 0.3f),
+                            fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal
+                        )
+                    }
+                }
+            }
+        }
+
+        // Arrow pointing down to indicate "look at bottom of screen"
+        Spacer(Modifier.height(8.dp))
+
+        Icon(
+            imageVector = Icons.Filled.KeyboardArrowDown,
+            contentDescription = null,
+            modifier = Modifier
+                .size(24.dp)
+                .graphicsLayer {
+                    translationY = (pulseScale - 1f) * 20f
+                },
+            tint = accentColor.copy(alpha = 0.7f)
+        )
+    }
+}
+
+/**
+ * Visual preview showing how to access Practice Calls from Messages
+ * Shows a mock Messages header with the phone icon highlighted
+ */
+@Composable
+private fun PracticeCallsPreview(accentColor: Color) {
+    val infiniteTransition = rememberInfiniteTransition(label = "practiceCallsPreview")
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = gentleEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "phonePulse"
+    )
+
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 0.6f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = gentleEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "phoneGlow"
+    )
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Label
+        Text(
+            text = "In Messages, look for the phone icon:",
+            style = MaterialTheme.typography.labelSmall,
+            color = Color.White.copy(alpha = 0.5f)
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        // Mock Messages header preview
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = Color(0xFF252540),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column {
+                // Mock header bar
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Messages title
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Mail,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = Color.White.copy(alpha = 0.7f)
+                        )
+                        Text(
+                            text = "Messages",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
+                    }
+
+                    // Highlighted phone icon
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.scale(pulseScale)
+                    ) {
+                        // Glow effect
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(CircleShape)
+                                .background(accentColor.copy(alpha = glowAlpha))
+                        )
+
+                        // Phone icon
+                        Icon(
+                            imageVector = Icons.Filled.Phone,
+                            contentDescription = "Practice Calls",
+                            modifier = Modifier.size(24.dp),
+                            tint = accentColor
+                        )
+                    }
+                }
+
+                // Divider
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(Color.White.copy(alpha = 0.1f))
+                )
+
+                // Mock conversation list hint
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Avatar placeholder
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.1f))
+                    )
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.5f)
+                                .height(12.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color.White.copy(alpha = 0.15f))
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(0.8f)
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(Color.White.copy(alpha = 0.08f))
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        // Instruction text
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = "Tap the",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White.copy(alpha = 0.5f)
+            )
+            Icon(
+                imageVector = Icons.Filled.Phone,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = accentColor
+            )
+            Text(
+                text = "icon to start practicing!",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White.copy(alpha = 0.5f)
+            )
         }
     }
 }
@@ -890,22 +1199,47 @@ private fun RainbowProgressIndicator(
                 label = "dotSize"
             )
 
+            // Use colors with better contrast and a softer appearance
+            val baseColor = rainbowGradient[index % rainbowGradient.size]
             val dotColor = when {
-                isActive || isPast -> rainbowGradient[index % rainbowGradient.size]
-                else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                isActive -> baseColor
+                isPast -> baseColor.copy(alpha = 0.7f)
+                else -> MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
             }
 
             Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(animatedSize)
-                    .clip(CircleShape)
-                    .background(dotColor)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
                         onClick = { onStepClick(index) }
                     )
-            )
+            ) {
+                // Soft glow for active dot
+                if (isActive) {
+                    Box(
+                        modifier = Modifier
+                            .size(animatedSize + 8.dp)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.radialGradient(
+                                    colors = listOf(
+                                        MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f),
+                                        Color.Transparent
+                                    )
+                                )
+                            )
+                    )
+                }
+                // The actual dot
+                Box(
+                    modifier = Modifier
+                        .size(animatedSize)
+                        .clip(CircleShape)
+                        .background(dotColor)
+                )
+            }
         }
     }
 }
@@ -994,34 +1328,44 @@ private fun TutorialCardContent(
                     .rotate(iconRotation),
                 contentAlignment = Alignment.Center
             ) {
-                // Glow effect
+                // Glow effect - use a softer, more pleasant color with better visibility
                 Box(
                     modifier = Modifier
                         .size(100.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = iconGlow))
+                        .background(
+                            Brush.radialGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.tertiary.copy(alpha = iconGlow * 0.6f),
+                                    MaterialTheme.colorScheme.tertiary.copy(alpha = iconGlow * 0.2f),
+                                    Color.Transparent
+                                )
+                            )
+                        )
                 )
-                // Main icon container
+                // Main icon container - use solid background for better contrast
                 Box(
                     modifier = Modifier
                         .size(90.dp)
                         .clip(CircleShape)
-                        .background(
-                            Brush.radialGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primaryContainer,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                                )
-                            )
-                        ),
+                        .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = step.icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(44.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                    // Add a contrasting inner circle for depth
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surface),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = step.icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(44.dp),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 }
             }
 

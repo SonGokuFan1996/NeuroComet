@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_energy_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="12dp"
+    android:background="@drawable/widget_background">
+
+    <!-- Emoji indicator -->
+    <TextView
+        android:id="@+id/widget_energy_emoji"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="32sp"
+        android:text="🔋" />
+
+    <!-- Energy level display -->
+    <TextView
+        android:id="@+id/widget_energy_level"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/widget_text_primary"
+        android:text="50%" />
+
+    <!-- Progress bar -->
+    <ProgressBar
+        android:id="@+id/widget_energy_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="16dp"
+        android:max="100"
+        android:progress="50"
+        android:progressTint="@color/widget_progress"
+        android:progressBackgroundTint="@color/widget_progress_background" />
+
+    <!-- Label -->
+    <TextView
+        android:id="@+id/widget_energy_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textSize="12sp"
+        android:textColor="@color/widget_text_secondary"
+        android:text="Energy Level" />
+
+    <!-- Control buttons -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/widget_energy_down"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:text="➖"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/widget_energy_up"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:text="➕"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+
+</LinearLayout>
+

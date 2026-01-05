@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="250dp"
+    android:height="120dp"
+    android:viewportWidth="250"
+    android:viewportHeight="120">
+
+    <!-- Background with rounded corners -->
+    <path
+        android:pathData="M16,0 L234,0 Q250,0 250,16 L250,104 Q250,120 234,120 L16,120 Q0,120 0,104 L0,16 Q0,0 16,0 Z"
+        android:fillColor="#f093fb"/>
+
+    <!-- Gradient overlay -->
+    <path
+        android:pathData="M16,0 L234,0 Q250,0 250,16 L250,104 Q250,120 234,120 L16,120 Q0,120 0,104 L0,16 Q0,0 16,0 Z"
+        android:fillColor="#f5576c"
+        android:fillAlpha="0.5"/>
+
+    <!-- Decorative star -->
+    <path
+        android:pathData="M220,20 m-15,0 a15,15 0 1,1 30,0 a15,15 0 1,1 -30,0"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.3"/>
+
+    <!-- Quote mark -->
+    <path
+        android:pathData="M20,15 L40,15 Q45,15 45,20 L45,35 Q45,40 40,40 L20,40 Q15,40 15,35 L15,20 Q15,15 20,15 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.6"/>
+
+    <!-- Text line 1 -->
+    <path
+        android:pathData="M20,50 L220,50 Q225,50 225,55 L225,62 Q225,67 220,67 L20,67 Q15,67 15,62 L15,55 Q15,50 20,50 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.5"/>
+
+    <!-- Text line 2 -->
+    <path
+        android:pathData="M20,72 L180,72 Q185,72 185,77 L185,84 Q185,89 180,89 L20,89 Q15,89 15,84 L15,77 Q15,72 20,72 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.4"/>
+
+    <!-- Refresh button -->
+    <path
+        android:pathData="M220,90 m-12,0 a12,12 0 1,1 24,0 a12,12 0 1,1 -24,0"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.5"/>
+
+    <!-- Refresh icon arrows -->
+    <path
+        android:pathData="M215,87 L220,82 L225,87 M225,93 L220,98 L215,93"
+        android:strokeColor="#f5576c"
+        android:strokeWidth="2"
+        android:fillColor="#00000000"/>
+</vector>
+

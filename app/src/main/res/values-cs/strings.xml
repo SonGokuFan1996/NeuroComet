@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core UI - Czech (Czechia has growing neurodivergent community) -->
+    <string name="app_name">NeuroComet</string>
+    <string name="nav_feed">Kanál</string>
+    <string name="nav_explore">Prozkoumat</string>
+    <string name="nav_messages">Zprávy</string>
+    <string name="nav_notifications">Oznámení</string>
+    <string name="nav_settings">Nastavení</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in">Přihlásit se</string>
+    <string name="auth_sign_up">Registrace</string>
+    <string name="auth_email_label">E-mail</string>
+    <string name="auth_password_label">Heslo</string>
+    <string name="auth_create_account">Vytvořit účet</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">Vzhled a zobrazení</string>
+    <string name="settings_section_privacy">Soukromí a bezpečnost</string>
+    <string name="settings_section_notifications">Oznámení</string>
+    <string name="settings_section_accessibility">Přístupnost</string>
+
+    <!-- Explore -->
+    <string name="explore_title">Prozkoumat</string>
+    <string name="explore_autism">Autismus</string>
+    <string name="explore_adhd">ADHD</string>
+    <string name="explore_anxiety">Úzkost</string>
+    <string name="explore_sensory">Senzorické</string>
+
+    <!-- Games -->
+    <string name="games_hub_title">Herní centrum</string>
+    <string name="game_bubble_pop">Praskání bublin</string>
+    <string name="game_fidget_spinner">Fidget spinner</string>
+
+    <!-- Feedback -->
+    <string name="feedback_hub_title">Centrum zpětné vazby</string>
+    <string name="feedback_report_bug_title">Nahlásit chybu</string>
+    <string name="feedback_request_feature_title">Požádat o funkci</string>
+    <string name="feedback_send_title">Odeslat zpětnou vazbu</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">Vývojář</string>
+    <string name="settings_developer_subtitle">Nástroje pro ladění a testování</string>
+    <string name="settings_developer_options_group">Možnosti vývojáře</string>
+    <string name="settings_dev_options_desc">Pokročilé možnosti pro testování a ladění</string>
+    <string name="settings_force_verify_title">Vynutit ověření</string>
+    <string name="settings_force_verify_subtitle">Přepnout stav ověření uživatele.</string>
+    <string name="settings_fake_premium_title">Falešné Premium</string>
+    <string name="settings_fake_premium_subtitle">Simulovat placený stav.</string>
+    <string name="settings_fake_premium">Falešný prémiový režim</string>
+    <string name="settings_fake_premium_enabled">Prémiové funkce odemčeny pro testování</string>
+    <string name="settings_fake_premium_disabled">Povolit pro testování prémiových funkcí</string>
+    <string name="settings_mock_interface_title">Testovací rozhraní</string>
+    <string name="settings_mock_interface_subtitle">Zobrazit falešná data pro demo.</string>
+    <string name="settings_simulate_badge_title">Simulovat oznámení o odznaku</string>
+    <string name="settings_simulate_badge_subtitle">Spustí oznámení pro \'%s\'.</string>
+    <string name="settings_nuke_db_title">Smazat databázi</string>
+    <string name="settings_nuke_db_subtitle">Smazat VŠECHNY příspěvky. Nevratné.</string>
+    <string name="settings_nuke_db_dialog_title">Smazat databázi?</string>
+    <string name="settings_nuke_db_dialog_text">Tím se trvale smažou všechny příspěvky ze serveru. Tuto akci nelze vrátit zpět.</string>
+    <string name="settings_nuke_db_dialog_confirm">SMAZAT</string>
+    <string name="settings_nuke_db_dialog_cancel">Zrušit</string>
+    <string name="settings_language_test_title">Jazyk aplikace (Test)</string>
+    <string name="settings_language_test_subtitle">Nastavit jazyk ručně. Vyžaduje restart.</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">Možnosti vývojáře</string>
+    <string name="dev_phone_format_test">Formátování telefonního čísla</string>
+    <string name="dev_phone_format_test_desc">Testování automatického formátování pro různé regiony</string>
+    <string name="dev_phone_format_style">Styl formátování</string>
+    <string name="dev_phone_test_input">Zadejte telefonní číslo</string>
+    <string name="dev_phone_format_pattern">Vzor</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">Úložiště přihlašovacích údajů</string>
+    <string name="dev_credential_test_save">Testovat uložení</string>
+    <string name="dev_credential_test_retrieve">Testovat načtení</string>
+    <string name="dev_credential_clear_all">Vymazat všechny přihlašovací údaje</string>
+    <string name="dev_credential_session_status">Stav relace</string>
+    <string name="dev_credential_biometric_status">Stav biometrie</string>
+    <string name="dev_credential_create_session">Vytvořit testovací relaci</string>
+    <string name="dev_credential_end_session">Ukončit relaci</string>
+    <string name="dev_credential_extend_session">Prodloužit relaci</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">Nástroje pro ladění</string>
+    <string name="debug_performance_overlay">Překrytí výkonu</string>
+    <string name="debug_performance_desc">Zobrazuje FPS, paměť a statistiky posouvání</string>
+    <string name="debug_reset_counters">Resetovat počítadla</string>
+
+    <!-- General Settings -->
+    <string name="settings_profile_group">Profil</string>
+    <string name="settings_badges_title">Odznaky</string>
+    <string name="settings_badges_subtitle">Zobrazit získané úspěchy a cíle.</string>
+    <string name="settings_visual_comfort_group">Vizuální komfort a témata</string>
+    <string name="settings_text_size_title">Velikost textu</string>
+    <string name="settings_dark_mode_title">Tmavý režim</string>
+    <string name="settings_dark_mode_enabled">Povoleno</string>
+    <string name="settings_dark_mode_disabled">Zakázáno</string>
+    <string name="settings_high_contrast_title">Režim vysokého kontrastu</string>
+    <string name="settings_high_contrast_subtitle_enabled">Povoleno (čistá černá/bílá)</string>
+    <string name="settings_high_contrast_subtitle_disabled">Zakázáno</string>
+    <string name="settings_neuro_centric_theme_title">Neuro-centrické téma</string>
+    <string name="settings_go_premium_title">Přejít na Premium</string>
+    <string name="settings_go_premium_subtitle">Odstraňte reklamy a podpořte vývojáře.</string>
+    <string name="settings_account_group">Účet</string>
+    <string name="settings_logout">Odhlásit se</string>
+    <string name="settings_verified_human_title">Ověřený člověk</string>
+    <string name="settings_verified_human_subtitle_verified">Stav: Ověřeno</string>
+    <string name="settings_verified_human_subtitle_unverified">Stav: Neověřeno</string>
+    <string name="settings_2fa_title">Dvoufaktorové ověření</string>
+    <string name="settings_2fa_subtitle">Vyžadovat kód při přihlášení.</string>
+</resources>
+

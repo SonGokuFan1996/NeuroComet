@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Affirmation Widget - Daily neurodivergent-affirming messages -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_affirmation_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp"
+    android:background="@drawable/widget_background">
+
+    <!-- Decorative brain emoji -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="28sp"
+        android:text="🧠✨" />
+
+    <!-- Affirmation text -->
+    <TextView
+        android:id="@+id/widget_affirmation_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="@color/widget_text_primary"
+        android:gravity="center"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:text="Your brain is not broken, it's beautifully different" />
+
+    <!-- Next button -->
+    <TextView
+        android:id="@+id/widget_affirmation_next"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_marginTop="12dp"
+        android:paddingHorizontal="16dp"
+        android:gravity="center"
+        android:textSize="12sp"
+        android:textColor="@color/widget_text_secondary"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:text="🔄 New Affirmation"
+        android:clickable="true"
+        android:focusable="true" />
+
+</LinearLayout>
+

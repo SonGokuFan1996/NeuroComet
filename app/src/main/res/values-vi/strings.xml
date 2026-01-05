@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core UI -->
+    <string name="app_name">NeuroComet</string>
+    <string name="nav_feed">Bảng tin</string>
+    <string name="nav_explore">Khám phá</string>
+    <string name="nav_messages">Tin nhắn</string>
+    <string name="nav_notifications">Thông báo</string>
+    <string name="nav_settings">Cài đặt</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in">Đăng nhập</string>
+    <string name="auth_sign_up">Đăng ký</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_password_label">Mật khẩu</string>
+    <string name="auth_create_account">Tạo tài khoản</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">Giao diện &amp; Hiển thị</string>
+    <string name="settings_section_privacy">Quyền riêng tư &amp; Bảo mật</string>
+    <string name="settings_section_notifications">Thông báo</string>
+    <string name="settings_section_accessibility">Trợ năng</string>
+
+    <!-- Explore -->
+    <string name="explore_title">Khám phá</string>
+    <string name="explore_autism">Tự kỷ</string>
+    <string name="explore_adhd">ADHD</string>
+    <string name="explore_anxiety">Lo âu</string>
+    <string name="explore_sensory">Cảm giác</string>
+
+    <!-- Games -->
+    <string name="games_hub_title">Trung tâm Trò chơi</string>
+    <string name="game_bubble_pop">Bắn Bong Bóng</string>
+    <string name="game_fidget_spinner">Con Quay</string>
+
+    <!-- Feedback -->
+    <string name="feedback_hub_title">Trung tâm Phản hồi</string>
+    <string name="feedback_report_bug_title">Báo lỗi</string>
+    <string name="feedback_request_feature_title">Yêu cầu tính năng</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">Nhà phát triển</string>
+    <string name="settings_developer_subtitle">Công cụ gỡ lỗi và kiểm thử</string>
+    <string name="settings_developer_options_group">Tùy chọn Nhà phát triển</string>
+    <string name="settings_dev_options_desc">Tùy chọn nâng cao để kiểm thử và gỡ lỗi</string>
+    <string name="settings_force_verify_title">Bắt buộc xác minh</string>
+    <string name="settings_force_verify_subtitle">Chuyển đổi trạng thái xác minh người dùng.</string>
+    <string name="settings_fake_premium_title">Premium Giả</string>
+    <string name="settings_fake_premium_subtitle">Mô phỏng trạng thái đã thanh toán.</string>
+    <string name="settings_fake_premium">Chế độ Premium Giả</string>
+    <string name="settings_fake_premium_enabled">Đã mở khóa tính năng premium để kiểm thử</string>
+    <string name="settings_fake_premium_disabled">Bật để kiểm thử tính năng premium</string>
+    <string name="settings_mock_interface_title">Giao diện Mock</string>
+    <string name="settings_mock_interface_subtitle">Hiển thị dữ liệu giả cho demo.</string>
+    <string name="settings_simulate_badge_title">Mô phỏng thông báo huy hiệu</string>
+    <string name="settings_simulate_badge_subtitle">Kích hoạt thông báo cho \'%s\'.</string>
+    <string name="settings_nuke_db_title">Xóa cơ sở dữ liệu</string>
+    <string name="settings_nuke_db_subtitle">Xóa TẤT CẢ bài đăng. Không thể hoàn tác.</string>
+    <string name="settings_nuke_db_dialog_title">Xóa cơ sở dữ liệu?</string>
+    <string name="settings_nuke_db_dialog_text">Điều này sẽ xóa vĩnh viễn tất cả bài đăng khỏi máy chủ. Hành động này không thể hoàn tác.</string>
+    <string name="settings_nuke_db_dialog_confirm">XÓA</string>
+    <string name="settings_nuke_db_dialog_cancel">Hủy</string>
+    <string name="settings_language_test_title">Ngôn ngữ ứng dụng (Kiểm thử)</string>
+    <string name="settings_language_test_subtitle">Đặt ngôn ngữ thủ công. Cần khởi động lại.</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">Tùy chọn Nhà phát triển</string>
+    <string name="dev_phone_format_test">Định dạng Số điện thoại</string>
+    <string name="dev_phone_format_test_desc">Kiểm thử tự động định dạng cho các vùng khác nhau</string>
+    <string name="dev_phone_format_style">Kiểu Định dạng</string>
+    <string name="dev_phone_test_input">Nhập số điện thoại</string>
+    <string name="dev_phone_format_pattern">Mẫu</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">Lưu trữ Thông tin xác thực</string>
+    <string name="dev_credential_test_save">Kiểm thử Lưu</string>
+    <string name="dev_credential_test_retrieve">Kiểm thử Truy xuất</string>
+    <string name="dev_credential_clear_all">Xóa Tất cả Thông tin xác thực</string>
+    <string name="dev_credential_session_status">Trạng thái Phiên</string>
+    <string name="dev_credential_biometric_status">Trạng thái Sinh trắc học</string>
+    <string name="dev_credential_create_session">Tạo Phiên Kiểm thử</string>
+    <string name="dev_credential_end_session">Kết thúc Phiên</string>
+    <string name="dev_credential_extend_session">Gia hạn Phiên</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">Công cụ gỡ lỗi</string>
+    <string name="debug_performance_overlay">Lớp phủ hiệu suất</string>
+    <string name="debug_performance_desc">Hiển thị FPS, bộ nhớ và thống kê cuộn</string>
+    <string name="debug_reset_counters">Đặt lại bộ đếm</string>
+
+    <!-- General Settings -->
+    <string name="settings_profile_group">Hồ sơ</string>
+    <string name="settings_badges_title">Huy hiệu</string>
+    <string name="settings_badges_subtitle">Xem thành tựu và mục tiêu đã đạt được.</string>
+    <string name="settings_visual_comfort_group">Thoải mái thị giác &amp; Chủ đề</string>
+    <string name="settings_text_size_title">Cỡ chữ</string>
+    <string name="settings_dark_mode_title">Chế độ tối</string>
+    <string name="settings_dark_mode_enabled">Đã bật</string>
+    <string name="settings_dark_mode_disabled">Đã tắt</string>
+    <string name="settings_high_contrast_title">Chế độ tương phản cao</string>
+    <string name="settings_high_contrast_subtitle_enabled">Đã bật (Đen/Trắng thuần túy)</string>
+    <string name="settings_high_contrast_subtitle_disabled">Đã tắt</string>
+    <string name="settings_neuro_centric_theme_title">Chủ đề trung tâm thần kinh</string>
+    <string name="settings_go_premium_title">Nâng cấp Premium</string>
+    <string name="settings_go_premium_subtitle">Xóa quảng cáo và hỗ trợ nhà phát triển.</string>
+    <string name="settings_account_group">Tài khoản</string>
+    <string name="settings_logout">Đăng xuất</string>
+    <string name="settings_verified_human_title">Con người đã xác minh</string>
+    <string name="settings_verified_human_subtitle_verified">Trạng thái: Đã xác minh</string>
+    <string name="settings_verified_human_subtitle_unverified">Trạng thái: Chưa xác minh</string>
+    <string name="settings_2fa_title">Xác thực hai yếu tố</string>
+    <string name="settings_2fa_subtitle">Yêu cầu mã khi đăng nhập.</string>
+</resources>
+

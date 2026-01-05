@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -55,6 +56,7 @@ sealed class Screen(val route: String, val labelId: Int, val iconFilled: ImageVe
     data object Settings : Screen("settings", R.string.nav_settings, Icons.Filled.Settings, Icons.Outlined.Settings)
     data object ThemeSettings : Screen("theme_settings", R.string.nav_settings, Icons.Filled.Palette, Icons.Outlined.Palette)
     data object AnimationSettings : Screen("animation_settings", R.string.nav_settings, Icons.Filled.Animation, Icons.Outlined.Animation)
+    data object IconCustomization : Screen("icon_customization", R.string.settings_app_icon, Icons.Filled.Palette, Icons.Outlined.Palette)
     data object PrivacySettings : Screen("privacy_settings", R.string.nav_settings, Icons.Filled.Lock, Icons.Outlined.Lock)
     data object NotificationSettings : Screen("notification_settings", R.string.nav_settings, Icons.Filled.Notifications, Icons.Outlined.Notifications)
     data object ContentSettings : Screen("content_settings", R.string.nav_settings, Icons.Filled.PlayArrow, Icons.Outlined.PlayArrow)
@@ -83,6 +85,9 @@ sealed class Screen(val route: String, val labelId: Int, val iconFilled: ImageVe
     data object GamesHub : Screen("games_hub", R.string.games_hub_title, Icons.Filled.SportsEsports, Icons.Outlined.SportsEsports)
     data object GamePlay : Screen("game/{gameId}", R.string.games_hub_title, Icons.Filled.SportsEsports, Icons.Outlined.SportsEsports) {
         fun route(gameId: String) = "game/$gameId"
+    }
+    data object FeedbackHub : Screen("feedback_hub/{action}", R.string.feedback_hub_title, Icons.Filled.Feedback, Icons.Outlined.Feedback) {
+        fun route(action: String = "none") = "feedback_hub/$action"
     }
 }
 
@@ -873,6 +878,12 @@ class MainActivity : AppCompatActivity() {
         )
         super.onCreate(savedInstanceState)
 
+        // Initialize Performance Overlay State (loads saved preferences)
+        PerformanceOverlayState.init(this)
+
+        // Initialize Settings Manager (loads all persistent settings)
+        SettingsManager.init(this)
+
         // ========================================================================
         // SECURITY: Perform comprehensive security check at app startup
         // Detects root, hooks, debuggers, emulators, and app tampering
@@ -1179,14 +1190,16 @@ fun NeuroCometApp(
                 PaddingValues(top = innerPadding.calculateTopPadding())
             }
 
-            NavHost(
-                navController = navController,
-                startDestination = Screen.Feed.route,
-                modifier = Modifier
-                    .padding(navHostPadding)
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-            ) {
+            // Wrap in a Box to overlay the debug performance monitor
+            Box(modifier = Modifier.fillMaxSize()) {
+                NavHost(
+                    navController = navController,
+                    startDestination = Screen.Feed.route,
+                    modifier = Modifier
+                        .padding(navHostPadding)
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
+                ) {
                 composable(Screen.Feed.route) {
                     FeedScreen(
                         posts = feedState.posts,
@@ -1250,9 +1263,10 @@ fun NeuroCometApp(
                             feedViewModel.openConversation(conversationId)
                             navController.navigate(Screen.Conversation.route(conversationId))
                         },
-                        onNewMessage = {
-                            // Navigate to explore to find users to message
-                            navController.navigate(Screen.Explore.route)
+                        onStartNewChat = { userId ->
+                            // Start or open conversation with the selected user
+                            val conversationId = feedViewModel.startOrOpenConversation(userId)
+                            navController.navigate(Screen.Conversation.route(conversationId))
                         },
                         onOpenCallHistory = {
                             navController.navigate(Screen.CallHistory.route)
@@ -1273,6 +1287,10 @@ fun NeuroCometApp(
                             onOpenConversation = { id ->
                                 feedViewModel.openConversation(id)
                                 navController.navigate(Screen.Conversation.route(id))
+                            },
+                            onStartNewChat = { userId ->
+                                val conversationId = feedViewModel.startOrOpenConversation(userId)
+                                navController.navigate(Screen.Conversation.route(conversationId))
                             },
                             onBack = { navController.popBackStack() },
                             onOpenCallHistory = {
@@ -1372,6 +1390,9 @@ fun NeuroCometApp(
                         onOpenAnimationSettings = {
                             navController.navigate(Screen.AnimationSettings.route)
                         },
+                        onOpenIconCustomization = {
+                            navController.navigate(Screen.IconCustomization.route)
+                        },
                         onOpenPrivacySettings = {
                             navController.navigate(Screen.PrivacySettings.route)
                         },
@@ -1399,6 +1420,15 @@ fun NeuroCometApp(
                         onOpenGames = {
                             navController.navigate(Screen.GamesHub.route)
                         },
+                        onOpenBugReport = {
+                            navController.navigate(Screen.FeedbackHub.route("bug"))
+                        },
+                        onOpenFeatureRequest = {
+                            navController.navigate(Screen.FeedbackHub.route("feature"))
+                        },
+                        onOpenGeneralFeedback = {
+                            navController.navigate(Screen.FeedbackHub.route("feedback"))
+                        },
                         isPremium = feedState.isPremium,
                         isFakePremiumEnabled = feedState.isFakePremiumEnabled,
                         onFakePremiumToggle = { enabled ->
@@ -1417,6 +1447,11 @@ fun NeuroCometApp(
                     AnimationSettingsScreen(
                         onBack = { navController.popBackStack() },
                         themeViewModel = themeViewModel
+                    )
+                }
+                composable(Screen.IconCustomization.route) {
+                    IconCustomizationScreen(
+                        onBack = { navController.popBackStack() }
                     )
                 }
                 composable(Screen.PrivacySettings.route) {
@@ -1570,8 +1605,31 @@ fun NeuroCometApp(
                         onBack = { navController.popBackStack() }
                     )
                 }
+                // Feedback Hub
+                composable(Screen.FeedbackHub.route) { backStackEntry ->
+                    val action = backStackEntry.arguments?.getString("action") ?: "none"
+                    val initialAction = when (action) {
+                        "bug" -> FeedbackInitialAction.BUG_REPORT
+                        "feature" -> FeedbackInitialAction.FEATURE_REQUEST
+                        "feedback" -> FeedbackInitialAction.GENERAL_FEEDBACK
+                        else -> FeedbackInitialAction.NONE
+                    }
+                    FeedbackHubScreen(
+                        onBack = { navController.popBackStack() },
+                        initialAction = initialAction
+                    )
+                }
             }
+
+            // Debug Performance Overlay (controlled from Developer Options)
+            DebugPerformanceOverlay(
+                enabled = PerformanceOverlayState.isEnabled,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .statusBarsPadding()
+            )
         }
+        } // End of Scaffold content
 
         if (showPremiumDialog) {
             AlertDialog(

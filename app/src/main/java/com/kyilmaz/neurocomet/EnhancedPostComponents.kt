@@ -775,7 +775,7 @@ fun ReportPostDialog(
                     OutlinedTextField(
                         value = additionalInfo,
                         onValueChange = { additionalInfo = it },
-                        placeholder = { Text("Please describe the issue...") },
+                        placeholder = { Text(stringResource(R.string.report_dialog_reason_hint)) },
                         modifier = Modifier.fillMaxWidth(),
                         maxLines = 3
                     )
@@ -788,7 +788,7 @@ fun ReportPostDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.report_dialog_cancel))
                     }
                     Spacer(Modifier.width(8.dp))
                     Button(
@@ -805,7 +805,7 @@ fun ReportPostDialog(
                             containerColor = MaterialTheme.colorScheme.error
                         )
                     ) {
-                        Text("Report")
+                        Text(stringResource(R.string.report_dialog_submit))
                     }
                 }
             }
@@ -1001,7 +1001,7 @@ fun EnhancedCreatePostDialog(
                             value = imageUrl,
                             onValueChange = { imageUrl = it },
                             label = { Text(stringResource(R.string.create_post_image_url)) },
-                            placeholder = { Text("https://...") },
+                            placeholder = { Text(stringResource(R.string.create_story_url_placeholder)) },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
                             leadingIcon = { Icon(Icons.Filled.Image, null) },
@@ -1014,7 +1014,7 @@ fun EnhancedCreatePostDialog(
                             value = videoUrl,
                             onValueChange = { videoUrl = it },
                             label = { Text(stringResource(R.string.create_post_video_url)) },
-                            placeholder = { Text("https://...") },
+                            placeholder = { Text(stringResource(R.string.create_story_url_placeholder)) },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
                             leadingIcon = { Icon(Icons.Filled.VideoLibrary, null) },

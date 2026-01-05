@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core UI - Romanian (Romania has growing autism awareness) -->
+    <string name="app_name">NeuroComet</string>
+    <string name="nav_feed">Flux</string>
+    <string name="nav_explore">Explorează</string>
+    <string name="nav_messages">Mesaje</string>
+    <string name="nav_notifications">Notificări</string>
+    <string name="nav_settings">Setări</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in">Conectare</string>
+    <string name="auth_sign_up">Înregistrare</string>
+    <string name="auth_email_label">E-mail</string>
+    <string name="auth_password_label">Parolă</string>
+    <string name="auth_create_account">Creează cont</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">Aspect și afișare</string>
+    <string name="settings_section_privacy">Confidențialitate și securitate</string>
+    <string name="settings_section_notifications">Notificări</string>
+    <string name="settings_section_accessibility">Accesibilitate</string>
+
+    <!-- Explore -->
+    <string name="explore_title">Explorează</string>
+    <string name="explore_autism">Autism</string>
+    <string name="explore_adhd">ADHD</string>
+    <string name="explore_anxiety">Anxietate</string>
+    <string name="explore_sensory">Senzorial</string>
+
+    <!-- Games -->
+    <string name="games_hub_title">Centru de jocuri</string>
+    <string name="game_bubble_pop">Sparge baloane</string>
+    <string name="game_fidget_spinner">Fidget Spinner</string>
+
+    <!-- Feedback -->
+    <string name="feedback_hub_title">Centru de feedback</string>
+    <string name="feedback_report_bug_title">Raportează o eroare</string>
+    <string name="feedback_request_feature_title">Solicită o funcție</string>
+    <string name="feedback_send_title">Trimite feedback</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">Dezvoltator</string>
+    <string name="settings_developer_subtitle">Instrumente de depanare și testare</string>
+    <string name="settings_developer_options_group">Opțiuni dezvoltator</string>
+    <string name="settings_dev_options_desc">Opțiuni avansate pentru testare și depanare</string>
+    <string name="settings_force_verify_title">Forțează verificarea</string>
+    <string name="settings_force_verify_subtitle">Comută starea de verificare a utilizatorului.</string>
+    <string name="settings_fake_premium_title">Premium Fals</string>
+    <string name="settings_fake_premium_subtitle">Simulează starea plătită.</string>
+    <string name="settings_fake_premium">Mod Premium fals</string>
+    <string name="settings_fake_premium_enabled">Funcții premium deblocate pentru testare</string>
+    <string name="settings_fake_premium_disabled">Activează pentru a testa funcțiile premium</string>
+    <string name="settings_mock_interface_title">Interfață simulată</string>
+    <string name="settings_mock_interface_subtitle">Afișează date false pentru demo.</string>
+    <string name="settings_simulate_badge_title">Simulează notificare insignă</string>
+    <string name="settings_simulate_badge_subtitle">Declanșează notificare pentru \'%s\'.</string>
+    <string name="settings_nuke_db_title">Șterge baza de date</string>
+    <string name="settings_nuke_db_subtitle">Șterge TOATE postările. Ireversibil.</string>
+    <string name="settings_nuke_db_dialog_title">Ștergi baza de date?</string>
+    <string name="settings_nuke_db_dialog_text">Aceasta va șterge permanent toate postările de pe server. Această acțiune nu poate fi anulată.</string>
+    <string name="settings_nuke_db_dialog_confirm">ȘTERGE</string>
+    <string name="settings_nuke_db_dialog_cancel">Anulează</string>
+    <string name="settings_language_test_title">Limba aplicației (Test)</string>
+    <string name="settings_language_test_subtitle">Setează limba manual. Necesită repornire.</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">Opțiuni dezvoltator</string>
+    <string name="dev_phone_format_test">Formatare număr de telefon</string>
+    <string name="dev_phone_format_test_desc">Testează formatarea automată pentru diferite regiuni</string>
+    <string name="dev_phone_format_style">Stil de formatare</string>
+    <string name="dev_phone_test_input">Introduceți numărul de telefon</string>
+    <string name="dev_phone_format_pattern">Model</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">Stocare credențiale</string>
+    <string name="dev_credential_test_save">Testează salvarea</string>
+    <string name="dev_credential_test_retrieve">Testează recuperarea</string>
+    <string name="dev_credential_clear_all">Șterge toate credențialele</string>
+    <string name="dev_credential_session_status">Stare sesiune</string>
+    <string name="dev_credential_biometric_status">Stare biometrică</string>
+    <string name="dev_credential_create_session">Creează sesiune de test</string>
+    <string name="dev_credential_end_session">Închide sesiunea</string>
+    <string name="dev_credential_extend_session">Extinde sesiunea</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">Instrumente de depanare</string>
+    <string name="debug_performance_overlay">Suprapunere performanță</string>
+    <string name="debug_performance_desc">Afișează FPS, memorie și statistici de derulare</string>
+    <string name="debug_reset_counters">Resetează contoarele</string>
+
+    <!-- General Settings -->
+    <string name="settings_profile_group">Profil</string>
+    <string name="settings_badges_title">Insigne</string>
+    <string name="settings_badges_subtitle">Vizualizează realizările și obiectivele tale.</string>
+    <string name="settings_visual_comfort_group">Confort vizual și teme</string>
+    <string name="settings_text_size_title">Dimensiune text</string>
+    <string name="settings_dark_mode_title">Mod întunecat</string>
+    <string name="settings_dark_mode_enabled">Activat</string>
+    <string name="settings_dark_mode_disabled">Dezactivat</string>
+    <string name="settings_high_contrast_title">Mod contrast ridicat</string>
+    <string name="settings_high_contrast_subtitle_enabled">Activat (negru/alb pur)</string>
+    <string name="settings_high_contrast_subtitle_disabled">Dezactivat</string>
+    <string name="settings_neuro_centric_theme_title">Temă neuro-centrică</string>
+    <string name="settings_go_premium_title">Devino Premium</string>
+    <string name="settings_go_premium_subtitle">Elimină reclamele și sprijină dezvoltatorii.</string>
+    <string name="settings_account_group">Cont</string>
+    <string name="settings_logout">Deconectare</string>
+    <string name="settings_verified_human_title">Om verificat</string>
+    <string name="settings_verified_human_subtitle_verified">Stare: Verificat</string>
+    <string name="settings_verified_human_subtitle_unverified">Stare: Neverificat</string>
+    <string name="settings_2fa_title">Autentificare în doi pași</string>
+    <string name="settings_2fa_subtitle">Solicită cod la autentificare.</string>
+</resources>
+

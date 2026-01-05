@@ -2,6 +2,238 @@
 <resources>
     <string name="app_name">NeuroComet</string>
 
+    <!-- Auth Screen -->
+    <string name="auth_app_tagline">مساحة آمنة لكل عقل ✨</string>
+    <string name="auth_sign_in">تسجيل الدخول</string>
+    <string name="auth_sign_up">إنشاء حساب</string>
+    <string name="auth_email_label">البريد الإلكتروني</string>
+    <string name="auth_email_placeholder">بريدك@الإلكتروني.com</string>
+    <string name="auth_password_label">كلمة المرور</string>
+    <string name="auth_confirm_password_label">تأكيد كلمة المرور</string>
+    <string name="auth_password_requirements">🔒 يجب أن تحتوي كلمة المرور على أكثر من 12 حرفاً مع أحرف كبيرة وصغيرة وأرقام ورموز.</string>
+    <string name="auth_create_account">إنشاء حساب</string>
+    <string name="auth_passwords_not_match">كلمات المرور غير متطابقة</string>
+    <string name="auth_password_weak">كلمة المرور لا تستوفي المتطلبات</string>
+    <string name="auth_skip">تخطي الآن</string>
+    <string name="auth_skip_dev">تخطي الآن (مطور)</string>
+    <string name="auth_data_secure">بياناتك مشفرة وآمنة</string>
+    <string name="auth_2fa_title">المصادقة الثنائية</string>
+    <string name="auth_2fa_description">أدخل الرمز المكون من 6 أرقام المرسل إلى جهازك</string>
+    <string name="auth_2fa_code_label">رمز من 6 أرقام</string>
+    <string name="auth_2fa_code_placeholder">123456</string>
+    <string name="auth_2fa_verify">تحقق</string>
+    <string name="auth_hide_password">إخفاء كلمة المرور</string>
+    <string name="auth_show_password">إظهار كلمة المرور</string>
+
+    <!-- Auth Tutorial -->
+    <string name="auth_tutorial_welcome_title">مرحباً بك في بيتك 💜</string>
+    <string name="auth_tutorial_welcome_desc">NeuroComet هو مساحة آمنة وداعمة للعقول المتنوعة عصبياً ومجتمع LGBTQ+. أنت تنتمي هنا كما أنت—لا حاجة للأقنعة.</string>
+    <string name="auth_tutorial_comfort_title">راحتك مهمة ∞</string>
+    <string name="auth_tutorial_comfort_desc_anim">اضغط على رمز اللانهاية في أي وقت لتقليل الحركة البصرية. صممناه للتصفح الحسي المريح.</string>
+    <string name="auth_tutorial_comfort_desc_static">ممتاز! لقد فعّلت وضع الهدوء. اضغط مرة أخرى عندما تريد حركة أكثر أو أقل.</string>
+    <string name="auth_tutorial_themes_title">أكثر من 25 سمة عصبية 🎨</string>
+    <string name="auth_tutorial_themes_desc">اختر سمات مصممة لتركيز ADHD، راحة التوحد، تخفيف القلق، إمكانية الوصول لعمى الألوان، ودعم المزاج. عقلك، طريقتك.</string>
+    <string name="auth_tutorial_fonts_title">خطوط صديقة لعسر القراءة 📖</string>
+    <string name="auth_tutorial_fonts_desc">أكثر من 12 خطاً للوصول بما في ذلك OpenDyslexic وLexend وAtkinson Hyperlegible. اضبط التباعد والوزن والحجم ليتناسب مع طريقة قراءة عقلك.</string>
+    <string name="auth_tutorial_community_title">المجتمع والفخر 🌈</string>
+    <string name="auth_tutorial_community_desc">تواصل مع أشخاص يفهمون. المتنوعون عصبياً، LGBTQ+ والحلفاء—كل العقول، كل الهويات، كل الجمال. سمات خاصة للفخر، يوم التوحد وشهر ADHD!</string>
+    <string name="auth_tutorial_safety_title">مصمم للأمان 🛡️</string>
+    <string name="auth_tutorial_safety_desc">تصفية المحتوى، الرقابة الأبوية، حدود وقت الشاشة ووضع النوم تحمي رفاهيتك. أنت تتحكم فيما تراه ومتى.</string>
+    <string name="auth_tutorial_ready_title">جاهز للبدء! ✨</string>
+    <string name="auth_tutorial_ready_desc">سجل الدخول أو أنشئ حسابك للانضمام إلى الآلاف من الأفراد المتنوعين عصبياً وLGBTQ+. هذه مساحتك—استكشف بسرعتك.</string>
+    <string name="auth_tutorial_skip">تخطي</string>
+    <string name="auth_tutorial_continue">متابعة</string>
+    <string name="auth_tutorial_lets_go">هيا بنا! ✨</string>
+    <string name="auth_tutorial_step_count">%1$d من %2$d</string>
+    <string name="auth_tutorial_tap_here">اضغط هنا</string>
+
+    <!-- Splash Screen -->
+    <string name="splash_tagline_default">مساحة مصممة لك</string>
+    <string name="splash_tagline_hyperfocus">منطقة خالية من التشتت</string>
+    <string name="splash_tagline_overload">وضع التحفيز المنخفض</string>
+    <string name="splash_tagline_calm">مساحتك الهادئة</string>
+    <string name="splash_tagline_adhd_energized">اركب الموجة</string>
+    <string name="splash_tagline_adhd_low_dopamine">تحفيز لطيف</string>
+    <string name="splash_tagline_adhd_task_mode">أقل تشتت</string>
+    <string name="splash_tagline_autism_routine">قابل للتنبؤ وآمن</string>
+    <string name="splash_tagline_autism_sensory_seek">تجارب غنية تنتظرك</string>
+    <string name="splash_tagline_autism_low_stim">تحفيز أدنى</string>
+    <string name="splash_tagline_anxiety_soothe">تهدئة عقلك</string>
+    <string name="splash_tagline_anxiety_grounding">متجذر في الحاضر</string>
+    <string name="splash_tagline_dyslexia_friendly">مصمم للوضوح</string>
+    <string name="splash_tagline_colorblind_deuteranopia">صديق لعمى الألوان الأخضر</string>
+    <string name="splash_tagline_colorblind_protanopia">صديق لعمى الألوان الأحمر</string>
+    <string name="splash_tagline_colorblind_tritanopia">صديق لعمى الألوان الأزرق</string>
+    <string name="splash_tagline_colorblind_monochromacy">تصميم قائم على الأنماط</string>
+    <string name="splash_tagline_blind_screen_reader">محسّن لـ TalkBack</string>
+    <string name="splash_tagline_blind_high_contrast">أسود وأبيض نقي</string>
+    <string name="splash_tagline_blind_large_text">وضع النص الكبير جداً</string>
+    <string name="splash_tagline_mood_tired">الراحة مقبولة</string>
+    <string name="splash_tagline_mood_anxious">تنفس معنا</string>
+    <string name="splash_tagline_mood_happy">لنحتفل بك</string>
+    <string name="splash_tagline_mood_overwhelmed">نأخذها بهدوء</string>
+    <string name="splash_tagline_mood_creative">دع الأفكار تتدفق</string>
+    <string name="splash_tagline_rainbow_brain">احتضن عقلك قوس القزح</string>
+
+    <!-- Splash Messages -->
+    <string name="splash_msg_default_1">مرحباً بعودتك</string>
+    <string name="splash_msg_default_2">مساحتك تنتظرك</string>
+    <string name="splash_msg_default_3">لنبدأ</string>
+    <string name="splash_msg_hyperfocus_1">وضع التركيز</string>
+    <string name="splash_msg_hyperfocus_2">عقل صافٍ أمامك</string>
+    <string name="splash_msg_hyperfocus_3">جاهز للغوص العميق</string>
+    <string name="splash_msg_overload_1">نأخذها ببطء</string>
+    <string name="splash_msg_overload_2">تنفس معي</string>
+    <string name="splash_msg_overload_3">إيقاع لطيف</string>
+    <string name="splash_msg_calm_1">السلام ينتظرك</string>
+    <string name="splash_msg_calm_2">وضع الصفاء</string>
+    <string name="splash_msg_calm_3">مياه هادئة</string>
+    <string name="splash_msg_adhd_energized_1">هيا بنا! ⚡</string>
+    <string name="splash_msg_adhd_energized_2">تم تحرير الطاقة</string>
+    <string name="splash_msg_adhd_energized_3">وقت التألق</string>
+    <string name="splash_msg_adhd_low_dopamine_1">نحن نستعد</string>
+    <string name="splash_msg_adhd_low_dopamine_2">نجد شرارتك</string>
+    <string name="splash_msg_adhd_low_dopamine_3">يمكنك فعلها</string>
+    <string name="splash_msg_adhd_task_mode_1">وضع المهمة</string>
+    <string name="splash_msg_adhd_task_mode_2">شيء واحد في كل مرة</string>
+    <string name="splash_msg_adhd_task_mode_3">التركيز مُفعّل</string>
+    <string name="splash_msg_autism_routine_1">كالعادة</string>
+    <string name="splash_msg_autism_routine_2">أنماط مألوفة</string>
+    <string name="splash_msg_autism_routine_3">راحة في الروتين</string>
+    <string name="splash_msg_autism_sensory_seek_1">فرحة حسية</string>
+    <string name="splash_msg_autism_sensory_seek_2">اشعر بالأنماط</string>
+    <string name="splash_msg_autism_sensory_seek_3">أجواء مُرضية</string>
+    <string name="splash_msg_autism_low_stim_1">الوضع الهادئ</string>
+    <string name="splash_msg_autism_low_stim_2">ناعم ولطيف</string>
+    <string name="splash_msg_autism_low_stim_3">أرِح حواسك</string>
+    <string name="splash_msg_anxiety_soothe_1">أنت آمن هنا</string>
+    <string name="splash_msg_anxiety_soothe_2">شهيق، زفير</string>
+    <string name="splash_msg_anxiety_soothe_3">كل شيء على ما يرام</string>
+    <string name="splash_msg_anxiety_grounding_1">أقدام على الأرض</string>
+    <string name="splash_msg_anxiety_grounding_2">اللحظة الحاضرة</string>
+    <string name="splash_msg_anxiety_grounding_3">مستقر وآمن</string>
+    <string name="splash_msg_dyslexia_friendly_1">واضح وقابل للقراءة</string>
+    <string name="splash_msg_dyslexia_friendly_2">بطريقتك</string>
+    <string name="splash_msg_dyslexia_friendly_3">قراءة سهلة أمامك</string>
+    <string name="splash_msg_colorblind_deuter_1">ألوان محسّنة</string>
+    <string name="splash_msg_colorblind_deuter_2">وضوح أزرق وبرتقالي</string>
+    <string name="splash_msg_colorblind_deuter_3">انظر بثقة</string>
+    <string name="splash_msg_colorblind_protan_1">ألوان مُكيّفة</string>
+    <string name="splash_msg_colorblind_protan_2">تناغم أزرق وأصفر</string>
+    <string name="splash_msg_colorblind_protan_3">تمييز واضح</string>
+    <string name="splash_msg_colorblind_tritan_1">ألوان مُحسّنة</string>
+    <string name="splash_msg_colorblind_tritan_2">تباين وردي وفيروزي</string>
+    <string name="splash_msg_colorblind_tritan_3">وضوح بصري</string>
+    <string name="splash_msg_colorblind_mono_1">أشكال وأنماط</string>
+    <string name="splash_msg_colorblind_mono_2">تباين عالي</string>
+    <string name="splash_msg_colorblind_mono_3">حدود واضحة</string>
+    <string name="splash_msg_blind_reader_1">قارئ الشاشة جاهز</string>
+    <string name="splash_msg_blind_reader_2">إمكانية الوصول أولاً</string>
+    <string name="splash_msg_blind_reader_3">مرحباً</string>
+    <string name="splash_msg_blind_contrast_1">أقصى تباين</string>
+    <string name="splash_msg_blind_contrast_2">واضح وجريء</string>
+    <string name="splash_msg_blind_contrast_3">سهل الرؤية</string>
+    <string name="splash_msg_blind_large_1">كبير وواضح</string>
+    <string name="splash_msg_blind_large_2">قراءة سهلة</string>
+    <string name="splash_msg_blind_large_3">بطريقتك</string>
+    <string name="splash_msg_mood_tired_1">خذها ببساطة</string>
+    <string name="splash_msg_mood_tired_2">لا استعجال</string>
+    <string name="splash_msg_mood_tired_3">بداية لطيفة</string>
+    <string name="splash_msg_mood_anxious_1">أنت بخير</string>
+    <string name="splash_msg_mood_anxious_2">هذا أيضاً سيمر</string>
+    <string name="splash_msg_mood_anxious_3">مساحة آمنة</string>
+    <string name="splash_msg_mood_happy_1">مرحباً يا شمس! ☀️</string>
+    <string name="splash_msg_mood_happy_2">أجواء رائعة</string>
+    <string name="splash_msg_mood_happy_3">الفرح ينتظرك</string>
+    <string name="splash_msg_mood_overwhelmed_1">نفس واحد</string>
+    <string name="splash_msg_mood_overwhelmed_2">نحن نبطئ</string>
+    <string name="splash_msg_mood_overwhelmed_3">نحن معك</string>
+    <string name="splash_msg_mood_creative_1">الإلهام قادم</string>
+    <string name="splash_msg_mood_creative_2">ابدع بحرية</string>
+    <string name="splash_msg_mood_creative_3">وضع الخيال</string>
+    <string name="splash_msg_rainbow_1">🦄 وجدت السر!</string>
+    <string name="splash_msg_rainbow_2">🌈 احتفل بعقلك الفريد</string>
+    <string name="splash_msg_rainbow_3">✨ التنوع العصبي سحر</string>
+    <string name="splash_msg_rainbow_4">🧠 عقلك جميل</string>
+    <string name="splash_msg_rainbow_5">💜 الاختلاف قوة</string>
+
+    <!-- NeuroState Categories -->
+    <string name="neuro_category_basic">السمات الأساسية</string>
+    <string name="neuro_category_adhd">سمات ADHD</string>
+    <string name="neuro_category_autism">سمات التوحد</string>
+    <string name="neuro_category_anxiety">سمات القلق/الوسواس</string>
+    <string name="neuro_category_accessibility">إمكانية الوصول</string>
+    <string name="neuro_category_colorblind">عمى الألوان</string>
+    <string name="neuro_category_blind">المكفوفين وضعاف البصر</string>
+    <string name="neuro_category_mood">كيف تشعر؟</string>
+    <string name="neuro_category_secret">🦄 السمات السرية</string>
+
+    <!-- NeuroState Names -->
+    <string name="neuro_state_default">الافتراضي</string>
+    <string name="neuro_state_hyperfocus">التركيز الفائق</string>
+    <string name="neuro_state_overload">الحمل الحسي الزائد</string>
+    <string name="neuro_state_calm">هادئ</string>
+    <string name="neuro_state_adhd_energized">ADHD - نشيط</string>
+    <string name="neuro_state_adhd_low_dopamine">ADHD - دوبامين منخفض</string>
+    <string name="neuro_state_adhd_task_mode">ADHD - وضع المهمة</string>
+    <string name="neuro_state_autism_routine">التوحد - الروتين</string>
+    <string name="neuro_state_autism_sensory_seek">التوحد - البحث الحسي</string>
+    <string name="neuro_state_autism_low_stim">التوحد - تحفيز منخفض</string>
+    <string name="neuro_state_anxiety_soothe">القلق - التهدئة</string>
+    <string name="neuro_state_anxiety_grounding">القلق - التجذر</string>
+    <string name="neuro_state_dyslexia_friendly">صديق لعسر القراءة</string>
+    <string name="neuro_state_colorblind_deuter">عمى الألوان الأخضر</string>
+    <string name="neuro_state_colorblind_protan">عمى الألوان الأحمر</string>
+    <string name="neuro_state_colorblind_tritan">عمى الألوان الأزرق</string>
+    <string name="neuro_state_colorblind_mono">أحادي اللون</string>
+    <string name="neuro_state_blind_screen_reader">وضع قارئ الشاشة</string>
+    <string name="neuro_state_blind_high_contrast">أقصى تباين</string>
+    <string name="neuro_state_blind_large_text">وضع النص الكبير</string>
+    <string name="neuro_state_mood_tired">أشعر بالتعب</string>
+    <string name="neuro_state_mood_anxious">أشعر بالقلق</string>
+    <string name="neuro_state_mood_happy">أشعر بالسعادة</string>
+    <string name="neuro_state_mood_overwhelmed">أشعر بالإرهاق</string>
+    <string name="neuro_state_mood_creative">أشعر بالإبداع</string>
+    <string name="neuro_state_rainbow_brain">عقل قوس القزح</string>
+
+    <!-- NeuroState Descriptions -->
+    <string name="neuro_state_default_desc">سمة قياسية بألوان متوازنة</string>
+    <string name="neuro_state_hyperfocus_desc">تباين عالي للتركيز العميق</string>
+    <string name="neuro_state_overload_desc">ألوان هادئة وناعمة لتقليل التحفيز</string>
+    <string name="neuro_state_calm_desc">ألوان ناعمة ومهدئة للاسترخاء</string>
+    <string name="neuro_state_adhd_energized_desc">ألوان مشرقة وجذابة للأيام المنتجة</string>
+    <string name="neuro_state_adhd_low_dopamine_desc">ألوان دافئة ومحفزة لتحسين المزاج</string>
+    <string name="neuro_state_adhd_task_mode_desc">أقل تشتت، لوحة ألوان معززة للتركيز</string>
+    <string name="neuro_state_autism_routine_desc">أنماط ألوان قابلة للتنبؤ ومتسقة</string>
+    <string name="neuro_state_autism_sensory_seek_desc">قوام غني وتباينات مُرضية</string>
+    <string name="neuro_state_autism_low_stim_desc">ألوان ناعمة جداً ولطيفة</string>
+    <string name="neuro_state_anxiety_soothe_desc">ألوان باردة ومطمئنة لتخفيف القلق</string>
+    <string name="neuro_state_anxiety_grounding_desc">ألوان ترابية ومستقرة للتمركز</string>
+    <string name="neuro_state_dyslexia_friendly_desc">قابلية قراءة عالية مع تباين أمثل</string>
+    <string name="neuro_state_colorblind_deuter_desc">محسّن لعمى الألوان الأحمر-الأخضر (ضعف الأخضر)</string>
+    <string name="neuro_state_colorblind_protan_desc">محسّن لعمى الألوان الأحمر-الأخضر (ضعف الأحمر)</string>
+    <string name="neuro_state_colorblind_tritan_desc">محسّن لعمى الألوان الأزرق-الأصفر</string>
+    <string name="neuro_state_colorblind_mono_desc">درجات رمادية عالية التباين لعمى الألوان الكامل</string>
+    <string name="neuro_state_blind_screen_reader_desc">محسّن لـ TalkBack وقارئات الشاشة بأقصى تباين</string>
+    <string name="neuro_state_blind_high_contrast_desc">أسود/أبيض نقي للمستخدمين ذوي الرؤية المنخفضة جداً</string>
+    <string name="neuro_state_blind_large_text_desc">نص كبير جداً مع تخطيط مبسط</string>
+    <string name="neuro_state_mood_tired_desc">ألوان لطيفة لا تُجهد العينين</string>
+    <string name="neuro_state_mood_anxious_desc">لوحة مهدئة لتقليل التوتر</string>
+    <string name="neuro_state_mood_happy_desc">ألوان مبهجة تتناسب مع مزاجك</string>
+    <string name="neuro_state_mood_overwhelmed_desc">لوحة مبسطة وهادئة</string>
+    <string name="neuro_state_mood_creative_desc">ألوان ملهمة لتغذية الخيال</string>
+    <string name="neuro_state_rainbow_brain_desc">احتفل بعقلك المتنوع عصبياً الفريد! 🌈🧠</string>
+
+    <!-- Accessibility Strings -->
+    <string name="accessibility_selected">محدد</string>
+    <string name="accessibility_not_selected">غير محدد</string>
+    <string name="expand_category">توسيع %1$s</string>
+    <string name="collapse_category">طي %1$s</string>
+
+    <!-- Easter Egg Dialog -->
+    <string name="easter_egg_secret_unlocked">🎊 تم فتح السر! 🎊</string>
+    <string name="easter_egg_welcome_back">🦄 مرحباً بعودتك! 🦄</string>
+
     <!-- Navigation/Screen Titles -->
     <string name="nav_feed">الرئيسية</string>
     <string name="nav_explore">استكشاف</string>
@@ -117,11 +349,6 @@
     <string name="comments_add_comment_placeholder">أضف تعليقاً…</string>
     <string name="comments_send_button_description">إرسال</string>
 
-    <!-- NeuroState Names -->
-    <string name="neuro_state_default">افتراضي</string>
-    <string name="neuro_state_hyperfocus">تركيز فائق</string>
-    <string name="neuro_state_overload">حمل زائد</string>
-    <string name="neuro_state_calm">هدوء</string>
 
     <!-- Text Scale Factor Names -->
     <string name="text_scale_small">صغير</string>
@@ -528,6 +755,21 @@
     <string name="explore_topic_late_diagnosed">التشخيص المتأخر</string>
     <string name="explore_topic_late_diagnosed_desc">تجارب التشخيص في مرحلة البلوغ واستكشاف الهوية</string>
 
+    <!-- LGBTQ+ Explore Topics -->
+    <string name="explore_section_lgbtq">LGBTQ+ والهوية</string>
+    <string name="explore_topic_lgbtq_nd">LGBTQ+ والتنوع العصبي</string>
+    <string name="explore_topic_lgbtq_nd_desc">الاحتفاء بتقاطع الهويات الكويرية والمتنوعة عصبياً</string>
+    <string name="explore_topic_trans_nd">العابرون جنسياً و ND</string>
+    <string name="explore_topic_trans_nd_desc">دعم الأشخاص المتحولين جنسياً ومتنوعي الجنس من ذوي التنوع العصبي</string>
+    <string name="explore_topic_queer_pride">فخر الكوير</string>
+    <string name="explore_topic_queer_pride_desc">الاحتفاء بفرحة الكوير وفعاليات الفخر والمجتمع</string>
+    <string name="explore_topic_ace_aro">طيف Ace/Aro</string>
+    <string name="explore_topic_ace_aro_desc">تجارب اللاجنسية واللارومانسية للمتنوعين عصبياً</string>
+    <string name="explore_topic_nonbinary">غير ثنائي و ND</string>
+    <string name="explore_topic_nonbinary_desc">مجتمع غير ثنائي الجنس ومتنوعي الجندر</string>
+    <string name="explore_topic_coming_out">قصص الإفصاح</string>
+    <string name="explore_topic_coming_out_desc">مشاركة رحلات الإفصاح وإيجاد القبول</string>
+
     <!-- Explore Stats -->
     <string name="explore_members">%s عضو</string>
     <string name="explore_posts">%s منشور</string>
@@ -573,4 +815,166 @@
     <string name="settings_fake_premium_enabled">ميزات بريميوم مفتوحة للاختبار</string>
     <string name="settings_fake_premium_disabled">فعّل لاختبار ميزات بريميوم</string>
     <string name="settings_dev_options_desc">خيارات متقدمة للاختبار والتصحيح</string>
+
+    <!-- NeuroGames - ألعاب صديقة للتحفيز -->
+    <string name="games_hub_title">ألعاب نيورو</string>
+    <string name="games_subtitle">متعة صديقة للتحفيز لعقلك</string>
+    <string name="games_play_now">العب الألعاب</string>
+    <string name="games_play_now_desc">افتح ألعاب صديقة للتحفيز بكسب الإنجازات</string>
+    <string name="games_unlocked">الألعاب المفتوحة</string>
+    <string name="games_locked">الألعاب المقفلة</string>
+    <string name="games_your_achievements">إنجازاتك</string>
+    <string name="games_achievements">إنجازات</string>
+    <string name="games_next_unlock">%d أخرى لفتح اللعبة التالية!</string>
+    <string name="games_requires_achievements">يتطلب %d إنجازات</string>
+    <string name="games_coming_soon">قريباً</string>
+    <string name="games_coming_soon_message">هذه اللعبة لا تزال قيد التطوير. عد قريباً!</string>
+
+    <!-- الألعاب الفردية -->
+    <string name="game_bubble_pop">فرقعة الفقاعات</string>
+    <string name="game_bubble_pop_desc">افرقع فقاعات مرضية لتجربة تحفيز مهدئة</string>
+    <string name="game_bubble_pop_hint">اضغط على الفقاعات لفرقعتها! ✨</string>
+    <string name="game_fidget_spinner">فيدجت سبينر</string>
+    <string name="game_fidget_spinner_desc">دوّر كما تشاء - بلا حدود، فقط أجواء جيدة</string>
+    <string name="game_fidget_spinner_hint">اسحب للتدوير! كلما سحبت أسرع، دار أسرع 🌀</string>
+    <string name="game_color_flow">تدفق الألوان</string>
+    <string name="game_color_flow_desc">شاهد تدرجات الألوان المريحة تتدفق وتمتزج</string>
+    <string name="game_color_flow_hint">اضغط في أي مكان لتغيير الألوان</string>
+    <string name="game_pattern_tap">نقر الأنماط</string>
+    <string name="game_pattern_tap_desc">انقر الأنماط بالتسلسل - رائع لتدريب التركيز</string>
+    <string name="game_infinity_draw">الرسم اللانهائي</string>
+    <string name="game_infinity_draw_desc">ارسم أنماطاً لا نهائية لا تختفي أبداً - نعيم تحفيز نقي</string>
+    <string name="game_sensory_rain">المطر الحسي</string>
+    <string name="game_sensory_rain_desc">شاهد قطرات مطر جميلة تسقط بمرئيات مهدئة</string>
+    <string name="game_breathing_bubbles">فقاعات التنفس</string>
+    <string name="game_breathing_bubbles_desc">اتبع الفقاعة لممارسة التنفس الهادئ</string>
+    <string name="game_breathing_bubbles_hint">تنفس للداخل عندما تكبر الفقاعة، وللخارج عندما تصغر 🫧</string>
+    <string name="game_texture_tiles">بلاط الملمس</string>
+    <string name="game_texture_tiles_desc">اضغط على البلاط لتشعر بملمس مختلف ومرضي</string>
+    <string name="game_texture_tiles_hint">كل بلاطة لها ردود فعل لمسية فريدة - اعثر على مفضلاتك!</string>
+    <string name="game_sound_garden">حديقة الصوت</string>
+    <string name="game_sound_garden_desc">أنشئ مناظر صوتية بزراعة زهور الصوت</string>
+    <string name="game_sound_garden_hint">اضغط للزراعة، اضغط مطولاً للإزالة. اجمع الأصوات معاً! 🌸</string>
+
+    <!-- ألعاب قيد التطوير -->
+    <string name="game_stim_sequencer">منظم التحفيز</string>
+    <string name="game_stim_sequencer_desc">أنشئ أنماط إيقاعية مرضية خاصة بك</string>
+    <string name="game_emotion_garden">حديقة المشاعر</string>
+    <string name="game_emotion_garden_desc">ازرع زهوراً تمثل مشاعرك</string>
+    <string name="game_safe_space">بانيالمساحة الآمنة</string>
+    <string name="game_safe_space_desc">صمم غرفتك الافتراضية المهدئة</string>
+    <string name="game_worry_jar">جرة القلق</string>
+    <string name="game_worry_jar_desc">اكتب مخاوفك وشاهدها تطفو بعيداً</string>
+    <string name="game_coming_soon">قريباً</string>
+    <string name="game_in_development">🚧 قيد التطوير</string>
+
+    <!-- شاشة تفاصيل الموضوع -->
+    <string name="topic_not_found">الموضوع غير موجود</string>
+    <string name="topic_share">مشاركة الموضوع</string>
+    <string name="topic_more_options_soon">المزيد من الخيارات قريباً! ⚙️</string>
+    <string name="topic_members_posts">%s عضو • %s منشور</string>
+    <string name="topic_joined">انضممت</string>
+    <string name="topic_join_community">انضم للمجتمع</string>
+    <string name="topic_tab_posts">المنشورات</string>
+    <string name="topic_tab_resources">الموارد</string>
+    <string name="topic_tab_events">الأحداث</string>
+    <string name="topic_tab_members">الأعضاء</string>
+    <string name="topic_share_text">تفقد مجتمع %s على NeuroComet! 🧠✨</string>
+
+    <!-- قسم موارد الموضوع -->
+    <string name="topic_resources_title">الموارد</string>
+    <string name="resource_getting_started">دليل البداية</string>
+    <string name="resource_getting_started_desc">تعلم الأساسيات وإرشادات المجتمع</string>
+    <string name="resource_pinned">مثبت</string>
+    <string name="resource_themes">25+ موضوع حالة عصبية</string>
+    <string name="resource_themes_desc">مواضيع ADHD والتوحد والقلق وعمى الألوان والمزاج</string>
+    <string name="resource_new">جديد!</string>
+    <string name="resource_fonts">دليل خطوط الوصول</string>
+    <string name="resource_fonts_desc">Lexend و OpenDyslexic و Atkinson و10+ خطوط</string>
+    <string name="resource_fonts_count">12 خط</string>
+    <string name="resource_animation">عناصر التحكم في الرسوم</string>
+    <string name="resource_animation_desc">عطّل الرسوم المتحركة لتجربة أكثر هدوءاً</string>
+    <string name="resource_animation_count">7 تبديلات</string>
+    <string name="resource_events">أحداث العطلات والتوعية</string>
+    <string name="resource_events_desc">مواضيع خاصة لأيام التوعية ND</string>
+    <string name="resource_events_count">15 حدث</string>
+    <string name="resource_safety">السلامة والرقابة الأبوية</string>
+    <string name="resource_safety_desc">وقت الشاشة، وضع النوم، تصفية المحتوى</string>
+    <string name="resource_essential">أساسي</string>
+    <string name="resource_tips">نصائح وحيل سريعة</string>
+    <string name="resource_tips_desc">افتح دماغ قوس قزح، قلل إجهاد العين والمزيد</string>
+    <string name="resource_tips_count">8 نصائح</string>
+    <string name="resource_links">مجموعة روابط مفيدة</string>
+    <string name="resource_links_desc">موارد وأدوات خارجية منتقاة</string>
+    <string name="resource_links_updated">تم التحديث قبل يومين</string>
+    <string name="resource_wiki">ويكي المجتمع</string>
+    <string name="resource_wiki_desc">قاعدة معرفية مكتوبة بشكل تعاوني</string>
+    <string name="resource_wiki_count">156 مقال</string>
+    <string name="resource_videos">مكتبة الفيديو</string>
+    <string name="resource_videos_desc">مقاطع فيديو تعليمية ودروس</string>
+    <string name="resource_videos_count">23 فيديو</string>
+    <string name="resource_reading">قراءات موصى بها</string>
+    <string name="resource_reading_desc">كتب ومقالات يوصي بها الأعضاء</string>
+    <string name="resource_reading_count">45 عنصر</string>
+
+    <!-- قسم أحداث الموضوع -->
+    <string name="topic_events_title">الأحداث القادمة</string>
+    <string name="event_weekly_chat">دردشة المجتمع الأسبوعية</string>
+    <string name="event_weekly_chat_time">كل سبت الساعة 3 مساءً EST</string>
+    <string name="event_type_discussion">نقاش مباشر</string>
+    <string name="event_book_club">اجتماع نادي الكتاب</string>
+    <string name="event_book_club_time">5 يناير 2026 الساعة 7 مساءً EST</string>
+    <string name="event_type_reading">نقاش قراءة</string>
+    <string name="event_mindfulness">جلسة اليقظة الذهنية</string>
+    <string name="event_mindfulness_time">8 يناير 2026 الساعة 10 صباحاً EST</string>
+    <string name="event_type_meditation">تأمل موجه</string>
+    <string name="event_game_night">ليلة الألعاب</string>
+    <string name="event_game_night_time">12 يناير 2026 الساعة 8 مساءً EST</string>
+    <string name="event_type_social">ألعاب اجتماعية</string>
+    <string name="event_qa">أسئلة وأجوبة مع خبير</string>
+    <string name="event_qa_time">15 يناير 2026 الساعة 6 مساءً EST</string>
+    <string name="event_type_ama">اسألني أي شيء</string>
+    <string name="event_live">مباشر</string>
+    <string name="event_rsvp">احجز</string>
+    <string name="event_join">انضم</string>
+
+    <!-- قسم أعضاء الموضوع -->
+    <string name="topic_members_title">أعضاء المجتمع</string>
+    <string name="member_role_moderator">مشرف</string>
+    <string name="member_role_contributor">مساهم رئيسي</string>
+    <string name="member_role_active">عضو نشط</string>
+    <string name="member_role_veteran">محترف</string>
+    <string name="member_role_member">عضو</string>
+    <string name="member_role_new">عضو جديد</string>
+    <string name="member_follow">متابعة</string>
+    <string name="member_share">مشاركة</string>
+
+    <!-- سلاسل الوقت المنقضي -->
+    <string name="time_minutes_ago">قبل %d دقيقة</string>
+    <string name="time_hours_ago">قبل %d ساعة</string>
+    <string name="time_days_ago">قبل %d يوم</string>
+
+    <!-- Feedback Hub -->
+    <string name="feedback_hub_title">مركز الملاحظات</string>
+    <string name="feedback_report_bug_title">الإبلاغ عن خطأ</string>
+    <string name="feedback_request_feature_title">طلب ميزة</string>
+    <string name="feedback_send_title">إرسال ملاحظات</string>
+
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">تخزين بيانات الاعتماد</string>
+    <string name="dev_credential_test_save">اختبار الحفظ</string>
+    <string name="dev_credential_test_retrieve">اختبار الاسترداد</string>
+    <string name="dev_credential_clear_all">مسح جميع بيانات الاعتماد</string>
+    <string name="dev_credential_session_status">حالة الجلسة</string>
+    <string name="dev_credential_biometric_status">حالة القياسات الحيوية</string>
+    <string name="dev_credential_create_session">إنشاء جلسة اختبار</string>
+    <string name="dev_credential_end_session">إنهاء الجلسة</string>
+    <string name="dev_credential_extend_session">تمديد الجلسة</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">أدوات التصحيح</string>
+    <string name="debug_performance_overlay">طبقة الأداء</string>
+    <string name="debug_performance_desc">يعرض FPS والذاكرة وإحصائيات التمرير</string>
+    <string name="debug_reset_counters">إعادة تعيين العدادات</string>
 </resources>

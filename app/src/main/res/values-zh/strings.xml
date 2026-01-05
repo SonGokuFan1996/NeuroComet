@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core UI -->
+    <string name="app_name">NeuroComet</string>
+    <string name="nav_feed">动态</string>
+    <string name="nav_explore">探索</string>
+    <string name="nav_messages">消息</string>
+    <string name="nav_notifications">通知</string>
+    <string name="nav_settings">设置</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in">登录</string>
+    <string name="auth_sign_up">注册</string>
+    <string name="auth_email_label">电子邮件</string>
+    <string name="auth_password_label">密码</string>
+    <string name="auth_create_account">创建账户</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">外观与显示</string>
+    <string name="settings_section_privacy">隐私与安全</string>
+    <string name="settings_section_notifications">通知</string>
+    <string name="settings_section_accessibility">无障碍</string>
+
+    <!-- Explore -->
+    <string name="explore_title">探索</string>
+    <string name="explore_autism">自闭症</string>
+    <string name="explore_adhd">多动症</string>
+    <string name="explore_anxiety">焦虑</string>
+    <string name="explore_sensory">感官</string>
+
+    <!-- Games -->
+    <string name="games_hub_title">游戏中心</string>
+    <string name="game_bubble_pop">泡泡消消乐</string>
+    <string name="game_fidget_spinner">指尖陀螺</string>
+
+    <!-- Feedback -->
+    <string name="feedback_hub_title">反馈中心</string>
+    <string name="feedback_report_bug_title">报告问题</string>
+    <string name="feedback_request_feature_title">功能请求</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">开发者</string>
+    <string name="settings_developer_subtitle">调试和测试工具</string>
+    <string name="settings_developer_options_group">开发者选项</string>
+    <string name="settings_dev_options_desc">测试和调试的高级选项</string>
+    <string name="settings_force_verify_title">强制验证</string>
+    <string name="settings_force_verify_subtitle">切换用户验证状态。</string>
+    <string name="settings_fake_premium_title">假高级版</string>
+    <string name="settings_fake_premium_subtitle">模拟付费状态。</string>
+    <string name="settings_fake_premium">假高级模式</string>
+    <string name="settings_fake_premium_enabled">已解锁高级功能用于测试</string>
+    <string name="settings_fake_premium_disabled">启用以测试高级功能</string>
+    <string name="settings_mock_interface_title">模拟界面</string>
+    <string name="settings_mock_interface_subtitle">显示演示用的虚假数据。</string>
+    <string name="settings_simulate_badge_title">模拟徽章通知</string>
+    <string name="settings_simulate_badge_subtitle">触发\'%s\'的通知。</string>
+    <string name="settings_nuke_db_title">清空数据库</string>
+    <string name="settings_nuke_db_subtitle">删除所有帖子。不可撤销。</string>
+    <string name="settings_nuke_db_dialog_title">清空数据库？</string>
+    <string name="settings_nuke_db_dialog_text">这将永久删除服务器上的所有帖子。此操作无法撤销。</string>
+    <string name="settings_nuke_db_dialog_confirm">清空</string>
+    <string name="settings_nuke_db_dialog_cancel">取消</string>
+    <string name="settings_language_test_title">应用语言（测试）</string>
+    <string name="settings_language_test_subtitle">手动设置应用语言。需要重启。</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">开发者选项</string>
+    <string name="dev_phone_format_test">电话号码格式</string>
+    <string name="dev_phone_format_test_desc">测试不同地区的自动格式化</string>
+    <string name="dev_phone_format_style">格式样式</string>
+    <string name="dev_phone_test_input">输入电话号码</string>
+    <string name="dev_phone_format_pattern">模式</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">凭证存储</string>
+    <string name="dev_credential_test_save">测试保存</string>
+    <string name="dev_credential_test_retrieve">测试检索</string>
+    <string name="dev_credential_clear_all">清除所有凭证</string>
+    <string name="dev_credential_session_status">会话状态</string>
+    <string name="dev_credential_biometric_status">生物识别状态</string>
+    <string name="dev_credential_create_session">创建测试会话</string>
+    <string name="dev_credential_end_session">结束会话</string>
+    <string name="dev_credential_extend_session">延长会话</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">调试工具</string>
+    <string name="debug_performance_overlay">性能叠加层</string>
+    <string name="debug_performance_desc">显示FPS、内存和滚动统计</string>
+    <string name="debug_reset_counters">重置计数器</string>
+
+    <!-- General Settings -->
+    <string name="settings_profile_group">个人资料</string>
+    <string name="settings_badges_title">徽章</string>
+    <string name="settings_badges_subtitle">查看您获得的成就和目标。</string>
+    <string name="settings_visual_comfort_group">视觉舒适度和主题</string>
+    <string name="settings_text_size_title">文字大小</string>
+    <string name="settings_dark_mode_title">深色模式</string>
+    <string name="settings_dark_mode_enabled">已启用</string>
+    <string name="settings_dark_mode_disabled">已禁用</string>
+    <string name="settings_high_contrast_title">高对比度模式</string>
+    <string name="settings_high_contrast_subtitle_enabled">已启用（纯黑/白）</string>
+    <string name="settings_high_contrast_subtitle_disabled">已禁用</string>
+    <string name="settings_neuro_centric_theme_title">神经中心主题</string>
+    <string name="settings_go_premium_title">升级高级版</string>
+    <string name="settings_go_premium_subtitle">移除广告并支持开发者。</string>
+    <string name="settings_account_group">账户</string>
+    <string name="settings_logout">登出</string>
+    <string name="settings_verified_human_title">已验证人类</string>
+    <string name="settings_verified_human_subtitle_verified">状态：已验证</string>
+    <string name="settings_verified_human_subtitle_unverified">状态：未验证</string>
+    <string name="settings_2fa_title">双因素认证</string>
+    <string name="settings_2fa_subtitle">登录时需要验证码。</string>
+</resources>
+

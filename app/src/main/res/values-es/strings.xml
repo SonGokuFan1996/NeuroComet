@@ -2,6 +2,238 @@
 <resources>
     <string name="app_name">NeuroComet</string>
 
+    <!-- Auth Screen -->
+    <string name="auth_app_tagline">Un espacio seguro para cada mente ✨</string>
+    <string name="auth_sign_in">Iniciar Sesión</string>
+    <string name="auth_sign_up">Registrarse</string>
+    <string name="auth_email_label">Correo electrónico</string>
+    <string name="auth_email_placeholder">tu@correo.com</string>
+    <string name="auth_password_label">Contraseña</string>
+    <string name="auth_confirm_password_label">Confirmar Contraseña</string>
+    <string name="auth_password_requirements">🔒 La contraseña debe tener más de 12 caracteres con mayúsculas, minúsculas, números y símbolos.</string>
+    <string name="auth_create_account">Crear Cuenta</string>
+    <string name="auth_passwords_not_match">Las contraseñas no coinciden</string>
+    <string name="auth_password_weak">La contraseña no cumple los requisitos</string>
+    <string name="auth_skip">Omitir por ahora</string>
+    <string name="auth_skip_dev">Omitir por ahora (dev)</string>
+    <string name="auth_data_secure">Tus datos están encriptados y seguros</string>
+    <string name="auth_2fa_title">Autenticación de Dos Factores</string>
+    <string name="auth_2fa_description">Ingresa el código de 6 dígitos enviado a tu dispositivo</string>
+    <string name="auth_2fa_code_label">Código de 6 Dígitos</string>
+    <string name="auth_2fa_code_placeholder">123456</string>
+    <string name="auth_2fa_verify">Verificar</string>
+    <string name="auth_hide_password">Ocultar contraseña</string>
+    <string name="auth_show_password">Mostrar contraseña</string>
+
+    <!-- Auth Tutorial -->
+    <string name="auth_tutorial_welcome_title">Bienvenido a Casa 💜</string>
+    <string name="auth_tutorial_welcome_desc">NeuroComet es un espacio seguro y afirmativo para mentes neurodivergentes y LGBTQ+. Perteneces aquí tal como eres—sin máscaras requeridas.</string>
+    <string name="auth_tutorial_comfort_title">Tu Comodidad Importa ∞</string>
+    <string name="auth_tutorial_comfort_desc_anim">Toca el símbolo de infinito en cualquier momento para reducir el movimiento visual. Lo diseñamos para una navegación amigable sensorialmente.</string>
+    <string name="auth_tutorial_comfort_desc_static">¡Perfecto! Has activado el modo calmado. Toca de nuevo cuando necesites más o menos movimiento.</string>
+    <string name="auth_tutorial_themes_title">25+ Temas de Estado Neuro 🎨</string>
+    <string name="auth_tutorial_themes_desc">Elige temas diseñados para enfoque TDAH, comodidad autista, alivio de ansiedad, accesibilidad para daltónicos y apoyo del estado de ánimo. Tu cerebro, tu manera.</string>
+    <string name="auth_tutorial_fonts_title">Fuentes Amigables con Dislexia 📖</string>
+    <string name="auth_tutorial_fonts_desc">Más de 12 fuentes de accesibilidad incluyendo OpenDyslexic, Lexend y Atkinson Hyperlegible. Ajusta el espaciado, peso y tamaño para que coincida con cómo TU cerebro lee mejor.</string>
+    <string name="auth_tutorial_community_title">Comunidad y Orgullo 🌈</string>
+    <string name="auth_tutorial_community_desc">Conéctate con personas que entienden. Neurodivergentes, LGBTQ+ y aliados—todos los cerebros, todas las identidades, todos hermosos. ¡Temas especiales para Orgullo, Día del Autismo y Mes del TDAH!</string>
+    <string name="auth_tutorial_safety_title">Construido para la Seguridad 🛡️</string>
+    <string name="auth_tutorial_safety_desc">Filtrado de contenido, controles parentales, límites de tiempo de pantalla y modo nocturno protegen tu bienestar. Tú controlas lo que ves y cuándo.</string>
+    <string name="auth_tutorial_ready_title">¡Listo para Comenzar! ✨</string>
+    <string name="auth_tutorial_ready_desc">Inicia sesión o crea tu cuenta para unirte a miles de personas neurodivergentes y LGBTQ+. Este es TU espacio—explora a tu propio ritmo.</string>
+    <string name="auth_tutorial_skip">Omitir</string>
+    <string name="auth_tutorial_continue">Continuar</string>
+    <string name="auth_tutorial_lets_go">¡Vamos! ✨</string>
+    <string name="auth_tutorial_step_count">%1$d de %2$d</string>
+    <string name="auth_tutorial_tap_here">Toca aquí</string>
+
+    <!-- Splash Screen -->
+    <string name="splash_tagline_default">Un espacio diseñado para ti</string>
+    <string name="splash_tagline_hyperfocus">Zona libre de distracciones</string>
+    <string name="splash_tagline_overload">Modo de baja estimulación</string>
+    <string name="splash_tagline_calm">Tu espacio tranquilo</string>
+    <string name="splash_tagline_adhd_energized">Surca la ola</string>
+    <string name="splash_tagline_adhd_low_dopamine">Motivación suave</string>
+    <string name="splash_tagline_adhd_task_mode">Mínimas distracciones</string>
+    <string name="splash_tagline_autism_routine">Predecible y seguro</string>
+    <string name="splash_tagline_autism_sensory_seek">Experiencias ricas te esperan</string>
+    <string name="splash_tagline_autism_low_stim">Estimulación mínima</string>
+    <string name="splash_tagline_anxiety_soothe">Calmando tu mente</string>
+    <string name="splash_tagline_anxiety_grounding">Arraigado en el ahora</string>
+    <string name="splash_tagline_dyslexia_friendly">Diseñado para claridad</string>
+    <string name="splash_tagline_colorblind_deuteranopia">Amigable con deuteranopía</string>
+    <string name="splash_tagline_colorblind_protanopia">Amigable con protanopía</string>
+    <string name="splash_tagline_colorblind_tritanopia">Amigable con tritanopía</string>
+    <string name="splash_tagline_colorblind_monochromacy">Diseño basado en patrones</string>
+    <string name="splash_tagline_blind_screen_reader">Optimizado para TalkBack</string>
+    <string name="splash_tagline_blind_high_contrast">Negro y blanco puro</string>
+    <string name="splash_tagline_blind_large_text">Modo de texto extra grande</string>
+    <string name="splash_tagline_mood_tired">Descansar está bien</string>
+    <string name="splash_tagline_mood_anxious">Respira con nosotros</string>
+    <string name="splash_tagline_mood_happy">Celebremos tu momento</string>
+    <string name="splash_tagline_mood_overwhelmed">Tomándolo con calma</string>
+    <string name="splash_tagline_mood_creative">Deja fluir las ideas</string>
+    <string name="splash_tagline_rainbow_brain">Abraza tu cerebro arcoíris</string>
+
+    <!-- Splash Messages -->
+    <string name="splash_msg_default_1">Bienvenido de nuevo</string>
+    <string name="splash_msg_default_2">Tu espacio te espera</string>
+    <string name="splash_msg_default_3">Empecemos</string>
+    <string name="splash_msg_hyperfocus_1">Modo enfoque</string>
+    <string name="splash_msg_hyperfocus_2">Mente clara adelante</string>
+    <string name="splash_msg_hyperfocus_3">Listo para sumergirse</string>
+    <string name="splash_msg_overload_1">Yendo despacio</string>
+    <string name="splash_msg_overload_2">Respira conmigo</string>
+    <string name="splash_msg_overload_3">Ritmo suave</string>
+    <string name="splash_msg_calm_1">La paz te espera</string>
+    <string name="splash_msg_calm_2">Modo serenidad</string>
+    <string name="splash_msg_calm_3">Aguas tranquilas</string>
+    <string name="splash_msg_adhd_energized_1">¡Vamos! ⚡</string>
+    <string name="splash_msg_adhd_energized_2">Energía desbloqueada</string>
+    <string name="splash_msg_adhd_energized_3">Hora de brillar</string>
+    <string name="splash_msg_adhd_low_dopamine_1">Calentando</string>
+    <string name="splash_msg_adhd_low_dopamine_2">Encontrando tu chispa</string>
+    <string name="splash_msg_adhd_low_dopamine_3">Tú puedes</string>
+    <string name="splash_msg_adhd_task_mode_1">Modo tarea</string>
+    <string name="splash_msg_adhd_task_mode_2">Una cosa a la vez</string>
+    <string name="splash_msg_adhd_task_mode_3">Enfoque activado</string>
+    <string name="splash_msg_autism_routine_1">Como siempre</string>
+    <string name="splash_msg_autism_routine_2">Patrones familiares</string>
+    <string name="splash_msg_autism_routine_3">Comodidad en la rutina</string>
+    <string name="splash_msg_autism_sensory_seek_1">Alegría sensorial</string>
+    <string name="splash_msg_autism_sensory_seek_2">Siente los patrones</string>
+    <string name="splash_msg_autism_sensory_seek_3">Vibraciones satisfactorias</string>
+    <string name="splash_msg_autism_low_stim_1">Modo silencioso</string>
+    <string name="splash_msg_autism_low_stim_2">Suave y gentil</string>
+    <string name="splash_msg_autism_low_stim_3">Descansa tus sentidos</string>
+    <string name="splash_msg_anxiety_soothe_1">Estás seguro aquí</string>
+    <string name="splash_msg_anxiety_soothe_2">Inhala, exhala</string>
+    <string name="splash_msg_anxiety_soothe_3">Todo está bien</string>
+    <string name="splash_msg_anxiety_grounding_1">Pies en la tierra</string>
+    <string name="splash_msg_anxiety_grounding_2">Momento presente</string>
+    <string name="splash_msg_anxiety_grounding_3">Estable y seguro</string>
+    <string name="splash_msg_dyslexia_friendly_1">Claro y legible</string>
+    <string name="splash_msg_dyslexia_friendly_2">A tu manera</string>
+    <string name="splash_msg_dyslexia_friendly_3">Lectura fácil adelante</string>
+    <string name="splash_msg_colorblind_deuter_1">Colores optimizados</string>
+    <string name="splash_msg_colorblind_deuter_2">Claridad azul y naranja</string>
+    <string name="splash_msg_colorblind_deuter_3">Ve con confianza</string>
+    <string name="splash_msg_colorblind_protan_1">Colores adaptados</string>
+    <string name="splash_msg_colorblind_protan_2">Armonía azul y amarillo</string>
+    <string name="splash_msg_colorblind_protan_3">Distinción clara</string>
+    <string name="splash_msg_colorblind_tritan_1">Colores refinados</string>
+    <string name="splash_msg_colorblind_tritan_2">Contraste rosa y turquesa</string>
+    <string name="splash_msg_colorblind_tritan_3">Claridad visual</string>
+    <string name="splash_msg_colorblind_mono_1">Formas y patrones</string>
+    <string name="splash_msg_colorblind_mono_2">Alto contraste</string>
+    <string name="splash_msg_colorblind_mono_3">Límites claros</string>
+    <string name="splash_msg_blind_reader_1">Lector de pantalla listo</string>
+    <string name="splash_msg_blind_reader_2">Accesibilidad primero</string>
+    <string name="splash_msg_blind_reader_3">Bienvenido</string>
+    <string name="splash_msg_blind_contrast_1">Máximo contraste</string>
+    <string name="splash_msg_blind_contrast_2">Claro y audaz</string>
+    <string name="splash_msg_blind_contrast_3">Fácil de ver</string>
+    <string name="splash_msg_blind_large_1">Grande y claro</string>
+    <string name="splash_msg_blind_large_2">Lectura fácil</string>
+    <string name="splash_msg_blind_large_3">A tu manera</string>
+    <string name="splash_msg_mood_tired_1">Tómalo con calma</string>
+    <string name="splash_msg_mood_tired_2">Sin prisa</string>
+    <string name="splash_msg_mood_tired_3">Comienzo suave</string>
+    <string name="splash_msg_mood_anxious_1">Estás bien</string>
+    <string name="splash_msg_mood_anxious_2">Esto también pasará</string>
+    <string name="splash_msg_mood_anxious_3">Espacio seguro</string>
+    <string name="splash_msg_mood_happy_1">¡Hola sol! ☀️</string>
+    <string name="splash_msg_mood_happy_2">Buenas vibras</string>
+    <string name="splash_msg_mood_happy_3">La alegría te espera</string>
+    <string name="splash_msg_mood_overwhelmed_1">Una respiración</string>
+    <string name="splash_msg_mood_overwhelmed_2">Desacelerando</string>
+    <string name="splash_msg_mood_overwhelmed_3">Te tenemos</string>
+    <string name="splash_msg_mood_creative_1">Inspiración entrante</string>
+    <string name="splash_msg_mood_creative_2">Crea libremente</string>
+    <string name="splash_msg_mood_creative_3">Modo imaginación</string>
+    <string name="splash_msg_rainbow_1">🦄 ¡Encontraste el secreto!</string>
+    <string name="splash_msg_rainbow_2">🌈 Celebra tu mente única</string>
+    <string name="splash_msg_rainbow_3">✨ La neurodivergencia es magia</string>
+    <string name="splash_msg_rainbow_4">🧠 Tu cerebro es hermoso</string>
+    <string name="splash_msg_rainbow_5">💜 Ser diferente es poderoso</string>
+
+    <!-- NeuroState Categories -->
+    <string name="neuro_category_basic">Temas Básicos</string>
+    <string name="neuro_category_adhd">Temas TDAH</string>
+    <string name="neuro_category_autism">Temas Autismo</string>
+    <string name="neuro_category_anxiety">Temas Ansiedad/TOC</string>
+    <string name="neuro_category_accessibility">Accesibilidad</string>
+    <string name="neuro_category_colorblind">Daltonismo</string>
+    <string name="neuro_category_blind">Ciegos y Baja Visión</string>
+    <string name="neuro_category_mood">¿Cómo Te Sientes?</string>
+    <string name="neuro_category_secret">🦄 Temas Secretos</string>
+
+    <!-- NeuroState Names -->
+    <string name="neuro_state_default">Predeterminado</string>
+    <string name="neuro_state_hyperfocus">Hiperenfoque</string>
+    <string name="neuro_state_overload">Sobrecarga Sensorial</string>
+    <string name="neuro_state_calm">Calma</string>
+    <string name="neuro_state_adhd_energized">TDAH - Energizado</string>
+    <string name="neuro_state_adhd_low_dopamine">TDAH - Dopamina Baja</string>
+    <string name="neuro_state_adhd_task_mode">TDAH - Modo Tarea</string>
+    <string name="neuro_state_autism_routine">Autismo - Rutina</string>
+    <string name="neuro_state_autism_sensory_seek">Autismo - Búsqueda Sensorial</string>
+    <string name="neuro_state_autism_low_stim">Autismo - Baja Estimulación</string>
+    <string name="neuro_state_anxiety_soothe">Ansiedad - Calmar</string>
+    <string name="neuro_state_anxiety_grounding">Ansiedad - Arraigo</string>
+    <string name="neuro_state_dyslexia_friendly">Amigable con Dislexia</string>
+    <string name="neuro_state_colorblind_deuter">Deuteranopía</string>
+    <string name="neuro_state_colorblind_protan">Protanopía</string>
+    <string name="neuro_state_colorblind_tritan">Tritanopía</string>
+    <string name="neuro_state_colorblind_mono">Monocromía</string>
+    <string name="neuro_state_blind_screen_reader">Modo Lector de Pantalla</string>
+    <string name="neuro_state_blind_high_contrast">Máximo Contraste</string>
+    <string name="neuro_state_blind_large_text">Modo Texto Grande</string>
+    <string name="neuro_state_mood_tired">Sintiéndome Cansado</string>
+    <string name="neuro_state_mood_anxious">Sintiéndome Ansioso</string>
+    <string name="neuro_state_mood_happy">Sintiéndome Feliz</string>
+    <string name="neuro_state_mood_overwhelmed">Sintiéndome Abrumado</string>
+    <string name="neuro_state_mood_creative">Sintiéndome Creativo</string>
+    <string name="neuro_state_rainbow_brain">Cerebro Arcoíris</string>
+
+    <!-- NeuroState Descriptions -->
+    <string name="neuro_state_default_desc">Tema estándar con colores equilibrados</string>
+    <string name="neuro_state_hyperfocus_desc">Alto contraste para concentración profunda</string>
+    <string name="neuro_state_overload_desc">Colores suaves y calmados para reducir estimulación</string>
+    <string name="neuro_state_calm_desc">Colores suaves y relajantes para descansar</string>
+    <string name="neuro_state_adhd_energized_desc">Colores brillantes y atractivos para días productivos</string>
+    <string name="neuro_state_adhd_low_dopamine_desc">Colores cálidos y estimulantes para mejorar el ánimo</string>
+    <string name="neuro_state_adhd_task_mode_desc">Mínimas distracciones, paleta de mejora de enfoque</string>
+    <string name="neuro_state_autism_routine_desc">Patrones de color predecibles y consistentes</string>
+    <string name="neuro_state_autism_sensory_seek_desc">Texturas ricas y contrastes satisfactorios</string>
+    <string name="neuro_state_autism_low_stim_desc">Colores muy suaves y gentiles</string>
+    <string name="neuro_state_anxiety_soothe_desc">Colores frescos y tranquilizadores para aliviar la preocupación</string>
+    <string name="neuro_state_anxiety_grounding_desc">Colores terrosos y estables para centrarse</string>
+    <string name="neuro_state_dyslexia_friendly_desc">Alta legibilidad con contraste óptimo</string>
+    <string name="neuro_state_colorblind_deuter_desc">Optimizado para daltonismo rojo-verde (verde débil)</string>
+    <string name="neuro_state_colorblind_protan_desc">Optimizado para daltonismo rojo-verde (rojo débil)</string>
+    <string name="neuro_state_colorblind_tritan_desc">Optimizado para daltonismo azul-amarillo</string>
+    <string name="neuro_state_colorblind_mono_desc">Escala de grises de alto contraste para daltonismo completo</string>
+    <string name="neuro_state_blind_screen_reader_desc">Optimizado para TalkBack y lectores de pantalla con máximo contraste</string>
+    <string name="neuro_state_blind_high_contrast_desc">Blanco/negro puro para usuarios con muy baja visión</string>
+    <string name="neuro_state_blind_large_text_desc">Texto extra grande con diseño simplificado</string>
+    <string name="neuro_state_mood_tired_desc">Colores suaves que no cansan los ojos</string>
+    <string name="neuro_state_mood_anxious_desc">Paleta calmante para reducir el estrés</string>
+    <string name="neuro_state_mood_happy_desc">Colores alegres para combinar con tu ánimo</string>
+    <string name="neuro_state_mood_overwhelmed_desc">Paleta simplificada y tranquila</string>
+    <string name="neuro_state_mood_creative_desc">Colores inspiradores para alimentar la imaginación</string>
+    <string name="neuro_state_rainbow_brain_desc">¡Celebra tu mente neurodivergente única! 🌈🧠</string>
+
+    <!-- Accessibility Strings -->
+    <string name="accessibility_selected">seleccionado</string>
+    <string name="accessibility_not_selected">no seleccionado</string>
+    <string name="expand_category">Expandir %1$s</string>
+    <string name="collapse_category">Contraer %1$s</string>
+
+    <!-- Easter Egg Dialog -->
+    <string name="easter_egg_secret_unlocked">🎊 ¡Secreto Desbloqueado! 🎊</string>
+    <string name="easter_egg_welcome_back">🦄 ¡Bienvenido de Nuevo! 🦄</string>
+
     <!-- Navigation/Screen Titles -->
     <string name="nav_feed">Inicio</string>
     <string name="nav_explore">Explorar</string>
@@ -26,6 +258,11 @@
     <string name="dm_safety_title">Seguridad</string>
     <string name="dm_safety_body">Si algo no está bien, reporta los mensajes abusivos. Las cuentas de menores de 13 años no pueden usar mensajes directos.</string>
     <string name="dm_message_placeholder">Mensaje</string>
+    <string name="dm_search_conversations_placeholder">Buscar conversaciones</string>
+    <string name="dm_reply_to_placeholder">Responder a %s…</string>
+    <string name="create_post_share_thoughts">Comparte tus pensamientos con la comunidad…</string>
+    <string name="image_editor_type_text">Escribe tu texto…</string>
+    <string name="image_editor_enter_text">Introduce tu texto…</string>
     <string name="dm_send">Enviar</string>
     <string name="dm_back">Atrás</string>
     <string name="dm_report">Reportar</string>
@@ -117,11 +354,6 @@
     <string name="comments_add_comment_placeholder">Añadir un comentario…</string>
     <string name="comments_send_button_description">Enviar</string>
 
-    <!-- NeuroState Names -->
-    <string name="neuro_state_default">Predeterminado</string>
-    <string name="neuro_state_hyperfocus">Hiperfoco</string>
-    <string name="neuro_state_overload">Sobrecarga</string>
-    <string name="neuro_state_calm">Calma</string>
 
     <!-- Text Scale Factor Names -->
     <string name="text_scale_small">Pequeño</string>
@@ -135,6 +367,19 @@
     <string name="create_story_duration_hint">Duración en segundos (ej., 5)</string>
     <string name="create_story_add_button">AÑADIR HISTORIA</string>
     <string name="create_story_cancel">Cancelar</string>
+    <string name="create_story_caption_label">Título (opcional)</string>
+    <string name="create_story_caption_placeholder">Añade un título…</string>
+    <string name="create_story_understood">Entendido</string>
+    <string name="create_story_posting">Publicando…</string>
+    <string name="create_story_url_label">URL</string>
+    <string name="create_story_url_placeholder">https://…</string>
+    <string name="create_story_message_label">Tu mensaje</string>
+    <string name="create_story_message_placeholder">¿Qué tienes en mente?</string>
+    <string name="create_story_share_link">Comparte un enlace con vista previa</string>
+    <string name="create_story_create_text">Crea una historia de texto</string>
+    <string name="create_story_text_preview">Tu texto aquí…</string>
+    <string name="create_story_background_color">Color de Fondo</string>
+    <string name="create_story_gradient_backgrounds">Fondos Degradados</string>
     <string name="story_add_button_content_description">Añadir historia</string>
     <string name="story_your_story_label">Tu historia</string>
     <string name="story_user_story_content_description">Historia de %s</string>
@@ -239,6 +484,10 @@
     <string name="button_save">Guardar</string>
     <string name="button_delete">Eliminar</string>
     <string name="button_edit">Editar</string>
+
+    <!-- Parental Controls Dialogs -->
+    <string name="posting_restricted_title">Publicaciones Restringidas</string>
+    <string name="posting_restricted_message">Las publicaciones han sido deshabilitadas por controles parentales. Pide a un padre o tutor que cambie esta configuración.</string>
 
     <!-- Menu Items -->
     <string name="menu_view_profile">Ver perfil</string>
@@ -462,6 +711,7 @@
     <string name="settings_high_contrast_desc">Máximo contraste para visibilidad</string>
     <string name="settings_privacy">Configuración de Privacidad</string>
     <string name="settings_privacy_desc">Quién puede ver tu contenido y enviarte mensajes</string>
+    <string name="privacy_muted_word_label">Palabra o frase</string>
     <string name="settings_blocked">Cuentas Bloqueadas</string>
     <string name="settings_blocked_desc">Administrar usuarios que has bloqueado</string>
     <string name="settings_data">Datos y Almacenamiento</string>
@@ -483,6 +733,12 @@
     <string name="settings_parental">Controles Parentales</string>
     <string name="settings_parental_desc">Configuración de seguridad para usuarios más jóvenes</string>
     <string name="settings_parental_pin_set">PIN establecido • Toca para administrar</string>
+    <string name="parental_pin_label">PIN</string>
+    <string name="parental_pin_confirm_label">Confirmar PIN</string>
+    <string name="parental_pin_current_label">PIN Actual</string>
+    <string name="parental_pin_new_label">Nuevo PIN</string>
+    <string name="parental_pin_confirm_new_label">Confirmar Nuevo PIN</string>
+    <string name="parental_pin_enter_confirm">Introduce el PIN para confirmar</string>
     <string name="settings_kid_mode">Modo Niños</string>
     <string name="settings_kid_mode_desc">Filtrado de contenido apropiado para la edad</string>
     <string name="settings_keep_screen_on">Mantener Pantalla Encendida</string>
@@ -650,4 +906,301 @@
     <string name="game_infinity_draw_desc">Dibuja patrones infinitos que nunca se desvanecen - pura felicidad stim</string>
     <string name="game_sensory_rain">Lluvia Sensorial</string>
     <string name="game_sensory_rain_desc">Observa hermosas gotas de lluvia caer con visuales relajantes</string>
+    <string name="game_breathing_bubbles">Burbujas de Respiración</string>
+    <string name="game_breathing_bubbles_desc">Sigue la burbuja para practicar la respiración calmada</string>
+    <string name="game_breathing_bubbles_hint">Inhala mientras la burbuja crece, exhala mientras se encoge 🫧</string>
+    <string name="game_texture_tiles">Azulejos de Textura</string>
+    <string name="game_texture_tiles_desc">Toca azulejos para sentir diferentes texturas satisfactorias</string>
+    <string name="game_texture_tiles_hint">Cada azulejo tiene retroalimentación háptica única - ¡encuentra tus favoritos!</string>
+    <string name="game_sound_garden">Jardín de Sonidos</string>
+    <string name="game_sound_garden_desc">Crea paisajes sonoros ambientales plantando flores de sonido</string>
+    <string name="game_sound_garden_hint">Toca para plantar, mantén presionado para eliminar. ¡Combina sonidos! 🌸</string>
+
+    <!-- Juegos en Desarrollo -->
+    <string name="game_stim_sequencer">Secuenciador Stim</string>
+    <string name="game_stim_sequencer_desc">Crea tus propios patrones de ritmo satisfactorios</string>
+    <string name="game_stim_sequencer_hint">¡Toca los pads para crear tu ritmo! Mantén pulsado para limpiar 🎵</string>
+    <string name="game_emotion_garden">Jardín de Emociones</string>
+    <string name="game_emotion_garden_desc">Cultiva flores que representan tus sentimientos</string>
+    <string name="game_emotion_garden_hint">¡Toca para plantar una flor de emoción, mírala crecer! 🌸</string>
+    <string name="game_safe_space">Constructor de Espacio Seguro</string>
+    <string name="game_safe_space_desc">Diseña tu propia habitación virtual relajante</string>
+    <string name="game_safe_space_hint">Añade elementos para crear tu espacio perfecto de calma 🏠</string>
+    <string name="game_worry_jar">Tarro de Preocupaciones</string>
+    <string name="game_worry_jar_desc">Escribe preocupaciones y obsérvalas flotar</string>
+    <string name="game_worry_jar_hint">Escribe una preocupación y libérala al tarro ✨</string>
+    <string name="game_constellation_connect">Conectar Constelaciones</string>
+    <string name="game_constellation_connect_desc">Dibuja líneas entre estrellas para crear constelaciones</string>
+    <string name="game_constellation_connect_hint">Conecta las estrellas para revelar patrones ⭐</string>
+    <string name="game_zen_sand">Jardín de Arena Zen</string>
+    <string name="game_zen_sand_desc">Dibuja patrones relajantes en arena virtual</string>
+    <string name="game_zen_sand_hint">Traza tu dedo para crear ondas 🏝️</string>
+    <string name="game_mood_mixer">Mezclador de Estados</string>
+    <string name="game_mood_mixer_desc">Mezcla colores para que coincidan con tu estado actual</string>
+    <string name="game_mood_mixer_hint">Arrastra colores juntos para crear nuevos sentimientos 🎨</string>
+    <string name="game_coming_soon">Próximamente</string>
+    <string name="game_in_development">🚧 En Desarrollo</string>
+
+    <!-- Topic Detail Screen -->
+    <string name="topic_not_found">Tema no encontrado</string>
+    <string name="topic_share">Compartir Tema</string>
+    <string name="topic_more_options_soon">¡Más opciones pronto! ⚙️</string>
+    <string name="topic_members_posts">%s miembros • %s publicaciones</string>
+    <string name="topic_joined">Unido</string>
+    <string name="topic_join_community">Unirse a la Comunidad</string>
+    <string name="topic_tab_posts">Publicaciones</string>
+    <string name="topic_tab_resources">Recursos</string>
+    <string name="topic_tab_events">Eventos</string>
+    <string name="topic_tab_members">Miembros</string>
+    <string name="topic_share_text">¡Mira la comunidad %s en NeuroComet! 🧠✨</string>
+
+    <!-- Topic Resources Section -->
+    <string name="topic_resources_title">Recursos</string>
+    <string name="resource_getting_started">Guía de Inicio</string>
+    <string name="resource_getting_started_desc">Aprende lo básico y las reglas de la comunidad</string>
+    <string name="resource_pinned">Fijado</string>
+    <string name="resource_themes">25+ Temas Neuro-Estado</string>
+    <string name="resource_themes_desc">Temas TDAH, Autismo, Ansiedad, Daltonismo y Estado de ánimo</string>
+    <string name="resource_new">¡Nuevo!</string>
+    <string name="resource_fonts">Guía de Fuentes Accesibles</string>
+    <string name="resource_fonts_desc">Lexend, OpenDyslexic, Atkinson y 10+ fuentes más</string>
+    <string name="resource_fonts_count">12 fuentes</string>
+    <string name="resource_animation">Controles de Animación</string>
+    <string name="resource_animation_desc">Desactiva animaciones para una experiencia más tranquila</string>
+    <string name="resource_animation_count">7 controles</string>
+    <string name="resource_events">Eventos de Celebración y Concienciación</string>
+    <string name="resource_events_desc">Temas especiales para días de concienciación ND</string>
+    <string name="resource_events_count">15 eventos</string>
+    <string name="resource_safety">Seguridad y Control Parental</string>
+    <string name="resource_safety_desc">Tiempo de pantalla, modo nocturno, filtrado de contenido</string>
+    <string name="resource_essential">Esencial</string>
+    <string name="resource_tips">Consejos y Trucos Rápidos</string>
+    <string name="resource_tips_desc">Desbloquea Cerebro Arcoíris, reduce fatiga visual y más</string>
+    <string name="resource_tips_count">8 consejos</string>
+    <string name="resource_links">Colección de Enlaces Útiles</string>
+    <string name="resource_links_desc">Recursos externos y herramientas seleccionados</string>
+    <string name="resource_links_updated">Actualizado hace 2d</string>
+    <string name="resource_wiki">Wiki de la Comunidad</string>
+    <string name="resource_wiki_desc">Base de conocimientos escrita colaborativamente</string>
+    <string name="resource_wiki_count">156 artículos</string>
+    <string name="resource_videos">Biblioteca de Videos</string>
+    <string name="resource_videos_desc">Videos educativos y tutoriales</string>
+    <string name="resource_videos_count">23 videos</string>
+    <string name="resource_reading">Lecturas Recomendadas</string>
+    <string name="resource_reading_desc">Libros y artículos recomendados por miembros</string>
+    <string name="resource_reading_count">45 elementos</string>
+
+    <!-- Topic Events Section -->
+    <string name="topic_events_title">Próximos Eventos</string>
+    <string name="event_weekly_chat">Chat Semanal de la Comunidad</string>
+    <string name="event_weekly_chat_time">Todos los sábados a las 15:00 EST</string>
+    <string name="event_type_discussion">Discusión en Vivo</string>
+    <string name="event_book_club">Reunión del Club de Lectura</string>
+    <string name="event_book_club_time">5 de enero de 2026 a las 19:00 EST</string>
+    <string name="event_type_reading">Discusión de Lectura</string>
+    <string name="event_mindfulness">Sesión de Mindfulness</string>
+    <string name="event_mindfulness_time">8 de enero de 2026 a las 10:00 EST</string>
+    <string name="event_type_meditation">Meditación Guiada</string>
+    <string name="event_game_night">Noche de Juegos</string>
+    <string name="event_game_night_time">12 de enero de 2026 a las 20:00 EST</string>
+    <string name="event_type_social">Juegos Sociales</string>
+    <string name="event_qa">Preguntas y Respuestas con Experto</string>
+    <string name="event_qa_time">15 de enero de 2026 a las 18:00 EST</string>
+    <string name="event_type_ama">Pregúntame Lo Que Sea</string>
+    <string name="event_live">EN VIVO</string>
+    <string name="event_rsvp">CONFIRMAR</string>
+    <string name="event_join">Unirse</string>
+
+    <!-- Topic Members Section -->
+    <string name="topic_members_title">Miembros de la Comunidad</string>
+    <string name="member_role_moderator">Moderador</string>
+    <string name="member_role_contributor">Contribuidor Principal</string>
+    <string name="member_role_active">Miembro Activo</string>
+    <string name="member_role_veteran">Veterano</string>
+    <string name="member_role_member">Miembro</string>
+    <string name="member_role_new">Nuevo Miembro</string>
+    <string name="member_follow">Seguir</string>
+    <string name="member_share">Compartir</string>
+
+    <!-- Time Ago Strings -->
+    <string name="time_minutes_ago">hace %dm</string>
+    <string name="time_hours_ago">hace %dh</string>
+    <string name="time_days_ago">hace %dd</string>
+
+    <!-- Mock Post Content - ADHD Hacks -->
+    <string name="post_adhd_1_author">FinnEnfocado</string>
+    <string name="post_adhd_1_content">🧠 ¡Acabo de descubrir el poder del body doubling! Trabajar junto a alguien (incluso virtualmente) me ayuda mucho a mantenerme en la tarea.</string>
+    <string name="post_adhd_2_author">TinaCiegaAlTiempo</string>
+    <string name="post_adhd_2_content">¿Alguien más usa temporizadores para TODO? Configuro bloques de 25 minutos y cambia el juego. ¡Pomodoro gana! 🍅</string>
+    <string name="post_adhd_3_author">HarryHiperenfocado</string>
+    <string name="post_adhd_3_content">CONSEJO: Pon tu teléfono en otra habitación durante el trabajo profundo. Fuera de la vista = fuera de la mente. ¡Por fin terminando proyectos!</string>
+    <string name="post_adhd_4_author">SallyDispersada</string>
+    <string name="post_adhd_4_content">¡El andamiaje externo es mi superpoder! Recordatorios visuales, apps, alarmas - mi entorno recuerda para que yo no tenga que hacerlo 📝</string>
+    <string name="post_adhd_5_author">IvyImpulsiva</string>
+    <string name="post_adhd_5_content">Empecé a usar \'intenciones de implementación\' - en lugar de \'haré ejercicio\' digo \'A las 7am, me pongo los zapatos y camino\'. ¡Funciona! 🏃‍♀️</string>
+
+    <!-- Mock Post Content - Safe Foods -->
+    <string name="post_safefood_1_author">SensibleATexturas</string>
+    <string name="post_safefood_1_content">¡Encontré una nueva comida segura! Estas galletas de arroz tienen el crujido perfecto sin ser muy ruidosas. Comparto la marca en comentarios 🍘</string>
+    <string name="post_safefood_2_author">ClubComidaBeige</string>
+    <string name="post_safefood_2_content">Recordatorio: ¡Las \'comidas seguras\' son válidas! A veces la pasta simple es autocuidado. Sin vergüenza por comer lo que funciona 🍝</string>
+    <string name="post_safefood_3_author">ChefSensorial</string>
+    <string name="post_safefood_3_content">¡Hice un libro de recetas sensory-friendly! Todas evitan disparadores comunes de textura. ¿Alguien quiere que lo comparta?</string>
+    <string name="post_safefood_4_author">PeteElExigente</string>
+    <string name="post_safefood_4_content">¿Alguien más tiene \'restaurantes seguros\'? Lugares donde sabes exactamente qué pedir y siempre es consistente?</string>
+    <string name="post_safefood_5_author">MollyMealPrep</string>
+    <string name="post_safefood_5_content">Cocinar en lote mis comidas seguras el domingo = menos fatiga de decisión toda la semana. Actualmente rotando 5 comidas que disfruto 💪</string>
+
+    <!-- Mock Post Content - Sleep & Rest -->
+    <string name="post_sleep_1_author">NateBúhoNocturno</string>
+    <string name="post_sleep_1_content">¡Por fin encontré una manta con peso que no me sobrecalienta! Presión profunda + tela fresca = realmente dormir 😴</string>
+    <string name="post_sleep_2_author">RachelInquieta</string>
+    <string name="post_sleep_2_content">Rutina de relajación que funciona para mi cerebro: luces tenues, sin pantallas 1h antes, misma playlist cada noche. ¡La consistencia es clave!</string>
+    <string name="post_sleep_3_author">IanInsomne</string>
+    <string name="post_sleep_3_content">¿El cerebro de alguien más hace lo de \'recordar cada momento vergonzoso\' a las 2am? Empecé a escribir diario antes de dormir para \'cerrar pestañas\'</string>
+    <string name="post_sleep_4_author">StephSoñolienta</string>
+    <string name="post_sleep_4_content">Ruido blanco vs ruido marrón vs ruido rosa - ¿cuál funciona para ti? Yo soy team ruido marrón, es como un abrazo para mis oídos 🔊</string>
+    <string name="post_sleep_5_author">DanSoñador</string>
+    <string name="post_sleep_5_content">Empecé a usar cortinas opacas Y antifaz. Habitación totalmente oscura = ¡por fin obteniendo ciclos de sueño profundo!</string>
+
+    <!-- Mock Post Content - Stimming -->
+    <string name="post_stim_1_author">EquipoStim</string>
+    <string name="post_stim_1_content">¡Reseña de nuevo juguete stim! Este anillo fidget texturizado es MUY satisfactorio. Suficientemente silencioso para reuniones, suficiente stim para regulación ✨</string>
+    <string name="post_stim_2_author">AleteoFeliz</string>
+    <string name="post_stim_2_content">¡Normalicen el stimming en público! Estaba meciéndome en el supermercado y un niño dijo \'¡está bailando!\' Me alegró el día 💃</string>
+    <string name="post_stim_3_author">SamMasticador</string>
+    <string name="post_stim_3_content">Para mis compañeros oral stimmers - encontré collares masticables que parecen joyería real. ¡Discretos Y funcionales!</string>
+    <string name="post_stim_4_author">SophieGiratoria</string>
+    <string name="post_stim_4_content">¡El movimiento es medicina! Cuando no puedo hacer stim abiertamente, muevo los dedos de los pies bajo el escritorio. Sutil pero ayuda 🦶</string>
+    <string name="post_stim_5_author">BuscadorSensorial</string>
+    <string name="post_stim_5_content">Armé un \'kit stim\' para mi bolso: masilla, tarjetas texturizadas, cubo fidget. ¡Siempre preparado para necesidades de regulación!</string>
+
+    <!-- Mock Post Content - Sensory Tips -->
+    <string name="post_sensory_1_author">OllieAbrumado</string>
+    <string name="post_sensory_1_content">Los tapones Loop CAMBIARON MI VIDA. Aún escucho conversaciones pero quita el filo de ambientes con sobrecarga sensorial 🎧</string>
+    <string name="post_sensory_2_author">LunaSensibleALuz</string>
+    <string name="post_sensory_2_content">Bombillas de tono cálido + interruptores dimmer hicieron mi casa un refugio seguro. ¡Los fluorescentes agresivos están prohibidos!</string>
+    <string name="post_sensory_3_author">TaylorOdiaEtiquetas</string>
+    <string name="post_sensory_3_content">Pasé una hora quitando todas las etiquetas de ropa hoy. Valió cada segundo. ¿Por qué las marcas las hacen tan rasposas?! 👕</string>
+    <string name="post_sensory_4_author">AlexSensibleAOlores</string>
+    <string name="post_sensory_4_content">Sin fragancia es el camino. Hice una lista de productos realmente sin olor, ¡feliz de compartir!</string>
+    <string name="post_sensory_5_author">QuinnSilencioso</string>
+    <string name="post_sensory_5_content">Creé un \'mapa sensorial\' de mi ciudad - cafés tranquilos, tiendas de bajo estímulo, rutas de escape accesibles. ¡Súper útil! 🗺️</string>
+
+    <!-- Mock Post Content - Meltdown Support -->
+    <string name="post_meltdown_1_author">RenRecuperación</string>
+    <string name="post_meltdown_1_content">Recordatorio: Los meltdowns no son \'mal comportamiento\' - son sobrecarga del sistema nervioso. Sé amable contigo después 💙</string>
+    <string name="post_meltdown_2_author">CarlaCoping</string>
+    <string name="post_meltdown_2_content">Mi kit de meltdown: auriculares con cancelación de ruido, gafas de sol, almohadilla de peso, agua y contacto de \'persona segura\'</string>
+    <string name="post_meltdown_3_author">PatPrevención</string>
+    <string name="post_meltdown_3_content">Aprendiendo mis señales de advertencia: pico de irritabilidad, aumento de sensibilidad al sonido, tensión física. ¡Capturarlo temprano ayuda!</string>
+    <string name="post_meltdown_4_author">SamEspacioSeguro</string>
+    <string name="post_meltdown_4_content">Creé un \'rincón de calma\' en mi casa con luces tenues, texturas suaves y CERO demandas. Zona de recuperación esencial 🏠</string>
+    <string name="post_meltdown_5_author">SueDeApoyo</string>
+    <string name="post_meltdown_5_content">Autocuidado post-meltdown: descanso, hidratación, comida reconfortante y absolutamente CERO autocrítica. La recuperación toma tiempo 🌸</string>
+
+    <!-- Mock Post Content - Social Skills -->
+    <string name="post_social_1_author">CoachDeConversación</string>
+    <string name="post_social_1_content">¡Guiones para small talk! \'¿Cómo va tu día?\' → \'¿Planes divertidos para el fin de semana?\' → \'¡Eso suena bien!\' ¡Los patrones memorizados ayudan! 💬</string>
+    <string name="post_social_2_author">FredAmistad</string>
+    <string name="post_social_2_content">Calidad sobre cantidad. Tener 2-3 amigos cercanos que \'entienden\' vale más que 100 conocidos 👥</string>
+    <string name="post_social_3_author">AndyIncómodo</string>
+    <string name="post_social_3_content">¡Está bien irse temprano de eventos sociales! \'La pasé genial, me voy ya\' - no se necesita explicación larga 👋</string>
+    <string name="post_social_4_author">BellaLímites</string>
+    <string name="post_social_4_content">\'Necesito pensar en eso\' es una oración completa. ¡Sin presión para responder inmediatamente!</string>
+    <string name="post_social_5_author">PabloParalelo</string>
+    <string name="post_social_5_content">¡El juego paralelo es amistad adulta válida! Jugar videojuegos juntos, hacer manualidades en la misma sala - conexión sin interacción constante</string>
+
+    <!-- Mock Post Content - Masking -->
+    <string name="post_mask_1_author">UriDesenmascara</string>
+    <string name="post_mask_1_content">Finalmente dejando la máscara en casa. Es agotador pretender ser \'normal\' todo el día. Los espacios seguros importan 🎭</string>
+    <string name="post_mask_2_author">BethAgotada</string>
+    <string name="post_mask_2_content">Enmascarar llevó al agotamiento. Ahora estoy aprendiendo lentamente quién soy sin la actuación. Es aterrador pero liberador</string>
+    <string name="post_mask_3_author">AvaAuténtica</string>
+    <string name="post_mask_3_content">Encontré amigos que aceptan al verdadero yo - stims, infodumps y todo. ¡Dicen que soy \'más interesante\' sin máscara! ✨</string>
+    <string name="post_mask_4_author">EliExhausto</string>
+    <string name="post_mask_4_content">El precio de enmascarar: migrañas, fatiga, confusión de identidad. ¿Vale mi bienestar \'encajar\'? Reconsiderando…</string>
+    <string name="post_mask_5_author">GraciaCrece</string>
+    <string name="post_mask_5_content">Empecé a hacer stim en público. Mi corazón latía rápido al principio, pero literalmente a nadie le importó. El miedo era más grande que la realidad 💪</string>
+
+    <!-- Mock Post Content - Special Interests -->
+    <string name="post_special_1_author">DaveDinosaurios</string>
+    <string name="post_special_1_content">¡Tres horas investigando la evolución de plumas de dinosaurios y NO me arrepiento de NADA! ¿Quién quiere escuchar sobre Archaeopteryx? 🦕</string>
+    <string name="post_special_2_author">RastreadorDeTrenes</string>
+    <string name="post_special_2_content">Memorizar horarios de trenes no es \'raro\' - ¡esta información me hace feliz Y es práctica! Ambos son válidos 🚂</string>
+    <string name="post_special_3_author">SarahEspacial</string>
+    <string name="post_special_3_content">Mi interés especial es seguir lanzamientos de satélites. ¿Quién quiere charlar sobre mecánica orbital? 🛰️</string>
+    <string name="post_special_4_author">MiraHongos</string>
+    <string name="post_special_4_content">Documentando cada hongo que encuentro en mis caminatas. ¡47 especies hasta ahora! La micología es fascinante 🍄</string>
+    <string name="post_special_5_author">HenryHistoria</string>
+    <string name="post_special_5_content">Pregúntame sobre cualquier período histórico, probablemente puedo hablar una hora. ¡Los intereses especiales son regalos! 📚</string>
+
+    <!-- Feedback Hub -->
+    <string name="feedback_hub_title">Centro de Comentarios</string>
+    <string name="feedback_submit_tab">Enviar</string>
+    <string name="feedback_requests_tab">Solicitudes</string>
+    <string name="feedback_roadmap_tab">Hoja de Ruta</string>
+    <string name="feedback_remaining">Te quedan %d envíos hoy</string>
+    <string name="feedback_report_bug_title">Reportar un Error</string>
+    <string name="feedback_report_bug_desc">¿Encontraste algo roto? Avísanos para que podamos arreglarlo.</string>
+    <string name="feedback_request_feature_title">Solicitar una Función</string>
+    <string name="feedback_request_feature_desc">¿Tienes una idea para mejorar NeuroComet? ¡Nos encantaría escucharla!</string>
+    <string name="feedback_send_title">Enviar Comentarios</string>
+    <string name="feedback_send_desc">¡Comparte tus pensamientos, sugerencias o simplemente saluda!</string>
+    <string name="feedback_community_note">Todos los comentarios son revisados por nuestro equipo. Priorizamos las funciones según los votos de la comunidad y el impacto en usuarios neurodivergentes.</string>
+    <string name="feedback_bug_submitted_title">Reporte de Error Enviado</string>
+    <string name="feedback_bug_submitted_msg">¡Gracias por ayudarnos a mejorar NeuroComet! Investigaremos este problema.</string>
+    <string name="feedback_feature_submitted_title">Solicitud de Función Enviada</string>
+    <string name="feedback_feature_submitted_msg">¡Tu idea ha sido enviada! La comunidad ahora puede votar por ella.</string>
+    <string name="feedback_thank_you_title">¡Gracias!</string>
+    <string name="feedback_thank_you_msg">Tus comentarios nos ayudan a hacer NeuroComet mejor para todos.</string>
+    <string name="feedback_bug_title_label">Título del Error</string>
+    <string name="feedback_bug_title_hint">Breve descripción del problema</string>
+    <string name="feedback_steps_label">Pasos para Reproducir</string>
+    <string name="feedback_steps_hint">1. Ir a…\n2. Tocar en…\n3. Aparece el error</string>
+    <string name="feedback_severity_label">Gravedad</string>
+    <string name="feedback_include_device_info">Incluir información del dispositivo</string>
+    <string name="feedback_feature_title_label">Título de la Función</string>
+    <string name="feedback_feature_title_hint">¿Qué te gustaría ver?</string>
+    <string name="feedback_feature_desc_label">Descripción</string>
+    <string name="feedback_feature_desc_hint">Describe cómo te ayudaría esta función…</string>
+    <string name="feedback_category_label">Categoría</string>
+    <string name="feedback_general_label">Tus pensamientos (opcional)</string>
+    <string name="feedback_general_hint">Cuéntanos qué piensas…</string>
+    <string name="feedback_submit_bug">Enviar Reporte de Error</string>
+    <string name="feedback_submit_request">Enviar Solicitud</string>
+    <string name="feedback_submit">Enviar</string>
+    <string name="feedback_coming_soon">Próximamente</string>
+    <string name="feedback_recently_shipped">Lanzados Recientemente</string>
+    <string name="feedback_sort_top_voted">Más Votados</string>
+    <string name="feedback_sort_newest">Más Recientes</string>
+    <string name="feedback_status_submitted">Enviado</string>
+    <string name="feedback_status_review">En Revisión</string>
+    <string name="feedback_status_planned">Planificado</string>
+    <string name="feedback_status_progress">En Progreso</string>
+    <string name="feedback_status_completed">Completado</string>
+    <string name="feedback_status_declined">Rechazado</string>
+    <string name="feedback_severity_low">Baja</string>
+    <string name="feedback_severity_medium">Media</string>
+    <string name="feedback_severity_high">Alta</string>
+    <string name="feedback_severity_critical">Crítica</string>
+    <string name="feedback_votes">%d votos</string>
+
+    <!-- Debug Performance -->
+    <string name="debug_tools_title">Herramientas de Depuración</string>
+    <string name="debug_performance_overlay">Superposición de Rendimiento</string>
+    <string name="debug_performance_desc">Muestra FPS, memoria y estadísticas de desplazamiento</string>
+    <string name="debug_reset_counters">Reiniciar Contadores</string>
+
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">Almacenamiento de Credenciales</string>
+    <string name="dev_credential_test_save">Probar Guardar</string>
+    <string name="dev_credential_test_retrieve">Probar Recuperar</string>
+    <string name="dev_credential_clear_all">Borrar Todas las Credenciales</string>
+    <string name="dev_credential_session_status">Estado de Sesión</string>
+    <string name="dev_credential_biometric_status">Estado Biométrico</string>
+    <string name="dev_credential_create_session">Crear Sesión de Prueba</string>
+    <string name="dev_credential_end_session">Finalizar Sesión</string>
+    <string name="dev_credential_extend_session">Extender Sesión</string>
 </resources>

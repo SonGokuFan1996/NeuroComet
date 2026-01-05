@@ -1,0 +1,57 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Neural connection line 1 (top-left) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M19,19 L29,29 Q44,44 54,54 L49,59 Q39,49 24,24 Z" />
+
+    <!-- Neural connection line 2 (top-right) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M89,19 L79,29 Q64,44 54,54 L59,59 Q69,49 84,24 Z" />
+
+    <!-- Neural connection line 3 (bottom) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M54,94 L54,64 Q54,54 54,54 L59,54 Q59,54 59,64 L59,94 Z" />
+
+    <!-- Comet tail glow effect -->
+    <path
+        android:fillColor="#000000"
+        android:fillAlpha="0.3"
+        android:pathData="M14,14 Q34,34 54,54 Q34,34 24,24 Q14,14 14,14 Z" />
+
+    <path
+        android:fillColor="#000000"
+        android:fillAlpha="0.3"
+        android:pathData="M94,14 Q74,34 54,54 Q74,34 84,24 Q94,14 94,14 Z" />
+
+    <!-- Center circle - the "comet" core -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M54,54 m-20,0 a20,20 0 1,1 40,0 a20,20 0 1,1 -40,0" />
+
+    <!-- Inner highlight circle -->
+    <path
+        android:fillColor="#000000"
+        android:fillAlpha="0.5"
+        android:pathData="M54,48 m-8,0 a8,8 0 1,1 16,0 a8,8 0 1,1 -16,0" />
+
+    <!-- Small orbiting dots representing neural diversity -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M30,54 m-4,0 a4,4 0 1,1 8,0 a4,4 0 1,1 -8,0" />
+
+    <path
+        android:fillColor="#000000"
+        android:pathData="M78,54 m-4,0 a4,4 0 1,1 8,0 a4,4 0 1,1 -8,0" />
+
+    <path
+        android:fillColor="#000000"
+        android:pathData="M54,30 m-4,0 a4,4 0 1,1 8,0 a4,4 0 1,1 -8,0" />
+</vector>
+

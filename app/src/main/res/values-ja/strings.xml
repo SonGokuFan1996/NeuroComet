@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core UI -->
+    <string name="app_name">NeuroComet</string>
+    <string name="nav_feed">フィード</string>
+    <string name="nav_explore">探索</string>
+    <string name="nav_messages">メッセージ</string>
+    <string name="nav_notifications">通知</string>
+    <string name="nav_settings">設定</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in">ログイン</string>
+    <string name="auth_sign_up">新規登録</string>
+    <string name="auth_email_label">メールアドレス</string>
+    <string name="auth_password_label">パスワード</string>
+    <string name="auth_create_account">アカウント作成</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">外観と表示</string>
+    <string name="settings_section_privacy">プライバシーとセキュリティ</string>
+    <string name="settings_section_notifications">通知</string>
+    <string name="settings_section_accessibility">アクセシビリティ</string>
+
+    <!-- Explore -->
+    <string name="explore_title">探索</string>
+    <string name="explore_autism">自閉症</string>
+    <string name="explore_adhd">ADHD</string>
+    <string name="explore_anxiety">不安</string>
+    <string name="explore_sensory">感覚</string>
+
+    <!-- Games -->
+    <string name="games_hub_title">ゲームハブ</string>
+    <string name="game_bubble_pop">バブルポップ</string>
+    <string name="game_fidget_spinner">フィジェットスピナー</string>
+
+    <!-- Feedback -->
+    <string name="feedback_hub_title">フィードバックハブ</string>
+    <string name="feedback_report_bug_title">バグを報告</string>
+    <string name="feedback_request_feature_title">機能をリクエスト</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">開発者</string>
+    <string name="settings_developer_subtitle">デバッグ＆テストツール</string>
+    <string name="settings_developer_options_group">開発者オプション</string>
+    <string name="settings_dev_options_desc">テストとデバッグ用の詳細オプション</string>
+    <string name="settings_force_verify_title">強制認証</string>
+    <string name="settings_force_verify_subtitle">ユーザー認証ステータスを切り替え。</string>
+    <string name="settings_fake_premium_title">フェイクプレミアム</string>
+    <string name="settings_fake_premium_subtitle">有料ステータスをシミュレート。</string>
+    <string name="settings_fake_premium">フェイクプレミアムモード</string>
+    <string name="settings_fake_premium_enabled">テスト用にプレミアム機能がアンロックされました</string>
+    <string name="settings_fake_premium_disabled">プレミアム機能をテストするには有効にしてください</string>
+    <string name="settings_mock_interface_title">モックインターフェース</string>
+    <string name="settings_mock_interface_subtitle">デモ用のフェイクデータを表示。</string>
+    <string name="settings_simulate_badge_title">バッジ通知をシミュレート</string>
+    <string name="settings_simulate_badge_subtitle">\'%s\'の通知をトリガー。</string>
+    <string name="settings_nuke_db_title">データベースを削除</string>
+    <string name="settings_nuke_db_subtitle">すべての投稿を削除。元に戻せません。</string>
+    <string name="settings_nuke_db_dialog_title">データベースを削除しますか？</string>
+    <string name="settings_nuke_db_dialog_text">サーバーからすべての投稿が永久に削除されます。この操作は元に戻せません。</string>
+    <string name="settings_nuke_db_dialog_confirm">削除</string>
+    <string name="settings_nuke_db_dialog_cancel">キャンセル</string>
+    <string name="settings_language_test_title">アプリ言語（テスト）</string>
+    <string name="settings_language_test_subtitle">アプリ言語を手動で設定。再起動が必要。</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">開発者オプション</string>
+    <string name="dev_phone_format_test">電話番号フォーマット</string>
+    <string name="dev_phone_format_test_desc">異なる地域の自動フォーマットをテスト</string>
+    <string name="dev_phone_format_style">フォーマットスタイル</string>
+    <string name="dev_phone_test_input">電話番号を入力</string>
+    <string name="dev_phone_format_pattern">パターン</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">資格情報ストレージ</string>
+    <string name="dev_credential_test_save">保存テスト</string>
+    <string name="dev_credential_test_retrieve">取得テスト</string>
+    <string name="dev_credential_clear_all">すべての資格情報をクリア</string>
+    <string name="dev_credential_session_status">セッションステータス</string>
+    <string name="dev_credential_biometric_status">生体認証ステータス</string>
+    <string name="dev_credential_create_session">テストセッションを作成</string>
+    <string name="dev_credential_end_session">セッションを終了</string>
+    <string name="dev_credential_extend_session">セッションを延長</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">デバッグツール</string>
+    <string name="debug_performance_overlay">パフォーマンスオーバーレイ</string>
+    <string name="debug_performance_desc">FPS、メモリ、スクロール統計を表示</string>
+    <string name="debug_reset_counters">カウンターをリセット</string>
+
+    <!-- General Settings -->
+    <string name="settings_profile_group">プロフィール</string>
+    <string name="settings_badges_title">バッジ</string>
+    <string name="settings_badges_subtitle">獲得した実績と目標を見る。</string>
+    <string name="settings_visual_comfort_group">視覚的快適さとテーマ</string>
+    <string name="settings_text_size_title">文字サイズ</string>
+    <string name="settings_dark_mode_title">ダークモード</string>
+    <string name="settings_dark_mode_enabled">有効</string>
+    <string name="settings_dark_mode_disabled">無効</string>
+    <string name="settings_high_contrast_title">ハイコントラストモード</string>
+    <string name="settings_high_contrast_subtitle_enabled">有効（純粋な黒/白）</string>
+    <string name="settings_high_contrast_subtitle_disabled">無効</string>
+    <string name="settings_neuro_centric_theme_title">ニューロ中心テーマ</string>
+    <string name="settings_go_premium_title">プレミアムになる</string>
+    <string name="settings_go_premium_subtitle">広告を削除して開発者をサポート。</string>
+    <string name="settings_account_group">アカウント</string>
+    <string name="settings_logout">ログアウト</string>
+    <string name="settings_verified_human_title">認証済み人間</string>
+    <string name="settings_verified_human_subtitle_verified">ステータス：認証済み</string>
+    <string name="settings_verified_human_subtitle_unverified">ステータス：未認証</string>
+    <string name="settings_2fa_title">二要素認証</string>
+    <string name="settings_2fa_subtitle">ログイン時にコードが必要。</string>
+</resources>
+

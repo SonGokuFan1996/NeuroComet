@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -33,12 +35,15 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Accessibility
 import androidx.compose.material.icons.filled.Animation
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChildFriendly
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Feedback
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -54,9 +59,15 @@ import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.RestartAlt
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.OutlinedButton
 import com.kyilmaz.neurocomet.ui.components.PhoneNumberTextField
 import com.kyilmaz.neurocomet.ui.components.PhoneFormat
 import androidx.compose.material.icons.filled.TextFields
@@ -119,6 +130,7 @@ fun SettingsScreen(
     onOpenParentalControls: () -> Unit,
     onOpenThemeSettings: () -> Unit = {},
     onOpenAnimationSettings: () -> Unit = {},
+    onOpenIconCustomization: () -> Unit = {},
     onOpenPrivacySettings: () -> Unit = {},
     onOpenNotificationSettings: () -> Unit = {},
     onOpenContentSettings: () -> Unit = {},
@@ -128,6 +140,9 @@ fun SettingsScreen(
     onOpenSubscription: () -> Unit = {},
     onOpenMyProfile: () -> Unit = {},
     onOpenGames: () -> Unit = {},
+    onOpenBugReport: () -> Unit = {},
+    onOpenFeatureRequest: () -> Unit = {},
+    onOpenGeneralFeedback: () -> Unit = {},
     isPremium: Boolean = false,
     isFakePremiumEnabled: Boolean = false,
     onFakePremiumToggle: (Boolean) -> Unit = {},
@@ -167,7 +182,10 @@ fun SettingsScreen(
             onDismissRequest = { showEasterEggDialog = false },
             title = {
                 Text(
-                    text = if (!themeState.rainbowBrainUnlocked) "🎊 Secret Unlocked! 🎊" else "🦄 Welcome Back! 🦄",
+                    text = if (!themeState.rainbowBrainUnlocked)
+                        stringResource(R.string.easter_egg_secret_unlocked)
+                    else
+                        stringResource(R.string.easter_egg_welcome_back),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -186,7 +204,7 @@ fun SettingsScreen(
                     )
                     if (!themeState.rainbowBrainUnlocked) {
                         Text(
-                            text = "🦄 You've unlocked the Rainbow Brain theme!\nFind it in Theme Settings → Secret Themes",
+                            text = stringResource(R.string.easter_egg_rainbow_unlocked),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.primary,
                             textAlign = TextAlign.Center,
@@ -194,7 +212,7 @@ fun SettingsScreen(
                         )
                     }
                     Text(
-                        text = "Made with 💜 for every unique mind",
+                        text = stringResource(R.string.theme_made_with_love),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -387,6 +405,13 @@ fun SettingsScreen(
                         icon = Icons.Default.Contrast,
                         isChecked = themeState.isHighContrast,
                         onCheckedChange = { themeViewModel.setIsHighContrast(it) }
+                    )
+                    SettingsDivider()
+                    SettingsItem(
+                        title = stringResource(R.string.settings_app_icon),
+                        description = stringResource(R.string.settings_app_icon_desc),
+                        icon = Icons.Default.Palette,
+                        onClick = onOpenIconCustomization
                     )
                 }
             }
@@ -582,6 +607,42 @@ fun SettingsScreen(
             }
 
             // ═══════════════════════════════════════════════════════════════
+            // FEEDBACK & SUPPORT SECTION
+            // ═══════════════════════════════════════════════════════════════
+            item(key = "spacer_before_feedback") { Spacer(Modifier.height(8.dp)) }
+            item(key = "feedback_header") {
+                SettingsSectionHeader(
+                    title = stringResource(R.string.feedback_hub_title),
+                    icon = Icons.Default.Feedback,
+                    subtitle = null
+                )
+            }
+            item(key = "feedback_card") {
+                SettingsCard {
+                    SettingsItem(
+                        title = stringResource(R.string.feedback_report_bug_title),
+                        description = stringResource(R.string.feedback_report_bug_desc),
+                        icon = Icons.Default.BugReport,
+                        onClick = onOpenBugReport
+                    )
+                    SettingsDivider()
+                    SettingsItem(
+                        title = stringResource(R.string.feedback_request_feature_title),
+                        description = stringResource(R.string.feedback_request_feature_desc),
+                        icon = Icons.Default.Star,
+                        onClick = onOpenFeatureRequest
+                    )
+                    SettingsDivider()
+                    SettingsItem(
+                        title = stringResource(R.string.feedback_send_title),
+                        description = stringResource(R.string.feedback_send_desc),
+                        icon = Icons.Default.Email,
+                        onClick = onOpenGeneralFeedback
+                    )
+                }
+            }
+
+            // ═══════════════════════════════════════════════════════════════
             // DEVELOPER OPTIONS (if enabled)
             // ═══════════════════════════════════════════════════════════════
             if (canShowDevOptions) {
@@ -621,6 +682,21 @@ fun SettingsScreen(
                 // Phone Number Format Testing Card
                 item(key = "dev_phone_test") {
                     PhoneFormatTestCard()
+                }
+
+                // Permission Testing Section
+                item(key = "dev_permission_test") {
+                    PermissionTestingSection()
+                }
+
+                // Language Strings Checker (Unified - Core, General Settings, Dev Options)
+                item(key = "dev_language_strings_check") {
+                    LanguageStringsCheckerCard()
+                }
+
+                // Performance Monitor
+                item(key = "dev_performance_monitor") {
+                    PerformanceMonitorCard()
                 }
             }
 
@@ -1074,13 +1150,13 @@ fun NeuroThemePicker(
                     )
                     Column {
                         Text(
-                            text = "Dynamic Colors Active",
+                            text = stringResource(R.string.theme_dynamic_colors_active),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Text(
-                            text = "Disable Dynamic Colors in Quick Settings below to use custom themes.",
+                            text = stringResource(R.string.theme_dynamic_colors_hint),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                         )
@@ -1124,8 +1200,10 @@ private fun ThemeCategoryCard(
     onStateSelected: (NeuroState) -> Unit,
     isDisabled: Boolean = false
 ) {
+    val context = LocalContext.current
     val selectedInCategory = category.states.find { it == selectedState }
     val alpha = if (isDisabled) 0.5f else 1f
+    val categoryDisplayName = category.getDisplayName(context)
 
     Card(
         modifier = Modifier
@@ -1147,20 +1225,20 @@ private fun ThemeCategoryCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = category.displayName,
+                        text = categoryDisplayName,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     if (selectedInCategory != null && !isDisabled) {
                         Text(
-                            text = "${selectedInCategory.emoji} ${selectedInCategory.displayName}",
+                            text = "${selectedInCategory.emoji} ${selectedInCategory.getDisplayName(context)}",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary
                         )
                     } else if (isDisabled) {
                         Text(
-                            text = "Disabled (Dynamic Colors active)",
+                            text = stringResource(R.string.theme_disabled_dynamic_active),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                         )
@@ -1168,7 +1246,10 @@ private fun ThemeCategoryCard(
                 }
                 Icon(
                     imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = if (isExpanded) "Collapse ${category.displayName}" else "Expand ${category.displayName}",
+                    contentDescription = if (isExpanded)
+                        stringResource(R.string.collapse_category, categoryDisplayName)
+                    else
+                        stringResource(R.string.expand_category, categoryDisplayName),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -1205,6 +1286,10 @@ private fun ThemeOptionChip(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val stateDisplayName = state.getDisplayName(context)
+    val stateDescription = state.getDescription(context)
+
     val backgroundColor = if (isSelected)
         MaterialTheme.colorScheme.primaryContainer
     else
@@ -1215,14 +1300,17 @@ private fun ThemeOptionChip(
     else
         MaterialTheme.colorScheme.outline
 
-    val selectionState = if (isSelected) "selected" else "not selected"
+    val selectionState = if (isSelected)
+        stringResource(R.string.accessibility_selected)
+    else
+        stringResource(R.string.accessibility_not_selected)
 
     Card(
         modifier = Modifier
             .width(120.dp)
             .semantics {
                 role = Role.RadioButton
-                contentDescription = "${state.displayName}, ${state.description}, $selectionState"
+                contentDescription = "$stateDisplayName, $stateDescription, $selectionState"
             }
             .clickable(
                 role = Role.RadioButton,
@@ -1248,7 +1336,7 @@ private fun ThemeOptionChip(
                 style = MaterialTheme.typography.headlineSmall
             )
             Text(
-                text = state.displayName,
+                text = stateDisplayName,
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                 textAlign = TextAlign.Center,
@@ -1283,6 +1371,7 @@ fun ThemeSettingsScreen(
     themeViewModel: ThemeViewModel,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
     val themeState by themeViewModel.themeState.collectAsState()
 
     // Easter egg state - tap the current theme card multiple times!
@@ -1313,7 +1402,10 @@ fun ThemeSettingsScreen(
             onDismissRequest = { showEasterEggDialog = false },
             title = {
                 Text(
-                    text = if (!themeState.rainbowBrainUnlocked) "🎊 Secret Unlocked! 🎊" else "🦄 Welcome Back! 🦄",
+                    text = if (!themeState.rainbowBrainUnlocked)
+                        stringResource(R.string.easter_egg_secret_unlocked)
+                    else
+                        stringResource(R.string.easter_egg_welcome_back),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -1332,7 +1424,7 @@ fun ThemeSettingsScreen(
                     )
                     if (!themeState.rainbowBrainUnlocked) {
                         Text(
-                            text = "🦄 You've unlocked the Rainbow Brain theme!\nScroll down to Secret Themes to try it!",
+                            text = stringResource(R.string.theme_rainbow_unlocked),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.primary,
                             textAlign = TextAlign.Center,
@@ -1340,7 +1432,7 @@ fun ThemeSettingsScreen(
                         )
                     }
                     Text(
-                        text = "Made with 💜 for every unique mind",
+                        text = stringResource(R.string.theme_made_with_love),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
@@ -1365,12 +1457,12 @@ fun ThemeSettingsScreen(
                 title = {
                     Column {
                         Text(
-                            text = "Theme Settings",
+                            text = stringResource(R.string.theme_settings_title),
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Choose a theme that works for you",
+                            text = stringResource(R.string.theme_settings_subtitle),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1380,7 +1472,7 @@ fun ThemeSettingsScreen(
                     androidx.compose.material3.IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.badges_back_button_description)
                         )
                     }
                 },
@@ -1420,18 +1512,18 @@ fun ThemeSettingsScreen(
                         Spacer(Modifier.width(16.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Current Theme",
+                                text = stringResource(R.string.theme_current_theme),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                             )
                             Text(
-                                text = themeState.selectedState.displayName,
+                                text = themeState.selectedState.getDisplayName(context),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                             Text(
-                                text = themeState.selectedState.description,
+                                text = themeState.selectedState.getDescription(context),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                             )
@@ -1482,7 +1574,7 @@ fun ThemeSettingsScreen(
             item(key = "spacer_quick_settings") { Spacer(Modifier.padding(8.dp)) }
             item(key = "quick_settings_title") {
                 Text(
-                    text = "Quick Settings",
+                    text = stringResource(R.string.theme_quick_settings),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -1492,11 +1584,11 @@ fun ThemeSettingsScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     // Dynamic Color toggle (Material You / M3E)
                     SettingsToggle(
-                        title = "Dynamic Colors",
+                        title = stringResource(R.string.theme_dynamic_colors),
                         description = if (com.kyilmaz.neurocomet.ui.theme.isDynamicColorAvailable())
-                            "Use colors from your device wallpaper (Material You)"
+                            stringResource(R.string.theme_dynamic_colors_desc)
                         else
-                            "Requires Android 12 or higher",
+                            stringResource(R.string.theme_dynamic_colors_unavailable),
                         icon = Icons.Default.Palette,
                         isChecked = themeState.useDynamicColor,
                         onCheckedChange = { themeViewModel.setUseDynamicColor(it) },
@@ -1630,7 +1722,9 @@ private fun PhoneFormatTestCard() {
                     )
 
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         PhoneFormat.entries.forEach { format ->
@@ -1644,11 +1738,18 @@ private fun PhoneFormatTestCard() {
                                             PhoneFormat.UK -> "UK"
                                             PhoneFormat.INTERNATIONAL -> "Int'l"
                                             PhoneFormat.SIMPLE -> "Simple"
+                                            PhoneFormat.GERMAN -> "DE"
+                                            PhoneFormat.FRENCH -> "FR"
+                                            PhoneFormat.JAPANESE -> "JP"
+                                            PhoneFormat.AUSTRALIAN -> "AU"
+                                            PhoneFormat.INDIAN -> "IN"
+                                            PhoneFormat.BRAZILIAN -> "BR"
+                                            PhoneFormat.TURKISH -> "TR"
+                                            PhoneFormat.KOREAN -> "KR"
                                         },
                                         style = MaterialTheme.typography.labelSmall
                                     )
-                                },
-                                modifier = Modifier.weight(1f)
+                                }
                             )
                         }
                     }
@@ -1666,6 +1767,14 @@ private fun PhoneFormatTestCard() {
                                     PhoneFormat.UK -> "07700 900123"
                                     PhoneFormat.INTERNATIONAL -> "+1 555 123 4567"
                                     PhoneFormat.SIMPLE -> "555-123-4567"
+                                    PhoneFormat.GERMAN -> "+49 123 4567890"
+                                    PhoneFormat.FRENCH -> "+33 1 23 45 67 89"
+                                    PhoneFormat.JAPANESE -> "+81 12-3456-7890"
+                                    PhoneFormat.AUSTRALIAN -> "+61 4 1234 5678"
+                                    PhoneFormat.INDIAN -> "+91 98765 43210"
+                                    PhoneFormat.BRAZILIAN -> "+55 (11) 98765-4321"
+                                    PhoneFormat.TURKISH -> "+90 532 123 45 67"
+                                    PhoneFormat.KOREAN -> "+82 10-1234-5678"
                                 }
                             )
                         }
@@ -1693,6 +1802,14 @@ private fun PhoneFormatTestCard() {
                                     PhoneFormat.UK -> "XXXXX XXXXXX"
                                     PhoneFormat.INTERNATIONAL -> "+X XXX XXX XXXX"
                                     PhoneFormat.SIMPLE -> "XXX-XXX-XXXX"
+                                    PhoneFormat.GERMAN -> "+49 XXX XXXXXXX"
+                                    PhoneFormat.FRENCH -> "+33 X XX XX XX XX"
+                                    PhoneFormat.JAPANESE -> "+81 XX-XXXX-XXXX"
+                                    PhoneFormat.AUSTRALIAN -> "+61 X XXXX XXXX"
+                                    PhoneFormat.INDIAN -> "+91 XXXXX XXXXX"
+                                    PhoneFormat.BRAZILIAN -> "+55 (XX) XXXXX-XXXX"
+                                    PhoneFormat.TURKISH -> "+90 XXX XXX XX XX"
+                                    PhoneFormat.KOREAN -> "+82 XX-XXXX-XXXX"
                                 },
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium,
@@ -1768,6 +1885,236 @@ private fun ScreenTimeoutToggle() {
                     }
                 }
             }
+        )
+    }
+}
+
+/**
+ * Performance Monitor Card for Developer section.
+ * Shows FPS, frame drops, memory usage, and allows toggling the overlay.
+ */
+@Composable
+fun PerformanceMonitorCard() {
+    val context = LocalContext.current
+    var isExpanded by remember { mutableStateOf(false) }
+    var performanceOverlayEnabled by remember { mutableStateOf(PerformanceOverlayState.isEnabled) }
+    var scrollJankDetectionEnabled by remember { mutableStateOf(PerformanceOverlayState.scrollJankDetectionEnabled) }
+
+    val fps by PerformanceMonitor.currentFps
+    val droppedFrames by PerformanceMonitor.droppedFrameCount
+    val memoryMb by PerformanceMonitor.memoryUsageMb
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { isExpanded = !isExpanded },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Filled.Speed,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = "Performance Monitor",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = if (performanceOverlayEnabled) "Overlay enabled" else "Overlay disabled",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                Icon(
+                    if (isExpanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    contentDescription = if (isExpanded) "Collapse" else "Expand"
+                )
+            }
+
+            // Expanded content
+            AnimatedVisibility(visible = isExpanded) {
+                Column(modifier = Modifier.padding(top = 16.dp)) {
+                    // Toggle for Performance Overlay
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "Performance Overlay",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                "Show FPS, frame drops, memory usage",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = performanceOverlayEnabled,
+                            onCheckedChange = {
+                                performanceOverlayEnabled = it
+                                PerformanceOverlayState.isEnabled = it
+                            }
+                        )
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    // Toggle for Scroll Jank Detection
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "Scroll Jank Detection",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                "Detect scroll performance issues",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = scrollJankDetectionEnabled,
+                            onCheckedChange = {
+                                scrollJankDetectionEnabled = it
+                                PerformanceOverlayState.scrollJankDetectionEnabled = it
+                            }
+                        )
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+                    HorizontalDivider()
+                    Spacer(Modifier.height(12.dp))
+
+                    // Current Performance Stats
+                    Text(
+                        "Current Performance",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(Modifier.height(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        PerformanceStatItem(
+                            label = "FPS",
+                            value = "${fps.toInt()}",
+                            color = when {
+                                fps >= 55 -> Color(0xFF4CAF50)
+                                fps >= 45 -> Color(0xFFFFEB3B)
+                                fps >= 30 -> Color(0xFFFF9800)
+                                else -> Color(0xFFF44336)
+                            }
+                        )
+                        PerformanceStatItem(
+                            label = "Drops",
+                            value = "$droppedFrames",
+                            color = if (droppedFrames > 10) Color(0xFFFF9800) else Color(0xFF4CAF50)
+                        )
+                        PerformanceStatItem(
+                            label = "Memory",
+                            value = "${String.format("%.0f", memoryMb)}MB",
+                            color = if (memoryMb > 200) Color(0xFFFF9800) else Color(0xFF4CAF50)
+                        )
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // Reset Counters Button
+                    Button(
+                        onClick = {
+                            PerformanceMonitor.reset()
+                            android.widget.Toast.makeText(
+                                context,
+                                "Performance counters reset",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    ) {
+                        Icon(Icons.Filled.Refresh, null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Reset Counters")
+                    }
+
+                    Spacer(Modifier.height(8.dp))
+
+                    // Reset to Defaults Button
+                    OutlinedButton(
+                        onClick = {
+                            PerformanceOverlayState.resetToDefaults()
+                            performanceOverlayEnabled = false
+                            scrollJankDetectionEnabled = true
+                            android.widget.Toast.makeText(
+                                context,
+                                "Performance settings reset to defaults",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Filled.RestartAlt, null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Reset to Defaults")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PerformanceStatItem(
+    label: String,
+    value: String,
+    color: Color
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .background(color.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = color
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = color.copy(alpha = 0.8f)
         )
     }
 }

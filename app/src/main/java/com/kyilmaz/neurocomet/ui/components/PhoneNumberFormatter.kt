@@ -51,6 +51,14 @@ class PhoneNumberVisualTransformation(
             PhoneFormat.INTERNATIONAL -> formatInternational(digits)
             PhoneFormat.SIMPLE -> formatSimple(digits)
             PhoneFormat.UK -> formatUK(digits)
+            PhoneFormat.GERMAN -> formatGerman(digits)
+            PhoneFormat.FRENCH -> formatFrench(digits)
+            PhoneFormat.JAPANESE -> formatJapanese(digits)
+            PhoneFormat.AUSTRALIAN -> formatAustralian(digits)
+            PhoneFormat.INDIAN -> formatIndian(digits)
+            PhoneFormat.BRAZILIAN -> formatBrazilian(digits)
+            PhoneFormat.TURKISH -> formatTurkish(digits)
+            PhoneFormat.KOREAN -> formatKorean(digits)
         }
     }
 
@@ -104,13 +112,129 @@ class PhoneNumberVisualTransformation(
             }
         }
     }
+
+    private fun formatGerman(digits: String): String {
+        // Format: +49 XXX XXXXXXX
+        return buildString {
+            if (digits.isNotEmpty()) append("+")
+            digits.take(12).forEachIndexed { index, char ->
+                when (index) {
+                    2, 5 -> append(" $char")
+                    else -> append(char)
+                }
+            }
+        }
+    }
+
+    private fun formatFrench(digits: String): String {
+        // Format: +33 X XX XX XX XX
+        return buildString {
+            if (digits.isNotEmpty()) append("+")
+            digits.take(11).forEachIndexed { index, char ->
+                when (index) {
+                    2, 3, 5, 7, 9 -> append(" $char")
+                    else -> append(char)
+                }
+            }
+        }
+    }
+
+    private fun formatJapanese(digits: String): String {
+        // Format: +81 XX-XXXX-XXXX
+        return buildString {
+            if (digits.isNotEmpty()) append("+")
+            digits.take(12).forEachIndexed { index, char ->
+                when (index) {
+                    2 -> append(" $char")
+                    4, 8 -> append("-$char")
+                    else -> append(char)
+                }
+            }
+        }
+    }
+
+    private fun formatAustralian(digits: String): String {
+        // Format: +61 X XXXX XXXX
+        return buildString {
+            if (digits.isNotEmpty()) append("+")
+            digits.take(11).forEachIndexed { index, char ->
+                when (index) {
+                    2, 3, 7 -> append(" $char")
+                    else -> append(char)
+                }
+            }
+        }
+    }
+
+    private fun formatIndian(digits: String): String {
+        // Format: +91 XXXXX XXXXX
+        return buildString {
+            if (digits.isNotEmpty()) append("+")
+            digits.take(12).forEachIndexed { index, char ->
+                when (index) {
+                    2, 7 -> append(" $char")
+                    else -> append(char)
+                }
+            }
+        }
+    }
+
+    private fun formatBrazilian(digits: String): String {
+        // Format: +55 (XX) XXXXX-XXXX
+        return buildString {
+            if (digits.isNotEmpty()) append("+")
+            digits.take(13).forEachIndexed { index, char ->
+                when (index) {
+                    2 -> append(" ($char")
+                    4 -> append(") $char")
+                    9 -> append("-$char")
+                    else -> append(char)
+                }
+            }
+        }
+    }
+
+    private fun formatTurkish(digits: String): String {
+        // Format: +90 XXX XXX XX XX
+        return buildString {
+            if (digits.isNotEmpty()) append("+")
+            digits.take(12).forEachIndexed { index, char ->
+                when (index) {
+                    2, 5, 8, 10 -> append(" $char")
+                    else -> append(char)
+                }
+            }
+        }
+    }
+
+    private fun formatKorean(digits: String): String {
+        // Format: +82 XX-XXXX-XXXX
+        return buildString {
+            if (digits.isNotEmpty()) append("+")
+            digits.take(12).forEachIndexed { index, char ->
+                when (index) {
+                    2 -> append(" $char")
+                    4, 8 -> append("-$char")
+                    else -> append(char)
+                }
+            }
+        }
+    }
 }
 
 enum class PhoneFormat {
     US,           // (XXX) XXX-XXXX
     INTERNATIONAL, // +X XXX XXX XXXX
     SIMPLE,       // XXX-XXX-XXXX
-    UK            // XXXXX XXXXXX
+    UK,           // XXXXX XXXXXX
+    GERMAN,       // +49 XXX XXXXXXX
+    FRENCH,       // +33 X XX XX XX XX
+    JAPANESE,     // +81 XX-XXXX-XXXX
+    AUSTRALIAN,   // +61 X XXXX XXXX
+    INDIAN,       // +91 XXXXX XXXXX
+    BRAZILIAN,    // +55 (XX) XXXXX-XXXX
+    TURKISH,      // +90 XXX XXX XX XX
+    KOREAN        // +82 XX-XXXX-XXXX
 }
 
 /**
@@ -172,6 +296,14 @@ fun PhoneNumberTextField(
         PhoneFormat.INTERNATIONAL -> 12
         PhoneFormat.SIMPLE -> 10
         PhoneFormat.UK -> 11
+        PhoneFormat.GERMAN -> 12
+        PhoneFormat.FRENCH -> 11
+        PhoneFormat.JAPANESE -> 12
+        PhoneFormat.AUSTRALIAN -> 11
+        PhoneFormat.INDIAN -> 12
+        PhoneFormat.BRAZILIAN -> 13
+        PhoneFormat.TURKISH -> 12
+        PhoneFormat.KOREAN -> 12
     }
 
     OutlinedTextField(
@@ -200,46 +332,114 @@ fun PhoneNumberTextField(
 fun formatPhoneNumber(digits: String, format: PhoneFormat = PhoneFormat.US): String {
     val cleanDigits = digits.filter { it.isDigit() }
     return when (format) {
-        PhoneFormat.US -> {
-            buildString {
-                cleanDigits.take(10).forEachIndexed { index, char ->
-                    when (index) {
-                        0 -> append("($char")
-                        2 -> append("$char) ")
-                        5 -> append("$char-")
-                        else -> append(char)
-                    }
+        PhoneFormat.US -> buildString {
+            cleanDigits.take(10).forEachIndexed { index, char ->
+                when (index) {
+                    0 -> append("($char")
+                    2 -> append("$char) ")
+                    5 -> append("$char-")
+                    else -> append(char)
                 }
             }
         }
-        PhoneFormat.INTERNATIONAL -> {
-            buildString {
-                if (cleanDigits.isNotEmpty()) append("+")
-                cleanDigits.take(12).forEachIndexed { index, char ->
-                    when (index) {
-                        1, 4, 7 -> append(" $char")
-                        else -> append(char)
-                    }
+        PhoneFormat.INTERNATIONAL -> buildString {
+            if (cleanDigits.isNotEmpty()) append("+")
+            cleanDigits.take(12).forEachIndexed { index, char ->
+                when (index) {
+                    1, 4, 7 -> append(" $char")
+                    else -> append(char)
                 }
             }
         }
-        PhoneFormat.SIMPLE -> {
-            buildString {
-                cleanDigits.take(10).forEachIndexed { index, char ->
-                    when (index) {
-                        3, 6 -> append("-$char")
-                        else -> append(char)
-                    }
+        PhoneFormat.SIMPLE -> buildString {
+            cleanDigits.take(10).forEachIndexed { index, char ->
+                when (index) {
+                    3, 6 -> append("-$char")
+                    else -> append(char)
                 }
             }
         }
-        PhoneFormat.UK -> {
-            buildString {
-                cleanDigits.take(11).forEachIndexed { index, char ->
-                    when (index) {
-                        5 -> append(" $char")
-                        else -> append(char)
-                    }
+        PhoneFormat.UK -> buildString {
+            cleanDigits.take(11).forEachIndexed { index, char ->
+                when (index) {
+                    5 -> append(" $char")
+                    else -> append(char)
+                }
+            }
+        }
+        PhoneFormat.GERMAN -> buildString {
+            if (cleanDigits.isNotEmpty()) append("+")
+            cleanDigits.take(12).forEachIndexed { index, char ->
+                when (index) {
+                    2, 5 -> append(" $char")
+                    else -> append(char)
+                }
+            }
+        }
+        PhoneFormat.FRENCH -> buildString {
+            if (cleanDigits.isNotEmpty()) append("+")
+            cleanDigits.take(11).forEachIndexed { index, char ->
+                when (index) {
+                    2, 3, 5, 7, 9 -> append(" $char")
+                    else -> append(char)
+                }
+            }
+        }
+        PhoneFormat.JAPANESE -> buildString {
+            if (cleanDigits.isNotEmpty()) append("+")
+            cleanDigits.take(12).forEachIndexed { index, char ->
+                when (index) {
+                    2 -> append(" $char")
+                    4, 8 -> append("-$char")
+                    else -> append(char)
+                }
+            }
+        }
+        PhoneFormat.AUSTRALIAN -> buildString {
+            if (cleanDigits.isNotEmpty()) append("+")
+            cleanDigits.take(11).forEachIndexed { index, char ->
+                when (index) {
+                    2, 3, 7 -> append(" $char")
+                    else -> append(char)
+                }
+            }
+        }
+        PhoneFormat.INDIAN -> buildString {
+            if (cleanDigits.isNotEmpty()) append("+")
+            cleanDigits.take(12).forEachIndexed { index, char ->
+                when (index) {
+                    2, 7 -> append(" $char")
+                    else -> append(char)
+                }
+            }
+        }
+        PhoneFormat.BRAZILIAN -> buildString {
+            if (cleanDigits.isNotEmpty()) append("+")
+            cleanDigits.take(13).forEachIndexed { index, char ->
+                when (index) {
+                    2 -> append(" ($char")
+                    4 -> append(") $char")
+                    9 -> append("-$char")
+                    else -> append(char)
+                }
+            }
+        }
+        PhoneFormat.TURKISH -> buildString {
+            if (cleanDigits.isNotEmpty()) append("+")
+            cleanDigits.take(12).forEachIndexed { index, char ->
+                when (index) {
+                    2, 5, 8, 10 -> append(" $char")
+                    else -> append(char)
+                }
+            }
+        }
+        PhoneFormat.KOREAN -> buildString {
+            if (cleanDigits.isNotEmpty()) append("+")
+            cleanDigits.take(12).forEachIndexed { index, char ->
+                when (index) {
+                    2 -> append(" $char")
+                    4, 8 -> append("-$char")
+                    else -> append(char)
                 }
             }
         }

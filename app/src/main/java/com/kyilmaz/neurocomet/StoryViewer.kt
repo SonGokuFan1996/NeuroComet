@@ -406,7 +406,7 @@ fun StoryViewerDialog(
                         OutlinedTextField(
                             value = replyText,
                             onValueChange = { replyText = it },
-                            placeholder = { Text("Reply to ${story.userName}...") },
+                            placeholder = { Text(stringResource(R.string.dm_reply_to_placeholder, story.userName)) },
                             modifier = Modifier.weight(1f),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
@@ -605,8 +605,8 @@ fun EnhancedCreateStoryDialog(
                 OutlinedTextField(
                     value = currentImageUrl,
                     onValueChange = { currentImageUrl = it },
-                    label = { Text("Image URL") },
-                    placeholder = { Text("https://example.com/image.jpg") },
+                    label = { Text(stringResource(R.string.create_story_image_url_hint)) },
+                    placeholder = { Text(stringResource(R.string.create_story_url_placeholder)) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     leadingIcon = {
@@ -623,7 +623,7 @@ fun EnhancedCreateStoryDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Duration:", style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(R.string.create_story_duration_hint), style = MaterialTheme.typography.bodyMedium)
                     listOf("3", "5", "7", "10").forEach { duration ->
                         FilterChip(
                             selected = currentDuration == duration,
@@ -639,8 +639,8 @@ fun EnhancedCreateStoryDialog(
                 OutlinedTextField(
                     value = currentTextOverlay,
                     onValueChange = { currentTextOverlay = it },
-                    label = { Text("Text Overlay (optional)") },
-                    placeholder = { Text("Add text to your story...") },
+                    label = { Text(stringResource(R.string.create_story_caption_label)) },
+                    placeholder = { Text(stringResource(R.string.create_story_caption_placeholder)) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     maxLines = 2
@@ -650,7 +650,7 @@ fun EnhancedCreateStoryDialog(
 
                 // Background color picker (for text-only stories)
                 Text(
-                    text = "Background Color:",
+                    text = stringResource(R.string.create_story_background_color),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Spacer(Modifier.height(8.dp))

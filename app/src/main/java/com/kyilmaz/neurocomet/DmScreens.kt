@@ -437,7 +437,7 @@ fun DmInboxScreen(
                             }
                         }
                     },
-                    placeholder = { Text("Search messages, names…") },
+                    placeholder = { Text(stringResource(R.string.dm_search_placeholder)) },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = { /* no-op */ })
                 )
@@ -667,7 +667,7 @@ private fun NeuroConversationListItem(
                 if (hasUnread) {
                     AssistChip(
                         onClick = onClick,
-                        label = { Text("Unread") },
+                        label = { Text(stringResource(R.string.filter_unread)) },
                         leadingIcon = { Icon(Icons.Filled.MarkChatUnread, contentDescription = null) },
                         colors = AssistChipDefaults.assistChipColors(
                             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
@@ -1167,7 +1167,7 @@ fun DmConversationScreen(
                                 )
                             }
                             FilledTonalButton(onClick = { onUnblockUser(recipientId) }) {
-                                Text("Unblock")
+                                Text(stringResource(R.string.dm_unblock_user))
                             }
                         }
                     } else {
@@ -1639,7 +1639,7 @@ private fun NeuroMessageBubble(
                         if (message.deliveryStatus == MessageDeliveryStatus.FAILED) {
                             AssistChip(
                                 onClick = onRetry,
-                                label = { Text("Tap to retry") },
+                                label = { Text(stringResource(R.string.dm_tap_to_retry)) },
                                 leadingIcon = { Icon(Icons.Filled.Refresh, contentDescription = null) }
                             )
                         }

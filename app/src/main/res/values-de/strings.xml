@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core UI -->
+    <string name="app_name">NeuroComet</string>
+    <string name="nav_feed">Startseite</string>
+    <string name="nav_explore">Entdecken</string>
+    <string name="nav_messages">Nachrichten</string>
+    <string name="nav_notifications">Benachrichtigungen</string>
+    <string name="nav_settings">Einstellungen</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in">Anmelden</string>
+    <string name="auth_sign_up">Registrieren</string>
+    <string name="auth_email_label">E-Mail</string>
+    <string name="auth_password_label">Passwort</string>
+    <string name="auth_create_account">Konto erstellen</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">Erscheinungsbild &amp; Anzeige</string>
+    <string name="settings_section_privacy">Datenschutz &amp; Sicherheit</string>
+    <string name="settings_section_notifications">Benachrichtigungen</string>
+    <string name="settings_section_accessibility">Barrierefreiheit</string>
+
+    <!-- Explore -->
+    <string name="explore_title">Entdecken</string>
+    <string name="explore_autism">Autismus</string>
+    <string name="explore_adhd">ADHS</string>
+    <string name="explore_anxiety">Angst</string>
+    <string name="explore_sensory">Sensorisch</string>
+
+    <!-- Games -->
+    <string name="games_hub_title">Spiele-Hub</string>
+    <string name="game_bubble_pop">Blasen platzen</string>
+    <string name="game_fidget_spinner">Fidget Spinner</string>
+
+    <!-- Feedback -->
+    <string name="feedback_hub_title">Feedback-Hub</string>
+    <string name="feedback_report_bug_title">Fehler melden</string>
+    <string name="feedback_request_feature_title">Funktion anfragen</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">Entwickler</string>
+    <string name="settings_developer_subtitle">Debug- &amp; Testwerkzeuge</string>
+    <string name="settings_developer_options_group">Entwickleroptionen</string>
+    <string name="settings_dev_options_desc">Erweiterte Optionen für Tests &amp; Debugging</string>
+    <string name="settings_force_verify_title">Verifizierung erzwingen</string>
+    <string name="settings_force_verify_subtitle">Verifizierungsstatus des Benutzers umschalten.</string>
+    <string name="settings_fake_premium_title">Fake Premium</string>
+    <string name="settings_fake_premium_subtitle">Bezahlstatus simulieren.</string>
+    <string name="settings_fake_premium">Fake Premium-Modus</string>
+    <string name="settings_fake_premium_enabled">Premium-Funktionen zum Testen freigeschaltet</string>
+    <string name="settings_fake_premium_disabled">Aktivieren, um Premium-Funktionen zu testen</string>
+    <string name="settings_mock_interface_title">Mock-Schnittstelle</string>
+    <string name="settings_mock_interface_subtitle">Fake-Daten für Demo anzeigen.</string>
+    <string name="settings_simulate_badge_title">Badge-Benachrichtigung simulieren</string>
+    <string name="settings_simulate_badge_subtitle">Löst Benachrichtigung für \'%s\' aus.</string>
+    <string name="settings_nuke_db_title">Datenbank löschen</string>
+    <string name="settings_nuke_db_subtitle">ALLE Beiträge löschen. Unwiderruflich.</string>
+    <string name="settings_nuke_db_dialog_title">Datenbank löschen?</string>
+    <string name="settings_nuke_db_dialog_text">Hiermit werden alle Beiträge dauerhaft vom Server gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.</string>
+    <string name="settings_nuke_db_dialog_confirm">LÖSCHEN</string>
+    <string name="settings_nuke_db_dialog_cancel">Abbrechen</string>
+    <string name="settings_language_test_title">App-Sprache (Test)</string>
+    <string name="settings_language_test_subtitle">App-Sprache manuell festlegen. Erfordert Neustart.</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">Entwickleroptionen</string>
+    <string name="dev_phone_format_test">Telefonnummern-Formatierung</string>
+    <string name="dev_phone_format_test_desc">Auto-Formatierung für verschiedene Regionen testen</string>
+    <string name="dev_phone_format_style">Formatstil</string>
+    <string name="dev_phone_test_input">Telefonnummer eingeben</string>
+    <string name="dev_phone_format_pattern">Muster</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">Anmeldedaten-Speicher</string>
+    <string name="dev_credential_test_save">Test speichern</string>
+    <string name="dev_credential_test_retrieve">Test abrufen</string>
+    <string name="dev_credential_clear_all">Alle Anmeldedaten löschen</string>
+    <string name="dev_credential_session_status">Sitzungsstatus</string>
+    <string name="dev_credential_biometric_status">Biometrie-Status</string>
+    <string name="dev_credential_create_session">Testsitzung erstellen</string>
+    <string name="dev_credential_end_session">Sitzung beenden</string>
+    <string name="dev_credential_extend_session">Sitzung verlängern</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">Debug-Werkzeuge</string>
+    <string name="debug_performance_overlay">Leistungsoverlay</string>
+    <string name="debug_performance_desc">Zeigt FPS, Speicher und Scroll-Statistiken</string>
+    <string name="debug_reset_counters">Zähler zurücksetzen</string>
+
+    <!-- General Settings -->
+    <string name="settings_profile_group">Profil</string>
+    <string name="settings_badges_title">Abzeichen</string>
+    <string name="settings_badges_subtitle">Ihre verdienten Erfolge und Ziele ansehen.</string>
+    <string name="settings_visual_comfort_group">Visuelle Komfort &amp; Themen</string>
+    <string name="settings_text_size_title">Textgröße</string>
+    <string name="settings_dark_mode_title">Dunkelmodus</string>
+    <string name="settings_dark_mode_enabled">Aktiviert</string>
+    <string name="settings_dark_mode_disabled">Deaktiviert</string>
+    <string name="settings_high_contrast_title">Hochkontrastmodus</string>
+    <string name="settings_high_contrast_subtitle_enabled">Aktiviert (Reines Schwarz/Weiß)</string>
+    <string name="settings_high_contrast_subtitle_disabled">Deaktiviert</string>
+    <string name="settings_neuro_centric_theme_title">Neuro-Zentrisches Theme</string>
+    <string name="settings_go_premium_title">Premium werden</string>
+    <string name="settings_go_premium_subtitle">Werbung entfernen und Entwickler unterstützen.</string>
+    <string name="settings_account_group">Konto</string>
+    <string name="settings_logout">Abmelden</string>
+    <string name="settings_verified_human_title">Verifizierter Mensch</string>
+    <string name="settings_verified_human_subtitle_verified">Status: Verifiziert</string>
+    <string name="settings_verified_human_subtitle_unverified">Status: Nicht verifiziert</string>
+    <string name="settings_2fa_title">Zwei-Faktor-Auth</string>
+    <string name="settings_2fa_subtitle">Code bei der Anmeldung erforderlich.</string>
+</resources>
+

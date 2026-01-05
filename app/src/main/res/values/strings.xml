@@ -9,6 +9,270 @@
     <string name="nav_notifications">Alerts</string>
     <string name="nav_settings">Settings</string>
 
+    <!-- Auth Screen -->
+    <string name="auth_app_tagline">A safe space for every mind ✨</string>
+    <string name="auth_sign_in">Sign In</string>
+    <string name="auth_sign_up">Sign Up</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_email_placeholder">your@email.com</string>
+    <string name="auth_password_label">Password</string>
+    <string name="auth_confirm_password_label">Confirm Password</string>
+    <string name="auth_password_requirements">🔒 Password must be 12+ characters with uppercase, lowercase, number, and symbol.</string>
+    <string name="auth_create_account">Create Account</string>
+    <string name="auth_passwords_not_match">Passwords do not match</string>
+    <string name="auth_password_weak">Password doesn\'t meet requirements</string>
+    <string name="auth_skip">Skip for now</string>
+    <string name="auth_skip_dev">Skip for now (dev)</string>
+    <string name="auth_data_secure">Your data is encrypted and secure</string>
+    <string name="auth_2fa_title">Two-Factor Authentication</string>
+    <string name="auth_2fa_description">Enter the 6-digit code sent to your device</string>
+    <string name="auth_2fa_code_label">6-Digit Code</string>
+    <string name="auth_2fa_code_placeholder">123456</string>
+    <string name="auth_2fa_verify">Verify</string>
+    <string name="auth_hide_password">Hide password</string>
+    <string name="auth_show_password">Show password</string>
+
+    <!-- Auth Tutorial -->
+    <string name="auth_tutorial_welcome_title">Welcome Home 💜</string>
+    <string name="auth_tutorial_welcome_desc">NeuroComet is a safe, affirming space for neurodivergent and LGBTQ+ minds. You belong here exactly as you are—no masking required.</string>
+    <string name="auth_tutorial_comfort_title">Your Comfort Matters ∞</string>
+    <string name="auth_tutorial_comfort_desc_anim">Tap the infinity symbol anytime to reduce visual motion. We designed this for sensory-friendly browsing.</string>
+    <string name="auth_tutorial_comfort_desc_static">Perfect! You\'ve activated calm mode. Tap again whenever you need more or less motion.</string>
+    <string name="auth_tutorial_themes_title">25+ Neuro-State Themes 🎨</string>
+    <string name="auth_tutorial_themes_desc">Choose themes designed for ADHD focus, autism comfort, anxiety relief, colorblind accessibility, and mood support. Your brain, your way.</string>
+    <string name="auth_tutorial_fonts_title">Dyslexia-Friendly Fonts 📖</string>
+    <string name="auth_tutorial_fonts_desc">12+ accessibility fonts including OpenDyslexic, Lexend, and Atkinson Hyperlegible. Adjust spacing, weight, and size to match how YOUR brain reads best.</string>
+    <string name="auth_tutorial_community_title">Community &amp; Pride 🌈</string>
+    <string name="auth_tutorial_community_desc">Connect with people who get it. Neurodivergent, LGBTQ+, and allies—all brains, all identities, all beautiful. Special themes for Pride, Autism Day, and ADHD Month!</string>
+    <string name="auth_tutorial_safety_title">Built for Safety 🛡️</string>
+    <string name="auth_tutorial_safety_desc">Content filtering, parental controls, screen time limits, and bedtime mode protect your wellbeing. You control what you see and when.</string>
+    <string name="auth_tutorial_ready_title">Ready to Begin! ✨</string>
+    <string name="auth_tutorial_ready_desc">Sign in or create your account to join thousands of neurodivergent and LGBTQ+ individuals. This is YOUR space—explore at your own pace.</string>
+    <string name="auth_tutorial_skip">Skip</string>
+    <string name="auth_tutorial_continue">Continue</string>
+    <string name="auth_tutorial_lets_go">Let\'s Go! ✨</string>
+    <string name="auth_tutorial_step_count">%1$d of %2$d</string>
+    <string name="auth_tutorial_tap_here">Tap here</string>
+
+    <!-- Splash Screen -->
+    <string name="splash_tagline_default">A space designed for you</string>
+    <string name="splash_tagline_hyperfocus">Distraction-free zone</string>
+    <string name="splash_tagline_overload">Low stimulation mode</string>
+    <string name="splash_tagline_calm">Your tranquil space</string>
+    <string name="splash_tagline_adhd_energized">Ride the wave</string>
+    <string name="splash_tagline_adhd_low_dopamine">Gentle motivation</string>
+    <string name="splash_tagline_adhd_task_mode">Minimal distractions</string>
+    <string name="splash_tagline_autism_routine">Predictable &amp; safe</string>
+    <string name="splash_tagline_autism_sensory_seek">Rich experiences await</string>
+    <string name="splash_tagline_autism_low_stim">Minimal stimulation</string>
+    <string name="splash_tagline_anxiety_soothe">Calming your mind</string>
+    <string name="splash_tagline_anxiety_grounding">Rooted in now</string>
+    <string name="splash_tagline_dyslexia_friendly">Designed for clarity</string>
+    <string name="splash_tagline_colorblind_deuteranopia">Deuteranopia friendly</string>
+    <string name="splash_tagline_colorblind_protanopia">Protanopia friendly</string>
+    <string name="splash_tagline_colorblind_tritanopia">Tritanopia friendly</string>
+    <string name="splash_tagline_colorblind_monochromacy">Pattern-based design</string>
+    <string name="splash_tagline_blind_screen_reader">Optimized for TalkBack</string>
+    <string name="splash_tagline_blind_high_contrast">Pure black and white</string>
+    <string name="splash_tagline_blind_large_text">Extra large text mode</string>
+    <string name="splash_tagline_mood_tired">Rest is okay</string>
+    <string name="splash_tagline_mood_anxious">Breathe with us</string>
+    <string name="splash_tagline_mood_happy">Let\'s celebrate you</string>
+    <string name="splash_tagline_mood_overwhelmed">Taking it gentle</string>
+    <string name="splash_tagline_mood_creative">Let ideas flow</string>
+    <string name="splash_tagline_rainbow_brain">Embrace your rainbow brain</string>
+
+    <!-- Splash Messages - Default -->
+    <string name="splash_msg_default_1">Welcome back</string>
+    <string name="splash_msg_default_2">Your space awaits</string>
+    <string name="splash_msg_default_3">Let\'s begin</string>
+
+    <!-- Splash Messages - Hyperfocus -->
+    <string name="splash_msg_hyperfocus_1">Focus mode</string>
+    <string name="splash_msg_hyperfocus_2">Clear mind ahead</string>
+    <string name="splash_msg_hyperfocus_3">Ready to dive deep</string>
+
+    <!-- Splash Messages - Overload -->
+    <string name="splash_msg_overload_1">Taking it slow</string>
+    <string name="splash_msg_overload_2">Breathe with me</string>
+    <string name="splash_msg_overload_3">Gentle pace</string>
+
+    <!-- Splash Messages - Calm -->
+    <string name="splash_msg_calm_1">Peace awaits</string>
+    <string name="splash_msg_calm_2">Serenity mode</string>
+    <string name="splash_msg_calm_3">Calm waters</string>
+
+    <!-- Splash Messages - ADHD Energized -->
+    <string name="splash_msg_adhd_energized_1">Let\'s go! ⚡</string>
+    <string name="splash_msg_adhd_energized_2">Energy unlocked</string>
+    <string name="splash_msg_adhd_energized_3">Time to shine</string>
+
+    <!-- Splash Messages - ADHD Low Dopamine -->
+    <string name="splash_msg_adhd_low_dopamine_1">Warming up</string>
+    <string name="splash_msg_adhd_low_dopamine_2">Finding your spark</string>
+    <string name="splash_msg_adhd_low_dopamine_3">You\'ve got this</string>
+
+    <!-- Splash Messages - ADHD Task Mode -->
+    <string name="splash_msg_adhd_task_mode_1">Task mode</string>
+    <string name="splash_msg_adhd_task_mode_2">One thing at a time</string>
+    <string name="splash_msg_adhd_task_mode_3">Focus activated</string>
+
+    <!-- Splash Messages - Autism Routine -->
+    <string name="splash_msg_autism_routine_1">Same as always</string>
+    <string name="splash_msg_autism_routine_2">Familiar patterns</string>
+    <string name="splash_msg_autism_routine_3">Comfort in routine</string>
+
+    <!-- Splash Messages - Autism Sensory Seek -->
+    <string name="splash_msg_autism_sensory_seek_1">Sensory joy</string>
+    <string name="splash_msg_autism_sensory_seek_2">Feel the patterns</string>
+    <string name="splash_msg_autism_sensory_seek_3">Satisfying vibes</string>
+
+    <!-- Splash Messages - Autism Low Stim -->
+    <string name="splash_msg_autism_low_stim_1">Quiet mode</string>
+    <string name="splash_msg_autism_low_stim_2">Soft &amp; gentle</string>
+    <string name="splash_msg_autism_low_stim_3">Rest your senses</string>
+
+    <!-- Splash Messages - Anxiety Soothe -->
+    <string name="splash_msg_anxiety_soothe_1">You\'re safe here</string>
+    <string name="splash_msg_anxiety_soothe_2">Breathe in, breathe out</string>
+    <string name="splash_msg_anxiety_soothe_3">All is well</string>
+
+    <!-- Splash Messages - Anxiety Grounding -->
+    <string name="splash_msg_anxiety_grounding_1">Feet on the ground</string>
+    <string name="splash_msg_anxiety_grounding_2">Present moment</string>
+    <string name="splash_msg_anxiety_grounding_3">Stable &amp; secure</string>
+
+    <!-- Splash Messages - Dyslexia Friendly -->
+    <string name="splash_msg_dyslexia_friendly_1">Clear &amp; readable</string>
+    <string name="splash_msg_dyslexia_friendly_2">Your way</string>
+    <string name="splash_msg_dyslexia_friendly_3">Easy reading ahead</string>
+
+    <!-- Splash Messages - Colorblind -->
+    <string name="splash_msg_colorblind_deuter_1">Colors optimized</string>
+    <string name="splash_msg_colorblind_deuter_2">Blue &amp; orange clarity</string>
+    <string name="splash_msg_colorblind_deuter_3">See with confidence</string>
+    <string name="splash_msg_colorblind_protan_1">Colors adapted</string>
+    <string name="splash_msg_colorblind_protan_2">Blue &amp; yellow harmony</string>
+    <string name="splash_msg_colorblind_protan_3">Clear distinction</string>
+    <string name="splash_msg_colorblind_tritan_1">Colors refined</string>
+    <string name="splash_msg_colorblind_tritan_2">Pink &amp; teal contrast</string>
+    <string name="splash_msg_colorblind_tritan_3">Visual clarity</string>
+    <string name="splash_msg_colorblind_mono_1">Shapes &amp; patterns</string>
+    <string name="splash_msg_colorblind_mono_2">High contrast</string>
+    <string name="splash_msg_colorblind_mono_3">Clear boundaries</string>
+
+    <!-- Splash Messages - Blind / Low Vision -->
+    <string name="splash_msg_blind_reader_1">Screen reader ready</string>
+    <string name="splash_msg_blind_reader_2">Accessibility first</string>
+    <string name="splash_msg_blind_reader_3">Welcome</string>
+    <string name="splash_msg_blind_contrast_1">Maximum contrast</string>
+    <string name="splash_msg_blind_contrast_2">Clear and bold</string>
+    <string name="splash_msg_blind_contrast_3">Easy to see</string>
+    <string name="splash_msg_blind_large_1">Large and clear</string>
+    <string name="splash_msg_blind_large_2">Easy reading</string>
+    <string name="splash_msg_blind_large_3">Your way</string>
+
+    <!-- Splash Messages - Mood -->
+    <string name="splash_msg_mood_tired_1">Take it easy</string>
+    <string name="splash_msg_mood_tired_2">No rush</string>
+    <string name="splash_msg_mood_tired_3">Gentle start</string>
+    <string name="splash_msg_mood_anxious_1">You\'re okay</string>
+    <string name="splash_msg_mood_anxious_2">This too shall pass</string>
+    <string name="splash_msg_mood_anxious_3">Safe space</string>
+    <string name="splash_msg_mood_happy_1">Hello sunshine! ☀️</string>
+    <string name="splash_msg_mood_happy_2">Great vibes</string>
+    <string name="splash_msg_mood_happy_3">Joy awaits</string>
+    <string name="splash_msg_mood_overwhelmed_1">One breath</string>
+    <string name="splash_msg_mood_overwhelmed_2">Slowing down</string>
+    <string name="splash_msg_mood_overwhelmed_3">We\'ve got you</string>
+    <string name="splash_msg_mood_creative_1">Inspiration incoming</string>
+    <string name="splash_msg_mood_creative_2">Create freely</string>
+    <string name="splash_msg_mood_creative_3">Imagination mode</string>
+
+    <!-- Splash Messages - Rainbow Brain (secret theme) -->
+    <string name="splash_msg_rainbow_1">🦄 You found the secret!</string>
+    <string name="splash_msg_rainbow_2">🌈 Celebrate your unique mind</string>
+    <string name="splash_msg_rainbow_3">✨ Neurodivergence is magic</string>
+    <string name="splash_msg_rainbow_4">🧠 Your brain is beautiful</string>
+    <string name="splash_msg_rainbow_5">💜 Different is powerful</string>
+
+    <!-- NeuroState Categories -->
+    <string name="neuro_category_basic">Basic Themes</string>
+    <string name="neuro_category_adhd">ADHD Themes</string>
+    <string name="neuro_category_autism">Autism Themes</string>
+    <string name="neuro_category_anxiety">Anxiety/OCD Themes</string>
+    <string name="neuro_category_accessibility">Accessibility</string>
+    <string name="neuro_category_colorblind">Colorblind Friendly</string>
+    <string name="neuro_category_blind">Blind &amp; Low Vision</string>
+    <string name="neuro_category_mood">How Are You Feeling?</string>
+    <string name="neuro_category_secret">🦄 Secret Themes</string>
+
+    <!-- NeuroState Names -->
+    <string name="neuro_state_default">Default</string>
+    <string name="neuro_state_hyperfocus">Hyperfocus</string>
+    <string name="neuro_state_overload">Sensory Overload</string>
+    <string name="neuro_state_calm">Calm</string>
+    <string name="neuro_state_adhd_energized">ADHD - Energized</string>
+    <string name="neuro_state_adhd_low_dopamine">ADHD - Low Dopamine</string>
+    <string name="neuro_state_adhd_task_mode">ADHD - Task Mode</string>
+    <string name="neuro_state_autism_routine">Autism - Routine</string>
+    <string name="neuro_state_autism_sensory_seek">Autism - Sensory Seeking</string>
+    <string name="neuro_state_autism_low_stim">Autism - Low Stimulation</string>
+    <string name="neuro_state_anxiety_soothe">Anxiety - Soothe</string>
+    <string name="neuro_state_anxiety_grounding">Anxiety - Grounding</string>
+    <string name="neuro_state_dyslexia_friendly">Dyslexia Friendly</string>
+    <string name="neuro_state_colorblind_deuter">Deuteranopia</string>
+    <string name="neuro_state_colorblind_protan">Protanopia</string>
+    <string name="neuro_state_colorblind_tritan">Tritanopia</string>
+    <string name="neuro_state_colorblind_mono">Monochromacy</string>
+    <string name="neuro_state_blind_screen_reader">Screen Reader Mode</string>
+    <string name="neuro_state_blind_high_contrast">Maximum Contrast</string>
+    <string name="neuro_state_blind_large_text">Large Text Mode</string>
+    <string name="neuro_state_mood_tired">Feeling Tired</string>
+    <string name="neuro_state_mood_anxious">Feeling Anxious</string>
+    <string name="neuro_state_mood_happy">Feeling Happy</string>
+    <string name="neuro_state_mood_overwhelmed">Feeling Overwhelmed</string>
+    <string name="neuro_state_mood_creative">Feeling Creative</string>
+    <string name="neuro_state_rainbow_brain">Rainbow Brain</string>
+
+    <!-- NeuroState Descriptions -->
+    <string name="neuro_state_default_desc">Standard theme with balanced colors</string>
+    <string name="neuro_state_hyperfocus_desc">High contrast for deep concentration</string>
+    <string name="neuro_state_overload_desc">Muted, calm colors to reduce stimulation</string>
+    <string name="neuro_state_calm_desc">Soft, soothing colors for relaxation</string>
+    <string name="neuro_state_adhd_energized_desc">Bright, engaging colors for productive days</string>
+    <string name="neuro_state_adhd_low_dopamine_desc">Warm, stimulating colors to boost mood</string>
+    <string name="neuro_state_adhd_task_mode_desc">Minimal distractions, focus-enhancing palette</string>
+    <string name="neuro_state_autism_routine_desc">Predictable, consistent color patterns</string>
+    <string name="neuro_state_autism_sensory_seek_desc">Rich textures and satisfying contrasts</string>
+    <string name="neuro_state_autism_low_stim_desc">Very muted, gentle colors</string>
+    <string name="neuro_state_anxiety_soothe_desc">Cool, reassuring colors to ease worry</string>
+    <string name="neuro_state_anxiety_grounding_desc">Earthy, stable colors for centering</string>
+    <string name="neuro_state_dyslexia_friendly_desc">High readability with optimal contrast</string>
+    <string name="neuro_state_colorblind_deuter_desc">Optimized for red-green (green-weak) color blindness</string>
+    <string name="neuro_state_colorblind_protan_desc">Optimized for red-green (red-weak) color blindness</string>
+    <string name="neuro_state_colorblind_tritan_desc">Optimized for blue-yellow color blindness</string>
+    <string name="neuro_state_colorblind_mono_desc">High contrast grayscale for complete color blindness</string>
+    <string name="neuro_state_blind_screen_reader_desc">Optimized for TalkBack and screen readers with maximum contrast</string>
+    <string name="neuro_state_blind_high_contrast_desc">Pure black/white for users with very low vision</string>
+    <string name="neuro_state_blind_large_text_desc">Extra large text with simplified layout</string>
+    <string name="neuro_state_mood_tired_desc">Gentle colors that don\'t strain the eyes</string>
+    <string name="neuro_state_mood_anxious_desc">Calming palette to reduce stress</string>
+    <string name="neuro_state_mood_happy_desc">Cheerful colors to match your mood</string>
+    <string name="neuro_state_mood_overwhelmed_desc">Simplified, quiet palette</string>
+    <string name="neuro_state_mood_creative_desc">Inspiring colors to fuel imagination</string>
+    <string name="neuro_state_rainbow_brain_desc">Celebrate your beautifully unique neurodivergent mind! 🌈🧠</string>
+
+    <!-- Accessibility Strings -->
+    <string name="accessibility_selected">selected</string>
+    <string name="accessibility_not_selected">not selected</string>
+    <string name="expand_category">Expand %1$s</string>
+    <string name="collapse_category">Collapse %1$s</string>
+
+    <!-- Easter Egg Dialog -->
+    <string name="easter_egg_secret_unlocked">🎊 Secret Unlocked! 🎊</string>
+    <string name="easter_egg_welcome_back">🦄 Welcome Back! 🦄</string>
+
     <!-- Direct Messages (DM) -->
     <string name="dm_title">Messages</string>
     <string name="dm_search_placeholder">Search messages</string>
@@ -35,6 +299,11 @@
     <string name="dm_safety_title">Safety</string>
     <string name="dm_safety_body">If something feels wrong, report abusive messages. Under-13 accounts can’t use DMs.</string>
     <string name="dm_message_placeholder">Message</string>
+    <string name="dm_search_conversations_placeholder">Search conversations</string>
+    <string name="dm_reply_to_placeholder">Reply to %s…</string>
+    <string name="create_post_share_thoughts">Share your thoughts with the community…</string>
+    <string name="image_editor_type_text">Type your text…</string>
+    <string name="image_editor_enter_text">Enter your text…</string>
     <string name="dm_send">Send</string>
     <string name="dm_back">Back</string>
     <string name="dm_report">Report</string>
@@ -130,11 +399,6 @@
     <string name="comments_add_comment_placeholder">Add a comment…</string>
     <string name="comments_send_button_description">Send</string>
 
-    <!-- NeuroState Names -->
-    <string name="neuro_state_default">Default</string>
-    <string name="neuro_state_hyperfocus">Hyperfocus</string>
-    <string name="neuro_state_overload">Overload</string>
-    <string name="neuro_state_calm">Calm</string>
 
     <!-- Text Scale Factor Names -->
     <string name="text_scale_small">Small</string>
@@ -152,6 +416,19 @@
     <string name="create_story_duration_hint">Duration in seconds (e.g., 5)</string>
     <string name="create_story_add_button">ADD STORY</string>
     <string name="create_story_cancel">Cancel</string>
+    <string name="create_story_caption_label">Caption (optional)</string>
+    <string name="create_story_caption_placeholder">Add a caption…</string>
+    <string name="create_story_understood">Understood</string>
+    <string name="create_story_posting">Posting…</string>
+    <string name="create_story_url_label">URL</string>
+    <string name="create_story_url_placeholder">https://…</string>
+    <string name="create_story_message_label">Your message</string>
+    <string name="create_story_message_placeholder">What\'s on your mind?</string>
+    <string name="create_story_share_link">Share a link with a preview</string>
+    <string name="create_story_create_text">Create a text story</string>
+    <string name="create_story_text_preview">Your text here…</string>
+    <string name="create_story_background_color">Background Color</string>
+    <string name="create_story_gradient_backgrounds">Gradient Backgrounds</string>
     <string name="story_add_button_content_description">Add Story</string>
     <string name="story_your_story_label">Your Story</string>
     <string name="story_user_story_content_description">%s\'s Story</string>
@@ -262,6 +539,10 @@
     <string name="button_ok">OK</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_yes">Yes</string>
+
+    <!-- Parental Controls Dialogs -->
+    <string name="posting_restricted_title">Posting Restricted</string>
+    <string name="posting_restricted_message">Posting has been disabled by parental controls. Ask a parent or guardian to change this setting.</string>
     <string name="button_no">No</string>
     <string name="button_close">Close</string>
     <string name="button_save">Save</string>
@@ -519,8 +800,26 @@
     <string name="settings_dark_mode_desc">Use dark theme for low-light environments</string>
     <string name="settings_high_contrast">High Contrast</string>
     <string name="settings_high_contrast_desc">Maximum contrast for visibility</string>
+    <string name="settings_app_icon">App Icon</string>
+    <string name="settings_app_icon_desc">Choose your favorite icon style</string>
+    <string name="icon_style_default">Default Comet</string>
+    <string name="icon_style_default_desc">The classic NeuroComet icon</string>
+    <string name="icon_style_calm">Calm Waters</string>
+    <string name="icon_style_calm_desc">Soothing blue tones for relaxation</string>
+    <string name="icon_style_focus">Focus Mode</string>
+    <string name="icon_style_focus_desc">Minimal design to reduce distractions</string>
+    <string name="icon_style_energy">Energy Burst</string>
+    <string name="icon_style_energy_desc">Vibrant colors for motivation</string>
+    <string name="icon_style_sensory">Sensory Friendly</string>
+    <string name="icon_style_sensory_desc">Muted tones gentle on the eyes</string>
+    <string name="icon_style_pride">Neurodiversity Pride</string>
+    <string name="icon_style_pride_desc">Celebrate neurodivergent identity</string>
+    <string name="icon_customization_title">Choose Your Icon</string>
+    <string name="icon_customization_subtitle">Pick an icon that matches your mood and needs</string>
+    <string name="icon_applied">Icon applied! Restart your launcher if it doesn\'t update. 🎨</string>
     <string name="settings_privacy">Privacy Settings</string>
     <string name="settings_privacy_desc">Who can see your content &amp; message you</string>
+    <string name="privacy_muted_word_label">Word or phrase</string>
     <string name="settings_blocked">Blocked Accounts</string>
     <string name="settings_blocked_desc">Manage users you\'ve blocked</string>
     <string name="settings_data">Data &amp; Storage</string>
@@ -542,6 +841,12 @@
     <string name="settings_parental">Parental Controls</string>
     <string name="settings_parental_desc">Safety settings for younger users</string>
     <string name="settings_parental_pin_set">PIN is set • Tap to manage</string>
+    <string name="parental_pin_label">PIN</string>
+    <string name="parental_pin_confirm_label">Confirm PIN</string>
+    <string name="parental_pin_current_label">Current PIN</string>
+    <string name="parental_pin_new_label">New PIN</string>
+    <string name="parental_pin_confirm_new_label">Confirm New PIN</string>
+    <string name="parental_pin_enter_confirm">Enter PIN to confirm</string>
     <string name="settings_kid_mode">Kid Mode</string>
     <string name="settings_kid_mode_desc">Age-appropriate content filtering</string>
     <string name="settings_keep_screen_on">Keep Screen On</string>
@@ -711,6 +1016,40 @@
     <string name="game_infinity_draw_desc">Draw endless patterns that never fade - pure stim bliss</string>
     <string name="game_sensory_rain">Sensory Rain</string>
     <string name="game_sensory_rain_desc">Watch beautiful raindrops fall with soothing visuals</string>
+    <string name="game_breathing_bubbles">Breathing Bubbles</string>
+    <string name="game_breathing_bubbles_desc">Follow the bubble to practice calm breathing</string>
+    <string name="game_breathing_bubbles_hint">Breathe in as the bubble grows, out as it shrinks 🫧</string>
+    <string name="game_texture_tiles">Texture Tiles</string>
+    <string name="game_texture_tiles_desc">Tap tiles to feel different satisfying textures</string>
+    <string name="game_texture_tiles_hint">Each tile has unique haptic feedback - find your favorites!</string>
+    <string name="game_sound_garden">Sound Garden</string>
+    <string name="game_sound_garden_desc">Create ambient soundscapes by planting sound flowers</string>
+    <string name="game_sound_garden_hint">Tap to plant, long-press to remove. Layer sounds together! 🌸</string>
+
+    <!-- In-Development Games -->
+    <string name="game_stim_sequencer">Stim Sequencer</string>
+    <string name="game_stim_sequencer_desc">Create your own satisfying rhythm patterns</string>
+    <string name="game_stim_sequencer_hint">Tap pads to build your beat! Long-press to clear 🎵</string>
+    <string name="game_emotion_garden">Emotion Garden</string>
+    <string name="game_emotion_garden_desc">Grow flowers that represent your feelings</string>
+    <string name="game_emotion_garden_hint">Tap to plant an emotion flower, watch it grow! 🌸</string>
+    <string name="game_safe_space">Safe Space Builder</string>
+    <string name="game_safe_space_desc">Design your own calming virtual room</string>
+    <string name="game_safe_space_hint">Add items to create your perfect calm space 🏠</string>
+    <string name="game_worry_jar">Worry Jar</string>
+    <string name="game_worry_jar_desc">Write worries and watch them float away</string>
+    <string name="game_worry_jar_hint">Type a worry and release it to the jar ✨</string>
+    <string name="game_constellation_connect">Constellation Connect</string>
+    <string name="game_constellation_connect_desc">Draw lines between stars to create constellations</string>
+    <string name="game_constellation_connect_hint">Connect the stars to reveal patterns ⭐</string>
+    <string name="game_zen_sand">Zen Sand Garden</string>
+    <string name="game_zen_sand_desc">Draw calming patterns in virtual sand</string>
+    <string name="game_zen_sand_hint">Trace your finger to create ripples 🏝️</string>
+    <string name="game_mood_mixer">Mood Mixer</string>
+    <string name="game_mood_mixer_desc">Blend colors to match your current mood</string>
+    <string name="game_mood_mixer_hint">Drag colors together to create new feelings 🎨</string>
+    <string name="game_coming_soon">Coming Soon</string>
+    <string name="game_in_development">🚧 In Development</string>
 
     <!-- Explore Topic Detail Screen -->
     <string name="topic_not_found">Topic not found</string>
@@ -1112,5 +1451,186 @@
     <string name="security_status_fair">⚠️ Device security: Fair - Some features may be restricted</string>
     <string name="security_status_at_risk">🔴 Device security: At risk - Security features enabled</string>
     <string name="security_status_critical">🚨 Device security: Critical - App restrictions active</string>
+
+    <!-- Theme Settings -->
+    <string name="theme_settings_title">Theme Settings</string>
+    <string name="theme_settings_subtitle">Choose a theme that works for you</string>
+    <string name="theme_current_theme">Current Theme</string>
+    <string name="theme_quick_settings">Quick Settings</string>
+    <string name="theme_dynamic_colors">Dynamic Colors</string>
+    <string name="theme_dynamic_colors_active">Dynamic Colors Active</string>
+    <string name="theme_dynamic_colors_hint">Disable Dynamic Colors in Quick Settings below to use custom themes.</string>
+    <string name="theme_dynamic_colors_desc">Use colors from your device wallpaper (Material You)</string>
+    <string name="theme_dynamic_colors_unavailable">Requires Android 12 or higher</string>
+    <string name="theme_disabled_dynamic_active">Disabled (Dynamic Colors active)</string>
+    <string name="theme_rainbow_unlocked">🦄 You\'ve unlocked the Rainbow Brain theme!\nScroll down to Secret Themes to try it!</string>
+    <string name="theme_made_with_love">Made with 💜 for every unique mind</string>
+    <string name="easter_egg_rainbow_unlocked">🦄 You\'ve unlocked the Rainbow Brain theme!\nFind it in Theme Settings → Secret Themes</string>
+
+    <!-- Google Ads -->
+    <string name="ads_loading">Loading ad…</string>
+    <string name="ads_premium_no_ads">No ads - Premium member</string>
+    <string name="ads_watch_to_support">Watch a short ad to support NeuroComet</string>
+    <string name="ads_rewarded_complete">Thank you! You earned a reward.</string>
+    <string name="ads_disabled_kids">Ads are disabled in Kids Mode</string>
+    <string name="ads_error_load_failed">Ad failed to load</string>
+
+    <!-- Neurodivergent Widgets -->
+    <string name="widget_focus_timer">Focus Timer</string>
+    <string name="widget_energy_level">Energy Level</string>
+    <string name="widget_social_battery">Social Battery</string>
+    <string name="widget_task_checklist">Today\'s Tasks</string>
+    <string name="widget_calm_corner">Calm Corner</string>
+    <string name="widget_daily_checkin">How are you feeling?</string>
+    <string name="widget_sensory_status">Sensory Status</string>
+    <string name="widget_minutes_remaining">minutes remaining</string>
+    <string name="widget_add_task">Add Task</string>
+
+    <!-- Image Customization -->
+    <string name="image_edit_title">Edit Image</string>
+    <string name="image_edit_filters">Filters</string>
+    <string name="image_edit_adjust">Adjust</string>
+    <string name="image_edit_text">Text</string>
+    <string name="image_edit_stickers">Stickers</string>
+    <string name="image_edit_draw">Draw</string>
+    <string name="image_edit_crop">Crop</string>
+    <string name="image_edit_brightness">Brightness</string>
+    <string name="image_edit_contrast">Contrast</string>
+    <string name="image_edit_saturation">Saturation</string>
+    <string name="image_edit_add_text">Add text…</string>
+    <string name="image_edit_drawing_on">Drawing mode on</string>
+    <string name="image_edit_undo">Undo</string>
+    <string name="image_edit_done">Done</string>
+
+    <!-- Explore Views -->
+    <string name="explore_view_grid">Grid</string>
+    <string name="explore_view_compact">Compact</string>
+    <string name="explore_view_standard">Standard</string>
+    <string name="explore_view_large">Large</string>
+
+    <!-- Multi-Media Posts -->
+    <string name="post_media_count">%d of %d</string>
+    <string name="post_max_media_reached">Maximum %d items allowed</string>
+    <string name="post_add_more_media">Add more</string>
+    <string name="post_remove_media">Remove</string>
+    <string name="post_video_indicator">Video</string>
+    <string name="post_photos_count">%d photos</string>
+
+    <!-- Home Screen Widgets -->
+    <string name="widget_energy_name">Energy Level</string>
+    <string name="widget_energy_description">Track your energy and social battery level from your home screen</string>
+    <string name="widget_focus_timer_name">Focus Timer</string>
+    <string name="widget_focus_timer_description">Start and manage focus sessions directly from your home screen</string>
+    <string name="widget_mood_name">Mood Tracker</string>
+    <string name="widget_mood_description">Quick mood check-ins from your home screen</string>
+    <string name="widget_spoon_name">Spoon Counter</string>
+    <string name="widget_spoon_description">Track your daily energy spoons using spoon theory</string>
+    <string name="widget_affirmation_name">Daily Affirmation</string>
+    <string name="widget_affirmation_description">Neurodivergent-affirming daily messages to brighten your day</string>
+    <string name="widget_stim_break_name">Stim Break</string>
+    <string name="widget_stim_break_description">Track and remind yourself to take sensory regulation breaks</string>
+
+    <!-- Pull to Refresh -->
+    <string name="pull_to_refresh">Pull to refresh</string>
+    <string name="release_to_refresh">Release to refresh</string>
+    <string name="refreshing">Refreshing…</string>
+    <string name="refresh_complete">Refresh complete</string>
+
+    <!-- Location & Sensors -->
+    <string name="location_permission_title">Location Access</string>
+    <string name="location_permission_desc">Used for location sharing and finding nearby community members</string>
+    <string name="location_high_accuracy">High Accuracy</string>
+    <string name="location_balanced">Balanced</string>
+    <string name="location_low_power">Battery Saver</string>
+    <string name="sensor_accelerometer">Accelerometer</string>
+    <string name="sensor_magnetometer">Magnetometer</string>
+    <string name="sensor_barometer">Barometer</string>
+    <string name="sensor_monitoring">Sensor Monitoring</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">Credential Storage</string>
+    <string name="dev_credential_test_save">Test Save</string>
+    <string name="dev_credential_test_retrieve">Test Retrieve</string>
+    <string name="dev_credential_clear_all">Clear All Credentials</string>
+    <string name="dev_credential_session_status">Session Status</string>
+    <string name="dev_credential_biometric_status">Biometric Status</string>
+    <string name="dev_credential_create_session">Create Test Session</string>
+    <string name="dev_credential_end_session">End Session</string>
+    <string name="dev_credential_extend_session">Extend Session</string>
+
+    <!-- Error Boundary & Fallback UI -->
+    <string name="error_something_went_wrong">Something went wrong</string>
+    <string name="error_content_unavailable">Content unavailable</string>
+    <string name="error_try_again">Try Again</string>
+    <string name="error_go_home">Go to Home</string>
+    <string name="error_get_help">Get Help</string>
+    <string name="error_data_safe">Don\'t worry, your data is safe!</string>
+    <string name="error_temporary">This is just a temporary hiccup. The app is working on fixing itself!</string>
+    <string name="error_taking_longer">Taking longer than expected</string>
+    <string name="error_still_loading">The content is still loading. You can wait or try again.</string>
+    <string name="error_offline">You\'re offline</string>
+    <string name="error_check_connection">Check your internet connection and try again</string>
+    <string name="error_feature_unavailable">%s Unavailable</string>
+    <string name="error_empty_title">Nothing here yet</string>
+    <string name="error_empty_message">This space is waiting to be filled!</string>
+    <string name="error_show_details">Show Technical Details</string>
+    <string name="error_hide_details">Hide Details</string>
+
+    <!-- Feedback Hub -->
+    <string name="feedback_hub_title">Feedback Hub</string>
+    <string name="feedback_submit_tab">Submit</string>
+    <string name="feedback_requests_tab">Requests</string>
+    <string name="feedback_roadmap_tab">Roadmap</string>
+    <string name="feedback_remaining">You have %d submissions remaining today</string>
+    <string name="feedback_report_bug_title">Report a Bug</string>
+    <string name="feedback_report_bug_desc">Found something broken? Let us know so we can fix it.</string>
+    <string name="feedback_request_feature_title">Request a Feature</string>
+    <string name="feedback_request_feature_desc">Have an idea to make NeuroComet better? We\'d love to hear it!</string>
+    <string name="feedback_send_title">Send Feedback</string>
+    <string name="feedback_send_desc">Share your thoughts, suggestions, or just say hi!</string>
+    <string name="feedback_community_note">All feedback is reviewed by our team. We prioritize features based on community votes and impact on neurodivergent users.</string>
+    <string name="feedback_bug_submitted_title">Bug Report Submitted</string>
+    <string name="feedback_bug_submitted_msg">Thank you for helping us improve NeuroComet! We\'ll investigate this issue.</string>
+    <string name="feedback_feature_submitted_title">Feature Request Submitted</string>
+    <string name="feedback_feature_submitted_msg">Your idea has been submitted! The community can now vote on it.</string>
+    <string name="feedback_thank_you_title">Thank You!</string>
+    <string name="feedback_thank_you_msg">Your feedback helps us make NeuroComet better for everyone.</string>
+    <string name="feedback_bug_title_label">Bug Title</string>
+    <string name="feedback_bug_title_hint">Brief description of the issue</string>
+    <string name="feedback_steps_label">Steps to Reproduce</string>
+    <string name="feedback_steps_hint">1. Go to…\n2. Tap on…\n3. The bug appears</string>
+    <string name="feedback_severity_label">Severity</string>
+    <string name="feedback_include_device_info">Include device information</string>
+    <string name="feedback_feature_title_label">Feature Title</string>
+    <string name="feedback_feature_title_hint">What would you like to see?</string>
+    <string name="feedback_feature_desc_label">Description</string>
+    <string name="feedback_feature_desc_hint">Describe how this feature would help you…</string>
+    <string name="feedback_category_label">Category</string>
+    <string name="feedback_general_label">Your thoughts (optional)</string>
+    <string name="feedback_general_hint">Tell us what you think…</string>
+    <string name="feedback_submit_bug">Submit Bug Report</string>
+    <string name="feedback_submit_request">Submit Request</string>
+    <string name="feedback_submit">Submit</string>
+    <string name="feedback_coming_soon">Coming Soon</string>
+    <string name="feedback_recently_shipped">Recently Shipped</string>
+    <string name="feedback_sort_top_voted">Top Voted</string>
+    <string name="feedback_sort_newest">Newest</string>
+    <string name="feedback_status_submitted">Submitted</string>
+    <string name="feedback_status_review">Under Review</string>
+    <string name="feedback_status_planned">Planned</string>
+    <string name="feedback_status_progress">In Progress</string>
+    <string name="feedback_status_completed">Completed</string>
+    <string name="feedback_status_declined">Declined</string>
+    <string name="feedback_severity_low">Low</string>
+    <string name="feedback_severity_medium">Medium</string>
+    <string name="feedback_severity_high">High</string>
+    <string name="feedback_severity_critical">Critical</string>
+    <string name="feedback_votes">%d votes</string>
+
+    <!-- Debug Performance -->
+    <string name="debug_tools_title">Debug Tools</string>
+    <string name="debug_performance_overlay">Performance Overlay</string>
+    <string name="debug_performance_desc">Shows FPS, memory, and scroll stats</string>
+    <string name="debug_reset_counters">Reset Counters</string>
 
 </resources>

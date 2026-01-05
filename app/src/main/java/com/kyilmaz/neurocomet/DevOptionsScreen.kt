@@ -644,6 +644,7 @@ fun DevOptionsScreen(
                 title = "Performance & Debug",
                 icon = Icons.Filled.Speed
             ) {
+
                 if (feedViewModel != null) {
                     val feedState by feedViewModel.uiState.collectAsState()
 
@@ -812,6 +813,50 @@ fun DevOptionsScreen(
 
             // === GAMES TESTING SECTION ===
             GamesTestingSection(onNavigateToGame = onNavigateToGame)
+
+            // ═══════════════════════════════════════════════════════════════
+            // CATEGORY: DEV TEST - GOOGLE ADS & FEATURES
+            // ═══════════════════════════════════════════════════════════════
+            DevCategoryHeader(
+                title = "Dev Test",
+                icon = Icons.Filled.Apps
+            )
+
+            // === GOOGLE ADS TESTING ===
+            GoogleAdsDevTestSection()
+
+            // === NEURODIVERGENT WIDGETS TESTING ===
+            NeurodivergentWidgetsDevSection()
+
+            // === IMAGE CUSTOMIZATION TESTING ===
+            ImageCustomizationDevSection()
+
+            // === EXPLORE VIEWS TESTING ===
+            ExploreViewsDevSection()
+
+            // === MULTI-MEDIA POST TESTING ===
+            MultiMediaPostDevSection()
+
+               // === ADAPTIVE NAVIGATION TESTING ===
+            AdaptiveNavigationDevSection()
+
+            // === NEURODIVERGENT DIALOGS TESTING ===
+            NeurodivergentDialogsDevSection()
+
+            // === HOME SCREEN WIDGETS TESTING ===
+            WidgetDevSection()
+
+            // === ENHANCED LOCATION & SENSORS TESTING ===
+            EnhancedLocationSensorsDevSection()
+
+            // === CREDENTIAL STORAGE TESTING ===
+            CredentialStorageDevSection()
+
+            // === BACKGROUND TASKS TESTING ===
+            BackgroundTasksDevSection()
+
+            // === ERROR BOUNDARY TESTING ===
+            ErrorBoundaryDevSection()
 
             // ═══════════════════════════════════════════════════════════════
             // CATEGORY: NOTIFICATIONS & SOCIAL
@@ -1096,6 +1141,32 @@ private fun DevToggleRow(
             Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         Switch(checked = isChecked, onCheckedChange = onCheckedChange)
+    }
+}
+
+@Composable
+private fun PerformanceStatChip(
+    label: String,
+    value: String,
+    color: Color
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .background(color.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = color
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = color.copy(alpha = 0.8f)
+        )
     }
 }
 
@@ -1819,9 +1890,11 @@ private val IMPLEMENTED_LANGUAGES = listOf(
     TestLanguage("ar", "Arabic", "العربية", "🇸🇦", isRtl = true),
     TestLanguage("es", "Spanish", "Español", "🇪🇸"),
     TestLanguage("fr", "French", "Français", "🇫🇷"),
+    TestLanguage("hi", "Hindi", "हिन्दी", "🇮🇳"),
     TestLanguage("nl", "Dutch", "Nederlands", "🇳🇱"),
     TestLanguage("sv", "Swedish", "Svenska", "🇸🇪"),
-    TestLanguage("tr", "Turkish", "Türkçe", "🇹🇷")
+    TestLanguage("tr", "Turkish", "Türkçe", "🇹🇷"),
+    TestLanguage("ur", "Urdu", "اردو", "🇵🇰", isRtl = true)
 )
 
 /**
@@ -1838,11 +1911,12 @@ private val TEST_LANGUAGES = listOf(
     TestLanguage("ko", "Korean", "한국어", "🇰🇷", isImplemented = false),
     TestLanguage("zh", "Chinese", "中文", "🇨🇳", isImplemented = false),
     TestLanguage("ar", "Arabic", "العربية", "🇸🇦", isRtl = true),
-    TestLanguage("hi", "Hindi", "हिन्दी", "🇮🇳", isImplemented = false),
+    TestLanguage("hi", "Hindi", "हिन्दी", "🇮🇳"),
     TestLanguage("ru", "Russian", "Русский", "🇷🇺", isImplemented = false),
     TestLanguage("tr", "Turkish", "Türkçe", "🇹🇷"),
     TestLanguage("nl", "Dutch", "Nederlands", "🇳🇱"),
     TestLanguage("sv", "Swedish", "Svenska", "🇸🇪"),
+    TestLanguage("ur", "Urdu", "اردو", "🇵🇰", isRtl = true),
     TestLanguage("pl", "Polish", "Polski", "🇵🇱", isImplemented = false),
     TestLanguage("vi", "Vietnamese", "Tiếng Việt", "🇻🇳", isImplemented = false),
     TestLanguage("th", "Thai", "ไทย", "🇹🇭", isImplemented = false),

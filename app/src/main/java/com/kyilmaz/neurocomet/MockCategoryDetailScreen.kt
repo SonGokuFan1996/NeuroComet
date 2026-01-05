@@ -43,6 +43,16 @@ fun MockCategoryDetailScreen(
     var isJoined by remember { mutableStateOf(false) }
     var isNotificationsOn by remember { mutableStateOf(false) }
 
+    // Pre-fetch string resources for Toast messages (avoid querying in onClick lambdas)
+    val joinedToast = stringResource(R.string.community_joined_toast, categoryName)
+    val leftToast = stringResource(R.string.community_left_toast, categoryName)
+    val notificationsOnToast = stringResource(R.string.community_notifications_on_toast, categoryName)
+    val notificationsMutedToast = stringResource(R.string.community_notifications_muted_toast, categoryName)
+    val savedToast = stringResource(R.string.community_saved_toast, categoryName)
+    val linkCopiedToast = stringResource(R.string.community_link_copied)
+    val rulesComingSoonToast = stringResource(R.string.community_rules_coming_soon)
+    val reportedToast = stringResource(R.string.community_reported_toast)
+
     // Generate mock posts based on category
     val mockPosts = remember(categoryName) {
         generateMockPostsForCategory(categoryName)
@@ -91,7 +101,7 @@ fun MockCategoryDetailScreen(
                                     showMenu = false
                                     Toast.makeText(
                                         context,
-                                        if (isJoined) context.getString(R.string.community_joined_toast, categoryName) else context.getString(R.string.community_left_toast, categoryName),
+                                        if (isJoined) joinedToast else leftToast,
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 },
@@ -111,7 +121,7 @@ fun MockCategoryDetailScreen(
                                     showMenu = false
                                     Toast.makeText(
                                         context,
-                                        if (isNotificationsOn) context.getString(R.string.community_notifications_on_toast, categoryName) else context.getString(R.string.community_notifications_muted_toast, categoryName),
+                                        if (isNotificationsOn) notificationsOnToast else notificationsMutedToast,
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 },
@@ -130,7 +140,7 @@ fun MockCategoryDetailScreen(
                                 text = { Text(stringResource(R.string.community_save)) },
                                 onClick = {
                                     showMenu = false
-                                    Toast.makeText(context, context.getString(R.string.community_saved_toast, categoryName), Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, savedToast, Toast.LENGTH_SHORT).show()
                                 },
                                 leadingIcon = {
                                     Icon(Icons.Outlined.BookmarkBorder, contentDescription = null)
@@ -145,7 +155,7 @@ fun MockCategoryDetailScreen(
                                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                                     val clip = android.content.ClipData.newPlainText("Community Link", "https://NeuroComet.app/community/${categoryName.lowercase().replace(" ", "-")}")
                                     clipboard.setPrimaryClip(clip)
-                                    Toast.makeText(context, context.getString(R.string.community_link_copied), Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, linkCopiedToast, Toast.LENGTH_SHORT).show()
                                 },
                                 leadingIcon = {
                                     Icon(Icons.Outlined.Link, contentDescription = null)
@@ -159,7 +169,7 @@ fun MockCategoryDetailScreen(
                                 text = { Text(stringResource(R.string.community_rules)) },
                                 onClick = {
                                     showMenu = false
-                                    Toast.makeText(context, context.getString(R.string.community_rules_coming_soon), Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, rulesComingSoonToast, Toast.LENGTH_SHORT).show()
                                 },
                                 leadingIcon = {
                                     Icon(Icons.Outlined.Gavel, contentDescription = null)
@@ -171,7 +181,7 @@ fun MockCategoryDetailScreen(
                                 text = { Text(stringResource(R.string.community_report)) },
                                 onClick = {
                                     showMenu = false
-                                    Toast.makeText(context, context.getString(R.string.community_reported_toast), Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, reportedToast, Toast.LENGTH_SHORT).show()
                                 },
                                 leadingIcon = {
                                     Icon(Icons.Outlined.Flag, contentDescription = null)
@@ -181,7 +191,7 @@ fun MockCategoryDetailScreen(
                     }
                 },
                 scrollBehavior = scrollBehavior,
-                colors = TopAppBarDefaults.largeTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.surface
                 )
@@ -296,7 +306,7 @@ private fun ComposePostDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(150.dp),
-                    placeholder = { Text("Share your thoughts with the community...") },
+                    placeholder = { Text(stringResource(R.string.create_post_share_thoughts)) },
                     supportingText = {
                         Text("${postContent.length}/$maxLength")
                     }
@@ -380,6 +390,26 @@ private fun generateMockPostsForCategory(category: String): List<Post> {
                 createdAt = Instant.now().toString(),
                 isLikedByMe = false,
                 minAudience = Audience.UNDER_13
+            ),
+            // Multi-media post example (carousel with 5 images)
+            Post(
+                id = 100L,
+                userId = "StudySpaceDesigner",
+                userAvatar = userAvatarUrl("StudySpaceDesigner"),
+                content = "✨ My ADHD-friendly study space transformation! Swipe to see all 5 zones I created for better focus →",
+                likes = 1247,
+                comments = 89,
+                shares = 156,
+                createdAt = Instant.now().toString(),
+                isLikedByMe = true,
+                minAudience = Audience.UNDER_13,
+                mediaItems = listOf(
+                    MediaItem(url = "https://picsum.photos/seed/study1/800/600", type = MediaType.IMAGE, altText = "Cozy reading nook"),
+                    MediaItem(url = "https://picsum.photos/seed/study2/800/600", type = MediaType.IMAGE, altText = "Organized desk setup"),
+                    MediaItem(url = "https://picsum.photos/seed/study3/800/600", type = MediaType.IMAGE, altText = "Fidget toy collection"),
+                    MediaItem(url = "https://picsum.photos/seed/study4/800/600", type = MediaType.IMAGE, altText = "Timer and planner station"),
+                    MediaItem(url = "https://picsum.photos/seed/study5/800/600", type = MediaType.IMAGE, altText = "Snack and water corner")
+                )
             ),
             Post(
                 id = 102L,

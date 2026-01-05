@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="120dp"
+    android:viewportWidth="200"
+    android:viewportHeight="120">
+
+    <!-- Background with rounded corners -->
+    <path
+        android:pathData="M16,0 L184,0 Q200,0 200,16 L200,104 Q200,120 184,120 L16,120 Q0,120 0,104 L0,16 Q0,0 16,0 Z"
+        android:fillColor="#FF9A9E"/>
+
+    <!-- Gradient overlay -->
+    <path
+        android:pathData="M16,0 L184,0 Q200,0 200,16 L200,104 Q200,120 184,120 L16,120 Q0,120 0,104 L0,16 Q0,0 16,0 Z"
+        android:fillColor="#FECFEF"
+        android:fillAlpha="0.5"/>
+
+    <!-- Title background -->
+    <path
+        android:pathData="M40,10 L160,10 Q168,10 168,16 L168,24 Q168,30 160,30 L40,30 Q32,30 32,24 L32,16 Q32,10 40,10 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.4"/>
+
+    <!-- Mood emoji circles -->
+    <!-- Happy -->
+    <path
+        android:pathData="M25,60 m-15,0 a15,15 0 1,1 30,0 a15,15 0 1,1 -30,0"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.6"/>
+
+    <!-- Calm -->
+    <path
+        android:pathData="M65,60 m-15,0 a15,15 0 1,1 30,0 a15,15 0 1,1 -30,0"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.6"/>
+
+    <!-- Neutral (selected) -->
+    <path
+        android:pathData="M100,60 m-18,0 a18,18 0 1,1 36,0 a18,18 0 1,1 -36,0"
+        android:fillColor="#FFFFFF"/>
+    <path
+        android:pathData="M100,60 m-15,0 a15,15 0 1,1 30,0 a15,15 0 1,1 -30,0"
+        android:strokeColor="#E91E63"
+        android:strokeWidth="3"
+        android:fillColor="#FFFFFF"/>
+
+    <!-- Sad -->
+    <path
+        android:pathData="M135,60 m-15,0 a15,15 0 1,1 30,0 a15,15 0 1,1 -30,0"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.6"/>
+
+    <!-- Anxious -->
+    <path
+        android:pathData="M175,60 m-15,0 a15,15 0 1,1 30,0 a15,15 0 1,1 -30,0"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.6"/>
+
+    <!-- Bottom label -->
+    <path
+        android:pathData="M50,95 L150,95 Q158,95 158,101 L158,109 Q158,115 150,115 L50,115 Q42,115 42,109 L42,101 Q42,95 50,95 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.3"/>
+</vector>
+

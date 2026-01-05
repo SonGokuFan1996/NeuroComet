@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core UI -->
+    <string name="app_name">NeuroComet</string>
+    <string name="nav_feed">Streymi</string>
+    <string name="nav_explore">Kanna</string>
+    <string name="nav_messages">Skilaboð</string>
+    <string name="nav_notifications">Tilkynningar</string>
+    <string name="nav_settings">Stillingar</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in">Innskráning</string>
+    <string name="auth_sign_up">Nýskráning</string>
+    <string name="auth_email_label">Netfang</string>
+    <string name="auth_password_label">Lykilorð</string>
+    <string name="auth_create_account">Búa til reikning</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">Útlit og birting</string>
+    <string name="settings_section_privacy">Persónuvernd og öryggi</string>
+    <string name="settings_section_notifications">Tilkynningar</string>
+    <string name="settings_section_accessibility">Aðgengi</string>
+
+    <!-- Explore -->
+    <string name="explore_title">Kanna</string>
+    <string name="explore_autism">Einhverfa</string>
+    <string name="explore_adhd">ADHD</string>
+    <string name="explore_anxiety">Kvíði</string>
+    <string name="explore_sensory">Skynrænt</string>
+
+    <!-- Games -->
+    <string name="games_hub_title">Leikjamiðstöð</string>
+    <string name="game_bubble_pop">Sprengja bólur</string>
+    <string name="game_fidget_spinner">Fidget snúra</string>
+
+    <!-- Feedback -->
+    <string name="feedback_hub_title">Endurgjafarmiðstöð</string>
+    <string name="feedback_report_bug_title">Tilkynna villu</string>
+    <string name="feedback_request_feature_title">Óska eftir eiginleika</string>
+    <string name="feedback_send_title">Senda endurgjöf</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">Þróunaraðili</string>
+    <string name="settings_developer_subtitle">Villuleit og prófunarverkfæri</string>
+    <string name="settings_developer_options_group">Valkostir þróunaraðila</string>
+    <string name="settings_dev_options_desc">Ítarlegir valkostir fyrir prófun og villuleit</string>
+    <string name="settings_force_verify_title">Þvinga staðfestingu</string>
+    <string name="settings_force_verify_subtitle">Skipta um staðfestingarstöðu notanda.</string>
+    <string name="settings_fake_premium_title">Falskt Premium</string>
+    <string name="settings_fake_premium_subtitle">Herma eftir greiddri stöðu.</string>
+    <string name="settings_fake_premium">Falskur Premium-hamur</string>
+    <string name="settings_fake_premium_enabled">Premium-eiginleikar opnaðir til prófunar</string>
+    <string name="settings_fake_premium_disabled">Virkja til að prófa premium-eiginleika</string>
+    <string name="settings_mock_interface_title">Prófunarviðmót</string>
+    <string name="settings_mock_interface_subtitle">Sýna fölsk gögn fyrir demo.</string>
+    <string name="settings_simulate_badge_title">Herma eftir merki tilkynningu</string>
+    <string name="settings_simulate_badge_subtitle">Kveikir á tilkynningu fyrir \'%s\'.</string>
+    <string name="settings_nuke_db_title">Eyða gagnagrunni</string>
+    <string name="settings_nuke_db_subtitle">Eyða ÖLLUM færslum. Óafturkallanlegt.</string>
+    <string name="settings_nuke_db_dialog_title">Eyða gagnagrunni?</string>
+    <string name="settings_nuke_db_dialog_text">Þetta mun eyða öllum færslum varanlega af þjóninum. Ekki er hægt að afturkalla þessa aðgerð.</string>
+    <string name="settings_nuke_db_dialog_confirm">EYÐA</string>
+    <string name="settings_nuke_db_dialog_cancel">Hætta við</string>
+    <string name="settings_language_test_title">Tungumál forrits (Próf)</string>
+    <string name="settings_language_test_subtitle">Stilla tungumál handvirkt. Krefst endurræsingar.</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">Valkostir þróunaraðila</string>
+    <string name="dev_phone_format_test">Snið símanúmers</string>
+    <string name="dev_phone_format_test_desc">Prófa sjálfvirkt snið fyrir mismunandi svæði</string>
+    <string name="dev_phone_format_style">Sniðstíll</string>
+    <string name="dev_phone_test_input">Sláðu inn símanúmer</string>
+    <string name="dev_phone_format_pattern">Mynstur</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">Geymsla skilríkja</string>
+    <string name="dev_credential_test_save">Prófa vista</string>
+    <string name="dev_credential_test_retrieve">Prófa sækja</string>
+    <string name="dev_credential_clear_all">Hreinsa öll skilríki</string>
+    <string name="dev_credential_session_status">Staða lotu</string>
+    <string name="dev_credential_biometric_status">Staða líffræðilegrar auðkenningar</string>
+    <string name="dev_credential_create_session">Búa til prófunarlotu</string>
+    <string name="dev_credential_end_session">Ljúka lotu</string>
+    <string name="dev_credential_extend_session">Lengja lotu</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">Villuleitarverkfæri</string>
+    <string name="debug_performance_overlay">Afköst yfirlag</string>
+    <string name="debug_performance_desc">Sýnir FPS, minni og flettitölfræði</string>
+    <string name="debug_reset_counters">Endurstilla teljara</string>
+
+    <!-- General Settings -->
+    <string name="settings_profile_group">Prófíll</string>
+    <string name="settings_badges_title">Merki</string>
+    <string name="settings_badges_subtitle">Skoðaðu áunnin afrek og markmið.</string>
+    <string name="settings_visual_comfort_group">Sjónræn þægindi og þemu</string>
+    <string name="settings_text_size_title">Textastærð</string>
+    <string name="settings_dark_mode_title">Dökkur hamur</string>
+    <string name="settings_dark_mode_enabled">Virkt</string>
+    <string name="settings_dark_mode_disabled">Óvirkt</string>
+    <string name="settings_high_contrast_title">Mikill birtuskil hamur</string>
+    <string name="settings_high_contrast_subtitle_enabled">Virkt (hreint svart/hvítt)</string>
+    <string name="settings_high_contrast_subtitle_disabled">Óvirkt</string>
+    <string name="settings_neuro_centric_theme_title">Taugarmiðað þema</string>
+    <string name="settings_go_premium_title">Gerast Premium</string>
+    <string name="settings_go_premium_subtitle">Fjarlægðu auglýsingar og styðjið hönnuði.</string>
+    <string name="settings_account_group">Reikningur</string>
+    <string name="settings_logout">Útskrá</string>
+    <string name="settings_verified_human_title">Staðfestur manneskja</string>
+    <string name="settings_verified_human_subtitle_verified">Staða: Staðfest</string>
+    <string name="settings_verified_human_subtitle_unverified">Staða: Óstaðfest</string>
+    <string name="settings_2fa_title">Tveggja þátta auðkenning</string>
+    <string name="settings_2fa_subtitle">Krefjast kóða við innskráningu.</string>
+</resources>
+

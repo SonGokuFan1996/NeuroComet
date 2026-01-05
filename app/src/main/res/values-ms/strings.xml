@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core UI -->
+    <string name="app_name">NeuroComet</string>
+    <string name="nav_feed">Suapan</string>
+    <string name="nav_explore">Teroka</string>
+    <string name="nav_messages">Mesej</string>
+    <string name="nav_notifications">Pemberitahuan</string>
+    <string name="nav_settings">Tetapan</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in">Log Masuk</string>
+    <string name="auth_sign_up">Daftar</string>
+    <string name="auth_email_label">E-mel</string>
+    <string name="auth_password_label">Kata Laluan</string>
+    <string name="auth_create_account">Cipta Akaun</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">Penampilan &amp; Paparan</string>
+    <string name="settings_section_privacy">Privasi &amp; Keselamatan</string>
+    <string name="settings_section_notifications">Pemberitahuan</string>
+    <string name="settings_section_accessibility">Kebolehcapaian</string>
+
+    <!-- Explore -->
+    <string name="explore_title">Teroka</string>
+    <string name="explore_autism">Autisme</string>
+    <string name="explore_adhd">ADHD</string>
+    <string name="explore_anxiety">Kebimbangan</string>
+    <string name="explore_sensory">Deria</string>
+
+    <!-- Games -->
+    <string name="games_hub_title">Pusat Permainan</string>
+    <string name="game_bubble_pop">Pecahkan Buih</string>
+    <string name="game_fidget_spinner">Fidget Spinner</string>
+
+    <!-- Feedback -->
+    <string name="feedback_hub_title">Pusat Maklum Balas</string>
+    <string name="feedback_report_bug_title">Laporkan Pepijat</string>
+    <string name="feedback_request_feature_title">Minta Ciri</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">Pembangun</string>
+    <string name="settings_developer_subtitle">Alat nyahpepijat dan pengujian</string>
+    <string name="settings_developer_options_group">Pilihan Pembangun</string>
+    <string name="settings_dev_options_desc">Pilihan lanjutan untuk pengujian dan nyahpepijat</string>
+    <string name="settings_force_verify_title">Paksa Pengesahan</string>
+    <string name="settings_force_verify_subtitle">Tukar status pengesahan pengguna.</string>
+    <string name="settings_fake_premium_title">Premium Palsu</string>
+    <string name="settings_fake_premium_subtitle">Simulasi status berbayar.</string>
+    <string name="settings_fake_premium">Mod Premium Palsu</string>
+    <string name="settings_fake_premium_enabled">Ciri premium dibuka untuk pengujian</string>
+    <string name="settings_fake_premium_disabled">Aktifkan untuk menguji ciri premium</string>
+    <string name="settings_mock_interface_title">Antara Muka Mock</string>
+    <string name="settings_mock_interface_subtitle">Tunjukkan data palsu untuk demo.</string>
+    <string name="settings_simulate_badge_title">Simulasi Pemberitahuan Lencana</string>
+    <string name="settings_simulate_badge_subtitle">Cetuskan pemberitahuan untuk \'%s\'.</string>
+    <string name="settings_nuke_db_title">Padam Pangkalan Data</string>
+    <string name="settings_nuke_db_subtitle">Padam SEMUA pos. Tidak boleh batal.</string>
+    <string name="settings_nuke_db_dialog_title">Padam Pangkalan Data?</string>
+    <string name="settings_nuke_db_dialog_text">Ini akan memadam semua pos dari pelayan secara kekal. Tindakan ini tidak boleh dibatalkan.</string>
+    <string name="settings_nuke_db_dialog_confirm">PADAM</string>
+    <string name="settings_nuke_db_dialog_cancel">Batal</string>
+    <string name="settings_language_test_title">Bahasa Aplikasi (Ujian)</string>
+    <string name="settings_language_test_subtitle">Tetapkan bahasa secara manual. Perlu mula semula.</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">Pilihan Pembangun</string>
+    <string name="dev_phone_format_test">Pemformatan Nombor Telefon</string>
+    <string name="dev_phone_format_test_desc">Uji pemformatan automatik untuk pelbagai wilayah</string>
+    <string name="dev_phone_format_style">Gaya Format</string>
+    <string name="dev_phone_test_input">Masukkan nombor telefon</string>
+    <string name="dev_phone_format_pattern">Corak</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">Storan Kelayakan</string>
+    <string name="dev_credential_test_save">Uji Simpan</string>
+    <string name="dev_credential_test_retrieve">Uji Dapatkan</string>
+    <string name="dev_credential_clear_all">Padam Semua Kelayakan</string>
+    <string name="dev_credential_session_status">Status Sesi</string>
+    <string name="dev_credential_biometric_status">Status Biometrik</string>
+    <string name="dev_credential_create_session">Cipta Sesi Ujian</string>
+    <string name="dev_credential_end_session">Tamatkan Sesi</string>
+    <string name="dev_credential_extend_session">Lanjutkan Sesi</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">Alat Nyahpepijat</string>
+    <string name="debug_performance_overlay">Lapisan Prestasi</string>
+    <string name="debug_performance_desc">Menunjukkan FPS, memori, dan statistik tatal</string>
+    <string name="debug_reset_counters">Set Semula Pembilang</string>
+
+    <!-- General Settings -->
+    <string name="settings_profile_group">Profil</string>
+    <string name="settings_badges_title">Lencana</string>
+    <string name="settings_badges_subtitle">Lihat pencapaian dan matlamat anda.</string>
+    <string name="settings_visual_comfort_group">Keselesaan Visual &amp; Tema</string>
+    <string name="settings_text_size_title">Saiz Teks</string>
+    <string name="settings_dark_mode_title">Mod Gelap</string>
+    <string name="settings_dark_mode_enabled">Diaktifkan</string>
+    <string name="settings_dark_mode_disabled">Dinyahaktifkan</string>
+    <string name="settings_high_contrast_title">Mod Kontras Tinggi</string>
+    <string name="settings_high_contrast_subtitle_enabled">Diaktifkan (Hitam/Putih Tulen)</string>
+    <string name="settings_high_contrast_subtitle_disabled">Dinyahaktifkan</string>
+    <string name="settings_neuro_centric_theme_title">Tema Neuro-Sentrik</string>
+    <string name="settings_go_premium_title">Jadi Premium</string>
+    <string name="settings_go_premium_subtitle">Alih keluar iklan dan sokong pembangun.</string>
+    <string name="settings_account_group">Akaun</string>
+    <string name="settings_logout">Log Keluar</string>
+    <string name="settings_verified_human_title">Manusia Disahkan</string>
+    <string name="settings_verified_human_subtitle_verified">Status: Disahkan</string>
+    <string name="settings_verified_human_subtitle_unverified">Status: Tidak Disahkan</string>
+    <string name="settings_2fa_title">Pengesahan Dua Faktor</string>
+    <string name="settings_2fa_subtitle">Memerlukan kod semasa log masuk.</string>
+</resources>
+

@@ -2,6 +2,238 @@
 <resources>
     <string name="app_name">NeuroComet</string>
 
+    <!-- Auth Screen -->
+    <string name="auth_app_tagline">En trygg plats för varje sinne ✨</string>
+    <string name="auth_sign_in">Logga in</string>
+    <string name="auth_sign_up">Registrera dig</string>
+    <string name="auth_email_label">E-post</string>
+    <string name="auth_email_placeholder">din@epost.se</string>
+    <string name="auth_password_label">Lösenord</string>
+    <string name="auth_confirm_password_label">Bekräfta lösenord</string>
+    <string name="auth_password_requirements">🔒 Lösenord måste vara 12+ tecken med versaler, gemener, siffror och symboler.</string>
+    <string name="auth_create_account">Skapa konto</string>
+    <string name="auth_passwords_not_match">Lösenorden matchar inte</string>
+    <string name="auth_password_weak">Lösenord uppfyller inte kraven</string>
+    <string name="auth_skip">Hoppa över nu</string>
+    <string name="auth_skip_dev">Hoppa över nu (dev)</string>
+    <string name="auth_data_secure">Din data är krypterad och säker</string>
+    <string name="auth_2fa_title">Tvåfaktorsautentisering</string>
+    <string name="auth_2fa_description">Ange den 6-siffriga koden skickad till din enhet</string>
+    <string name="auth_2fa_code_label">6-siffrig kod</string>
+    <string name="auth_2fa_code_placeholder">123456</string>
+    <string name="auth_2fa_verify">Verifiera</string>
+    <string name="auth_hide_password">Dölj lösenord</string>
+    <string name="auth_show_password">Visa lösenord</string>
+
+    <!-- Auth Tutorial -->
+    <string name="auth_tutorial_welcome_title">Välkommen hem 💜</string>
+    <string name="auth_tutorial_welcome_desc">NeuroComet är en trygg, bekräftande plats för neurodivergenta och LGBTQ+ sinnen. Du hör hemma här precis som du är—ingen mask krävs.</string>
+    <string name="auth_tutorial_comfort_title">Din komfort spelar roll ∞</string>
+    <string name="auth_tutorial_comfort_desc_anim">Tryck på oändlighetssymbolen när som helst för att minska visuell rörelse. Vi designade detta för sensoriskt-vänlig surfning.</string>
+    <string name="auth_tutorial_comfort_desc_static">Perfekt! Du har aktiverat lugnt läge. Tryck igen när du vill ha mer eller mindre rörelse.</string>
+    <string name="auth_tutorial_themes_title">25+ Neuro-Tillstånd Teman 🎨</string>
+    <string name="auth_tutorial_themes_desc">Välj teman designade för ADHD-fokus, autism-komfort, ångestlindring, färgblindstillgänglighet och humörstöd. Din hjärna, din väg.</string>
+    <string name="auth_tutorial_fonts_title">Dyslexi-Vänliga Typsnitt 📖</string>
+    <string name="auth_tutorial_fonts_desc">12+ tillgänglighetstypsnitt inklusive OpenDyslexic, Lexend och Atkinson Hyperlegible. Justera mellanrum, vikt och storlek för hur DIN hjärna läser bäst.</string>
+    <string name="auth_tutorial_community_title">Gemenskap och Stolthet 🌈</string>
+    <string name="auth_tutorial_community_desc">Anslut med människor som förstår. Neurodivergenta, LGBTQ+ och allierade—alla hjärnor, alla identiteter, alla vackra. Specialteman för Pride, Autismdag och ADHD-månad!</string>
+    <string name="auth_tutorial_safety_title">Byggd för Säkerhet 🛡️</string>
+    <string name="auth_tutorial_safety_desc">Innehållsfiltrering, föräldrakontroller, skärmtidsbegränsningar och sovläge skyddar ditt välbefinnande. Du kontrollerar vad du ser och när.</string>
+    <string name="auth_tutorial_ready_title">Redo att börja! ✨</string>
+    <string name="auth_tutorial_ready_desc">Logga in eller skapa ditt konto för att gå med tusentals neurodivergenta och LGBTQ+ individer. Detta är DIN plats—utforska i din egen takt.</string>
+    <string name="auth_tutorial_skip">Hoppa över</string>
+    <string name="auth_tutorial_continue">Fortsätt</string>
+    <string name="auth_tutorial_lets_go">Nu kör vi! ✨</string>
+    <string name="auth_tutorial_step_count">%1$d av %2$d</string>
+    <string name="auth_tutorial_tap_here">Tryck här</string>
+
+    <!-- Splash Screen -->
+    <string name="splash_tagline_default">En plats designad för dig</string>
+    <string name="splash_tagline_hyperfocus">Störningsfri zon</string>
+    <string name="splash_tagline_overload">Låg stimulering läge</string>
+    <string name="splash_tagline_calm">Din lugna plats</string>
+    <string name="splash_tagline_adhd_energized">Rid på vågen</string>
+    <string name="splash_tagline_adhd_low_dopamine">Mjuk motivation</string>
+    <string name="splash_tagline_adhd_task_mode">Minimal distraktion</string>
+    <string name="splash_tagline_autism_routine">Förutsägbar och säker</string>
+    <string name="splash_tagline_autism_sensory_seek">Rika upplevelser väntar</string>
+    <string name="splash_tagline_autism_low_stim">Minimal stimulering</string>
+    <string name="splash_tagline_anxiety_soothe">Lugnar ditt sinne</string>
+    <string name="splash_tagline_anxiety_grounding">Rotad i nuet</string>
+    <string name="splash_tagline_dyslexia_friendly">Designad för tydlighet</string>
+    <string name="splash_tagline_colorblind_deuteranopia">Deuteranopi-vänlig</string>
+    <string name="splash_tagline_colorblind_protanopia">Protanopi-vänlig</string>
+    <string name="splash_tagline_colorblind_tritanopia">Tritanopi-vänlig</string>
+    <string name="splash_tagline_colorblind_monochromacy">Mönsterbaserad design</string>
+    <string name="splash_tagline_blind_screen_reader">Optimerad för TalkBack</string>
+    <string name="splash_tagline_blind_high_contrast">Rent svart-vitt</string>
+    <string name="splash_tagline_blind_large_text">Extra stor text läge</string>
+    <string name="splash_tagline_mood_tired">Vila är okej</string>
+    <string name="splash_tagline_mood_anxious">Andas med oss</string>
+    <string name="splash_tagline_mood_happy">Låt oss fira dig</string>
+    <string name="splash_tagline_mood_overwhelmed">Vi tar det lugnt</string>
+    <string name="splash_tagline_mood_creative">Låt idéer flöda</string>
+    <string name="splash_tagline_rainbow_brain">Omfamna din regnbågshjärna</string>
+
+    <!-- Splash Messages -->
+    <string name="splash_msg_default_1">Välkommen tillbaka</string>
+    <string name="splash_msg_default_2">Din plats väntar</string>
+    <string name="splash_msg_default_3">Låt oss börja</string>
+    <string name="splash_msg_hyperfocus_1">Fokusläge</string>
+    <string name="splash_msg_hyperfocus_2">Klart sinne framåt</string>
+    <string name="splash_msg_hyperfocus_3">Redo att dyka djupt</string>
+    <string name="splash_msg_overload_1">Tar det lugnt</string>
+    <string name="splash_msg_overload_2">Andas med mig</string>
+    <string name="splash_msg_overload_3">Mjukt tempo</string>
+    <string name="splash_msg_calm_1">Frid väntar</string>
+    <string name="splash_msg_calm_2">Serenitet läge</string>
+    <string name="splash_msg_calm_3">Lugna vatten</string>
+    <string name="splash_msg_adhd_energized_1">Nu kör vi! ⚡</string>
+    <string name="splash_msg_adhd_energized_2">Energi upplåst</string>
+    <string name="splash_msg_adhd_energized_3">Dags att lysa</string>
+    <string name="splash_msg_adhd_low_dopamine_1">Värmer upp</string>
+    <string name="splash_msg_adhd_low_dopamine_2">Hittar din gnista</string>
+    <string name="splash_msg_adhd_low_dopamine_3">Du klarar det</string>
+    <string name="splash_msg_adhd_task_mode_1">Uppgiftsläge</string>
+    <string name="splash_msg_adhd_task_mode_2">En sak i taget</string>
+    <string name="splash_msg_adhd_task_mode_3">Fokus aktiverad</string>
+    <string name="splash_msg_autism_routine_1">Som alltid</string>
+    <string name="splash_msg_autism_routine_2">Bekanta mönster</string>
+    <string name="splash_msg_autism_routine_3">Komfort i rutin</string>
+    <string name="splash_msg_autism_sensory_seek_1">Sensorisk glädje</string>
+    <string name="splash_msg_autism_sensory_seek_2">Känn mönstren</string>
+    <string name="splash_msg_autism_sensory_seek_3">Tillfredsställande vibb</string>
+    <string name="splash_msg_autism_low_stim_1">Tyst läge</string>
+    <string name="splash_msg_autism_low_stim_2">Mjuk och mild</string>
+    <string name="splash_msg_autism_low_stim_3">Vila dina sinnen</string>
+    <string name="splash_msg_anxiety_soothe_1">Du är trygg här</string>
+    <string name="splash_msg_anxiety_soothe_2">Andas in, andas ut</string>
+    <string name="splash_msg_anxiety_soothe_3">Allt är bra</string>
+    <string name="splash_msg_anxiety_grounding_1">Fötter på marken</string>
+    <string name="splash_msg_anxiety_grounding_2">Nuet</string>
+    <string name="splash_msg_anxiety_grounding_3">Stabil och säker</string>
+    <string name="splash_msg_dyslexia_friendly_1">Tydlig och läsbar</string>
+    <string name="splash_msg_dyslexia_friendly_2">Din väg</string>
+    <string name="splash_msg_dyslexia_friendly_3">Lätt läsning framåt</string>
+    <string name="splash_msg_colorblind_deuter_1">Färger optimerade</string>
+    <string name="splash_msg_colorblind_deuter_2">Blå och orange tydlighet</string>
+    <string name="splash_msg_colorblind_deuter_3">Se med förtroende</string>
+    <string name="splash_msg_colorblind_protan_1">Färger anpassade</string>
+    <string name="splash_msg_colorblind_protan_2">Blå och gul harmoni</string>
+    <string name="splash_msg_colorblind_protan_3">Tydlig distinktion</string>
+    <string name="splash_msg_colorblind_tritan_1">Färger förfinade</string>
+    <string name="splash_msg_colorblind_tritan_2">Rosa och turkos kontrast</string>
+    <string name="splash_msg_colorblind_tritan_3">Visuell tydlighet</string>
+    <string name="splash_msg_colorblind_mono_1">Former och mönster</string>
+    <string name="splash_msg_colorblind_mono_2">Hög kontrast</string>
+    <string name="splash_msg_colorblind_mono_3">Tydliga gränser</string>
+    <string name="splash_msg_blind_reader_1">Skärmläsare redo</string>
+    <string name="splash_msg_blind_reader_2">Tillgänglighet först</string>
+    <string name="splash_msg_blind_reader_3">Välkommen</string>
+    <string name="splash_msg_blind_contrast_1">Maximal kontrast</string>
+    <string name="splash_msg_blind_contrast_2">Tydlig och fet</string>
+    <string name="splash_msg_blind_contrast_3">Lätt att se</string>
+    <string name="splash_msg_blind_large_1">Stor och tydlig</string>
+    <string name="splash_msg_blind_large_2">Lätt läsning</string>
+    <string name="splash_msg_blind_large_3">Din väg</string>
+    <string name="splash_msg_mood_tired_1">Ta det lugnt</string>
+    <string name="splash_msg_mood_tired_2">Ingen brådska</string>
+    <string name="splash_msg_mood_tired_3">Mjuk start</string>
+    <string name="splash_msg_mood_anxious_1">Du är okej</string>
+    <string name="splash_msg_mood_anxious_2">Detta går också över</string>
+    <string name="splash_msg_mood_anxious_3">Trygg plats</string>
+    <string name="splash_msg_mood_happy_1">Hej solsken! ☀️</string>
+    <string name="splash_msg_mood_happy_2">Fantastiska vibbar</string>
+    <string name="splash_msg_mood_happy_3">Glädje väntar</string>
+    <string name="splash_msg_mood_overwhelmed_1">Ett andetag</string>
+    <string name="splash_msg_mood_overwhelmed_2">Saktar ner</string>
+    <string name="splash_msg_mood_overwhelmed_3">Vi finns för dig</string>
+    <string name="splash_msg_mood_creative_1">Inspiration på väg</string>
+    <string name="splash_msg_mood_creative_2">Skapa fritt</string>
+    <string name="splash_msg_mood_creative_3">Fantasiläge</string>
+    <string name="splash_msg_rainbow_1">🦄 Du hittade hemligheten!</string>
+    <string name="splash_msg_rainbow_2">🌈 Fira ditt unika sinne</string>
+    <string name="splash_msg_rainbow_3">✨ Neurodivergent är magi</string>
+    <string name="splash_msg_rainbow_4">🧠 Din hjärna är vacker</string>
+    <string name="splash_msg_rainbow_5">💜 Att vara annorlunda är kraftfullt</string>
+
+    <!-- NeuroState Categories -->
+    <string name="neuro_category_basic">Grundläggande Teman</string>
+    <string name="neuro_category_adhd">ADHD Teman</string>
+    <string name="neuro_category_autism">Autism Teman</string>
+    <string name="neuro_category_anxiety">Ångest/OCD Teman</string>
+    <string name="neuro_category_accessibility">Tillgänglighet</string>
+    <string name="neuro_category_colorblind">Färgblind Vänlig</string>
+    <string name="neuro_category_blind">Blind och Synskadad</string>
+    <string name="neuro_category_mood">Hur mår du?</string>
+    <string name="neuro_category_secret">🦄 Hemliga Teman</string>
+
+    <!-- NeuroState Names -->
+    <string name="neuro_state_default">Standard</string>
+    <string name="neuro_state_hyperfocus">Hyperfokus</string>
+    <string name="neuro_state_overload">Sensorisk Överbelastning</string>
+    <string name="neuro_state_calm">Lugn</string>
+    <string name="neuro_state_adhd_energized">ADHD - Energisk</string>
+    <string name="neuro_state_adhd_low_dopamine">ADHD - Låg Dopamin</string>
+    <string name="neuro_state_adhd_task_mode">ADHD - Uppgiftsläge</string>
+    <string name="neuro_state_autism_routine">Autism - Rutin</string>
+    <string name="neuro_state_autism_sensory_seek">Autism - Sensoriskt Sökande</string>
+    <string name="neuro_state_autism_low_stim">Autism - Låg Stimulering</string>
+    <string name="neuro_state_anxiety_soothe">Ångest - Lugna</string>
+    <string name="neuro_state_anxiety_grounding">Ångest - Jordning</string>
+    <string name="neuro_state_dyslexia_friendly">Dyslexi Vänlig</string>
+    <string name="neuro_state_colorblind_deuter">Deuteranopi</string>
+    <string name="neuro_state_colorblind_protan">Protanopi</string>
+    <string name="neuro_state_colorblind_tritan">Tritanopi</string>
+    <string name="neuro_state_colorblind_mono">Monokromasi</string>
+    <string name="neuro_state_blind_screen_reader">Skärmläsarläge</string>
+    <string name="neuro_state_blind_high_contrast">Maximal Kontrast</string>
+    <string name="neuro_state_blind_large_text">Stor Text Läge</string>
+    <string name="neuro_state_mood_tired">Känner sig Trött</string>
+    <string name="neuro_state_mood_anxious">Känner sig Orolig</string>
+    <string name="neuro_state_mood_happy">Känner sig Glad</string>
+    <string name="neuro_state_mood_overwhelmed">Känner sig Överväldigad</string>
+    <string name="neuro_state_mood_creative">Känner sig Kreativ</string>
+    <string name="neuro_state_rainbow_brain">Regnbågshjärna</string>
+
+    <!-- NeuroState Descriptions -->
+    <string name="neuro_state_default_desc">Standardtema med balanserade färger</string>
+    <string name="neuro_state_hyperfocus_desc">Hög kontrast för djup koncentration</string>
+    <string name="neuro_state_overload_desc">Dämpade, lugna färger för att minska stimulering</string>
+    <string name="neuro_state_calm_desc">Mjuka, lugnande färger för avslappning</string>
+    <string name="neuro_state_adhd_energized_desc">Ljusa, engagerande färger för produktiva dagar</string>
+    <string name="neuro_state_adhd_low_dopamine_desc">Varma, stimulerande färger för att förbättra humöret</string>
+    <string name="neuro_state_adhd_task_mode_desc">Minimal distraktion, fokusförbättrande palett</string>
+    <string name="neuro_state_autism_routine_desc">Förutsägbara, konsekventa färgmönster</string>
+    <string name="neuro_state_autism_sensory_seek_desc">Rika texturer och tillfredsställande kontraster</string>
+    <string name="neuro_state_autism_low_stim_desc">Mycket dämpade, mjuka färger</string>
+    <string name="neuro_state_anxiety_soothe_desc">Svala, lugnande färger för att lindra oro</string>
+    <string name="neuro_state_anxiety_grounding_desc">Jordiga, stabila färger för centrering</string>
+    <string name="neuro_state_dyslexia_friendly_desc">Hög läsbarhet med optimal kontrast</string>
+    <string name="neuro_state_colorblind_deuter_desc">Optimerad för röd-grön (grönsvag) färgblindhet</string>
+    <string name="neuro_state_colorblind_protan_desc">Optimerad för röd-grön (rödsvag) färgblindhet</string>
+    <string name="neuro_state_colorblind_tritan_desc">Optimerad för blå-gul färgblindhet</string>
+    <string name="neuro_state_colorblind_mono_desc">Högkontrast gråskala för fullständig färgblindhet</string>
+    <string name="neuro_state_blind_screen_reader_desc">Optimerad för TalkBack och skärmläsare med maximal kontrast</string>
+    <string name="neuro_state_blind_high_contrast_desc">Rent svart/vitt för användare med mycket nedsatt syn</string>
+    <string name="neuro_state_blind_large_text_desc">Extra stor text med förenklad layout</string>
+    <string name="neuro_state_mood_tired_desc">Mjuka färger som inte anstränger ögonen</string>
+    <string name="neuro_state_mood_anxious_desc">Lugnande palett för att minska stress</string>
+    <string name="neuro_state_mood_happy_desc">Glada färger som matchar ditt humör</string>
+    <string name="neuro_state_mood_overwhelmed_desc">Förenklad, lugn palett</string>
+    <string name="neuro_state_mood_creative_desc">Inspirerande färger för att driva fantasin</string>
+    <string name="neuro_state_rainbow_brain_desc">Fira ditt vackert unika neurodivergenta sinne! 🌈🧠</string>
+
+    <!-- Accessibility Strings -->
+    <string name="accessibility_selected">vald</string>
+    <string name="accessibility_not_selected">inte vald</string>
+    <string name="expand_category">Expandera %1$s</string>
+    <string name="collapse_category">Minimera %1$s</string>
+
+    <!-- Easter Egg Dialog -->
+    <string name="easter_egg_secret_unlocked">🎊 Hemlighet upplåst! 🎊</string>
+    <string name="easter_egg_welcome_back">🦄 Välkommen tillbaka! 🦄</string>
+
     <!-- Navigation/Screen Titles -->
     <string name="nav_feed">Flöde</string>
     <string name="nav_explore">Utforska</string>
@@ -117,11 +349,6 @@
     <string name="comments_add_comment_placeholder">Lägg till en kommentar…</string>
     <string name="comments_send_button_description">Skicka</string>
 
-    <!-- NeuroState Names -->
-    <string name="neuro_state_default">Standard</string>
-    <string name="neuro_state_hyperfocus">Hyperfokus</string>
-    <string name="neuro_state_overload">Överbelastning</string>
-    <string name="neuro_state_calm">Lugn</string>
 
     <!-- Text Scale Factor Names -->
     <string name="text_scale_small">Liten</string>
@@ -528,6 +755,21 @@
     <string name="explore_topic_late_diagnosed">Sent Diagnostiserad</string>
     <string name="explore_topic_late_diagnosed_desc">Vuxendiagnos erfarenheter och identitetsutforskning</string>
 
+    <!-- LGBTQ+ Explore Topics -->
+    <string name="explore_section_lgbtq">LGBTQ+ och Identitet</string>
+    <string name="explore_topic_lgbtq_nd">LGBTQ+ och Neurodivergent</string>
+    <string name="explore_topic_lgbtq_nd_desc">Fira korsningen av queer och neurodivergenta identiteter</string>
+    <string name="explore_topic_trans_nd">Trans och ND</string>
+    <string name="explore_topic_trans_nd_desc">Stöd för transpersoner och könsmångfaldiga neurodivergenta personer</string>
+    <string name="explore_topic_queer_pride">Queer Pride</string>
+    <string name="explore_topic_queer_pride_desc">Fira queer glädje, pride-evenemang och gemenskap</string>
+    <string name="explore_topic_ace_aro">Ace/Aro Spektrum</string>
+    <string name="explore_topic_ace_aro_desc">Asexuella, aromantiska och aroace neurodivergenta erfarenheter</string>
+    <string name="explore_topic_nonbinary">Icke-Binär och ND</string>
+    <string name="explore_topic_nonbinary_desc">Icke-binär, genderqueer och gender-fluid gemenskap</string>
+    <string name="explore_topic_coming_out">Coming Out Berättelser</string>
+    <string name="explore_topic_coming_out_desc">Dela coming out resor och hitta acceptans</string>
+
     <!-- Explore Stats -->
     <string name="explore_members">%s medlemmar</string>
     <string name="explore_posts">%s inlägg</string>
@@ -573,4 +815,191 @@
     <string name="settings_fake_premium_enabled">Premiumfunktioner upplåsta för testning</string>
     <string name="settings_fake_premium_disabled">Aktivera för att testa premiumfunktioner</string>
     <string name="settings_dev_options_desc">Avancerade alternativ för testning och felsökning</string>
+
+    <!-- NeuroGames - Stimvänliga Spel -->
+    <string name="games_hub_title">NeuroSpel</string>
+    <string name="games_subtitle">Stimvänlig underhållning för din hjärna</string>
+    <string name="games_play_now">Spela Spel</string>
+    <string name="games_play_now_desc">Lås upp stimvänliga spel genom att tjäna prestationer</string>
+    <string name="games_unlocked">Upplåsta Spel</string>
+    <string name="games_locked">Låsta Spel</string>
+    <string name="games_your_achievements">Dina Prestationer</string>
+    <string name="games_achievements">prestationer</string>
+    <string name="games_next_unlock">%d fler för att låsa upp nästa spel!</string>
+    <string name="games_requires_achievements">Kräver %d prestationer</string>
+    <string name="games_coming_soon">Kommer Snart</string>
+    <string name="games_coming_soon_message">Det här spelet utvecklas fortfarande. Kom tillbaka snart!</string>
+
+    <!-- Individuella Spel -->
+    <string name="game_bubble_pop">Bubbel Pop</string>
+    <string name="game_bubble_pop_desc">Poppa tillfredsställande bubblor för en lugnande stimupplevelse</string>
+    <string name="game_bubble_pop_hint">Tryck på bubblorna för att poppa dem! ✨</string>
+    <string name="game_fidget_spinner">Fidget Spinner</string>
+    <string name="game_fidget_spinner_desc">Snurra hur mycket du vill - inga gränser, bara bra vibbar</string>
+    <string name="game_fidget_spinner_hint">Svep för att snurra! Ju snabbare du sveper, desto snabbare snurrar det 🌀</string>
+    <string name="game_color_flow">Färgflöde</string>
+    <string name="game_color_flow_desc">Se avslappnande färggradienter flyta och blandas</string>
+    <string name="game_color_flow_hint">Tryck var som helst för att ändra färgerna</string>
+    <string name="game_pattern_tap">Mönster Tryck</string>
+    <string name="game_pattern_tap_desc">Tryck mönster i sekvens - bra för fokusträning</string>
+    <string name="game_infinity_draw">Oändlig Rita</string>
+    <string name="game_infinity_draw_desc">Rita ändlösa mönster som aldrig bleknar - ren stimlycka</string>
+    <string name="game_sensory_rain">Sensoriskt Regn</string>
+    <string name="game_sensory_rain_desc">Se vackra regndroppar falla med lugnande visuella effekter</string>
+    <string name="game_breathing_bubbles">Andningsbubblor</string>
+    <string name="game_breathing_bubbles_desc">Följ bubblan för att öva lugn andning</string>
+    <string name="game_breathing_bubbles_hint">Andas in när bubblan växer, ut när den krymper 🫧</string>
+    <string name="game_texture_tiles">Texturplattor</string>
+    <string name="game_texture_tiles_desc">Tryck på plattor för att känna olika tillfredsställande texturer</string>
+    <string name="game_texture_tiles_hint">Varje platta har unik haptisk feedback - hitta dina favoriter!</string>
+    <string name="game_sound_garden">Ljudträdgård</string>
+    <string name="game_sound_garden_desc">Skapa atmosfäriska ljudlandskap genom att plantera ljudblommor</string>
+    <string name="game_sound_garden_hint">Tryck för att plantera, håll nedtryckt för att ta bort. Lagra ljud! 🌸</string>
+
+    <!-- Spel Under Utveckling -->
+    <string name="game_stim_sequencer">Stim Sequencer</string>
+    <string name="game_stim_sequencer_desc">Skapa dina egna tillfredsställande rytmmönster</string>
+    <string name="game_emotion_garden">Känsloträdgård</string>
+    <string name="game_emotion_garden_desc">Odla blommor som representerar dina känslor</string>
+    <string name="game_safe_space">Trygg Plats Byggare</string>
+    <string name="game_safe_space_desc">Designa ditt eget lugnande virtuella rum</string>
+    <string name="game_worry_jar">Orosbutk</string>
+    <string name="game_worry_jar_desc">Skriv ner bekymmer och se dem flyta bort</string>
+    <string name="game_coming_soon">Kommer Snart</string>
+    <string name="game_in_development">🚧 Under Utveckling</string>
+
+    <!-- Ämnesdetaljskärm -->
+    <string name="topic_not_found">Ämne hittades inte</string>
+    <string name="topic_share">Dela Ämne</string>
+    <string name="topic_more_options_soon">Fler alternativ kommer snart! ⚙️</string>
+    <string name="topic_members_posts">%s medlemmar • %s inlägg</string>
+    <string name="topic_joined">Gick med</string>
+    <string name="topic_join_community">Gå med i Community</string>
+    <string name="topic_tab_posts">Inlägg</string>
+    <string name="topic_tab_resources">Resurser</string>
+    <string name="topic_tab_events">Evenemang</string>
+    <string name="topic_tab_members">Medlemmar</string>
+    <string name="topic_share_text">Kolla in %s-gemenskapen på NeuroComet! 🧠✨</string>
+
+    <!-- Ämnesresurser Sektion -->
+    <string name="topic_resources_title">Resurser</string>
+    <string name="resource_getting_started">Startguide</string>
+    <string name="resource_getting_started_desc">Lär dig grunderna och gemenskapens riktlinjer</string>
+    <string name="resource_pinned">Fäst</string>
+    <string name="resource_themes">25+ Neuro-State Teman</string>
+    <string name="resource_themes_desc">ADHD, Autism, Ångest, Färgblind och Humörteman</string>
+    <string name="resource_new">Ny!</string>
+    <string name="resource_fonts">Tillgänglighets Typsnitt Guide</string>
+    <string name="resource_fonts_desc">Lexend, OpenDyslexic, Atkinson och 10+ typsnitt</string>
+    <string name="resource_fonts_count">12 typsnitt</string>
+    <string name="resource_animation">Animationskontroller</string>
+    <string name="resource_animation_desc">Inaktivera animationer för en lugnare upplevelse</string>
+    <string name="resource_animation_count">7 växlar</string>
+    <string name="resource_events">Helg- och Medvetenhetsevenemang</string>
+    <string name="resource_events_desc">Specialteman för ND-medvetenhetsdagar</string>
+    <string name="resource_events_count">15 evenemang</string>
+    <string name="resource_safety">Säkerhet och Föräldrakontroll</string>
+    <string name="resource_safety_desc">Skärmtid, sovläge, innehållsfiltrering</string>
+    <string name="resource_essential">Väsentligt</string>
+    <string name="resource_tips">Snabba Tips och Tricks</string>
+    <string name="resource_tips_desc">Lås upp Regnbågshjärna, minska ögontrötthet och mer</string>
+    <string name="resource_tips_count">8 tips</string>
+    <string name="resource_links">Användbara Länkar Samling</string>
+    <string name="resource_links_desc">Utvalda externa resurser och verktyg</string>
+    <string name="resource_links_updated">Uppdaterad för 2d sedan</string>
+    <string name="resource_wiki">Community Wiki</string>
+    <string name="resource_wiki_desc">Samarbetad kunskapsbas</string>
+    <string name="resource_wiki_count">156 artiklar</string>
+    <string name="resource_videos">Videobibliotek</string>
+    <string name="resource_videos_desc">Utbildningsvideor och handledningar</string>
+    <string name="resource_videos_count">23 videor</string>
+    <string name="resource_reading">Rekommenderad Läsning</string>
+    <string name="resource_reading_desc">Böcker och artiklar rekommenderade av medlemmar</string>
+    <string name="resource_reading_count">45 objekt</string>
+
+    <!-- Ämnesevenemang Sektion -->
+    <string name="topic_events_title">Kommande Evenemang</string>
+    <string name="event_weekly_chat">Veckovis Community Chatt</string>
+    <string name="event_weekly_chat_time">Varje lördag kl 15:00 EST</string>
+    <string name="event_type_discussion">Live Diskussion</string>
+    <string name="event_book_club">Bokklubbsmöte</string>
+    <string name="event_book_club_time">5 januari 2026 kl 19:00 EST</string>
+    <string name="event_type_reading">Läsdiskussion</string>
+    <string name="event_mindfulness">Mindfulness Session</string>
+    <string name="event_mindfulness_time">8 januari 2026 kl 10:00 EST</string>
+    <string name="event_type_meditation">Guidad Meditation</string>
+    <string name="event_game_night">Spelkväll</string>
+    <string name="event_game_night_time">12 januari 2026 kl 20:00 EST</string>
+    <string name="event_type_social">Socialt Spelande</string>
+    <string name="event_qa">Frågor och Svar med Expert</string>
+    <string name="event_qa_time">15 januari 2026 kl 18:00 EST</string>
+    <string name="event_type_ama">Fråga Mig Vad Som Helst</string>
+    <string name="event_live">LIVE</string>
+    <string name="event_rsvp">OSA</string>
+    <string name="event_join">Gå med</string>
+
+    <!-- Ämnesmedlemmar Sektion -->
+    <string name="topic_members_title">Community Medlemmar</string>
+    <string name="member_role_moderator">Moderator</string>
+    <string name="member_role_contributor">Toppbidragsgivare</string>
+    <string name="member_role_active">Aktiv Medlem</string>
+    <string name="member_role_veteran">Veteran</string>
+    <string name="member_role_member">Medlem</string>
+    <string name="member_role_new">Ny Medlem</string>
+    <string name="member_follow">Följ</string>
+    <string name="member_share">Dela</string>
+
+    <!-- Tid Sedan Strängar -->
+    <string name="time_minutes_ago">%dm sedan</string>
+    <string name="time_hours_ago">%dt sedan</string>
+    <string name="time_days_ago">%dd sedan</string>
+
+    <!-- Hemskärmswidgetar -->
+    <string name="widget_energy_name">Energinivå</string>
+    <string name="widget_energy_description">Spåra din energi och sociala batterinivå från din hemskärm</string>
+    <string name="widget_focus_timer_name">Fokustimer</string>
+    <string name="widget_focus_timer_description">Starta och hantera fokussessioner direkt från din hemskärm</string>
+    <string name="widget_mood_name">Humörspårare</string>
+    <string name="widget_mood_description">Snabba humörincheckningar från din hemskärm</string>
+
+    <!-- Dra för att uppdatera -->
+    <string name="pull_to_refresh">Dra för att uppdatera</string>
+    <string name="release_to_refresh">Släpp för att uppdatera</string>
+    <string name="refreshing">Uppdaterar…</string>
+    <string name="refresh_complete">Uppdatering klar</string>
+
+    <!-- Plats och sensorer -->
+    <string name="location_permission_title">Platsåtkomst</string>
+    <string name="location_permission_desc">Används för platsdelning och för att hitta gemenskapsmedlemmar i närheten</string>
+    <string name="location_high_accuracy">Hög noggrannhet</string>
+    <string name="location_balanced">Balanserad</string>
+    <string name="location_low_power">Batterisparare</string>
+    <string name="sensor_accelerometer">Accelerometer</string>
+    <string name="sensor_magnetometer">Magnetometer</string>
+    <string name="sensor_barometer">Barometer</string>
+    <string name="sensor_monitoring">Sensorövervakning</string>
+
+    <!-- Utvecklaralternativ för autentisering -->
+    <string name="dev_credential_title">Autentiseringslagring</string>
+    <string name="dev_credential_test_save">Testspar</string>
+    <string name="dev_credential_test_retrieve">Testhämta</string>
+    <string name="dev_credential_clear_all">Rensa alla autentiseringar</string>
+    <string name="dev_credential_session_status">Sessionsstatus</string>
+    <string name="dev_credential_biometric_status">Biometrisk status</string>
+    <string name="dev_credential_create_session">Skapa testsession</string>
+    <string name="dev_credential_end_session">Avsluta session</string>
+    <string name="dev_credential_extend_session">Förläng session</string>
+
+    <!-- Feedback Hub -->
+    <string name="feedback_hub_title">Återkopplingshubb</string>
+    <string name="feedback_report_bug_title">Rapportera Bugg</string>
+    <string name="feedback_request_feature_title">Begär Funktion</string>
+    <string name="feedback_send_title">Skicka Återkoppling</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">Felsökningsverktyg</string>
+    <string name="debug_performance_overlay">Prestandaöverlägg</string>
+    <string name="debug_performance_desc">Visar FPS, minne och rullningsstatistik</string>
+    <string name="debug_reset_counters">Återställ Räknare</string>
+
 </resources>

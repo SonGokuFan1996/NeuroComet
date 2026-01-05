@@ -2,6 +2,238 @@
 <resources>
     <string name="app_name">NeuroComet</string>
 
+    <!-- Auth Screen -->
+    <string name="auth_app_tagline">Een veilige plek voor elke geest ✨</string>
+    <string name="auth_sign_in">Inloggen</string>
+    <string name="auth_sign_up">Registreren</string>
+    <string name="auth_email_label">E-mail</string>
+    <string name="auth_email_placeholder">jouw@email.nl</string>
+    <string name="auth_password_label">Wachtwoord</string>
+    <string name="auth_confirm_password_label">Wachtwoord bevestigen</string>
+    <string name="auth_password_requirements">🔒 Wachtwoord moet 12+ tekens bevatten met hoofdletters, kleine letters, cijfers en symbolen.</string>
+    <string name="auth_create_account">Account aanmaken</string>
+    <string name="auth_passwords_not_match">Wachtwoorden komen niet overeen</string>
+    <string name="auth_password_weak">Wachtwoord voldoet niet aan vereisten</string>
+    <string name="auth_skip">Voorlopig overslaan</string>
+    <string name="auth_skip_dev">Voorlopig overslaan (dev)</string>
+    <string name="auth_data_secure">Je gegevens zijn versleuteld en veilig</string>
+    <string name="auth_2fa_title">Twee-factor authenticatie</string>
+    <string name="auth_2fa_description">Voer de 6-cijferige code in die naar je apparaat is gestuurd</string>
+    <string name="auth_2fa_code_label">6-cijferige code</string>
+    <string name="auth_2fa_code_placeholder">123456</string>
+    <string name="auth_2fa_verify">Verifiëren</string>
+    <string name="auth_hide_password">Wachtwoord verbergen</string>
+    <string name="auth_show_password">Wachtwoord tonen</string>
+
+    <!-- Auth Tutorial -->
+    <string name="auth_tutorial_welcome_title">Welkom thuis 💜</string>
+    <string name="auth_tutorial_welcome_desc">NeuroComet is een veilige, bevestigende ruimte voor neurodiverse en LGBTQ+ geesten. Je hoort hier precies zoals je bent—geen masker nodig.</string>
+    <string name="auth_tutorial_comfort_title">Jouw comfort telt ∞</string>
+    <string name="auth_tutorial_comfort_desc_anim">Tik op het oneindigheid symbool om visuele beweging te verminderen. We hebben dit ontworpen voor sensorisch-vriendelijk browsen.</string>
+    <string name="auth_tutorial_comfort_desc_static">Perfect! Je hebt de rustige modus geactiveerd. Tik opnieuw wanneer je meer of minder beweging wilt.</string>
+    <string name="auth_tutorial_themes_title">25+ Neuro-Staat Thema\'s 🎨</string>
+    <string name="auth_tutorial_themes_desc">Kies thema\'s ontworpen voor ADHD focus, autisme comfort, angstverlichting, kleurenblind toegankelijkheid en stemmingsondersteuning. Jouw brein, jouw manier.</string>
+    <string name="auth_tutorial_fonts_title">Dyslexie-Vriendelijke Lettertypen 📖</string>
+    <string name="auth_tutorial_fonts_desc">12+ toegankelijkheidslettertypen inclusief OpenDyslexic, Lexend en Atkinson Hyperlegible. Pas spatiëring, gewicht en grootte aan zoals JOUW brein het beste leest.</string>
+    <string name="auth_tutorial_community_title">Gemeenschap en Trots 🌈</string>
+    <string name="auth_tutorial_community_desc">Verbind met mensen die het begrijpen. Neurodivers, LGBTQ+ en bondgenoten—alle breinen, alle identiteiten, allemaal prachtig. Speciale thema\'s voor Pride, Autisme Dag en ADHD Maand!</string>
+    <string name="auth_tutorial_safety_title">Gebouwd voor Veiligheid 🛡️</string>
+    <string name="auth_tutorial_safety_desc">Contentfiltering, ouderlijk toezicht, schermtijdlimieten en slaaptijdmodus beschermen je welzijn. Jij bepaalt wat je ziet en wanneer.</string>
+    <string name="auth_tutorial_ready_title">Klaar om te beginnen! ✨</string>
+    <string name="auth_tutorial_ready_desc">Log in of maak je account aan om je aan te sluiten bij duizenden neurodiverse en LGBTQ+ individuen. Dit is JOUW ruimte—verken op je eigen tempo.</string>
+    <string name="auth_tutorial_skip">Overslaan</string>
+    <string name="auth_tutorial_continue">Doorgaan</string>
+    <string name="auth_tutorial_lets_go">Laten we gaan! ✨</string>
+    <string name="auth_tutorial_step_count">%1$d van %2$d</string>
+    <string name="auth_tutorial_tap_here">Tik hier</string>
+
+    <!-- Splash Screen -->
+    <string name="splash_tagline_default">Een ruimte ontworpen voor jou</string>
+    <string name="splash_tagline_hyperfocus">Afleidingsvrije zone</string>
+    <string name="splash_tagline_overload">Lage stimulatie modus</string>
+    <string name="splash_tagline_calm">Jouw rustige ruimte</string>
+    <string name="splash_tagline_adhd_energized">Rijd de golf</string>
+    <string name="splash_tagline_adhd_low_dopamine">Zachte motivatie</string>
+    <string name="splash_tagline_adhd_task_mode">Minimale afleiding</string>
+    <string name="splash_tagline_autism_routine">Voorspelbaar en veilig</string>
+    <string name="splash_tagline_autism_sensory_seek">Rijke ervaringen wachten</string>
+    <string name="splash_tagline_autism_low_stim">Minimale stimulatie</string>
+    <string name="splash_tagline_anxiety_soothe">Je geest kalmeren</string>
+    <string name="splash_tagline_anxiety_grounding">Geworteld in het nu</string>
+    <string name="splash_tagline_dyslexia_friendly">Ontworpen voor duidelijkheid</string>
+    <string name="splash_tagline_colorblind_deuteranopia">Deuteranopie vriendelijk</string>
+    <string name="splash_tagline_colorblind_protanopia">Protanopie vriendelijk</string>
+    <string name="splash_tagline_colorblind_tritanopia">Tritanopie vriendelijk</string>
+    <string name="splash_tagline_colorblind_monochromacy">Patroon-gebaseerd ontwerp</string>
+    <string name="splash_tagline_blind_screen_reader">Geoptimaliseerd voor TalkBack</string>
+    <string name="splash_tagline_blind_high_contrast">Puur zwart-wit</string>
+    <string name="splash_tagline_blind_large_text">Extra grote tekst modus</string>
+    <string name="splash_tagline_mood_tired">Rust is oké</string>
+    <string name="splash_tagline_mood_anxious">Adem met ons</string>
+    <string name="splash_tagline_mood_happy">Laten we je vieren</string>
+    <string name="splash_tagline_mood_overwhelmed">We nemen het rustig</string>
+    <string name="splash_tagline_mood_creative">Laat ideeën stromen</string>
+    <string name="splash_tagline_rainbow_brain">Omarm je regenboogbrein</string>
+
+    <!-- Splash Messages -->
+    <string name="splash_msg_default_1">Welkom terug</string>
+    <string name="splash_msg_default_2">Je ruimte wacht</string>
+    <string name="splash_msg_default_3">Laten we beginnen</string>
+    <string name="splash_msg_hyperfocus_1">Focus modus</string>
+    <string name="splash_msg_hyperfocus_2">Heldere geest vooruit</string>
+    <string name="splash_msg_hyperfocus_3">Klaar om diep te duiken</string>
+    <string name="splash_msg_overload_1">Rustig aan</string>
+    <string name="splash_msg_overload_2">Adem met mij</string>
+    <string name="splash_msg_overload_3">Zacht tempo</string>
+    <string name="splash_msg_calm_1">Vrede wacht</string>
+    <string name="splash_msg_calm_2">Sereniteit modus</string>
+    <string name="splash_msg_calm_3">Kalme wateren</string>
+    <string name="splash_msg_adhd_energized_1">Laten we gaan! ⚡</string>
+    <string name="splash_msg_adhd_energized_2">Energie ontgrendeld</string>
+    <string name="splash_msg_adhd_energized_3">Tijd om te schijnen</string>
+    <string name="splash_msg_adhd_low_dopamine_1">Opwarmen</string>
+    <string name="splash_msg_adhd_low_dopamine_2">Je vonk vinden</string>
+    <string name="splash_msg_adhd_low_dopamine_3">Je kunt het</string>
+    <string name="splash_msg_adhd_task_mode_1">Taak modus</string>
+    <string name="splash_msg_adhd_task_mode_2">Een ding tegelijk</string>
+    <string name="splash_msg_adhd_task_mode_3">Focus geactiveerd</string>
+    <string name="splash_msg_autism_routine_1">Zoals altijd</string>
+    <string name="splash_msg_autism_routine_2">Vertrouwde patronen</string>
+    <string name="splash_msg_autism_routine_3">Comfort in routine</string>
+    <string name="splash_msg_autism_sensory_seek_1">Sensorische vreugde</string>
+    <string name="splash_msg_autism_sensory_seek_2">Voel de patronen</string>
+    <string name="splash_msg_autism_sensory_seek_3">Bevredigende vibes</string>
+    <string name="splash_msg_autism_low_stim_1">Stille modus</string>
+    <string name="splash_msg_autism_low_stim_2">Zacht en mild</string>
+    <string name="splash_msg_autism_low_stim_3">Rust je zintuigen</string>
+    <string name="splash_msg_anxiety_soothe_1">Je bent hier veilig</string>
+    <string name="splash_msg_anxiety_soothe_2">Inademen, uitademen</string>
+    <string name="splash_msg_anxiety_soothe_3">Alles is goed</string>
+    <string name="splash_msg_anxiety_grounding_1">Voeten op de grond</string>
+    <string name="splash_msg_anxiety_grounding_2">Het huidige moment</string>
+    <string name="splash_msg_anxiety_grounding_3">Stabiel en veilig</string>
+    <string name="splash_msg_dyslexia_friendly_1">Duidelijk en leesbaar</string>
+    <string name="splash_msg_dyslexia_friendly_2">Op jouw manier</string>
+    <string name="splash_msg_dyslexia_friendly_3">Makkelijk lezen vooruit</string>
+    <string name="splash_msg_colorblind_deuter_1">Kleuren geoptimaliseerd</string>
+    <string name="splash_msg_colorblind_deuter_2">Blauw en oranje helderheid</string>
+    <string name="splash_msg_colorblind_deuter_3">Zie met vertrouwen</string>
+    <string name="splash_msg_colorblind_protan_1">Kleuren aangepast</string>
+    <string name="splash_msg_colorblind_protan_2">Blauw en geel harmonie</string>
+    <string name="splash_msg_colorblind_protan_3">Duidelijk onderscheid</string>
+    <string name="splash_msg_colorblind_tritan_1">Kleuren verfijnd</string>
+    <string name="splash_msg_colorblind_tritan_2">Roze en turquoise contrast</string>
+    <string name="splash_msg_colorblind_tritan_3">Visuele helderheid</string>
+    <string name="splash_msg_colorblind_mono_1">Vormen en patronen</string>
+    <string name="splash_msg_colorblind_mono_2">Hoog contrast</string>
+    <string name="splash_msg_colorblind_mono_3">Duidelijke grenzen</string>
+    <string name="splash_msg_blind_reader_1">Schermlezer klaar</string>
+    <string name="splash_msg_blind_reader_2">Toegankelijkheid eerst</string>
+    <string name="splash_msg_blind_reader_3">Welkom</string>
+    <string name="splash_msg_blind_contrast_1">Maximum contrast</string>
+    <string name="splash_msg_blind_contrast_2">Duidelijk en vet</string>
+    <string name="splash_msg_blind_contrast_3">Makkelijk te zien</string>
+    <string name="splash_msg_blind_large_1">Groot en duidelijk</string>
+    <string name="splash_msg_blind_large_2">Makkelijk lezen</string>
+    <string name="splash_msg_blind_large_3">Op jouw manier</string>
+    <string name="splash_msg_mood_tired_1">Rustig aan</string>
+    <string name="splash_msg_mood_tired_2">Geen haast</string>
+    <string name="splash_msg_mood_tired_3">Zachte start</string>
+    <string name="splash_msg_mood_anxious_1">Het komt goed</string>
+    <string name="splash_msg_mood_anxious_2">Dit gaat ook voorbij</string>
+    <string name="splash_msg_mood_anxious_3">Veilige ruimte</string>
+    <string name="splash_msg_mood_happy_1">Hallo zonneschijn! ☀️</string>
+    <string name="splash_msg_mood_happy_2">Geweldige vibes</string>
+    <string name="splash_msg_mood_happy_3">Vreugde wacht</string>
+    <string name="splash_msg_mood_overwhelmed_1">Een adem</string>
+    <string name="splash_msg_mood_overwhelmed_2">Vertragen</string>
+    <string name="splash_msg_mood_overwhelmed_3">We zijn er voor je</string>
+    <string name="splash_msg_mood_creative_1">Inspiratie komt eraan</string>
+    <string name="splash_msg_mood_creative_2">Creëer vrij</string>
+    <string name="splash_msg_mood_creative_3">Verbeelding modus</string>
+    <string name="splash_msg_rainbow_1">🦄 Je vond het geheim!</string>
+    <string name="splash_msg_rainbow_2">🌈 Vier je unieke geest</string>
+    <string name="splash_msg_rainbow_3">✨ Neurodiversiteit is magie</string>
+    <string name="splash_msg_rainbow_4">🧠 Je brein is prachtig</string>
+    <string name="splash_msg_rainbow_5">💜 Anders zijn is krachtig</string>
+
+    <!-- NeuroState Categories -->
+    <string name="neuro_category_basic">Basis Thema\'s</string>
+    <string name="neuro_category_adhd">ADHD Thema\'s</string>
+    <string name="neuro_category_autism">Autisme Thema\'s</string>
+    <string name="neuro_category_anxiety">Angst/OCD Thema\'s</string>
+    <string name="neuro_category_accessibility">Toegankelijkheid</string>
+    <string name="neuro_category_colorblind">Kleurenblind Vriendelijk</string>
+    <string name="neuro_category_blind">Blind en Slechtziend</string>
+    <string name="neuro_category_mood">Hoe voel je je?</string>
+    <string name="neuro_category_secret">🦄 Geheime Thema\'s</string>
+
+    <!-- NeuroState Names -->
+    <string name="neuro_state_default">Standaard</string>
+    <string name="neuro_state_hyperfocus">Hyperfocus</string>
+    <string name="neuro_state_overload">Sensorische Overbelasting</string>
+    <string name="neuro_state_calm">Kalm</string>
+    <string name="neuro_state_adhd_energized">ADHD - Energiek</string>
+    <string name="neuro_state_adhd_low_dopamine">ADHD - Lage Dopamine</string>
+    <string name="neuro_state_adhd_task_mode">ADHD - Taak Modus</string>
+    <string name="neuro_state_autism_routine">Autisme - Routine</string>
+    <string name="neuro_state_autism_sensory_seek">Autisme - Sensorisch Zoeken</string>
+    <string name="neuro_state_autism_low_stim">Autisme - Lage Stimulatie</string>
+    <string name="neuro_state_anxiety_soothe">Angst - Kalmeren</string>
+    <string name="neuro_state_anxiety_grounding">Angst - Aarding</string>
+    <string name="neuro_state_dyslexia_friendly">Dyslexie Vriendelijk</string>
+    <string name="neuro_state_colorblind_deuter">Deuteranopie</string>
+    <string name="neuro_state_colorblind_protan">Protanopie</string>
+    <string name="neuro_state_colorblind_tritan">Tritanopie</string>
+    <string name="neuro_state_colorblind_mono">Monochromaat</string>
+    <string name="neuro_state_blind_screen_reader">Schermlezer Modus</string>
+    <string name="neuro_state_blind_high_contrast">Maximum Contrast</string>
+    <string name="neuro_state_blind_large_text">Grote Tekst Modus</string>
+    <string name="neuro_state_mood_tired">Moe Voelen</string>
+    <string name="neuro_state_mood_anxious">Angstig Voelen</string>
+    <string name="neuro_state_mood_happy">Blij Voelen</string>
+    <string name="neuro_state_mood_overwhelmed">Overweldigd Voelen</string>
+    <string name="neuro_state_mood_creative">Creatief Voelen</string>
+    <string name="neuro_state_rainbow_brain">Regenboog Brein</string>
+
+    <!-- NeuroState Descriptions -->
+    <string name="neuro_state_default_desc">Standaard thema met gebalanceerde kleuren</string>
+    <string name="neuro_state_hyperfocus_desc">Hoog contrast voor diepe concentratie</string>
+    <string name="neuro_state_overload_desc">Gedempte, kalme kleuren om stimulatie te verminderen</string>
+    <string name="neuro_state_calm_desc">Zachte, kalmerende kleuren voor ontspanning</string>
+    <string name="neuro_state_adhd_energized_desc">Heldere, boeiende kleuren voor productieve dagen</string>
+    <string name="neuro_state_adhd_low_dopamine_desc">Warme, stimulerende kleuren om stemming te verbeteren</string>
+    <string name="neuro_state_adhd_task_mode_desc">Minimale afleiding, focus-verbeterend palet</string>
+    <string name="neuro_state_autism_routine_desc">Voorspelbare, consistente kleurpatronen</string>
+    <string name="neuro_state_autism_sensory_seek_desc">Rijke texturen en bevredigende contrasten</string>
+    <string name="neuro_state_autism_low_stim_desc">Zeer gedempte, zachte kleuren</string>
+    <string name="neuro_state_anxiety_soothe_desc">Koele, geruststellende kleuren om zorgen te verlichten</string>
+    <string name="neuro_state_anxiety_grounding_desc">Aardse, stabiele kleuren voor centrering</string>
+    <string name="neuro_state_dyslexia_friendly_desc">Hoge leesbaarheid met optimaal contrast</string>
+    <string name="neuro_state_colorblind_deuter_desc">Geoptimaliseerd voor rood-groen (groen-zwak) kleurenblindheid</string>
+    <string name="neuro_state_colorblind_protan_desc">Geoptimaliseerd voor rood-groen (rood-zwak) kleurenblindheid</string>
+    <string name="neuro_state_colorblind_tritan_desc">Geoptimaliseerd voor blauw-geel kleurenblindheid</string>
+    <string name="neuro_state_colorblind_mono_desc">Hoog contrast grijstinten voor volledige kleurenblindheid</string>
+    <string name="neuro_state_blind_screen_reader_desc">Geoptimaliseerd voor TalkBack en schermlezers met maximum contrast</string>
+    <string name="neuro_state_blind_high_contrast_desc">Puur zwart/wit voor gebruikers met zeer laag zicht</string>
+    <string name="neuro_state_blind_large_text_desc">Extra grote tekst met vereenvoudigde lay-out</string>
+    <string name="neuro_state_mood_tired_desc">Zachte kleuren die de ogen niet vermoeien</string>
+    <string name="neuro_state_mood_anxious_desc">Kalmerend palet om stress te verminderen</string>
+    <string name="neuro_state_mood_happy_desc">Vrolijke kleuren passend bij je stemming</string>
+    <string name="neuro_state_mood_overwhelmed_desc">Vereenvoudigd, rustig palet</string>
+    <string name="neuro_state_mood_creative_desc">Inspirerende kleuren om verbeelding aan te wakkeren</string>
+    <string name="neuro_state_rainbow_brain_desc">Vier je prachtig unieke neurodiverse geest! 🌈🧠</string>
+
+    <!-- Accessibility Strings -->
+    <string name="accessibility_selected">geselecteerd</string>
+    <string name="accessibility_not_selected">niet geselecteerd</string>
+    <string name="expand_category">%1$s uitvouwen</string>
+    <string name="collapse_category">%1$s invouwen</string>
+
+    <!-- Easter Egg Dialog -->
+    <string name="easter_egg_secret_unlocked">🎊 Geheim ontgrendeld! 🎊</string>
+    <string name="easter_egg_welcome_back">🦄 Welkom terug! 🦄</string>
+
     <!-- Navigation/Screen Titles -->
     <string name="nav_feed">Feed</string>
     <string name="nav_explore">Ontdekken</string>
@@ -117,11 +349,6 @@
     <string name="comments_add_comment_placeholder">Voeg een reactie toe…</string>
     <string name="comments_send_button_description">Versturen</string>
 
-    <!-- NeuroState Names -->
-    <string name="neuro_state_default">Standaard</string>
-    <string name="neuro_state_hyperfocus">Hyperfocus</string>
-    <string name="neuro_state_overload">Overbelasting</string>
-    <string name="neuro_state_calm">Kalm</string>
 
     <!-- Text Scale Factor Names -->
     <string name="text_scale_small">Klein</string>
@@ -528,6 +755,21 @@
     <string name="explore_topic_late_diagnosed">Laat Gediagnosticeerd</string>
     <string name="explore_topic_late_diagnosed_desc">Ervaringen met diagnose als volwassene en identiteitsverkenning</string>
 
+    <!-- LGBTQ+ Explore Topics -->
+    <string name="explore_section_lgbtq">LGBTQ+ en Identiteit</string>
+    <string name="explore_topic_lgbtq_nd">LGBTQ+ en Neurodivers</string>
+    <string name="explore_topic_lgbtq_nd_desc">De kruising van queer en neurodiverse identiteiten vieren</string>
+    <string name="explore_topic_trans_nd">Trans en ND</string>
+    <string name="explore_topic_trans_nd_desc">Ondersteuning voor transgender en genderdiverse neurodiverse mensen</string>
+    <string name="explore_topic_queer_pride">Queer Pride</string>
+    <string name="explore_topic_queer_pride_desc">Queer vreugde, pride-evenementen en gemeenschap vieren</string>
+    <string name="explore_topic_ace_aro">Ace/Aro Spectrum</string>
+    <string name="explore_topic_ace_aro_desc">Aseksuele, aromantische en aroace neurodiverse ervaringen</string>
+    <string name="explore_topic_nonbinary">Non-Binair en ND</string>
+    <string name="explore_topic_nonbinary_desc">Non-binaire, genderqueer en gender-fluid gemeenschap</string>
+    <string name="explore_topic_coming_out">Coming Out Verhalen</string>
+    <string name="explore_topic_coming_out_desc">Coming out reizen delen en acceptatie vinden</string>
+
     <!-- Explore Stats -->
     <string name="explore_members">%s leden</string>
     <string name="explore_posts">%s berichten</string>
@@ -573,4 +815,166 @@
     <string name="settings_fake_premium_enabled">Premium functies ontgrendeld voor testen</string>
     <string name="settings_fake_premium_disabled">Activeer om premium functies te testen</string>
     <string name="settings_dev_options_desc">Geavanceerde opties voor testen en debuggen</string>
+
+    <!-- NeuroGames - Stim-vriendelijke Spellen -->
+    <string name="games_hub_title">NeuroSpellen</string>
+    <string name="games_subtitle">Stim-vriendelijk plezier voor je hersenen</string>
+    <string name="games_play_now">Speel Spellen</string>
+    <string name="games_play_now_desc">Ontgrendel stim-vriendelijke spellen door prestaties te verdienen</string>
+    <string name="games_unlocked">Ontgrendelde Spellen</string>
+    <string name="games_locked">Vergrendelde Spellen</string>
+    <string name="games_your_achievements">Jouw Prestaties</string>
+    <string name="games_achievements">prestaties</string>
+    <string name="games_next_unlock">%d meer om het volgende spel te ontgrendelen!</string>
+    <string name="games_requires_achievements">Vereist %d prestaties</string>
+    <string name="games_coming_soon">Binnenkort</string>
+    <string name="games_coming_soon_message">Dit spel is nog in ontwikkeling. Kom snel terug!</string>
+
+    <!-- Individuele Spellen -->
+    <string name="game_bubble_pop">Bubbels Poppen</string>
+    <string name="game_bubble_pop_desc">Pop bevredigende bubbels voor een kalmerende stim-ervaring</string>
+    <string name="game_bubble_pop_hint">Tik op de bubbels om ze te poppen! ✨</string>
+    <string name="game_fidget_spinner">Fidget Spinner</string>
+    <string name="game_fidget_spinner_desc">Draai naar hartenlust - geen limieten, alleen goede vibes</string>
+    <string name="game_fidget_spinner_hint">Veeg om te draaien! Hoe sneller je veegt, hoe sneller het draait 🌀</string>
+    <string name="game_color_flow">Kleurenstroom</string>
+    <string name="game_color_flow_desc">Bekijk ontspannende kleurovergangen stromen en mengen</string>
+    <string name="game_color_flow_hint">Tik ergens om de kleuren te veranderen</string>
+    <string name="game_pattern_tap">Patroon Tikken</string>
+    <string name="game_pattern_tap_desc">Tik patronen in volgorde - geweldig voor focustraining</string>
+    <string name="game_infinity_draw">Oneindig Tekenen</string>
+    <string name="game_infinity_draw_desc">Teken eindeloze patronen die nooit vervagen - pure stim-gelukzaligheid</string>
+    <string name="game_sensory_rain">Zintuiglijke Regen</string>
+    <string name="game_sensory_rain_desc">Bekijk prachtige regendruppels vallen met rustgevende beelden</string>
+    <string name="game_breathing_bubbles">Ademhalingsbellen</string>
+    <string name="game_breathing_bubbles_desc">Volg de bel om rustige ademhaling te oefenen</string>
+    <string name="game_breathing_bubbles_hint">Adem in als de bel groeit, uit als hij krimpt 🫧</string>
+    <string name="game_texture_tiles">Textuurtegels</string>
+    <string name="game_texture_tiles_desc">Tik op tegels om verschillende bevredigende texturen te voelen</string>
+    <string name="game_texture_tiles_hint">Elke tegel heeft unieke haptische feedback - vind je favorieten!</string>
+    <string name="game_sound_garden">Geluidstuin</string>
+    <string name="game_sound_garden_desc">Creëer sfeervolle geluidslandschappen door geluidsbloemen te planten</string>
+    <string name="game_sound_garden_hint">Tik om te planten, houd ingedrukt om te verwijderen. Laag geluiden! 🌸</string>
+
+    <!-- Games in Ontwikkeling -->
+    <string name="game_stim_sequencer">Stim Sequencer</string>
+    <string name="game_stim_sequencer_desc">Maak je eigen bevredigende ritmepatronen</string>
+    <string name="game_emotion_garden">Emotietuin</string>
+    <string name="game_emotion_garden_desc">Kweek bloemen die je gevoelens vertegenwoordigen</string>
+    <string name="game_safe_space">Veilige Ruimte Bouwer</string>
+    <string name="game_safe_space_desc">Ontwerp je eigen kalmerende virtuele kamer</string>
+    <string name="game_worry_jar">Zorgenpot</string>
+    <string name="game_worry_jar_desc">Schrijf zorgen op en kijk hoe ze wegdrijven</string>
+    <string name="game_coming_soon">Binnenkort</string>
+    <string name="game_in_development">🚧 In Ontwikkeling</string>
+
+    <!-- Topic Detail Scherm -->
+    <string name="topic_not_found">Onderwerp niet gevonden</string>
+    <string name="topic_share">Onderwerp Delen</string>
+    <string name="topic_more_options_soon">Meer opties binnenkort! ⚙️</string>
+    <string name="topic_members_posts">%s leden • %s berichten</string>
+    <string name="topic_joined">Lid geworden</string>
+    <string name="topic_join_community">Word Lid van Community</string>
+    <string name="topic_tab_posts">Berichten</string>
+    <string name="topic_tab_resources">Bronnen</string>
+    <string name="topic_tab_events">Evenementen</string>
+    <string name="topic_tab_members">Leden</string>
+    <string name="topic_share_text">Bekijk de %s community op NeuroComet! 🧠✨</string>
+
+    <!-- Topic Bronnen Sectie -->
+    <string name="topic_resources_title">Bronnen</string>
+    <string name="resource_getting_started">Startgids</string>
+    <string name="resource_getting_started_desc">Leer de basis en community richtlijnen</string>
+    <string name="resource_pinned">Vastgezet</string>
+    <string name="resource_themes">25+ Neuro-State Thema\'s</string>
+    <string name="resource_themes_desc">ADHD, Autisme, Angst, Kleurenblind en Stemming thema\'s</string>
+    <string name="resource_new">Nieuw!</string>
+    <string name="resource_fonts">Toegankelijkheid Lettertypen Gids</string>
+    <string name="resource_fonts_desc">Lexend, OpenDyslexic, Atkinson en 10+ lettertypen</string>
+    <string name="resource_fonts_count">12 lettertypen</string>
+    <string name="resource_animation">Animatie Instellingen</string>
+    <string name="resource_animation_desc">Schakel animaties uit voor een rustigere ervaring</string>
+    <string name="resource_animation_count">7 opties</string>
+    <string name="resource_events">Feestdagen en Bewustwordingsevenementen</string>
+    <string name="resource_events_desc">Speciale thema\'s voor ND bewustwordingsdagen</string>
+    <string name="resource_events_count">15 evenementen</string>
+    <string name="resource_safety">Veiligheid en Ouderlijk Toezicht</string>
+    <string name="resource_safety_desc">Schermtijd, slaapstandmodus, inhoudsfiltering</string>
+    <string name="resource_essential">Essentieel</string>
+    <string name="resource_tips">Snelle Tips en Trucs</string>
+    <string name="resource_tips_desc">Ontgrendel Regenboog Brein, verminder oogvermoeidheid en meer</string>
+    <string name="resource_tips_count">8 tips</string>
+    <string name="resource_links">Nuttige Links Collectie</string>
+    <string name="resource_links_desc">Geselecteerde externe bronnen en tools</string>
+    <string name="resource_links_updated">2 dagen geleden bijgewerkt</string>
+    <string name="resource_wiki">Community Wiki</string>
+    <string name="resource_wiki_desc">Samen geschreven kennisbank</string>
+    <string name="resource_wiki_count">156 artikelen</string>
+    <string name="resource_videos">Videobibliotheek</string>
+    <string name="resource_videos_desc">Educatieve video\'s en tutorials</string>
+    <string name="resource_videos_count">23 video\'s</string>
+    <string name="resource_reading">Aanbevolen Lectuur</string>
+    <string name="resource_reading_desc">Boeken en artikelen aanbevolen door leden</string>
+    <string name="resource_reading_count">45 items</string>
+
+    <!-- Topic Evenementen Sectie -->
+    <string name="topic_events_title">Aankomende Evenementen</string>
+    <string name="event_weekly_chat">Wekelijkse Community Chat</string>
+    <string name="event_weekly_chat_time">Elke zaterdag om 15:00 EST</string>
+    <string name="event_type_discussion">Live Discussie</string>
+    <string name="event_book_club">Boekenclub Bijeenkomst</string>
+    <string name="event_book_club_time">5 januari 2026 om 19:00 EST</string>
+    <string name="event_type_reading">Leesdiscussie</string>
+    <string name="event_mindfulness">Mindfulness Sessie</string>
+    <string name="event_mindfulness_time">8 januari 2026 om 10:00 EST</string>
+    <string name="event_type_meditation">Begeleide Meditatie</string>
+    <string name="event_game_night">Spelavond</string>
+    <string name="event_game_night_time">12 januari 2026 om 20:00 EST</string>
+    <string name="event_type_social">Sociaal Gamen</string>
+    <string name="event_qa">Q&amp;A met Expert</string>
+    <string name="event_qa_time">15 januari 2026 om 18:00 EST</string>
+    <string name="event_type_ama">Vraag Me Alles</string>
+    <string name="event_live">LIVE</string>
+    <string name="event_rsvp">RSVP</string>
+    <string name="event_join">Deelnemen</string>
+
+    <!-- Topic Leden Sectie -->
+    <string name="topic_members_title">Community Leden</string>
+    <string name="member_role_moderator">Moderator</string>
+    <string name="member_role_contributor">Top Bijdrager</string>
+    <string name="member_role_active">Actief Lid</string>
+    <string name="member_role_veteran">Veteraan</string>
+    <string name="member_role_member">Lid</string>
+    <string name="member_role_new">Nieuw Lid</string>
+    <string name="member_follow">Volgen</string>
+    <string name="member_share">Delen</string>
+
+    <!-- Tijd Geleden Strings -->
+    <string name="time_minutes_ago">%dm geleden</string>
+    <string name="time_hours_ago">%du geleden</string>
+    <string name="time_days_ago">%dd geleden</string>
+
+    <!-- Feedback Hub -->
+    <string name="feedback_hub_title">Feedback Hub</string>
+    <string name="feedback_report_bug_title">Bug Melden</string>
+    <string name="feedback_request_feature_title">Functie Aanvragen</string>
+    <string name="feedback_send_title">Feedback Verzenden</string>
+
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">Inloggegevens Opslag</string>
+    <string name="dev_credential_test_save">Test Opslaan</string>
+    <string name="dev_credential_test_retrieve">Test Ophalen</string>
+    <string name="dev_credential_clear_all">Alle Inloggegevens Wissen</string>
+    <string name="dev_credential_session_status">Sessiestatus</string>
+    <string name="dev_credential_biometric_status">Biometrische Status</string>
+    <string name="dev_credential_create_session">Testsessie Aanmaken</string>
+    <string name="dev_credential_end_session">Sessie Beëindigen</string>
+    <string name="dev_credential_extend_session">Sessie Verlengen</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">Debug Tools</string>
+    <string name="debug_performance_overlay">Prestatie Overlay</string>
+    <string name="debug_performance_desc">Toont FPS, geheugen en scroll statistieken</string>
+    <string name="debug_reset_counters">Tellers Resetten</string>
 </resources>

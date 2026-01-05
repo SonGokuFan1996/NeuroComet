@@ -529,6 +529,21 @@
     <string name="explore_topic_late_diagnosed">Late Diagnosed</string>
     <string name="explore_topic_late_diagnosed_desc">Adult diagnosis experiences and identity exploration</string>
 
+    <!-- LGBTQ+ Explore Topics -->
+    <string name="explore_section_lgbtq">LGBTQ+ &amp; Identity</string>
+    <string name="explore_topic_lgbtq_nd">LGBTQ+ &amp; Neurodivergent</string>
+    <string name="explore_topic_lgbtq_nd_desc">Celebrating the intersection of queer and neurodivergent identities</string>
+    <string name="explore_topic_trans_nd">Trans &amp; ND</string>
+    <string name="explore_topic_trans_nd_desc">Support for transgender and gender-diverse neurodivergent people</string>
+    <string name="explore_topic_queer_pride">Queer Pride</string>
+    <string name="explore_topic_queer_pride_desc">Celebrating queer joy, pride events, and community</string>
+    <string name="explore_topic_ace_aro">Ace/Aro Spectrum</string>
+    <string name="explore_topic_ace_aro_desc">Asexual, aromantic, and aroace neurodivergent experiences</string>
+    <string name="explore_topic_nonbinary">Non-Binary &amp; ND</string>
+    <string name="explore_topic_nonbinary_desc">Non-binary, genderqueer, and gender-fluid community</string>
+    <string name="explore_topic_coming_out">Coming Out Stories</string>
+    <string name="explore_topic_coming_out_desc">Sharing coming out journeys and finding acceptance</string>
+
     <!-- Explore Stats -->
     <string name="explore_members">%s members</string>
     <string name="explore_posts">%s posts</string>

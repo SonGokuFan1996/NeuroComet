@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Background with rounded corners -->
+    <path
+        android:pathData="M24,0 L176,0 Q200,0 200,24 L200,176 Q200,200 176,200 L24,200 Q0,200 0,176 L0,24 Q0,0 24,0 Z"
+        android:fillColor="#11998e"/>
+
+    <!-- Gradient overlay -->
+    <path
+        android:pathData="M24,0 L176,0 Q200,0 200,24 L200,176 Q200,200 176,200 L24,200 Q0,200 0,176 L0,24 Q0,0 24,0 Z"
+        android:fillColor="#38ef7d"
+        android:fillAlpha="0.4"/>
+
+    <!-- Timer outer ring -->
+    <path
+        android:pathData="M100,30 m-55,0 a55,55 0 1,1 110,0 a55,55 0 1,1 -110,0"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.3"/>
+
+    <!-- Timer inner ring (progress) -->
+    <path
+        android:pathData="M100,30 m-45,0 a45,45 0 1,1 90,0 a45,45 0 1,1 -90,0"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.5"/>
+
+    <!-- Timer center circle -->
+    <path
+        android:pathData="M100,75 m-30,0 a30,30 0 1,1 60,0 a30,30 0 1,1 -60,0"
+        android:fillColor="#FFFFFF"/>
+
+    <!-- Play icon in center -->
+    <path
+        android:pathData="M93,65 L93,85 L110,75 Z"
+        android:fillColor="#11998e"/>
+
+    <!-- Time display background -->
+    <path
+        android:pathData="M50,145 L150,145 Q158,145 158,153 L158,165 Q158,173 150,173 L50,173 Q42,173 42,165 L42,153 Q42,145 50,145 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.4"/>
+
+    <!-- Focus Timer label -->
+    <path
+        android:pathData="M30,180 L170,180 Q178,180 178,186 L178,192 Q178,198 170,198 L30,198 Q22,198 22,192 L22,186 Q22,180 30,180 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.25"/>
+</vector>
+

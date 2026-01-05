@@ -13,6 +13,8 @@
     <!-- Required for location sharing -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Required for background location access on Android 10+ -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <!-- Required for reading contacts -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <!-- Required for reading media files -->
@@ -62,11 +64,11 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:hardwareAccelerated="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/neuro_comet_icon"
         android:label="@string/app_name"
         android:largeHeap="false"
         android:localeConfig="@xml/locales_config"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/neuro_comet_icon_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.NeuroComet"
         tools:targetApi="31">
@@ -80,6 +82,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- ICON CUSTOMIZATION - Using Shortcut Manager approach            -->
+        <!-- The app creates pinned shortcuts with custom icons              -->
+        <!-- This is the only reliable way to have custom icons              -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+
 
         <!-- FileProvider for camera and file sharing -->
         <provider
@@ -101,6 +110,94 @@
                 android:name="autoStoreLocales"
                 android:value="true" />
         </service>
+
+        <!-- Energy Widget -->
+        <receiver
+            android:name=".widget.EnergyWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.kyilmaz.neurocomet.ENERGY_UP" />
+                <action android:name="com.kyilmaz.neurocomet.ENERGY_DOWN" />
+                <action android:name="com.kyilmaz.neurocomet.OPEN_APP" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_energy_info" />
+        </receiver>
+
+        <!-- Focus Timer Widget -->
+        <receiver
+            android:name=".widget.FocusTimerWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.kyilmaz.neurocomet.START_TIMER" />
+                <action android:name="com.kyilmaz.neurocomet.PAUSE_TIMER" />
+                <action android:name="com.kyilmaz.neurocomet.RESET_TIMER" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_focus_timer_info" />
+        </receiver>
+
+        <!-- Mood Widget -->
+        <receiver
+            android:name=".widget.MoodWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.kyilmaz.neurocomet.MOOD_HAPPY" />
+                <action android:name="com.kyilmaz.neurocomet.MOOD_CALM" />
+                <action android:name="com.kyilmaz.neurocomet.MOOD_SAD" />
+                <action android:name="com.kyilmaz.neurocomet.MOOD_ANXIOUS" />
+                <action android:name="com.kyilmaz.neurocomet.MOOD_TIRED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_mood_info" />
+        </receiver>
+
+        <!-- Spoon Theory Widget -->
+        <receiver
+            android:name=".widget.SpoonWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.kyilmaz.neurocomet.USE_SPOON" />
+                <action android:name="com.kyilmaz.neurocomet.RESET_SPOONS" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_spoon_info" />
+        </receiver>
+
+        <!-- Affirmation Widget -->
+        <receiver
+            android:name=".widget.AffirmationWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.kyilmaz.neurocomet.NEXT_AFFIRMATION" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_affirmation_info" />
+        </receiver>
+
+        <!-- Stim Break Widget -->
+        <receiver
+            android:name=".widget.StimBreakWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.kyilmaz.neurocomet.TAKE_BREAK" />
+                <action android:name="com.kyilmaz.neurocomet.RESET_BREAK_TIMER" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_stim_break_info" />
+        </receiver>
     </application>
 
 </manifest>

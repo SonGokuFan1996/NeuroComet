@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core UI -->
+    <string name="app_name">NeuroComet</string>
+    <string name="nav_feed">피드</string>
+    <string name="nav_explore">탐색</string>
+    <string name="nav_messages">메시지</string>
+    <string name="nav_notifications">알림</string>
+    <string name="nav_settings">설정</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in">로그인</string>
+    <string name="auth_sign_up">회원가입</string>
+    <string name="auth_email_label">이메일</string>
+    <string name="auth_password_label">비밀번호</string>
+    <string name="auth_create_account">계정 만들기</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">모양 및 표시</string>
+    <string name="settings_section_privacy">개인정보 및 보안</string>
+    <string name="settings_section_notifications">알림</string>
+    <string name="settings_section_accessibility">접근성</string>
+
+    <!-- Explore -->
+    <string name="explore_title">탐색</string>
+    <string name="explore_autism">자폐증</string>
+    <string name="explore_adhd">ADHD</string>
+    <string name="explore_anxiety">불안</string>
+    <string name="explore_sensory">감각</string>
+
+    <!-- Games -->
+    <string name="games_hub_title">게임 허브</string>
+    <string name="game_bubble_pop">버블 팝</string>
+    <string name="game_fidget_spinner">피젯 스피너</string>
+
+    <!-- Feedback -->
+    <string name="feedback_hub_title">피드백 허브</string>
+    <string name="feedback_report_bug_title">버그 신고</string>
+    <string name="feedback_request_feature_title">기능 요청</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">개발자</string>
+    <string name="settings_developer_subtitle">디버그 및 테스트 도구</string>
+    <string name="settings_developer_options_group">개발자 옵션</string>
+    <string name="settings_dev_options_desc">테스트 및 디버깅을 위한 고급 옵션</string>
+    <string name="settings_force_verify_title">강제 인증</string>
+    <string name="settings_force_verify_subtitle">사용자 인증 상태 전환.</string>
+    <string name="settings_fake_premium_title">가짜 프리미엄</string>
+    <string name="settings_fake_premium_subtitle">유료 상태 시뮬레이션.</string>
+    <string name="settings_fake_premium">가짜 프리미엄 모드</string>
+    <string name="settings_fake_premium_enabled">테스트용 프리미엄 기능 잠금 해제됨</string>
+    <string name="settings_fake_premium_disabled">프리미엄 기능을 테스트하려면 활성화하세요</string>
+    <string name="settings_mock_interface_title">모의 인터페이스</string>
+    <string name="settings_mock_interface_subtitle">데모용 가짜 데이터 표시.</string>
+    <string name="settings_simulate_badge_title">배지 알림 시뮬레이션</string>
+    <string name="settings_simulate_badge_subtitle">\'%s\'에 대한 알림 트리거.</string>
+    <string name="settings_nuke_db_title">데이터베이스 삭제</string>
+    <string name="settings_nuke_db_subtitle">모든 게시물 삭제. 복구 불가.</string>
+    <string name="settings_nuke_db_dialog_title">데이터베이스 삭제?</string>
+    <string name="settings_nuke_db_dialog_text">서버에서 모든 게시물이 영구 삭제됩니다. 이 작업은 취소할 수 없습니다.</string>
+    <string name="settings_nuke_db_dialog_confirm">삭제</string>
+    <string name="settings_nuke_db_dialog_cancel">취소</string>
+    <string name="settings_language_test_title">앱 언어 (테스트)</string>
+    <string name="settings_language_test_subtitle">앱 언어를 수동으로 설정. 재시작 필요.</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">개발자 옵션</string>
+    <string name="dev_phone_format_test">전화번호 형식</string>
+    <string name="dev_phone_format_test_desc">다양한 지역의 자동 형식 테스트</string>
+    <string name="dev_phone_format_style">형식 스타일</string>
+    <string name="dev_phone_test_input">전화번호 입력</string>
+    <string name="dev_phone_format_pattern">패턴</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">자격 증명 저장소</string>
+    <string name="dev_credential_test_save">저장 테스트</string>
+    <string name="dev_credential_test_retrieve">검색 테스트</string>
+    <string name="dev_credential_clear_all">모든 자격 증명 지우기</string>
+    <string name="dev_credential_session_status">세션 상태</string>
+    <string name="dev_credential_biometric_status">생체 인식 상태</string>
+    <string name="dev_credential_create_session">테스트 세션 생성</string>
+    <string name="dev_credential_end_session">세션 종료</string>
+    <string name="dev_credential_extend_session">세션 연장</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">디버그 도구</string>
+    <string name="debug_performance_overlay">성능 오버레이</string>
+    <string name="debug_performance_desc">FPS, 메모리 및 스크롤 통계 표시</string>
+    <string name="debug_reset_counters">카운터 재설정</string>
+
+    <!-- General Settings -->
+    <string name="settings_profile_group">프로필</string>
+    <string name="settings_badges_title">배지</string>
+    <string name="settings_badges_subtitle">획득한 성과와 목표를 확인하세요.</string>
+    <string name="settings_visual_comfort_group">시각적 편안함 &amp; 테마</string>
+    <string name="settings_text_size_title">글자 크기</string>
+    <string name="settings_dark_mode_title">다크 모드</string>
+    <string name="settings_dark_mode_enabled">활성화됨</string>
+    <string name="settings_dark_mode_disabled">비활성화됨</string>
+    <string name="settings_high_contrast_title">고대비 모드</string>
+    <string name="settings_high_contrast_subtitle_enabled">활성화됨 (순수 흑/백)</string>
+    <string name="settings_high_contrast_subtitle_disabled">비활성화됨</string>
+    <string name="settings_neuro_centric_theme_title">뉴로 중심 테마</string>
+    <string name="settings_go_premium_title">프리미엄 되기</string>
+    <string name="settings_go_premium_subtitle">광고를 제거하고 개발자를 지원하세요.</string>
+    <string name="settings_account_group">계정</string>
+    <string name="settings_logout">로그아웃</string>
+    <string name="settings_verified_human_title">인증된 인간</string>
+    <string name="settings_verified_human_subtitle_verified">상태: 인증됨</string>
+    <string name="settings_verified_human_subtitle_unverified">상태: 미인증</string>
+    <string name="settings_2fa_title">2단계 인증</string>
+    <string name="settings_2fa_subtitle">로그인 시 코드 필요.</string>
+</resources>
+

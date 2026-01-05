@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core UI -->
+    <string name="app_name">NeuroComet</string>
+    <string name="nav_feed">ฟีด</string>
+    <string name="nav_explore">สำรวจ</string>
+    <string name="nav_messages">ข้อความ</string>
+    <string name="nav_notifications">การแจ้งเตือน</string>
+    <string name="nav_settings">ตั้งค่า</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in">เข้าสู่ระบบ</string>
+    <string name="auth_sign_up">สมัครสมาชิก</string>
+    <string name="auth_email_label">อีเมล</string>
+    <string name="auth_password_label">รหัสผ่าน</string>
+    <string name="auth_create_account">สร้างบัญชี</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">ลักษณะและการแสดงผล</string>
+    <string name="settings_section_privacy">ความเป็นส่วนตัวและความปลอดภัย</string>
+    <string name="settings_section_notifications">การแจ้งเตือน</string>
+    <string name="settings_section_accessibility">การช่วยเหลือพิเศษ</string>
+
+    <!-- Explore -->
+    <string name="explore_title">สำรวจ</string>
+    <string name="explore_autism">ออทิสติก</string>
+    <string name="explore_adhd">สมาธิสั้น</string>
+    <string name="explore_anxiety">วิตกกังวล</string>
+    <string name="explore_sensory">ประสาทสัมผัส</string>
+
+    <!-- Games -->
+    <string name="games_hub_title">ศูนย์เกม</string>
+    <string name="game_bubble_pop">เกมกดฟอง</string>
+    <string name="game_fidget_spinner">ฟิดเจ็ตสปินเนอร์</string>
+
+    <!-- Feedback -->
+    <string name="feedback_hub_title">ศูนย์ข้อเสนอแนะ</string>
+    <string name="feedback_report_bug_title">รายงานข้อผิดพลาด</string>
+    <string name="feedback_request_feature_title">ขอฟีเจอร์ใหม่</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">นักพัฒนา</string>
+    <string name="settings_developer_subtitle">เครื่องมือดีบักและทดสอบ</string>
+    <string name="settings_developer_options_group">ตัวเลือกนักพัฒนา</string>
+    <string name="settings_dev_options_desc">ตัวเลือกขั้นสูงสำหรับการทดสอบและดีบัก</string>
+    <string name="settings_force_verify_title">บังคับยืนยัน</string>
+    <string name="settings_force_verify_subtitle">สลับสถานะการยืนยันผู้ใช้</string>
+    <string name="settings_fake_premium_title">พรีเมียมปลอม</string>
+    <string name="settings_fake_premium_subtitle">จำลองสถานะการชำระเงิน</string>
+    <string name="settings_fake_premium">โหมดพรีเมียมปลอม</string>
+    <string name="settings_fake_premium_enabled">ปลดล็อกฟีเจอร์พรีเมียมเพื่อทดสอบ</string>
+    <string name="settings_fake_premium_disabled">เปิดใช้งานเพื่อทดสอบฟีเจอร์พรีเมียม</string>
+    <string name="settings_mock_interface_title">อินเตอร์เฟสจำลอง</string>
+    <string name="settings_mock_interface_subtitle">แสดงข้อมูลปลอมสำหรับเดโม</string>
+    <string name="settings_simulate_badge_title">จำลองการแจ้งเตือนป้าย</string>
+    <string name="settings_simulate_badge_subtitle">ทริกเกอร์การแจ้งเตือนสำหรับ \'%s\'</string>
+    <string name="settings_nuke_db_title">ลบฐานข้อมูล</string>
+    <string name="settings_nuke_db_subtitle">ลบโพสต์ทั้งหมด ไม่สามารถย้อนกลับได้</string>
+    <string name="settings_nuke_db_dialog_title">ลบฐานข้อมูล?</string>
+    <string name="settings_nuke_db_dialog_text">การดำเนินการนี้จะลบโพสต์ทั้งหมดจากเซิร์ฟเวอร์อย่างถาวร ไม่สามารถยกเลิกได้</string>
+    <string name="settings_nuke_db_dialog_confirm">ลบ</string>
+    <string name="settings_nuke_db_dialog_cancel">ยกเลิก</string>
+    <string name="settings_language_test_title">ภาษาแอป (ทดสอบ)</string>
+    <string name="settings_language_test_subtitle">ตั้งค่าภาษาด้วยตนเอง ต้องรีสตาร์ท</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">ตัวเลือกนักพัฒนา</string>
+    <string name="dev_phone_format_test">การจัดรูปแบบหมายเลขโทรศัพท์</string>
+    <string name="dev_phone_format_test_desc">ทดสอบการจัดรูปแบบอัตโนมัติสำหรับภูมิภาคต่างๆ</string>
+    <string name="dev_phone_format_style">รูปแบบการจัดรูปแบบ</string>
+    <string name="dev_phone_test_input">ป้อนหมายเลขโทรศัพท์</string>
+    <string name="dev_phone_format_pattern">รูปแบบ</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">การจัดเก็บข้อมูลรับรอง</string>
+    <string name="dev_credential_test_save">ทดสอบการบันทึก</string>
+    <string name="dev_credential_test_retrieve">ทดสอบการดึงข้อมูล</string>
+    <string name="dev_credential_clear_all">ล้างข้อมูลรับรองทั้งหมด</string>
+    <string name="dev_credential_session_status">สถานะเซสชัน</string>
+    <string name="dev_credential_biometric_status">สถานะไบโอเมตริก</string>
+    <string name="dev_credential_create_session">สร้างเซสชันทดสอบ</string>
+    <string name="dev_credential_end_session">สิ้นสุดเซสชัน</string>
+    <string name="dev_credential_extend_session">ขยายเซสชัน</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">เครื่องมือดีบัก</string>
+    <string name="debug_performance_overlay">โอเวอร์เลย์ประสิทธิภาพ</string>
+    <string name="debug_performance_desc">แสดง FPS หน่วยความจำ และสถิติการเลื่อน</string>
+    <string name="debug_reset_counters">รีเซ็ตตัวนับ</string>
+
+    <!-- General Settings -->
+    <string name="settings_profile_group">โปรไฟล์</string>
+    <string name="settings_badges_title">ป้าย</string>
+    <string name="settings_badges_subtitle">ดูความสำเร็จและเป้าหมายที่ได้รับ</string>
+    <string name="settings_visual_comfort_group">ความสบายตา &amp; ธีม</string>
+    <string name="settings_text_size_title">ขนาดตัวอักษร</string>
+    <string name="settings_dark_mode_title">โหมดมืด</string>
+    <string name="settings_dark_mode_enabled">เปิดใช้งาน</string>
+    <string name="settings_dark_mode_disabled">ปิดใช้งาน</string>
+    <string name="settings_high_contrast_title">โหมดคอนทราสต์สูง</string>
+    <string name="settings_high_contrast_subtitle_enabled">เปิดใช้งาน (ดำ/ขาวบริสุทธิ์)</string>
+    <string name="settings_high_contrast_subtitle_disabled">ปิดใช้งาน</string>
+    <string name="settings_neuro_centric_theme_title">ธีมที่เน้นระบบประสาท</string>
+    <string name="settings_go_premium_title">อัปเกรดเป็นพรีเมียม</string>
+    <string name="settings_go_premium_subtitle">ลบโฆษณาและสนับสนุนนักพัฒนา</string>
+    <string name="settings_account_group">บัญชี</string>
+    <string name="settings_logout">ออกจากระบบ</string>
+    <string name="settings_verified_human_title">มนุษย์ที่ยืนยันแล้ว</string>
+    <string name="settings_verified_human_subtitle_verified">สถานะ: ยืนยันแล้ว</string>
+    <string name="settings_verified_human_subtitle_unverified">สถานะ: ยังไม่ยืนยัน</string>
+    <string name="settings_2fa_title">การยืนยันตัวตนสองขั้นตอน</string>
+    <string name="settings_2fa_subtitle">ต้องใช้รหัสเมื่อเข้าสู่ระบบ</string>
+</resources>
+

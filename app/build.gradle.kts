@@ -32,8 +32,8 @@ android {
         applicationId = "com.kyilmaz.neurocomet"
         minSdk = 26
         targetSdk = 36
-        versionCode = 125
-        versionName = "1.0.0-rc11"
+        versionCode = 141
+        versionName = "1.0.0-rc27"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -139,6 +139,9 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("androidx.biometric:biometric:1.1.0")
+
+    // Location services
+    implementation("com.google.android.gms:play-services-location:21.2.0")
 
 
     implementation(libs.androidx.compose.material.icons.extended)

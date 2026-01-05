@@ -1,6 +1,7 @@
 package com.kyilmaz.neurocomet
 
 import android.content.Context
+import android.os.SystemClock
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.core.content.edit
@@ -19,7 +20,9 @@ import android.util.Base64
  * - PIN is hashed with SHA-256 + salt before storage
  * - Uses Android Keystore for encryption where available
  * - Lockout after failed attempts
- * - Time-based restrictions
+ * - Time-based restrictions with ANTI-BYPASS protection
+ * - Uses monotonic time (SystemClock.elapsedRealtime) to prevent system clock manipulation
+ * - Tracks last known system time vs monotonic time delta to detect time changes
  */
 object ParentalControlsSettings {
     private const val PREFS = "parental_controls"
@@ -31,6 +34,7 @@ object ParentalControlsSettings {
     private const val KEY_IS_ENABLED = "is_enabled"
     private const val KEY_FAILED_ATTEMPTS = "failed_attempts"
     private const val KEY_LOCKOUT_UNTIL = "lockout_until"
+    private const val KEY_LOCKOUT_ELAPSED_REALTIME = "lockout_elapsed_realtime"
     private const val KEY_MAX_DAILY_MINUTES = "max_daily_minutes"
     private const val KEY_BEDTIME_START_HOUR = "bedtime_start_hour"
     private const val KEY_BEDTIME_START_MINUTE = "bedtime_start_minute"
@@ -45,11 +49,19 @@ object ParentalControlsSettings {
     private const val KEY_DAILY_USAGE_MINUTES = "daily_usage_minutes"
     private const val KEY_USAGE_DATE = "usage_date"
 
+    // Time bypass protection keys
+    private const val KEY_LAST_KNOWN_SYSTEM_TIME = "last_known_system_time"
+    private const val KEY_LAST_KNOWN_ELAPSED_REALTIME = "last_known_elapsed_realtime"
+    private const val KEY_TIME_TAMPERING_DETECTED = "time_tampering_detected"
+    private const val KEY_USAGE_ELAPSED_START = "usage_elapsed_start"
+    private const val KEY_SESSION_USAGE_SECONDS = "session_usage_seconds"
+
     // Security constants
     private const val MAX_FAILED_ATTEMPTS = 5
     private const val LOCKOUT_DURATION_MS = 30 * 60 * 1000L // 30 minutes
     private const val MIN_PIN_LENGTH = 4
     private const val MAX_PIN_LENGTH = 8
+    private const val TIME_DRIFT_TOLERANCE_MS = 5 * 60 * 1000L // 5 minutes tolerance for normal drift
 
     // Developer master PIN for bypassing parental controls (debug builds only)
     private const val DEV_MASTER_PIN = "000000"
@@ -68,6 +80,71 @@ object ParentalControlsSettings {
     fun isDevDevice(context: Context): Boolean {
         val isDebuggable = (context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
         return isDebuggable
+    }
+
+    /**
+     * Detect if time tampering has occurred by comparing system time delta with monotonic time delta.
+     * Returns true if time manipulation is detected.
+     */
+    fun detectTimeTampering(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
+        val lastSystemTime = prefs.getLong(KEY_LAST_KNOWN_SYSTEM_TIME, 0)
+        val lastElapsedRealtime = prefs.getLong(KEY_LAST_KNOWN_ELAPSED_REALTIME, 0)
+
+        if (lastSystemTime == 0L || lastElapsedRealtime == 0L) {
+            // First run, record baseline
+            updateTimeBaseline(context)
+            return false
+        }
+
+        val currentSystemTime = System.currentTimeMillis()
+        val currentElapsedRealtime = SystemClock.elapsedRealtime()
+
+        val systemTimeDelta = currentSystemTime - lastSystemTime
+        val elapsedRealtimeDelta = currentElapsedRealtime - lastElapsedRealtime
+
+        // If the difference between system time change and monotonic time change
+        // exceeds tolerance, time has been manipulated
+        val drift = kotlin.math.abs(systemTimeDelta - elapsedRealtimeDelta)
+
+        if (drift > TIME_DRIFT_TOLERANCE_MS && elapsedRealtimeDelta > 0) {
+            // Time tampering detected!
+            prefs.edit { putBoolean(KEY_TIME_TAMPERING_DETECTED, true) }
+            return true
+        }
+
+        // Update baseline
+        updateTimeBaseline(context)
+        return prefs.getBoolean(KEY_TIME_TAMPERING_DETECTED, false)
+    }
+
+    /**
+     * Update the time baseline for tampering detection.
+     */
+    private fun updateTimeBaseline(context: Context) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit {
+            putLong(KEY_LAST_KNOWN_SYSTEM_TIME, System.currentTimeMillis())
+            putLong(KEY_LAST_KNOWN_ELAPSED_REALTIME, SystemClock.elapsedRealtime())
+        }
+    }
+
+    /**
+     * Clear time tampering flag (only via PIN verification)
+     */
+    fun clearTimeTamperingFlag(context: Context) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit {
+            putBoolean(KEY_TIME_TAMPERING_DETECTED, false)
+        }
+        updateTimeBaseline(context)
+    }
+
+    /**
+     * Check if time tampering was previously detected
+     */
+    fun wasTimeTamperingDetected(context: Context): Boolean {
+        return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_TIME_TAMPERING_DETECTED, false)
     }
 
     /**
@@ -92,7 +169,8 @@ object ParentalControlsSettings {
         val contentFilterLevel: ContentFilterLevel = ContentFilterLevel.MODERATE,
         val dailyUsageMinutes: Int = 0,
         val isDuringBedtime: Boolean = false,
-        val isOverDailyLimit: Boolean = false
+        val isOverDailyLimit: Boolean = false,
+        val timeTamperingDetected: Boolean = false // New: detects if user changed system time
     )
 
     enum class ContentFilterLevel {
@@ -150,21 +228,28 @@ object ParentalControlsSettings {
     /**
      * Verify the entered PIN against the stored hash.
      * Implements lockout after MAX_FAILED_ATTEMPTS.
+     * Uses monotonic time (elapsedRealtime) to prevent time manipulation bypass.
      * Developer master PIN (000000) bypasses verification in debug builds.
      */
     fun verifyPin(context: Context, pin: String): PinVerifyResult {
         // Developer master PIN bypass (debug builds only)
         if (isDevMasterPin(context, pin)) {
+            clearTimeTamperingFlag(context)
             return PinVerifyResult.Success
         }
 
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
-        // Check if locked out
-        val lockoutUntil = prefs.getLong(KEY_LOCKOUT_UNTIL, 0)
-        if (lockoutUntil > System.currentTimeMillis()) {
-            val remainingMs = lockoutUntil - System.currentTimeMillis()
-            return PinVerifyResult.LockedOut(remainingMs)
+        // Check if locked out using monotonic time to prevent bypass
+        val lockoutElapsedRealtime = prefs.getLong(KEY_LOCKOUT_ELAPSED_REALTIME, 0)
+        val currentElapsedRealtime = SystemClock.elapsedRealtime()
+
+        if (lockoutElapsedRealtime > 0) {
+            val elapsedSinceLockout = currentElapsedRealtime - lockoutElapsedRealtime
+            if (elapsedSinceLockout < LOCKOUT_DURATION_MS) {
+                val remainingMs = LOCKOUT_DURATION_MS - elapsedSinceLockout
+                return PinVerifyResult.LockedOut(remainingMs)
+            }
         }
 
         val storedHash = prefs.getString(KEY_PIN_HASH, null)
@@ -177,11 +262,13 @@ object ParentalControlsSettings {
         val enteredHash = hashPin(pin, storedSalt)
 
         return if (enteredHash == storedHash) {
-            // Success - reset failed attempts
+            // Success - reset failed attempts and clear tampering flag
             prefs.edit {
                 putInt(KEY_FAILED_ATTEMPTS, 0)
                 remove(KEY_LOCKOUT_UNTIL)
+                remove(KEY_LOCKOUT_ELAPSED_REALTIME)
             }
+            clearTimeTamperingFlag(context)
             PinVerifyResult.Success
         } else {
             // Failed - increment counter
@@ -189,7 +276,9 @@ object ParentalControlsSettings {
             prefs.edit {
                 putInt(KEY_FAILED_ATTEMPTS, failedAttempts)
                 if (failedAttempts >= MAX_FAILED_ATTEMPTS) {
+                    // Store both system time and monotonic time for lockout
                     putLong(KEY_LOCKOUT_UNTIL, System.currentTimeMillis() + LOCKOUT_DURATION_MS)
+                    putLong(KEY_LOCKOUT_ELAPSED_REALTIME, SystemClock.elapsedRealtime())
                 }
             }
 
@@ -236,6 +325,7 @@ object ParentalControlsSettings {
 
     /**
      * Get the current parental control state.
+     * Includes time tampering detection.
      */
     fun getState(context: Context): ParentalControlState {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -243,9 +333,19 @@ object ParentalControlsSettings {
         val isPinSet = prefs.getString(KEY_PIN_HASH, null) != null
         val isEnabled = prefs.getBoolean(KEY_IS_ENABLED, false) && isPinSet
         val failedAttempts = prefs.getInt(KEY_FAILED_ATTEMPTS, 0)
-        val lockoutUntil = prefs.getLong(KEY_LOCKOUT_UNTIL, 0)
-        val isLockedOut = lockoutUntil > System.currentTimeMillis()
-        val lockoutRemainingMs = if (isLockedOut) lockoutUntil - System.currentTimeMillis() else 0
+
+        // Use monotonic time for lockout check to prevent bypass
+        val lockoutElapsedRealtime = prefs.getLong(KEY_LOCKOUT_ELAPSED_REALTIME, 0)
+        val currentElapsedRealtime = SystemClock.elapsedRealtime()
+        val isLockedOut = if (lockoutElapsedRealtime > 0) {
+            (currentElapsedRealtime - lockoutElapsedRealtime) < LOCKOUT_DURATION_MS
+        } else false
+        val lockoutRemainingMs = if (isLockedOut) {
+            LOCKOUT_DURATION_MS - (currentElapsedRealtime - lockoutElapsedRealtime)
+        } else 0L
+
+        // Check for time tampering
+        val timeTamperingDetected = detectTimeTampering(context)
 
         // Time restrictions
         val bedtimeEnabled = prefs.getBoolean(KEY_BEDTIME_ENABLED, false)
@@ -265,12 +365,20 @@ object ParentalControlsSettings {
         }
 
         // Check if currently during bedtime
-        val isDuringBedtime = if (bedtimeEnabled && isEnabled) {
+        // If time tampering is detected, force bedtime mode ON as a security measure
+        val isDuringBedtime = if (timeTamperingDetected && isEnabled) {
+            true // Force restrictions when tampering detected
+        } else if (bedtimeEnabled && isEnabled) {
             checkIfDuringBedtime(bedtimeStartHour, bedtimeStartMinute, bedtimeEndHour, bedtimeEndMinute)
         } else false
 
         // Check if over daily limit
-        val isOverDailyLimit = maxDailyMinutes > 0 && dailyUsageMinutes >= maxDailyMinutes
+        // If time tampering detected, force over-limit as security measure
+        val isOverDailyLimit = if (timeTamperingDetected && isEnabled && maxDailyMinutes > 0) {
+            true
+        } else {
+            maxDailyMinutes > 0 && dailyUsageMinutes >= maxDailyMinutes
+        }
 
         // Content filtering
         val contentFilterLevel = try {
@@ -298,7 +406,8 @@ object ParentalControlsSettings {
             contentFilterLevel = contentFilterLevel,
             dailyUsageMinutes = dailyUsageMinutes,
             isDuringBedtime = isDuringBedtime,
-            isOverDailyLimit = isOverDailyLimit
+            isOverDailyLimit = isOverDailyLimit,
+            timeTamperingDetected = timeTamperingDetected
         )
     }
 

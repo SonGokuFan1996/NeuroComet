@@ -8,28 +8,28 @@
         android:translateY="54">
         <!-- Center circle, representing a node -->
         <path
-            android:fillColor="@android:color/white"
-            android:pathData="M 0,0 m -25,0 a 25,25 0 1,1 50,0 a 25,25 0 1,1 -50,0" />
+            android:fillColor="#000000"
+            android:pathData="M 0,0 m -18,0 a 18,18 0 1,1 36,0 a 18,18 0 1,1 -36,0" />
 
         <!-- Neural connection line 1 -->
         <path
-            android:strokeColor="@android:color/white"
-            android:strokeWidth="5"
+            android:strokeColor="#000000"
+            android:strokeWidth="4"
             android:strokeLineCap="round"
-            android:pathData="M -35,-35 Q -10,0 0,0" />
+            android:pathData="M -26,-26 Q -8,0 0,0" />
 
         <!-- Neural connection line 2 -->
         <path
-            android:strokeColor="@android:color/white"
-            android:strokeWidth="5"
+            android:strokeColor="#000000"
+            android:strokeWidth="4"
             android:strokeLineCap="round"
-            android:pathData="M 35,-35 Q 10,0 0,0" />
+            android:pathData="M 26,-26 Q 8,0 0,0" />
 
         <!-- Neural connection line 3 -->
         <path
-            android:strokeColor="@android:color/white"
-            android:strokeWidth="5"
+            android:strokeColor="#000000"
+            android:strokeWidth="4"
             android:strokeLineCap="round"
-            android:pathData="M 0,40 Q 0,10 0,0" />
+            android:pathData="M 0,30 Q 0,8 0,0" />
     </group>
 </vector>

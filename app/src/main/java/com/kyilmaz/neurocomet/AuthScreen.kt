@@ -80,6 +80,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.cos
@@ -224,7 +225,7 @@ fun AuthScreen(
 
             // App name with rainbow shimmer
             Text(
-                text = "NeuroComet",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontSize = 36.sp,
                     fontWeight = FontWeight.ExtraBold
@@ -236,7 +237,7 @@ fun AuthScreen(
 
             // Tagline
             Text(
-                text = "A safe space for every mind ✨",
+                text = stringResource(R.string.auth_app_tagline),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.8f),
                 textAlign = TextAlign.Center
@@ -262,7 +263,7 @@ fun AuthScreen(
                     // 2FA Mode
                     if (is2FARequired) {
                         Text(
-                            text = "Two-Factor Authentication",
+                            text = stringResource(R.string.auth_2fa_title),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
@@ -271,7 +272,7 @@ fun AuthScreen(
                         )
 
                         Text(
-                            text = "Enter the 6-digit code sent to your device",
+                            text = stringResource(R.string.auth_2fa_description),
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.White.copy(alpha = 0.7f),
                             textAlign = TextAlign.Center,
@@ -283,12 +284,12 @@ fun AuthScreen(
                         NeuroTextField(
                             value = twoFactorCode,
                             onValueChange = { twoFactorCode = it },
-                            label = "6-Digit Code",
-                            placeholder = "123456"
+                            label = stringResource(R.string.auth_2fa_code_label),
+                            placeholder = stringResource(R.string.auth_2fa_code_placeholder)
                         )
 
                         NeuroButton(
-                            text = "Verify",
+                            text = stringResource(R.string.auth_2fa_verify),
                             onClick = { onVerify2FA(twoFactorCode) },
                             rainbowColors = rainbowColors
                         )
@@ -303,13 +304,13 @@ fun AuthScreen(
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             NeuroTabButton(
-                                text = "Sign In",
+                                text = stringResource(R.string.auth_sign_in),
                                 isSelected = selectedTabIndex == 0,
                                 onClick = { selectedTabIndex = 0; localError = null },
                                 modifier = Modifier.weight(1f)
                             )
                             NeuroTabButton(
-                                text = "Sign Up",
+                                text = stringResource(R.string.auth_sign_up),
                                 isSelected = selectedTabIndex == 1,
                                 onClick = { selectedTabIndex = 1; localError = null },
                                 modifier = Modifier.weight(1f)
@@ -343,15 +344,15 @@ fun AuthScreen(
                         NeuroTextField(
                             value = email,
                             onValueChange = { email = it; localError = null },
-                            label = "Email",
-                            placeholder = "your@email.com"
+                            label = stringResource(R.string.auth_email_label),
+                            placeholder = stringResource(R.string.auth_email_placeholder)
                         )
 
                         // Password field
                         NeuroTextField(
                             value = password,
                             onValueChange = { password = it; localError = null },
-                            label = "Password",
+                            label = stringResource(R.string.auth_password_label),
                             isPassword = true,
                             passwordVisible = passwordVisible,
                             onPasswordVisibilityToggle = { passwordVisible = !passwordVisible }
@@ -375,7 +376,7 @@ fun AuthScreen(
                                 NeuroTextField(
                                     value = confirmPassword,
                                     onValueChange = { confirmPassword = it; localError = null },
-                                    label = "Confirm Password",
+                                    label = stringResource(R.string.auth_confirm_password_label),
                                     isPassword = true,
                                     passwordVisible = confirmPasswordVisible,
                                     onPasswordVisibilityToggle = { confirmPasswordVisible = !confirmPasswordVisible }
@@ -390,7 +391,7 @@ fun AuthScreen(
                                     )
                                 ) {
                                     Text(
-                                        text = "🔒 Password must be 12+ characters with uppercase, lowercase, number, and symbol.",
+                                        text = stringResource(R.string.auth_password_requirements),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = Color(0xFF4ECDC4),
                                         modifier = Modifier.padding(12.dp)
@@ -401,20 +402,24 @@ fun AuthScreen(
 
                         Spacer(Modifier.height(8.dp))
 
+                        // Get error message strings
+                        val passwordsNotMatchError = stringResource(R.string.auth_passwords_not_match)
+                        val passwordWeakError = stringResource(R.string.auth_password_weak)
+
                         // Primary action button
                         NeuroButton(
-                            text = if (isSignIn) "Sign In" else "Create Account",
+                            text = if (isSignIn) stringResource(R.string.auth_sign_in) else stringResource(R.string.auth_create_account),
                             onClick = {
                                 if (isSignIn) {
                                     onSignIn(email, password)
                                 } else {
                                     val strongEnough = isStrongPassword(password, email)
                                     if (password != confirmPassword) {
-                                        localError = "Passwords do not match"
+                                        localError = passwordsNotMatchError
                                         return@NeuroButton
                                     }
                                     if (!strongEnough) {
-                                        localError = "Password doesn't meet requirements"
+                                        localError = passwordWeakError
                                         return@NeuroButton
                                     }
                                     pendingEmail = email
@@ -436,7 +441,7 @@ fun AuthScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = if (showDevBypass) "Skip for now (dev)" else "Skip for now",
+                        text = if (showDevBypass) stringResource(R.string.auth_skip_dev) else stringResource(R.string.auth_skip),
                         color = Color.White.copy(alpha = 0.8f),
                         fontWeight = FontWeight.Medium
                     )
@@ -458,7 +463,7 @@ fun AuthScreen(
                 )
                 Spacer(Modifier.width(6.dp))
                 Text(
-                    text = "Your data is encrypted and secure",
+                    text = stringResource(R.string.auth_data_secure),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White.copy(alpha = 0.6f)
                 )
@@ -883,7 +888,7 @@ private fun TutorialPointer(modifier: Modifier = Modifier) {
     ) {
         // "Tap here" text
         Text(
-            text = "Tap here",
+            text = stringResource(R.string.auth_tutorial_tap_here),
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF4ECDC4).copy(alpha = pointerAlpha)
@@ -915,53 +920,53 @@ private fun AuthTutorialOverlay(
     // Production-ready, neurodivergent-centric tutorial steps with LGBTQ+ inclusion
     val tutorialSteps = listOf(
         TutorialStep(
-            title = "Welcome Home 💜",
-            description = "NeuroComet is a safe, affirming space for neurodivergent and LGBTQ+ minds. You belong here exactly as you are—no masking required.",
+            title = stringResource(R.string.auth_tutorial_welcome_title),
+            description = stringResource(R.string.auth_tutorial_welcome_desc),
             emoji = "🏠",
             showRainbowInfinity = false,
             accentColor = Color(0xFF9B59B6) // Purple for inclusivity
         ),
         TutorialStep(
-            title = "Your Comfort Matters ∞",
+            title = stringResource(R.string.auth_tutorial_comfort_title),
             description = if (animationsEnabled)
-                "Tap the infinity symbol anytime to reduce visual motion. We designed this for sensory-friendly browsing."
+                stringResource(R.string.auth_tutorial_comfort_desc_anim)
             else
-                "Perfect! You've activated calm mode. Tap again whenever you need more or less motion.",
+                stringResource(R.string.auth_tutorial_comfort_desc_static),
             emoji = "∞",
             showRainbowInfinity = true,
             accentColor = Color(0xFF4ECDC4) // Teal for calm
         ),
         TutorialStep(
-            title = "25+ Neuro-State Themes 🎨",
-            description = "Choose themes designed for ADHD focus, autism comfort, anxiety relief, colorblind accessibility, and mood support. Your brain, your way.",
+            title = stringResource(R.string.auth_tutorial_themes_title),
+            description = stringResource(R.string.auth_tutorial_themes_desc),
             emoji = "🎨",
             showRainbowInfinity = false,
             accentColor = Color(0xFFE74C3C) // Warm red
         ),
         TutorialStep(
-            title = "Dyslexia-Friendly Fonts 📖",
-            description = "12+ accessibility fonts including OpenDyslexic, Lexend, and Atkinson Hyperlegible. Adjust spacing, weight, and size to match how YOUR brain reads best.",
+            title = stringResource(R.string.auth_tutorial_fonts_title),
+            description = stringResource(R.string.auth_tutorial_fonts_desc),
             emoji = "📖",
             showRainbowInfinity = false,
             accentColor = Color(0xFF3498DB) // Blue for clarity
         ),
         TutorialStep(
-            title = "Community & Pride 🌈",
-            description = "Connect with people who get it. Neurodivergent, LGBTQ+, and allies—all brains, all identities, all beautiful. Special themes for Pride, Autism Day, and ADHD Month!",
+            title = stringResource(R.string.auth_tutorial_community_title),
+            description = stringResource(R.string.auth_tutorial_community_desc),
             emoji = "🌈",
             showRainbowInfinity = false,
             accentColor = Color(0xFFF39C12) // Gold for celebration
         ),
         TutorialStep(
-            title = "Built for Safety 🛡️",
-            description = "Content filtering, parental controls, screen time limits, and bedtime mode protect your wellbeing. You control what you see and when.",
+            title = stringResource(R.string.auth_tutorial_safety_title),
+            description = stringResource(R.string.auth_tutorial_safety_desc),
             emoji = "🛡️",
             showRainbowInfinity = false,
             accentColor = Color(0xFF27AE60) // Green for safety
         ),
         TutorialStep(
-            title = "Ready to Begin! ✨",
-            description = "Sign in or create your account to join thousands of neurodivergent and LGBTQ+ individuals. This is YOUR space—explore at your own pace.",
+            title = stringResource(R.string.auth_tutorial_ready_title),
+            description = stringResource(R.string.auth_tutorial_ready_desc),
             emoji = "✨",
             showRainbowInfinity = false,
             accentColor = Color(0xFF9B59B6) // Return to purple
@@ -1080,7 +1085,7 @@ private fun AuthTutorialOverlay(
 
                 // Step counter
                 Text(
-                    text = "${currentStep + 1} of ${tutorialSteps.size}",
+                    text = stringResource(R.string.auth_tutorial_step_count, currentStep + 1, tutorialSteps.size),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.White.copy(alpha = 0.5f)
                 )
@@ -1098,7 +1103,7 @@ private fun AuthTutorialOverlay(
                         modifier = Modifier.padding(start = 8.dp)
                     ) {
                         Text(
-                            "Skip",
+                            stringResource(R.string.auth_tutorial_skip),
                             color = Color.White.copy(alpha = 0.5f),
                             style = MaterialTheme.typography.labelLarge
                         )
@@ -1113,7 +1118,7 @@ private fun AuthTutorialOverlay(
                         contentPadding = PaddingValues(horizontal = 32.dp, vertical = 14.dp)
                     ) {
                         Text(
-                            text = if (currentStep == tutorialSteps.size - 1) "Let's Go! ✨" else "Continue",
+                            text = if (currentStep == tutorialSteps.size - 1) stringResource(R.string.auth_tutorial_lets_go) else stringResource(R.string.auth_tutorial_continue),
                             color = Color.White,
                             fontWeight = FontWeight.SemiBold,
                             style = MaterialTheme.typography.labelLarge
@@ -1183,10 +1188,12 @@ private fun NeuroTextField(
             VisualTransformation.None,
         trailingIcon = if (isPassword && onPasswordVisibilityToggle != null) {
             {
+                val hidePasswordDesc = stringResource(R.string.auth_hide_password)
+                val showPasswordDesc = stringResource(R.string.auth_show_password)
                 IconButton(onClick = onPasswordVisibilityToggle) {
                     Icon(
                         imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                        contentDescription = if (passwordVisible) hidePasswordDesc else showPasswordDesc,
                         tint = Color.White.copy(alpha = 0.7f)
                     )
                 }

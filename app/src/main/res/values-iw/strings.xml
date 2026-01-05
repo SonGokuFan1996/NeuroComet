@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core UI -->
+    <string name="app_name">NeuroComet</string>
+    <string name="nav_feed">פיד</string>
+    <string name="nav_explore">גלה</string>
+    <string name="nav_messages">הודעות</string>
+    <string name="nav_notifications">התראות</string>
+    <string name="nav_settings">הגדרות</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in">התחבר</string>
+    <string name="auth_sign_up">הרשמה</string>
+    <string name="auth_email_label">אימייל</string>
+    <string name="auth_password_label">סיסמה</string>
+    <string name="auth_create_account">צור חשבון</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">מראה ותצוגה</string>
+    <string name="settings_section_privacy">פרטיות ואבטחה</string>
+    <string name="settings_section_notifications">התראות</string>
+    <string name="settings_section_accessibility">נגישות</string>
+
+    <!-- Explore -->
+    <string name="explore_title">גלה</string>
+    <string name="explore_autism">אוטיזם</string>
+    <string name="explore_adhd">הפרעת קשב</string>
+    <string name="explore_anxiety">חרדה</string>
+    <string name="explore_sensory">חושי</string>
+
+    <!-- Games -->
+    <string name="games_hub_title">מרכז משחקים</string>
+    <string name="game_bubble_pop">פיצוץ בועות</string>
+    <string name="game_fidget_spinner">ספינר</string>
+
+    <!-- Feedback -->
+    <string name="feedback_hub_title">מרכז משוב</string>
+    <string name="feedback_report_bug_title">דווח על באג</string>
+    <string name="feedback_request_feature_title">בקש תכונה</string>
+    <string name="feedback_send_title">שלח משוב</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">מפתח</string>
+    <string name="settings_developer_subtitle">כלי ניפוי באגים ובדיקות</string>
+    <string name="settings_developer_options_group">אפשרויות מפתח</string>
+    <string name="settings_dev_options_desc">אפשרויות מתקדמות לבדיקות וניפוי באגים</string>
+    <string name="settings_force_verify_title">אמת בכוח</string>
+    <string name="settings_force_verify_subtitle">החלף סטטוס אימות משתמש.</string>
+    <string name="settings_fake_premium_title">פרימיום מזויף</string>
+    <string name="settings_fake_premium_subtitle">סמלל סטטוס בתשלום.</string>
+    <string name="settings_fake_premium">מצב פרימיום מזויף</string>
+    <string name="settings_fake_premium_enabled">תכונות פרימיום נפתחו לבדיקה</string>
+    <string name="settings_fake_premium_disabled">הפעל כדי לבדוק תכונות פרימיום</string>
+    <string name="settings_mock_interface_title">ממשק דמה</string>
+    <string name="settings_mock_interface_subtitle">הצג נתונים מזויפים להדגמה.</string>
+    <string name="settings_simulate_badge_title">סמלל התראת תג</string>
+    <string name="settings_simulate_badge_subtitle">מפעיל התראה עבור \'%s\'.</string>
+    <string name="settings_nuke_db_title">מחק מסד נתונים</string>
+    <string name="settings_nuke_db_subtitle">מחק את כל הפוסטים. בלתי הפיך.</string>
+    <string name="settings_nuke_db_dialog_title">למחוק מסד נתונים?</string>
+    <string name="settings_nuke_db_dialog_text">פעולה זו תמחק לצמיתות את כל הפוסטים מהשרת. לא ניתן לבטל פעולה זו.</string>
+    <string name="settings_nuke_db_dialog_confirm">מחק</string>
+    <string name="settings_nuke_db_dialog_cancel">ביטול</string>
+    <string name="settings_language_test_title">שפת אפליקציה (בדיקה)</string>
+    <string name="settings_language_test_subtitle">הגדר שפה ידנית. דורש הפעלה מחדש.</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">אפשרויות מפתח</string>
+    <string name="dev_phone_format_test">עיצוב מספר טלפון</string>
+    <string name="dev_phone_format_test_desc">בדוק עיצוב אוטומטי לאזורים שונים</string>
+    <string name="dev_phone_format_style">סגנון עיצוב</string>
+    <string name="dev_phone_test_input">הזן מספר טלפון</string>
+    <string name="dev_phone_format_pattern">תבנית</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">אחסון אישורים</string>
+    <string name="dev_credential_test_save">בדוק שמירה</string>
+    <string name="dev_credential_test_retrieve">בדוק אחזור</string>
+    <string name="dev_credential_clear_all">נקה את כל האישורים</string>
+    <string name="dev_credential_session_status">סטטוס הפעלה</string>
+    <string name="dev_credential_biometric_status">סטטוס ביומטרי</string>
+    <string name="dev_credential_create_session">צור הפעלת בדיקה</string>
+    <string name="dev_credential_end_session">סיים הפעלה</string>
+    <string name="dev_credential_extend_session">הארך הפעלה</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">כלי ניפוי באגים</string>
+    <string name="debug_performance_overlay">שכבת ביצועים</string>
+    <string name="debug_performance_desc">מציג FPS, זיכרון וסטטיסטיקות גלילה</string>
+    <string name="debug_reset_counters">אפס מונים</string>
+
+    <!-- General Settings -->
+    <string name="settings_profile_group">פרופיל</string>
+    <string name="settings_badges_title">תגים</string>
+    <string name="settings_badges_subtitle">צפה בהישגים ובמטרות שהשגת.</string>
+    <string name="settings_visual_comfort_group">נוחות חזותית וערכות נושא</string>
+    <string name="settings_text_size_title">גודל טקסט</string>
+    <string name="settings_dark_mode_title">מצב כהה</string>
+    <string name="settings_dark_mode_enabled">מופעל</string>
+    <string name="settings_dark_mode_disabled">מושבת</string>
+    <string name="settings_high_contrast_title">מצב ניגודיות גבוהה</string>
+    <string name="settings_high_contrast_subtitle_enabled">מופעל (שחור/לבן טהור)</string>
+    <string name="settings_high_contrast_subtitle_disabled">מושבת</string>
+    <string name="settings_neuro_centric_theme_title">ערכת נושא נוירו-מרכזית</string>
+    <string name="settings_go_premium_title">עבור לפרימיום</string>
+    <string name="settings_go_premium_subtitle">הסר פרסומות ותמוך במפתחים.</string>
+    <string name="settings_account_group">חשבון</string>
+    <string name="settings_logout">התנתק</string>
+    <string name="settings_verified_human_title">אדם מאומת</string>
+    <string name="settings_verified_human_subtitle_verified">סטטוס: מאומת</string>
+    <string name="settings_verified_human_subtitle_unverified">סטטוס: לא מאומת</string>
+    <string name="settings_2fa_title">אימות דו-שלבי</string>
+    <string name="settings_2fa_subtitle">דרוש קוד בכניסה.</string>
+</resources>
+

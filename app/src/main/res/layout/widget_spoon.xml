@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Spoon Theory Widget - Track your daily energy spoons -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_spoon_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="12dp"
+    android:background="@drawable/widget_background">
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="@color/widget_text_primary"
+        android:text="🥄 Spoons Today" />
+
+    <!-- Spoon emoji indicator -->
+    <TextView
+        android:id="@+id/widget_spoon_emoji"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="32sp"
+        android:text="🥄" />
+
+    <!-- Spoon count display -->
+    <TextView
+        android:id="@+id/widget_spoon_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/widget_text_primary"
+        android:text="12 / 12" />
+
+    <!-- Progress bar -->
+    <ProgressBar
+        android:id="@+id/widget_spoon_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="16dp"
+        android:max="12"
+        android:progress="12"
+        android:progressTint="@color/widget_progress"
+        android:progressBackgroundTint="@color/widget_progress_background" />
+
+    <!-- Status label -->
+    <TextView
+        android:id="@+id/widget_spoon_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textSize="11sp"
+        android:textColor="@color/widget_text_secondary"
+        android:text="Fully Recharged" />
+
+    <!-- Control buttons -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/widget_spoon_use"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:paddingHorizontal="12dp"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/widget_button_text"
+            android:background="@drawable/widget_button_background"
+            android:text="Use Spoon"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/widget_spoon_reset"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="8dp"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:text="🔄"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+
+</LinearLayout>
+

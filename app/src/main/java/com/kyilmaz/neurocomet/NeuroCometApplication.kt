@@ -49,6 +49,7 @@ class NeuroCometApplication : Application() {
                     // Create notification channels
                     NotificationChannels.createNotificationChannels(this)
 
+
                     Log.d(TAG, "Application initialized successfully")
                 } catch (e: Exception) {
                     Log.e(TAG, "Error during deferred initialization", e)

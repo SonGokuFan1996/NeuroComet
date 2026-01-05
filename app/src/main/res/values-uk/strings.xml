@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core UI - Ukrainian (Ukraine has active neurodivergent support networks) -->
+    <string name="app_name">NeuroComet</string>
+    <string name="nav_feed">Стрічка</string>
+    <string name="nav_explore">Дослідити</string>
+    <string name="nav_messages">Повідомлення</string>
+    <string name="nav_notifications">Сповіщення</string>
+    <string name="nav_settings">Налаштування</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in">Увійти</string>
+    <string name="auth_sign_up">Зареєструватися</string>
+    <string name="auth_email_label">Електронна пошта</string>
+    <string name="auth_password_label">Пароль</string>
+    <string name="auth_create_account">Створити обліковий запис</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">Зовнішній вигляд та відображення</string>
+    <string name="settings_section_privacy">Конфіденційність та безпека</string>
+    <string name="settings_section_notifications">Сповіщення</string>
+    <string name="settings_section_accessibility">Доступність</string>
+
+    <!-- Explore -->
+    <string name="explore_title">Дослідити</string>
+    <string name="explore_autism">Аутизм</string>
+    <string name="explore_adhd">РДУГ</string>
+    <string name="explore_anxiety">Тривожність</string>
+    <string name="explore_sensory">Сенсорне</string>
+
+    <!-- Games -->
+    <string name="games_hub_title">Ігровий центр</string>
+    <string name="game_bubble_pop">Лопни бульбашки</string>
+    <string name="game_fidget_spinner">Спінер</string>
+
+    <!-- Feedback -->
+    <string name="feedback_hub_title">Центр відгуків</string>
+    <string name="feedback_report_bug_title">Повідомити про помилку</string>
+    <string name="feedback_request_feature_title">Запросити функцію</string>
+    <string name="feedback_send_title">Надіслати відгук</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">Розробник</string>
+    <string name="settings_developer_subtitle">Інструменти налагодження та тестування</string>
+    <string name="settings_developer_options_group">Параметри розробника</string>
+    <string name="settings_dev_options_desc">Розширені параметри для тестування та налагодження</string>
+    <string name="settings_force_verify_title">Примусова верифікація</string>
+    <string name="settings_force_verify_subtitle">Перемкнути статус верифікації користувача.</string>
+    <string name="settings_fake_premium_title">Фальшивий Преміум</string>
+    <string name="settings_fake_premium_subtitle">Симулювати оплачений статус.</string>
+    <string name="settings_fake_premium">Режим фальшивого преміум</string>
+    <string name="settings_fake_premium_enabled">Преміум-функції розблоковано для тестування</string>
+    <string name="settings_fake_premium_disabled">Увімкніть для тестування преміум-функцій</string>
+    <string name="settings_mock_interface_title">Тестовий інтерфейс</string>
+    <string name="settings_mock_interface_subtitle">Показати фальшиві дані для демо.</string>
+    <string name="settings_simulate_badge_title">Симулювати сповіщення значка</string>
+    <string name="settings_simulate_badge_subtitle">Запускає сповіщення для \'%s\'.</string>
+    <string name="settings_nuke_db_title">Видалити базу даних</string>
+    <string name="settings_nuke_db_subtitle">Видалити ВСІ пости. Незворотньо.</string>
+    <string name="settings_nuke_db_dialog_title">Видалити базу даних?</string>
+    <string name="settings_nuke_db_dialog_text">Це назавжди видалить усі пости з сервера. Цю дію не можна скасувати.</string>
+    <string name="settings_nuke_db_dialog_confirm">ВИДАЛИТИ</string>
+    <string name="settings_nuke_db_dialog_cancel">Скасувати</string>
+    <string name="settings_language_test_title">Мова додатку (Тест)</string>
+    <string name="settings_language_test_subtitle">Встановити мову вручну. Потрібен перезапуск.</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">Параметри розробника</string>
+    <string name="dev_phone_format_test">Форматування номера телефону</string>
+    <string name="dev_phone_format_test_desc">Тестування автоматичного форматування для різних регіонів</string>
+    <string name="dev_phone_format_style">Стиль форматування</string>
+    <string name="dev_phone_test_input">Введіть номер телефону</string>
+    <string name="dev_phone_format_pattern">Шаблон</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">Сховище облікових даних</string>
+    <string name="dev_credential_test_save">Тестувати збереження</string>
+    <string name="dev_credential_test_retrieve">Тестувати отримання</string>
+    <string name="dev_credential_clear_all">Очистити всі облікові дані</string>
+    <string name="dev_credential_session_status">Статус сесії</string>
+    <string name="dev_credential_biometric_status">Біометричний статус</string>
+    <string name="dev_credential_create_session">Створити тестову сесію</string>
+    <string name="dev_credential_end_session">Завершити сесію</string>
+    <string name="dev_credential_extend_session">Продовжити сесію</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">Інструменти налагодження</string>
+    <string name="debug_performance_overlay">Накладка продуктивності</string>
+    <string name="debug_performance_desc">Показує FPS, пам\'ять та статистику прокрутки</string>
+    <string name="debug_reset_counters">Скинути лічильники</string>
+
+    <!-- General Settings -->
+    <string name="settings_profile_group">Профіль</string>
+    <string name="settings_badges_title">Значки</string>
+    <string name="settings_badges_subtitle">Перегляньте здобуті досягнення та цілі.</string>
+    <string name="settings_visual_comfort_group">Візуальний комфорт та теми</string>
+    <string name="settings_text_size_title">Розмір тексту</string>
+    <string name="settings_dark_mode_title">Темний режим</string>
+    <string name="settings_dark_mode_enabled">Увімкнено</string>
+    <string name="settings_dark_mode_disabled">Вимкнено</string>
+    <string name="settings_high_contrast_title">Режим високого контрасту</string>
+    <string name="settings_high_contrast_subtitle_enabled">Увімкнено (чистий чорний/білий)</string>
+    <string name="settings_high_contrast_subtitle_disabled">Вимкнено</string>
+    <string name="settings_neuro_centric_theme_title">Нейро-центрична тема</string>
+    <string name="settings_go_premium_title">Стати Premium</string>
+    <string name="settings_go_premium_subtitle">Видаліть рекламу та підтримайте розробників.</string>
+    <string name="settings_account_group">Обліковий запис</string>
+    <string name="settings_logout">Вийти</string>
+    <string name="settings_verified_human_title">Підтверджена людина</string>
+    <string name="settings_verified_human_subtitle_verified">Статус: Підтверджено</string>
+    <string name="settings_verified_human_subtitle_unverified">Статус: Не підтверджено</string>
+    <string name="settings_2fa_title">Двофакторна автентифікація</string>
+    <string name="settings_2fa_subtitle">Вимагати код при вході.</string>
+</resources>
+

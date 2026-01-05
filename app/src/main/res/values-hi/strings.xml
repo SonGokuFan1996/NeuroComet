@@ -2,6 +2,238 @@
 <resources>
     <string name="app_name">NeuroComet</string>
 
+    <!-- Auth Screen -->
+    <string name="auth_app_tagline">हर दिमाग के लिए सुरक्षित जगह ✨</string>
+    <string name="auth_sign_in">साइन इन</string>
+    <string name="auth_sign_up">साइन अप</string>
+    <string name="auth_email_label">ईमेल</string>
+    <string name="auth_email_placeholder">आपका@ईमेल.com</string>
+    <string name="auth_password_label">पासवर्ड</string>
+    <string name="auth_confirm_password_label">पासवर्ड की पुष्टि करें</string>
+    <string name="auth_password_requirements">🔒 पासवर्ड 12+ अक्षरों का होना चाहिए जिसमें बड़े अक्षर, छोटे अक्षर, संख्या और प्रतीक हों।</string>
+    <string name="auth_create_account">खाता बनाएं</string>
+    <string name="auth_passwords_not_match">पासवर्ड मेल नहीं खाते</string>
+    <string name="auth_password_weak">पासवर्ड आवश्यकताओं को पूरा नहीं करता</string>
+    <string name="auth_skip">अभी के लिए छोड़ें</string>
+    <string name="auth_skip_dev">अभी के लिए छोड़ें (dev)</string>
+    <string name="auth_data_secure">आपका डेटा एन्क्रिप्टेड और सुरक्षित है</string>
+    <string name="auth_2fa_title">दो-कारक प्रमाणीकरण</string>
+    <string name="auth_2fa_description">अपने डिवाइस पर भेजा गया 6-अंकीय कोड दर्ज करें</string>
+    <string name="auth_2fa_code_label">6-अंकीय कोड</string>
+    <string name="auth_2fa_code_placeholder">123456</string>
+    <string name="auth_2fa_verify">सत्यापित करें</string>
+    <string name="auth_hide_password">पासवर्ड छुपाएं</string>
+    <string name="auth_show_password">पासवर्ड दिखाएं</string>
+
+    <!-- Auth Tutorial -->
+    <string name="auth_tutorial_welcome_title">घर आपका स्वागत है 💜</string>
+    <string name="auth_tutorial_welcome_desc">NeuroComet न्यूरोडाइवर्जेंट और LGBTQ+ दिमागों के लिए एक सुरक्षित, सकारात्मक जगह है। आप यहां बिल्कुल वैसे ही हैं—कोई मुखौटा जरूरी नहीं।</string>
+    <string name="auth_tutorial_comfort_title">आपका आराम मायने रखता है ∞</string>
+    <string name="auth_tutorial_comfort_desc_anim">दृश्य गति कम करने के लिए कभी भी अनंत प्रतीक टैप करें। हमने इसे संवेदी-अनुकूल ब्राउज़िंग के लिए डिज़ाइन किया।</string>
+    <string name="auth_tutorial_comfort_desc_static">बढ़िया! आपने शांत मोड सक्रिय किया। जब भी अधिक या कम गति चाहिए फिर से टैप करें।</string>
+    <string name="auth_tutorial_themes_title">25+ न्यूरो-स्टेट थीम 🎨</string>
+    <string name="auth_tutorial_themes_desc">ADHD फोकस, ऑटिज़्म कंफर्ट, चिंता राहत, कलर ब्लाइंड एक्सेसिबिलिटी और मूड सपोर्ट के लिए डिज़ाइन की गई थीम चुनें। आपका दिमाग, आपका तरीका।</string>
+    <string name="auth_tutorial_fonts_title">डिस्लेक्सिया-अनुकूल फ़ॉन्ट 📖</string>
+    <string name="auth_tutorial_fonts_desc">OpenDyslexic, Lexend और Atkinson Hyperlegible सहित 12+ एक्सेसिबिलिटी फ़ॉन्ट। स्पेसिंग, वेट और साइज़ को आपके दिमाग के पढ़ने के तरीके के अनुसार एडजस्ट करें।</string>
+    <string name="auth_tutorial_community_title">समुदाय और गर्व 🌈</string>
+    <string name="auth_tutorial_community_desc">समझने वाले लोगों से जुड़ें। न्यूरोडाइवर्जेंट, LGBTQ+ और सहयोगी—सभी दिमाग, सभी पहचान, सभी सुंदर। प्राइड, ऑटिज़्म दिवस और ADHD महीने के लिए विशेष थीम!</string>
+    <string name="auth_tutorial_safety_title">सुरक्षा के लिए बना 🛡️</string>
+    <string name="auth_tutorial_safety_desc">कंटेंट फ़िल्टरिंग, पैरेंटल कंट्रोल, स्क्रीन टाइम लिमिट और बेडटाइम मोड आपकी भलाई की रक्षा करते हैं। आप नियंत्रित करते हैं कि आप क्या और कब देखते हैं।</string>
+    <string name="auth_tutorial_ready_title">शुरू करने के लिए तैयार! ✨</string>
+    <string name="auth_tutorial_ready_desc">हजारों न्यूरोडाइवर्जेंट और LGBTQ+ व्यक्तियों से जुड़ने के लिए साइन इन करें या अपना खाता बनाएं। यह आपकी जगह है—अपनी गति से खोजें।</string>
+    <string name="auth_tutorial_skip">छोड़ें</string>
+    <string name="auth_tutorial_continue">जारी रखें</string>
+    <string name="auth_tutorial_lets_go">चलो शुरू करें! ✨</string>
+    <string name="auth_tutorial_step_count">%1$d में से %2$d</string>
+    <string name="auth_tutorial_tap_here">यहां टैप करें</string>
+
+    <!-- Splash Screen -->
+    <string name="splash_tagline_default">आपके लिए डिज़ाइन की गई जगह</string>
+    <string name="splash_tagline_hyperfocus">विचलन-मुक्त क्षेत्र</string>
+    <string name="splash_tagline_overload">कम उत्तेजना मोड</string>
+    <string name="splash_tagline_calm">आपका शांत स्थान</string>
+    <string name="splash_tagline_adhd_energized">लहर पर सवारी करें</string>
+    <string name="splash_tagline_adhd_low_dopamine">कोमल प्रेरणा</string>
+    <string name="splash_tagline_adhd_task_mode">न्यूनतम विचलन</string>
+    <string name="splash_tagline_autism_routine">अनुमानित और सुरक्षित</string>
+    <string name="splash_tagline_autism_sensory_seek">समृद्ध अनुभव आपकी प्रतीक्षा में</string>
+    <string name="splash_tagline_autism_low_stim">न्यूनतम उत्तेजना</string>
+    <string name="splash_tagline_anxiety_soothe">आपके मन को शांत कर रहा</string>
+    <string name="splash_tagline_anxiety_grounding">वर्तमान में जड़ें</string>
+    <string name="splash_tagline_dyslexia_friendly">स्पष्टता के लिए डिज़ाइन</string>
+    <string name="splash_tagline_colorblind_deuteranopia">ड्यूटेरेनोपिया अनुकूल</string>
+    <string name="splash_tagline_colorblind_protanopia">प्रोटानोपिया अनुकूल</string>
+    <string name="splash_tagline_colorblind_tritanopia">ट्राइटेनोपिया अनुकूल</string>
+    <string name="splash_tagline_colorblind_monochromacy">पैटर्न-आधारित डिज़ाइन</string>
+    <string name="splash_tagline_blind_screen_reader">TalkBack के लिए अनुकूलित</string>
+    <string name="splash_tagline_blind_high_contrast">शुद्ध काला और सफेद</string>
+    <string name="splash_tagline_blind_large_text">अतिरिक्त बड़ा टेक्स्ट मोड</string>
+    <string name="splash_tagline_mood_tired">आराम ठीक है</string>
+    <string name="splash_tagline_mood_anxious">हमारे साथ सांस लें</string>
+    <string name="splash_tagline_mood_happy">आपको मनाएं</string>
+    <string name="splash_tagline_mood_overwhelmed">धीरे-धीरे ले रहे</string>
+    <string name="splash_tagline_mood_creative">विचारों को बहने दें</string>
+    <string name="splash_tagline_rainbow_brain">अपने इंद्रधनुषी दिमाग को अपनाएं</string>
+
+    <!-- Splash Messages -->
+    <string name="splash_msg_default_1">वापस स्वागत है</string>
+    <string name="splash_msg_default_2">आपकी जगह इंतज़ार कर रही है</string>
+    <string name="splash_msg_default_3">शुरू करें</string>
+    <string name="splash_msg_hyperfocus_1">फोकस मोड</string>
+    <string name="splash_msg_hyperfocus_2">स्पष्ट मन आगे</string>
+    <string name="splash_msg_hyperfocus_3">गहरे में जाने के लिए तैयार</string>
+    <string name="splash_msg_overload_1">धीरे-धीरे ले रहे</string>
+    <string name="splash_msg_overload_2">मेरे साथ सांस लें</string>
+    <string name="splash_msg_overload_3">कोमल गति</string>
+    <string name="splash_msg_calm_1">शांति इंतज़ार कर रही है</string>
+    <string name="splash_msg_calm_2">शांति मोड</string>
+    <string name="splash_msg_calm_3">शांत जल</string>
+    <string name="splash_msg_adhd_energized_1">चलो चलें! ⚡</string>
+    <string name="splash_msg_adhd_energized_2">ऊर्जा खुली</string>
+    <string name="splash_msg_adhd_energized_3">चमकने का समय</string>
+    <string name="splash_msg_adhd_low_dopamine_1">गरम हो रहे</string>
+    <string name="splash_msg_adhd_low_dopamine_2">अपनी चिंगारी खोजें</string>
+    <string name="splash_msg_adhd_low_dopamine_3">आप कर सकते हैं</string>
+    <string name="splash_msg_adhd_task_mode_1">कार्य मोड</string>
+    <string name="splash_msg_adhd_task_mode_2">एक समय में एक चीज़</string>
+    <string name="splash_msg_adhd_task_mode_3">फोकस सक्रिय</string>
+    <string name="splash_msg_autism_routine_1">हमेशा की तरह</string>
+    <string name="splash_msg_autism_routine_2">परिचित पैटर्न</string>
+    <string name="splash_msg_autism_routine_3">रूटीन में आराम</string>
+    <string name="splash_msg_autism_sensory_seek_1">संवेदी खुशी</string>
+    <string name="splash_msg_autism_sensory_seek_2">पैटर्न महसूस करें</string>
+    <string name="splash_msg_autism_sensory_seek_3">संतोषजनक अनुभव</string>
+    <string name="splash_msg_autism_low_stim_1">शांत मोड</string>
+    <string name="splash_msg_autism_low_stim_2">मुलायम और कोमल</string>
+    <string name="splash_msg_autism_low_stim_3">अपनी इंद्रियों को आराम दें</string>
+    <string name="splash_msg_anxiety_soothe_1">आप यहां सुरक्षित हैं</string>
+    <string name="splash_msg_anxiety_soothe_2">सांस लें, छोड़ें</string>
+    <string name="splash_msg_anxiety_soothe_3">सब ठीक है</string>
+    <string name="splash_msg_anxiety_grounding_1">पैर ज़मीन पर</string>
+    <string name="splash_msg_anxiety_grounding_2">वर्तमान क्षण</string>
+    <string name="splash_msg_anxiety_grounding_3">स्थिर और सुरक्षित</string>
+    <string name="splash_msg_dyslexia_friendly_1">स्पष्ट और पठनीय</string>
+    <string name="splash_msg_dyslexia_friendly_2">आपका तरीका</string>
+    <string name="splash_msg_dyslexia_friendly_3">आसान पढ़ाई आगे</string>
+    <string name="splash_msg_colorblind_deuter_1">रंग अनुकूलित</string>
+    <string name="splash_msg_colorblind_deuter_2">नीला और नारंगी स्पष्टता</string>
+    <string name="splash_msg_colorblind_deuter_3">विश्वास से देखें</string>
+    <string name="splash_msg_colorblind_protan_1">रंग अनुकूलित</string>
+    <string name="splash_msg_colorblind_protan_2">नीला और पीला सामंजस्य</string>
+    <string name="splash_msg_colorblind_protan_3">स्पष्ट अंतर</string>
+    <string name="splash_msg_colorblind_tritan_1">रंग परिष्कृत</string>
+    <string name="splash_msg_colorblind_tritan_2">गुलाबी और हरा कंट्रास्ट</string>
+    <string name="splash_msg_colorblind_tritan_3">दृश्य स्पष्टता</string>
+    <string name="splash_msg_colorblind_mono_1">आकार और पैटर्न</string>
+    <string name="splash_msg_colorblind_mono_2">उच्च कंट्रास्ट</string>
+    <string name="splash_msg_colorblind_mono_3">स्पष्ट सीमाएं</string>
+    <string name="splash_msg_blind_reader_1">स्क्रीन रीडर तैयार</string>
+    <string name="splash_msg_blind_reader_2">एक्सेसिबिलिटी पहले</string>
+    <string name="splash_msg_blind_reader_3">स्वागत</string>
+    <string name="splash_msg_blind_contrast_1">अधिकतम कंट्रास्ट</string>
+    <string name="splash_msg_blind_contrast_2">स्पष्ट और बोल्ड</string>
+    <string name="splash_msg_blind_contrast_3">देखने में आसान</string>
+    <string name="splash_msg_blind_large_1">बड़ा और स्पष्ट</string>
+    <string name="splash_msg_blind_large_2">आसान पढ़ाई</string>
+    <string name="splash_msg_blind_large_3">आपका तरीका</string>
+    <string name="splash_msg_mood_tired_1">आराम से लें</string>
+    <string name="splash_msg_mood_tired_2">कोई जल्दी नहीं</string>
+    <string name="splash_msg_mood_tired_3">कोमल शुरुआत</string>
+    <string name="splash_msg_mood_anxious_1">आप ठीक हैं</string>
+    <string name="splash_msg_mood_anxious_2">यह भी गुज़र जाएगा</string>
+    <string name="splash_msg_mood_anxious_3">सुरक्षित जगह</string>
+    <string name="splash_msg_mood_happy_1">हैलो सनशाइन! ☀️</string>
+    <string name="splash_msg_mood_happy_2">शानदार अनुभव</string>
+    <string name="splash_msg_mood_happy_3">खुशी इंतज़ार कर रही</string>
+    <string name="splash_msg_mood_overwhelmed_1">एक सांस</string>
+    <string name="splash_msg_mood_overwhelmed_2">धीमे हो रहे</string>
+    <string name="splash_msg_mood_overwhelmed_3">हम आपके साथ हैं</string>
+    <string name="splash_msg_mood_creative_1">प्रेरणा आ रही है</string>
+    <string name="splash_msg_mood_creative_2">स्वतंत्र रूप से बनाएं</string>
+    <string name="splash_msg_mood_creative_3">कल्पना मोड</string>
+    <string name="splash_msg_rainbow_1">🦄 आपने रहस्य पाया!</string>
+    <string name="splash_msg_rainbow_2">🌈 अपने अद्वितीय मन का जश्न मनाएं</string>
+    <string name="splash_msg_rainbow_3">✨ न्यूरोडाइवर्जेंस जादू है</string>
+    <string name="splash_msg_rainbow_4">🧠 आपका दिमाग सुंदर है</string>
+    <string name="splash_msg_rainbow_5">💜 अलग होना शक्तिशाली है</string>
+
+    <!-- NeuroState Categories -->
+    <string name="neuro_category_basic">बुनियादी थीम</string>
+    <string name="neuro_category_adhd">ADHD थीम</string>
+    <string name="neuro_category_autism">ऑटिज़्म थीम</string>
+    <string name="neuro_category_anxiety">चिंता/OCD थीम</string>
+    <string name="neuro_category_accessibility">एक्सेसिबिलिटी</string>
+    <string name="neuro_category_colorblind">कलर ब्लाइंड अनुकूल</string>
+    <string name="neuro_category_blind">अंधे और कम दृष्टि</string>
+    <string name="neuro_category_mood">आप कैसा महसूस कर रहे हैं?</string>
+    <string name="neuro_category_secret">🦄 गुप्त थीम</string>
+
+    <!-- NeuroState Names -->
+    <string name="neuro_state_default">डिफ़ॉल्ट</string>
+    <string name="neuro_state_hyperfocus">हाइपरफोकस</string>
+    <string name="neuro_state_overload">संवेदी अधिभार</string>
+    <string name="neuro_state_calm">शांत</string>
+    <string name="neuro_state_adhd_energized">ADHD - ऊर्जावान</string>
+    <string name="neuro_state_adhd_low_dopamine">ADHD - कम डोपामिन</string>
+    <string name="neuro_state_adhd_task_mode">ADHD - कार्य मोड</string>
+    <string name="neuro_state_autism_routine">ऑटिज़्म - रूटीन</string>
+    <string name="neuro_state_autism_sensory_seek">ऑटिज़्म - संवेदी खोज</string>
+    <string name="neuro_state_autism_low_stim">ऑटिज़्म - कम उत्तेजना</string>
+    <string name="neuro_state_anxiety_soothe">चिंता - शांत</string>
+    <string name="neuro_state_anxiety_grounding">चिंता - ग्राउंडिंग</string>
+    <string name="neuro_state_dyslexia_friendly">डिस्लेक्सिया अनुकूल</string>
+    <string name="neuro_state_colorblind_deuter">ड्यूटेरेनोपिया</string>
+    <string name="neuro_state_colorblind_protan">प्रोटानोपिया</string>
+    <string name="neuro_state_colorblind_tritan">ट्राइटेनोपिया</string>
+    <string name="neuro_state_colorblind_mono">मोनोक्रोमेसी</string>
+    <string name="neuro_state_blind_screen_reader">स्क्रीन रीडर मोड</string>
+    <string name="neuro_state_blind_high_contrast">अधिकतम कंट्रास्ट</string>
+    <string name="neuro_state_blind_large_text">बड़ा टेक्स्ट मोड</string>
+    <string name="neuro_state_mood_tired">थका महसूस</string>
+    <string name="neuro_state_mood_anxious">चिंतित महसूस</string>
+    <string name="neuro_state_mood_happy">खुश महसूस</string>
+    <string name="neuro_state_mood_overwhelmed">अभिभूत महसूस</string>
+    <string name="neuro_state_mood_creative">रचनात्मक महसूस</string>
+    <string name="neuro_state_rainbow_brain">इंद्रधनुष दिमाग</string>
+
+    <!-- NeuroState Descriptions -->
+    <string name="neuro_state_default_desc">संतुलित रंगों के साथ मानक थीम</string>
+    <string name="neuro_state_hyperfocus_desc">गहन एकाग्रता के लिए उच्च कंट्रास्ट</string>
+    <string name="neuro_state_overload_desc">उत्तेजना कम करने के लिए मंद, शांत रंग</string>
+    <string name="neuro_state_calm_desc">विश्राम के लिए मुलायम, शांत रंग</string>
+    <string name="neuro_state_adhd_energized_desc">उत्पादक दिनों के लिए चमकीले, आकर्षक रंग</string>
+    <string name="neuro_state_adhd_low_dopamine_desc">मूड बढ़ाने के लिए गर्म, उत्तेजक रंग</string>
+    <string name="neuro_state_adhd_task_mode_desc">न्यूनतम विचलन, फोकस-बढ़ाने वाला पैलेट</string>
+    <string name="neuro_state_autism_routine_desc">पूर्वानुमेय, सुसंगत रंग पैटर्न</string>
+    <string name="neuro_state_autism_sensory_seek_desc">समृद्ध बनावट और संतोषजनक कंट्रास्ट</string>
+    <string name="neuro_state_autism_low_stim_desc">बहुत मंद, कोमल रंग</string>
+    <string name="neuro_state_anxiety_soothe_desc">चिंता कम करने के लिए ठंडे, आश्वस्त करने वाले रंग</string>
+    <string name="neuro_state_anxiety_grounding_desc">केंद्रित होने के लिए मिट्टी जैसे, स्थिर रंग</string>
+    <string name="neuro_state_dyslexia_friendly_desc">इष्टतम कंट्रास्ट के साथ उच्च पठनीयता</string>
+    <string name="neuro_state_colorblind_deuter_desc">लाल-हरे (हरा कमजोर) कलर ब्लाइंडनेस के लिए अनुकूलित</string>
+    <string name="neuro_state_colorblind_protan_desc">लाल-हरे (लाल कमजोर) कलर ब्लाइंडनेस के लिए अनुकूलित</string>
+    <string name="neuro_state_colorblind_tritan_desc">नीले-पीले कलर ब्लाइंडनेस के लिए अनुकूलित</string>
+    <string name="neuro_state_colorblind_mono_desc">पूर्ण कलर ब्लाइंडनेस के लिए उच्च कंट्रास्ट ग्रेस्केल</string>
+    <string name="neuro_state_blind_screen_reader_desc">TalkBack और स्क्रीन रीडर के लिए अधिकतम कंट्रास्ट के साथ अनुकूलित</string>
+    <string name="neuro_state_blind_high_contrast_desc">बहुत कम दृष्टि वाले उपयोगकर्ताओं के लिए शुद्ध काला/सफेद</string>
+    <string name="neuro_state_blind_large_text_desc">सरलीकृत लेआउट के साथ अतिरिक्त बड़ा टेक्स्ट</string>
+    <string name="neuro_state_mood_tired_desc">कोमल रंग जो आंखों को नहीं थकाते</string>
+    <string name="neuro_state_mood_anxious_desc">तनाव कम करने के लिए शांत पैलेट</string>
+    <string name="neuro_state_mood_happy_desc">आपके मूड से मेल खाने वाले खुशनुमा रंग</string>
+    <string name="neuro_state_mood_overwhelmed_desc">सरलीकृत, शांत पैलेट</string>
+    <string name="neuro_state_mood_creative_desc">कल्पना को बढ़ावा देने वाले प्रेरणादायक रंग</string>
+    <string name="neuro_state_rainbow_brain_desc">अपने सुंदर अद्वितीय न्यूरोडाइवर्जेंट दिमाग का जश्न मनाएं! 🌈🧠</string>
+
+    <!-- Accessibility Strings -->
+    <string name="accessibility_selected">चयनित</string>
+    <string name="accessibility_not_selected">चयनित नहीं</string>
+    <string name="expand_category">%1$s विस्तृत करें</string>
+    <string name="collapse_category">%1$s संक्षिप्त करें</string>
+
+    <!-- Easter Egg Dialog -->
+    <string name="easter_egg_secret_unlocked">🎊 रहस्य खुला! 🎊</string>
+    <string name="easter_egg_welcome_back">🦄 वापसी पर स्वागत! 🦄</string>
+
     <!-- Navigation/Screen Titles -->
     <string name="nav_feed">फ़ीड</string>
     <string name="nav_explore">खोजें</string>
@@ -131,11 +363,6 @@
     <string name="comments_send_button_description">भेजें</string>
     <string name="comments_view_all">सभी %d टिप्पणियां देखें</string>
 
-    <!-- NeuroState Names -->
-    <string name="neuro_state_default">डिफ़ॉल्ट</string>
-    <string name="neuro_state_hyperfocus">हाइपरफोकस</string>
-    <string name="neuro_state_overload">ओवरलोड</string>
-    <string name="neuro_state_calm">शांत</string>
 
     <!-- Text Scale Factor Names -->
     <string name="text_scale_small">छोटा</string>
@@ -424,10 +651,14 @@
     <string name="profile_cancel">रद्द करें</string>
     <string name="profile_got_it">समझ गया</string>
 
-    <!-- Explore Topics -->
-    <string name="explore_section_adhd">ADHD</string>
-    <string name="explore_section_autism">ऑटिज़्म</string>
-    <string name="explore_section_daily_life">दैनिक जीवन</string>
+    <!-- Explore Section Titles -->
+    <string name="explore_section_daily_living">दैनिक जीवन</string>
+    <string name="explore_section_sensory">सेंसरी और नियमन</string>
+    <string name="explore_section_social">सामाजिक और संवाद</string>
+    <string name="explore_section_work">कार्य और शिक्षा</string>
+    <string name="explore_section_interests">विशेष रुचियां और शौक</string>
+    <string name="explore_section_health">स्वास्थ्य और तंदुरुस्ती</string>
+    <string name="explore_section_family">परिवार और पालन-पोषण</string>
     <string name="explore_section_lgbtq">LGBTQ+ और पहचान</string>
 
     <string name="explore_topic_adhd_hacks">ADHD हैक्स</string>
@@ -436,26 +667,48 @@
     <string name="explore_topic_safe_foods_desc">आरामदायक खाद्य पदार्थ, रेसिपी और खाने की चिंता सहायता</string>
     <string name="explore_topic_sleep">नींद और आराम</string>
     <string name="explore_topic_sleep_desc">बेहतर नींद के लिए टिप्स और नींद से संबंधित संघर्ष</string>
+    <string name="explore_topic_executive_function">एग्जीक्यूटिव फंक्शन</string>
+    <string name="explore_topic_executive_function_desc">कार्य प्रबंधन, संगठन और वयस्कता</string>
     <string name="explore_topic_stimming">स्टिमिंग</string>
     <string name="explore_topic_stimming_desc">स्टिम टॉयज, तकनीकें और स्टिम-फ्रेंडली स्पेस</string>
-    <string name="explore_topic_sensory">सेंसरी टिप्स</string>
-    <string name="explore_topic_sensory_desc">सेंसरी ओवरलोड और सेंसरी-सीकिंग का प्रबंधन</string>
-    <string name="explore_topic_meltdowns">मेल्टडाउन सपोर्ट</string>
-    <string name="explore_topic_meltdowns_desc">मेल्टडाउन से निपटना, रोकथाम और रिकवरी</string>
+    <string name="explore_topic_sensory_tips">सेंसरी टिप्स</string>
+    <string name="explore_topic_sensory_tips_desc">सेंसरी संवेदनशीलता का प्रबंधन और सेंसरी-फ्रेंडली स्पेस बनाना</string>
+    <string name="explore_topic_meltdown">मेल्टडाउन सपोर्ट</string>
+    <string name="explore_topic_meltdown_desc">रोकथाम रणनीतियां, रिकवरी टिप्स और साथी सहायता</string>
+    <string name="explore_topic_sensory_diet">सेंसरी डाइट</string>
+    <string name="explore_topic_sensory_diet_desc">नियमन के लिए व्यक्तिगत सेंसरी रूटीन बनाना</string>
     <string name="explore_topic_social_skills">सामाजिक कौशल</string>
     <string name="explore_topic_social_skills_desc">सामाजिक स्थितियों को नेविगेट करना और संवाद टिप्स</string>
     <string name="explore_topic_masking">मास्किंग और अनमास्किंग</string>
     <string name="explore_topic_masking_desc">मास्किंग के अनुभव और प्रामाणिक रूप से जीना</string>
-    <string name="explore_topic_special_interests">विशेष रुचियां</string>
-    <string name="explore_topic_special_interests_desc">अपने जुनून और गहरे ज्ञान को साझा करें</string>
-    <string name="explore_topic_work">कार्य और स्कूल</string>
-    <string name="explore_topic_work_desc">कार्यस्थल और शैक्षणिक सहायता और अनुकूलन</string>
-    <string name="explore_topic_late_diagnosed">देर से निदान</string>
-    <string name="explore_topic_late_diagnosed_desc">वयस्क निदान अनुभव और पहचान अन्वेषण</string>
+    <string name="explore_topic_relationships">रिश्ते</string>
+    <string name="explore_topic_relationships_desc">डेटिंग, दोस्ती, पारिवारिक गतिशीलता और रिश्तों में संवाद</string>
+    <string name="explore_topic_aac">AAC और संवाद</string>
+    <string name="explore_topic_aac_desc">सहायक संवाद उपकरण और गैर-मौखिक संवाद</string>
+    <string name="explore_topic_work_school">कार्य और स्कूल</string>
+    <string name="explore_topic_work_school_desc">आवास, वकालत और शैक्षणिक और पेशेवर सेटिंग्स में सफलता</string>
+    <string name="explore_topic_disclosure">प्रकटीकरण और वकालत</string>
+    <string name="explore_topic_disclosure_desc">कब और कैसे प्रकट करें, आत्म-वकालत रणनीतियां</string>
+    <string name="explore_topic_career">करियर पथ</string>
+    <string name="explore_topic_career_desc">न्यूरोडाइवर्जेंट-फ्रेंडली करियर और कार्यस्थल सफलता खोजना</string>
+    <string name="explore_topic_college">कॉलेज संक्रमण</string>
+    <string name="explore_topic_college_desc">उच्च शिक्षा की तैयारी और नेविगेशन</string>
+    <string name="explore_topic_gaming">गेमिंग</string>
+    <string name="explore_topic_gaming_desc">वीडियो गेम्स, टेबलटॉप गेम्स और गेमिंग समुदाय</string>
+    <string name="explore_topic_coding">कोडिंग और टेक</string>
+    <string name="explore_topic_coding_desc">प्रोग्रामिंग, टेक प्रोजेक्ट्स और न्यूरोडाइवर्जेंट डेवलपर्स</string>
+    <string name="explore_topic_art">कला और रचनात्मकता</string>
+    <string name="explore_topic_art_desc">ड्राइंग, पेंटिंग, क्राफ्ट्स और रचनात्मक अभिव्यक्ति</string>
+    <string name="explore_topic_mental_health">मानसिक स्वास्थ्य</string>
+    <string name="explore_topic_mental_health_desc">चिंता, अवसाद, थेरेपी और मानसिक कल्याण</string>
+    <string name="explore_topic_medication">दवाई</string>
+    <string name="explore_topic_medication_desc">दवाई के अनुभव, सवाल और सहायता</string>
+    <string name="explore_topic_burnout">बर्नआउट रिकवरी</string>
+    <string name="explore_topic_burnout_desc">बर्नआउट को पहचानना, रोकना और ठीक होना</string>
     <string name="explore_topic_parenting">ND पेरेंटिंग</string>
     <string name="explore_topic_parenting_desc">न्यूरोडाइवर्जेंट माता-पिता और ND बच्चों की परवरिश</string>
-    <string name="explore_topic_executive_function">एग्जीक्यूटिव फंक्शन</string>
-    <string name="explore_topic_executive_function_desc">कार्य प्रबंधन, संगठन और वयस्कता</string>
+    <string name="explore_topic_late_diagnosed">देर से निदान</string>
+    <string name="explore_topic_late_diagnosed_desc">वयस्क निदान अनुभव और पहचान अन्वेषण</string>
 
     <!-- LGBTQ+ Topics -->
     <string name="explore_topic_lgbtq_nd">LGBTQ+ और न्यूरोडाइवर्जेंट</string>
@@ -483,5 +736,193 @@
     <string name="security_status_at_risk">🔴 डिवाइस सुरक्षा: जोखिम में - सुरक्षा सुविधाएं सक्षम</string>
     <string name="security_status_critical">🚨 डिवाइस सुरक्षा: गंभीर - ऐप प्रतिबंध सक्रिय</string>
 
+    <!-- NeuroGames - स्टिम-फ्रेंडली गेम्स -->
+    <string name="games_hub_title">न्यूरोगेम्स</string>
+    <string name="games_subtitle">आपके दिमाग के लिए स्टिम-फ्रेंडली मजा</string>
+    <string name="games_play_now">गेम्स खेलें</string>
+    <string name="games_play_now_desc">उपलब्धियां कमाकर स्टिम-फ्रेंडली गेम्स अनलॉक करें</string>
+    <string name="games_unlocked">अनलॉक गेम्स</string>
+    <string name="games_locked">लॉक गेम्स</string>
+    <string name="games_your_achievements">आपकी उपलब्धियां</string>
+    <string name="games_achievements">उपलब्धियां</string>
+    <string name="games_next_unlock">अगला गेम अनलॉक करने के लिए %d और!</string>
+    <string name="games_requires_achievements">%d उपलब्धियां आवश्यक</string>
+    <string name="games_coming_soon">जल्द आ रहा है</string>
+    <string name="games_coming_soon_message">यह गेम अभी विकसित हो रहा है। जल्द वापस आएं!</string>
+
+    <!-- व्यक्तिगत गेम्स -->
+    <string name="game_bubble_pop">बबल पॉप</string>
+    <string name="game_bubble_pop_desc">शांत करने वाले स्टिम अनुभव के लिए संतोषजनक बबल्स फोड़ें</string>
+    <string name="game_bubble_pop_hint">उन्हें फोड़ने के लिए बबल्स पर टैप करें! ✨</string>
+    <string name="game_fidget_spinner">फिजेट स्पिनर</string>
+    <string name="game_fidget_spinner_desc">जितना चाहें घुमाएं - कोई सीमा नहीं, बस मजा</string>
+    <string name="game_fidget_spinner_hint">घुमाने के लिए स्वाइप करें! जितना तेज स्वाइप, उतना तेज घूमेगा 🌀</string>
+    <string name="game_color_flow">कलर फ्लो</string>
+    <string name="game_color_flow_desc">आरामदायक रंग ग्रेडिएंट्स को बहते और मिश्रित होते देखें</string>
+    <string name="game_color_flow_hint">रंग बदलने के लिए कहीं भी टैप करें</string>
+    <string name="game_pattern_tap">पैटर्न टैप</string>
+    <string name="game_pattern_tap_desc">क्रम में पैटर्न टैप करें - फोकस ट्रेनिंग के लिए बढ़िया</string>
+    <string name="game_infinity_draw">इन्फिनिटी ड्रॉ</string>
+    <string name="game_infinity_draw_desc">अनंत पैटर्न बनाएं जो कभी मिटते नहीं - शुद्ध स्टिम आनंद</string>
+    <string name="game_sensory_rain">सेंसरी रेन</string>
+    <string name="game_sensory_rain_desc">शांत करने वाले विजुअल्स के साथ सुंदर बारिश की बूंदें गिरते देखें</string>
+    <string name="game_breathing_bubbles">ब्रीदिंग बबल्स</string>
+    <string name="game_breathing_bubbles_desc">शांत श्वास अभ्यास के लिए बुलबुले का पालन करें</string>
+    <string name="game_breathing_bubbles_hint">बुलबुला बढ़ने पर सांस लें, सिकुड़ने पर छोड़ें 🫧</string>
+    <string name="game_texture_tiles">टेक्सचर टाइल्स</string>
+    <string name="game_texture_tiles_desc">अलग-अलग संतोषजनक टेक्सचर महसूस करने के लिए टाइल्स टैप करें</string>
+    <string name="game_texture_tiles_hint">हर टाइल में अनोखी हैप्टिक फीडबैक है - अपने पसंदीदा खोजें!</string>
+    <string name="game_sound_garden">साउंड गार्डन</string>
+    <string name="game_sound_garden_desc">साउंड फ्लावर लगाकर एंबियंट साउंडस्केप बनाएं</string>
+    <string name="game_sound_garden_hint">लगाने के लिए टैप करें, हटाने के लिए दबाए रखें। आवाजें मिलाएं! 🌸</string>
+
+    <!-- विकास में गेम्स -->
+    <string name="game_stim_sequencer">स्टिम सीक्वेंसर</string>
+    <string name="game_stim_sequencer_desc">अपने खुद के संतोषजनक रिदम पैटर्न बनाएं</string>
+    <string name="game_emotion_garden">इमोशन गार्डन</string>
+    <string name="game_emotion_garden_desc">अपनी भावनाओं को दर्शाने वाले फूल उगाएं</string>
+    <string name="game_safe_space">सेफ स्पेस बिल्डर</string>
+    <string name="game_safe_space_desc">अपना खुद का शांत करने वाला वर्चुअल कमरा डिजाइन करें</string>
+    <string name="game_worry_jar">वरी जार</string>
+    <string name="game_worry_jar_desc">चिंताएं लिखें और उन्हें तैरते देखें</string>
+    <string name="game_coming_soon">जल्द आ रहा है</string>
+    <string name="game_in_development">🚧 विकास में</string>
+
+    <!-- टॉपिक डिटेल स्क्रीन -->
+    <string name="topic_not_found">विषय नहीं मिला</string>
+    <string name="topic_share">विषय साझा करें</string>
+    <string name="topic_more_options_soon">और विकल्प जल्द आ रहे हैं! ⚙️</string>
+    <string name="topic_members_posts">%s सदस्य • %s पोस्ट</string>
+    <string name="topic_joined">शामिल हो गए</string>
+    <string name="topic_join_community">समुदाय में शामिल हों</string>
+    <string name="topic_tab_posts">पोस्ट्स</string>
+    <string name="topic_tab_resources">संसाधन</string>
+    <string name="topic_tab_events">इवेंट्स</string>
+    <string name="topic_tab_members">सदस्य</string>
+    <string name="topic_share_text">NeuroComet पर %s समुदाय देखें! 🧠✨</string>
+
+    <!-- टॉपिक रिसोर्सेज सेक्शन -->
+    <string name="topic_resources_title">संसाधन</string>
+    <string name="resource_getting_started">शुरुआत गाइड</string>
+    <string name="resource_getting_started_desc">मूल बातें और समुदाय दिशानिर्देश सीखें</string>
+    <string name="resource_pinned">पिन किया</string>
+    <string name="resource_themes">25+ न्यूरो-स्टेट थीम</string>
+    <string name="resource_themes_desc">ADHD, ऑटिज़्म, एंग्जायटी, कलर ब्लाइंड और मूड थीम</string>
+    <string name="resource_new">नया!</string>
+    <string name="resource_fonts">एक्सेसिबिलिटी फॉन्ट्स गाइड</string>
+    <string name="resource_fonts_desc">Lexend, OpenDyslexic, Atkinson और 10+ फॉन्ट्स</string>
+    <string name="resource_fonts_count">12 फॉन्ट्स</string>
+    <string name="resource_animation">एनिमेशन कंट्रोल्स</string>
+    <string name="resource_animation_desc">शांत अनुभव के लिए एनिमेशन बंद करें</string>
+    <string name="resource_animation_count">7 टॉगल</string>
+    <string name="resource_events">हॉलिडे और अवेयरनेस इवेंट्स</string>
+    <string name="resource_events_desc">ND जागरूकता दिवसों के लिए विशेष थीम</string>
+    <string name="resource_events_count">15 इवेंट्स</string>
+    <string name="resource_safety">सुरक्षा और पेरेंटल कंट्रोल</string>
+    <string name="resource_safety_desc">स्क्रीन टाइम, बेडटाइम मोड, कंटेंट फिल्टरिंग</string>
+    <string name="resource_essential">आवश्यक</string>
+    <string name="resource_tips">क्विक टिप्स और ट्रिक्स</string>
+    <string name="resource_tips_desc">रेनबो ब्रेन अनलॉक करें, आंखों का तनाव कम करें और अधिक</string>
+    <string name="resource_tips_count">8 टिप्स</string>
+    <string name="resource_links">उपयोगी लिंक्स संग्रह</string>
+    <string name="resource_links_desc">चुने हुए बाहरी संसाधन और टूल्स</string>
+    <string name="resource_links_updated">2 दिन पहले अपडेट</string>
+    <string name="resource_wiki">कम्युनिटी विकी</string>
+    <string name="resource_wiki_desc">सहयोगात्मक रूप से लिखित ज्ञान आधार</string>
+    <string name="resource_wiki_count">156 लेख</string>
+    <string name="resource_videos">वीडियो लाइब्रेरी</string>
+    <string name="resource_videos_desc">शैक्षिक वीडियो और ट्यूटोरियल</string>
+    <string name="resource_videos_count">23 वीडियो</string>
+    <string name="resource_reading">अनुशंसित पठन</string>
+    <string name="resource_reading_desc">सदस्यों द्वारा अनुशंसित पुस्तकें और लेख</string>
+    <string name="resource_reading_count">45 आइटम</string>
+
+    <!-- टॉपिक इवेंट्स सेक्शन -->
+    <string name="topic_events_title">आगामी इवेंट्स</string>
+    <string name="event_weekly_chat">साप्ताहिक कम्युनिटी चैट</string>
+    <string name="event_weekly_chat_time">हर शनिवार दोपहर 3 बजे EST</string>
+    <string name="event_type_discussion">लाइव चर्चा</string>
+    <string name="event_book_club">बुक क्लब मीटिंग</string>
+    <string name="event_book_club_time">5 जनवरी 2026 शाम 7 बजे EST</string>
+    <string name="event_type_reading">पठन चर्चा</string>
+    <string name="event_mindfulness">माइंडफुलनेस सत्र</string>
+    <string name="event_mindfulness_time">8 जनवरी 2026 सुबह 10 बजे EST</string>
+    <string name="event_type_meditation">गाइडेड मेडिटेशन</string>
+    <string name="event_game_night">गेम नाइट</string>
+    <string name="event_game_night_time">12 जनवरी 2026 रात 8 बजे EST</string>
+    <string name="event_type_social">सोशल गेमिंग</string>
+    <string name="event_qa">विशेषज्ञ के साथ Q&amp;A</string>
+    <string name="event_qa_time">15 जनवरी 2026 शाम 6 बजे EST</string>
+    <string name="event_type_ama">मुझसे कुछ भी पूछें</string>
+    <string name="event_live">लाइव</string>
+    <string name="event_rsvp">RSVP</string>
+    <string name="event_join">शामिल हों</string>
+
+    <!-- टॉपिक मेंबर्स सेक्शन -->
+    <string name="topic_members_title">समुदाय के सदस्य</string>
+    <string name="member_role_moderator">मॉडरेटर</string>
+    <string name="member_role_contributor">टॉप कंट्रीब्यूटर</string>
+    <string name="member_role_active">सक्रिय सदस्य</string>
+    <string name="member_role_veteran">अनुभवी</string>
+    <string name="member_role_member">सदस्य</string>
+    <string name="member_role_new">नया सदस्य</string>
+    <string name="member_follow">फॉलो करें</string>
+    <string name="member_share">शेयर करें</string>
+
+    <!-- समय पहले स्ट्रिंग्स -->
+    <string name="time_minutes_ago">%d मिनट पहले</string>
+    <string name="time_hours_ago">%d घंटे पहले</string>
+    <string name="time_days_ago">%d दिन पहले</string>
+
+    <!-- Feedback Hub -->
+    <string name="feedback_hub_title">फीडबैक हब</string>
+    <string name="feedback_report_bug_title">बग रिपोर्ट करें</string>
+    <string name="feedback_request_feature_title">फीचर का अनुरोध करें</string>
+    <string name="feedback_send_title">फीडबैक भेजें</string>
+
+    <!-- Additional Settings -->
+    <string name="settings_section_appearance">प्रकटन और प्रदर्शन</string>
+    <string name="settings_section_privacy">गोपनीयता और सुरक्षा</string>
+    <string name="settings_section_notifications">सूचनाएं</string>
+    <string name="settings_section_accessibility">अभिगम्यता</string>
+
+    <!-- Explore Topics -->
+    <string name="explore_autism">ऑटिज़्म</string>
+    <string name="explore_adhd">एडीएचडी</string>
+    <string name="explore_anxiety">चिंता</string>
+    <string name="explore_sensory">संवेदी</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">डेवलपर</string>
+    <string name="settings_developer_subtitle">डीबग और परीक्षण उपकरण</string>
+    <string name="settings_dev_options_desc">परीक्षण और डीबग के लिए उन्नत विकल्प</string>
+    <string name="settings_fake_premium">नकली प्रीमियम मोड</string>
+    <string name="settings_fake_premium_enabled">परीक्षण के लिए प्रीमियम सुविधाएं अनलॉक</string>
+    <string name="settings_fake_premium_disabled">प्रीमियम सुविधाओं का परीक्षण करने के लिए सक्षम करें</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">डेवलपर विकल्प</string>
+    <string name="dev_phone_format_test">फोन नंबर फॉर्मेटिंग</string>
+    <string name="dev_phone_format_test_desc">विभिन्न क्षेत्रों के लिए स्वचालित फॉर्मेटिंग का परीक्षण करें</string>
+    <string name="dev_phone_format_style">फॉर्मेट शैली</string>
+    <string name="dev_phone_test_input">फोन नंबर दर्ज करें</string>
+    <string name="dev_phone_format_pattern">पैटर्न</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">क्रेडेंशियल संग्रहण</string>
+    <string name="dev_credential_test_save">सहेजने का परीक्षण करें</string>
+    <string name="dev_credential_test_retrieve">पुनर्प्राप्ति का परीक्षण करें</string>
+    <string name="dev_credential_clear_all">सभी क्रेडेंशियल साफ़ करें</string>
+    <string name="dev_credential_session_status">सत्र स्थिति</string>
+    <string name="dev_credential_biometric_status">बायोमेट्रिक स्थिति</string>
+    <string name="dev_credential_create_session">परीक्षण सत्र बनाएं</string>
+    <string name="dev_credential_end_session">सत्र समाप्त करें</string>
+    <string name="dev_credential_extend_session">सत्र बढ़ाएं</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">डीबग उपकरण</string>
+    <string name="debug_performance_overlay">प्रदर्शन ओवरले</string>
+    <string name="debug_performance_desc">FPS, मेमोरी और स्क्रॉल आँकड़े दिखाता है</string>
+    <string name="debug_reset_counters">काउंटर रीसेट करें</string>
 </resources>
 

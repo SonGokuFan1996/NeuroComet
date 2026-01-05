@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core UI -->
+    <string name="app_name">NeuroComet</string>
+    <string name="nav_feed">Syöte</string>
+    <string name="nav_explore">Tutustu</string>
+    <string name="nav_messages">Viestit</string>
+    <string name="nav_notifications">Ilmoitukset</string>
+    <string name="nav_settings">Asetukset</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in">Kirjaudu sisään</string>
+    <string name="auth_sign_up">Rekisteröidy</string>
+    <string name="auth_email_label">Sähköposti</string>
+    <string name="auth_password_label">Salasana</string>
+    <string name="auth_create_account">Luo tili</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">Ulkoasu &amp; Näyttö</string>
+    <string name="settings_section_privacy">Yksityisyys &amp; Turvallisuus</string>
+    <string name="settings_section_notifications">Ilmoitukset</string>
+    <string name="settings_section_accessibility">Esteettömyys</string>
+
+    <!-- Explore -->
+    <string name="explore_title">Tutustu</string>
+    <string name="explore_autism">Autismi</string>
+    <string name="explore_adhd">ADHD</string>
+    <string name="explore_anxiety">Ahdistus</string>
+    <string name="explore_sensory">Aistit</string>
+
+    <!-- Games -->
+    <string name="games_hub_title">Pelikeskus</string>
+    <string name="game_bubble_pop">Kuplien poksautus</string>
+    <string name="game_fidget_spinner">Fidget Spinner</string>
+
+    <!-- Feedback -->
+    <string name="feedback_hub_title">Palautekeskus</string>
+    <string name="feedback_report_bug_title">Ilmoita virheestä</string>
+    <string name="feedback_request_feature_title">Pyydä ominaisuutta</string>
+    <string name="feedback_send_title">Lähetä palautetta</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">Kehittäjä</string>
+    <string name="settings_developer_subtitle">Virheenkorjaus- ja testaustyökalut</string>
+    <string name="settings_developer_options_group">Kehittäjäasetukset</string>
+    <string name="settings_dev_options_desc">Edistyneet asetukset testaukseen ja virheenkorjaukseen</string>
+    <string name="settings_force_verify_title">Pakota vahvistus</string>
+    <string name="settings_force_verify_subtitle">Vaihda käyttäjän vahvistustila.</string>
+    <string name="settings_fake_premium_title">Valepremium</string>
+    <string name="settings_fake_premium_subtitle">Simuloi maksettua tilaa.</string>
+    <string name="settings_fake_premium">Valepremium-tila</string>
+    <string name="settings_fake_premium_enabled">Premium-ominaisuudet avattu testaukseen</string>
+    <string name="settings_fake_premium_disabled">Ota käyttöön premium-ominaisuuksien testaamiseksi</string>
+    <string name="settings_mock_interface_title">Mock-käyttöliittymä</string>
+    <string name="settings_mock_interface_subtitle">Näytä valetietoja demoa varten.</string>
+    <string name="settings_simulate_badge_title">Simuloi merkkiilmoitus</string>
+    <string name="settings_simulate_badge_subtitle">Laukaisee ilmoituksen kohteelle \'%s\'.</string>
+    <string name="settings_nuke_db_title">Tyhjennä tietokanta</string>
+    <string name="settings_nuke_db_subtitle">Poista KAIKKI julkaisut. Peruuttamaton.</string>
+    <string name="settings_nuke_db_dialog_title">Tyhjennä tietokanta?</string>
+    <string name="settings_nuke_db_dialog_text">Tämä poistaa pysyvästi kaikki julkaisut palvelimelta. Tätä toimintoa ei voi perua.</string>
+    <string name="settings_nuke_db_dialog_confirm">TYHJENNÄ</string>
+    <string name="settings_nuke_db_dialog_cancel">Peruuta</string>
+    <string name="settings_language_test_title">Sovelluksen kieli (Testi)</string>
+    <string name="settings_language_test_subtitle">Aseta kieli manuaalisesti. Vaatii uudelleenkäynnistyksen.</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">Kehittäjäasetukset</string>
+    <string name="dev_phone_format_test">Puhelinnumeron muotoilu</string>
+    <string name="dev_phone_format_test_desc">Testaa automaattista muotoilua eri alueille</string>
+    <string name="dev_phone_format_style">Muotoilutyyli</string>
+    <string name="dev_phone_test_input">Syötä puhelinnumero</string>
+    <string name="dev_phone_format_pattern">Malli</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">Tunnistetietojen tallennus</string>
+    <string name="dev_credential_test_save">Testaa tallennusta</string>
+    <string name="dev_credential_test_retrieve">Testaa hakua</string>
+    <string name="dev_credential_clear_all">Tyhjennä kaikki tunnistetiedot</string>
+    <string name="dev_credential_session_status">Istunnon tila</string>
+    <string name="dev_credential_biometric_status">Biometrinen tila</string>
+    <string name="dev_credential_create_session">Luo testiistunto</string>
+    <string name="dev_credential_end_session">Lopeta istunto</string>
+    <string name="dev_credential_extend_session">Jatka istuntoa</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">Virheenkorjaustyökalut</string>
+    <string name="debug_performance_overlay">Suorituskykykerros</string>
+    <string name="debug_performance_desc">Näyttää FPS, muistin ja vieritystilastot</string>
+    <string name="debug_reset_counters">Nollaa laskurit</string>
+
+    <!-- General Settings -->
+    <string name="settings_profile_group">Profiili</string>
+    <string name="settings_badges_title">Merkit</string>
+    <string name="settings_badges_subtitle">Katso ansaitut saavutukset ja tavoitteet.</string>
+    <string name="settings_visual_comfort_group">Visuaalinen mukavuus ja teemat</string>
+    <string name="settings_text_size_title">Tekstin koko</string>
+    <string name="settings_dark_mode_title">Tumma tila</string>
+    <string name="settings_dark_mode_enabled">Käytössä</string>
+    <string name="settings_dark_mode_disabled">Pois käytöstä</string>
+    <string name="settings_high_contrast_title">Korkean kontrastin tila</string>
+    <string name="settings_high_contrast_subtitle_enabled">Käytössä (puhdas musta/valkoinen)</string>
+    <string name="settings_high_contrast_subtitle_disabled">Pois käytöstä</string>
+    <string name="settings_neuro_centric_theme_title">Neurokeskeinen teema</string>
+    <string name="settings_go_premium_title">Siirry Premiumiin</string>
+    <string name="settings_go_premium_subtitle">Poista mainokset ja tue kehittäjiä.</string>
+    <string name="settings_account_group">Tili</string>
+    <string name="settings_logout">Kirjaudu ulos</string>
+    <string name="settings_verified_human_title">Vahvistettu ihminen</string>
+    <string name="settings_verified_human_subtitle_verified">Tila: Vahvistettu</string>
+    <string name="settings_verified_human_subtitle_unverified">Tila: Ei vahvistettu</string>
+    <string name="settings_2fa_title">Kaksivaiheinen todennus</string>
+    <string name="settings_2fa_subtitle">Vaadi koodi kirjautumisessa.</string>
+</resources>
+

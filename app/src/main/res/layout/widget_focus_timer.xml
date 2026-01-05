@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="12dp"
+    android:background="@drawable/widget_background">
+
+    <!-- Timer emoji -->
+    <TextView
+        android:id="@+id/widget_timer_emoji"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="32sp"
+        android:text="⏱️" />
+
+    <!-- Minutes display -->
+    <TextView
+        android:id="@+id/widget_timer_minutes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        android:textColor="@color/widget_text_primary"
+        android:text="25" />
+
+    <!-- Label -->
+    <TextView
+        android:id="@+id/widget_timer_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="@color/widget_text_secondary"
+        android:text="minutes" />
+
+    <!-- Control buttons -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <!-- Start/Pause button -->
+        <TextView
+            android:id="@+id/widget_timer_button"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:paddingHorizontal="16dp"
+            android:gravity="center"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/widget_button_text"
+            android:background="@drawable/widget_button_background"
+            android:text="▶️ Start"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <!-- Reset button -->
+        <TextView
+            android:id="@+id/widget_timer_reset"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:text="🔄"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+
+</LinearLayout>
+

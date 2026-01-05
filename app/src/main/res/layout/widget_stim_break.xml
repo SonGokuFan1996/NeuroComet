@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stim Break Widget - Track and remind sensory/stim breaks -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_break_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="12dp"
+    android:background="@drawable/widget_background">
+
+    <!-- Title with stim emoji -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="@color/widget_text_primary"
+        android:text="💫 Stim Break" />
+
+    <!-- Timer emoji (changes based on state) -->
+    <TextView
+        android:id="@+id/widget_break_emoji"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textSize="32sp"
+        android:text="🧘" />
+
+    <!-- Last break time -->
+    <TextView
+        android:id="@+id/widget_break_last"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textSize="12sp"
+        android:textColor="@color/widget_text_secondary"
+        android:text="Last: 2:30 PM" />
+
+    <!-- Minutes since break -->
+    <TextView
+        android:id="@+id/widget_break_since"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/widget_text_primary"
+        android:text="15 min ago" />
+
+    <!-- Next break reminder -->
+    <TextView
+        android:id="@+id/widget_break_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="11sp"
+        android:textColor="@color/widget_text_secondary"
+        android:text="Next in: 30 min" />
+
+    <!-- Control buttons -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/widget_break_take"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:paddingHorizontal="12dp"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/widget_button_text"
+            android:background="@drawable/widget_button_background"
+            android:text="✨ Take Break"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:id="@+id/widget_break_reset"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="8dp"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:text="🔄"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+
+</LinearLayout>
+

@@ -4,6 +4,7 @@ import android.util.Log
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonNames
@@ -20,6 +21,7 @@ object SupabaseTestData {
     // =========================================================================
     // Test Data Models (must match Supabase table schemas)
     // Note: We always provide created_at to avoid NOT NULL constraint issues
+    // Note: @EncodeDefault ensures all fields are serialized even with defaults
     // =========================================================================
 
     @Serializable
@@ -28,8 +30,10 @@ object SupabaseTestData {
         val content: String,
         val image_url: String? = null,
         val video_url: String? = null,
-        val likes: Int = 0,
-        val created_at: String // Required - always provide timestamp
+        @EncodeDefault val likes: Int = 0,
+        @EncodeDefault val comments: Int = 0,  // Required - NOT NULL in database
+        @EncodeDefault val shares: Int = 0,    // Required - NOT NULL in database
+        val created_at: String  // Required - always provide timestamp
     )
 
     @Serializable
@@ -88,6 +92,8 @@ object SupabaseTestData {
                 user_id = "test_user_${System.currentTimeMillis()}",
                 content = "🧪 Test post from NeuroComet DevOptions!\n\nThis is a test to verify Supabase connectivity. 🚀",
                 likes = (0..100).random(),
+                comments = (0..50).random(),
+                shares = (0..20).random(),
                 created_at = nowTimestamp()
             )
 
@@ -168,6 +174,8 @@ object SupabaseTestData {
                     user_id = "bulk_test_user_$i",
                     content = "🧪 Bulk test post #$i\n\n${getRandomNeuroContent()}",
                     likes = (0..500).random(),
+                    comments = (0..100).random(),
+                    shares = (0..50).random(),
                     created_at = nowTimestamp()
                 )
             }

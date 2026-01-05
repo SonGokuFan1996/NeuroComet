@@ -1,10 +1,12 @@
-@file:Suppress(
+ @file:Suppress(
     "UnusedImport",
     "AssignmentToStateVariable",
     "ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE",
     "UNUSED_VALUE",
     "AssignedValueIsNeverRead",
-    "UNUSED_PARAMETER"
+    "UNUSED_PARAMETER",
+    "UNUSED_VARIABLE",
+    "DEPRECATION"
 )
 
 package com.kyilmaz.neurocomet
@@ -22,6 +24,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition // Restored mi
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -81,6 +84,8 @@ import androidx.compose.material.icons.filled.PersonOff
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -99,6 +104,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -119,7 +125,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
-import androidx.media3.common.MediaItem
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.media3.common.MediaItem as ExoMediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
@@ -1128,11 +1136,11 @@ fun FeedScreen(
         if (showPostingBlockedMessage) {
             AlertDialog(
                 onDismissRequest = { showPostingBlockedMessage = false },
-                title = { Text("Posting Restricted") },
-                text = { Text("Posting has been disabled by parental controls. Ask a parent or guardian to change this setting.") },
+                title = { Text(stringResource(R.string.posting_restricted_title)) },
+                text = { Text(stringResource(R.string.posting_restricted_message)) },
                 confirmButton = {
                     TextButton(onClick = { showPostingBlockedMessage = false }) {
-                        Text("OK")
+                        Text(stringResource(R.string.button_ok))
                     }
                 }
             )
@@ -1166,171 +1174,163 @@ fun BubblyPostCard(
     val clipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
 
+    // Pre-compute strings for Toast messages
+    val bookmarkedText = stringResource(R.string.post_bookmarked)
+    val unbookmarkedText = stringResource(R.string.post_unbookmarked)
+    val copiedText = stringResource(R.string.post_copied)
+    val hideText = stringResource(R.string.post_hide)
+    val nowFollowingText = stringResource(R.string.post_now_following, post.userId ?: "")
+    val unfollowedText = stringResource(R.string.post_unfollowed, post.userId ?: "")
+
+    // ========================================================================
+    // BUBBLY POST CARD - Clean Dynamic Color Design
+    // ========================================================================
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 6.dp),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 1.dp,
-            pressedElevation = 0.5.dp
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = BorderStroke(
+            width = 1.5.dp,
+            color = MaterialTheme.colorScheme.outlineVariant
         )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            // Neurodivergent feature: Emotional tone indicator
-            if (emotionalTone != EmotionalTone.NEUTRAL && !safetyState.isKidsMode) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                        .background(
-                            emotionalTone.backgroundColor.copy(alpha = 0.1f),
-                            RoundedCornerShape(8.dp)
-                        )
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = emotionalTone.emoji,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(emotionalTone.labelResId),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = emotionalTone.textColor
-                    )
-                    Spacer(Modifier.weight(1f))
-                    if (emotionalTone.showWarning) {
-                        Text(
-                            text = stringResource(R.string.tone_may_be_intense),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                        )
-                    }
-                }
-            }
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // ============ HEADER ROW ============
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Avatar with colorful gradient ring
                 val avatarUrl = if (isMockInterfaceEnabled) {
                     post.userAvatar ?: "https://i.pravatar.cc/150?u=${post.userId}"
                 } else {
                     post.userAvatar
                 }
 
-                // Avatar with subtle border ring
                 Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            shape = CircleShape
-                        )
-                        .border(
-                            width = 1.5.dp,
-                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.12f),
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (!isMockInterfaceEnabled && avatarUrl.isNullOrBlank()) {
-                        Icon(
-                            Icons.Default.AccountCircle,
-                            contentDescription = stringResource(R.string.user_avatar_content_description),
                             modifier = Modifier
-                                .size(42.dp)
-                                .clip(CircleShape)
-                                .clickable { post.userId?.let { onProfileClick(it) } },
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                        )
-                    } else {
-                        AsyncImage(
-                            model = ImageRequest.Builder(context)
-                                .data(avatarUrl ?: "https://i.pravatar.cc/150?u=${post.userId}")
-                                .crossfade(150)
-                                .memoryCacheKey(avatarUrl ?: post.userId)
-                                .build(),
-                            contentDescription = stringResource(R.string.user_avatar_content_description),
-                            modifier = Modifier
-                                .size(42.dp)
-                                .clip(CircleShape)
-                                .clickable { post.userId?.let { onProfileClick(it) } },
-                            contentScale = ContentScale.Crop
-                        )
-                    }
-                }
-
-                Spacer(Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable { post.userId?.let { onProfileClick(it) } }
-                    ) {
-                        Text(
-                            post.userId ?: stringResource(R.string.unknown_user_id),
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodyMedium,
-                            letterSpacing = 0.1.sp
-                        )
-                        // Following indicator
-                        if (isFollowing) {
-                            Spacer(Modifier.width(6.dp))
-                            Text(
-                                text = stringResource(R.string.post_following_indicator),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(2.dp))
-                    Text(
-                        post.timeAgo,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
-                        letterSpacing = 0.15.sp
-                    )
-                }
-
-                // 3-dot menu
-                Box {
-                    IconButton(onClick = { showMenu = true }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more_options_content_description))
-                    }
-
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false }
-                    ) {
-                        // Bookmark/Save
-                        DropdownMenuItem(
-                            text = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                .size(50.dp)
+                                .background(
+                                    brush = Brush.linearGradient(
+                                        colors = listOf(
+                                            MaterialTheme.colorScheme.primary,
+                                            MaterialTheme.colorScheme.tertiary
+                                        )
+                                    ),
+                                    shape = CircleShape
+                                )
+                                .padding(3.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surface)
+                                    .clickable { post.userId?.let { onProfileClick(it) } },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (!isMockInterfaceEnabled && avatarUrl.isNullOrBlank()) {
                                     Icon(
-                                        if (isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                                        Icons.Default.AccountCircle,
                                         contentDescription = null,
-                                        modifier = Modifier.size(20.dp)
+                                        modifier = Modifier.size(44.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                                     )
-                                    Spacer(Modifier.width(12.dp))
-                                    Text(
-                                        if (isBookmarked) stringResource(R.string.post_unsave) else stringResource(R.string.post_save),
-                                        color = MaterialTheme.colorScheme.onSurface
+                                } else {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(context)
+                                            .data(avatarUrl ?: "https://i.pravatar.cc/150?u=${post.userId}")
+                                            .crossfade(true)
+                                            .build(),
+                                        contentDescription = null,
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop
                                     )
                                 }
-                            },
-                            onClick = {
-                                isBookmarked = !isBookmarked
-                                showMenu = false
-                                Toast.makeText(
-                                    context,
-                                    if (isBookmarked) context.getString(R.string.post_bookmarked) else context.getString(R.string.post_unbookmarked),
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                            }
+                        }
+
+                        Spacer(Modifier.width(12.dp))
+
+                        // User info
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = post.userId ?: "Unknown",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                if (isFollowing) {
+                                    Spacer(Modifier.width(8.dp))
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.primaryContainer
+                                    ) {
+                                        Text(
+                                            text = "Following",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                            fontWeight = FontWeight.Medium,
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
+                            }
+                            Text(
+                                text = post.timeAgo,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        // Menu button
+                        Box {
+                            IconButton(onClick = { showMenu = true }) {
+                                Icon(
+                                    Icons.Default.MoreVert,
+                                    contentDescription = "More options",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            DropdownMenu(
+                                expanded = showMenu,
+                                onDismissRequest = { showMenu = false }
+                            ) {
+                                // Bookmark/Save
+                                DropdownMenuItem(
+                                    text = {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                if (isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                            Spacer(Modifier.width(12.dp))
+                                            Text(
+                                                if (isBookmarked) stringResource(R.string.post_unsave) else stringResource(R.string.post_save),
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        isBookmarked = !isBookmarked
+                                        showMenu = false
+                                        Toast.makeText(context, if (isBookmarked) bookmarkedText else unbookmarkedText, Toast.LENGTH_SHORT).show()
                             }
                         )
 
@@ -1346,7 +1346,7 @@ fun BubblyPostCard(
                             onClick = {
                                 clipboardManager.setText(AnnotatedString(post.content))
                                 showMenu = false
-                                Toast.makeText(context, context.getString(R.string.post_copied), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, copiedText, Toast.LENGTH_SHORT).show()
                             }
                         )
 
@@ -1392,10 +1392,7 @@ fun BubblyPostCard(
                                     showMenu = false
                                     Toast.makeText(
                                         context,
-                                        context.getString(
-                                            if (isFollowing) R.string.post_now_following else R.string.post_unfollowed,
-                                            post.userId ?: ""
-                                        ),
+                                        if (isFollowing) nowFollowingText else unfollowedText,
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
@@ -1428,7 +1425,7 @@ fun BubblyPostCard(
                             },
                             onClick = {
                                 showMenu = false
-                                Toast.makeText(context, context.getString(R.string.post_hide), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, hideText, Toast.LENGTH_SHORT).show()
                             }
                         )
 
@@ -1500,12 +1497,14 @@ fun BubblyPostCard(
                     }
                 }
             }
-            Spacer(Modifier.height(16.dp))
+
+            // ============ CONTENT ============
+            Spacer(Modifier.height(12.dp))
 
             val shouldHide = safetyState.isKidsMode && ContentFiltering.shouldHideTextForKids(post.content, safetyState.kidsFilterLevel)
             if (shouldHide) {
                 Text(
-                    text = "Content hidden for kids mode",
+                    text = "🔒 Content hidden for kids mode",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1514,17 +1513,14 @@ fun BubblyPostCard(
                     ContentFiltering.sanitizeForKids(post.content, safetyState.kidsFilterLevel)
                 } else post.content
 
-                // Use NeuroLinkedText for automatic link detection
-                // Supports URLs, @mentions, #hashtags, emails, and phone numbers
                 NeuroLinkedText(
                     text = textToShow,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
-                        lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.15f
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface,
+                        lineHeight = 24.sp
                     ),
                     linkStyle = defaultNeuroLinkStyle(),
                     onLinkClick = { link ->
-                        // Handle internal links (mentions, hashtags)
                         when (link.type) {
                             com.kyilmaz.neurocomet.ui.components.LinkType.MENTION -> {
                                 val username = link.text.removePrefix("@")
@@ -1533,133 +1529,156 @@ fun BubblyPostCard(
                             com.kyilmaz.neurocomet.ui.components.LinkType.HASHTAG -> {
                                 Toast.makeText(context, "Exploring ${link.text}...", Toast.LENGTH_SHORT).show()
                             }
-                            else -> {
-                                // Let the default handler open URLs, emails, phones
-                                null
-                            }
+                            else -> null
                         }
                     }
                 )
             }
 
-            // Media Display logic updated for video/image support
-            // In UNDER_13 mode, hide media previews by default.
+            // ============ MEDIA CAROUSEL (up to 20 images/videos) ============
             val showMedia = !safetyState.isKidsMode
+            val mediaItems = post.getAllMedia()
 
-            if (showMedia && post.videoUrl != null) {
+            if (showMedia && mediaItems.isNotEmpty()) {
                 Spacer(Modifier.height(12.dp))
-                VideoPlayerView(
-                    videoUrl = post.videoUrl,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                )
-            } else if (showMedia && post.imageUrl != null) {
-                Spacer(Modifier.height(12.dp))
-                AsyncImage(
-                    model = post.imageUrl,
-                    contentDescription = stringResource(R.string.post_image_content_description),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    contentScale = ContentScale.Crop
-                )
+
+                if (mediaItems.size == 1) {
+                    // Single media item - simple display
+                    val item = mediaItems.first()
+                    when (item.type) {
+                        MediaType.VIDEO -> {
+                            VideoPlayerView(
+                                videoUrl = item.url,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                            )
+                        }
+                        MediaType.IMAGE -> {
+                            AsyncImage(
+                                model = item.url,
+                                contentDescription = item.altText,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp)
+                                    .clip(RoundedCornerShape(16.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    }
+                } else {
+                    // Multiple media items - carousel with pager
+                    PostMediaCarousel(
+                        mediaItems = mediaItems,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(280.dp)
+                    )
+                }
             }
-            // End Media Display logic
 
+            // ============ ACTION BAR ============
             Spacer(Modifier.height(12.dp))
-
-            // Neurodivergent feature: Reading time estimate
-            val wordCount = post.content.split("\\s+".toRegex()).size
-            val readingTimeSeconds = (wordCount / 3.5).toInt() // ~200 words per minute
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Reading time indicator (helpful for ADHD/time blindness)
-                if (wordCount > 20) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        shape = RoundedCornerShape(6.dp)
-                    ) {
-                        Text(
-                            text = "⏱️ ~${if (readingTimeSeconds < 60) "${readingTimeSeconds}s" else "${readingTimeSeconds / 60}m"} read",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                // Left: Like, Comment, Share
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    // Like button
+                    IconButton(onClick = onLike) {
+                        Icon(
+                            imageVector = if (post.isLikedByMe) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = "Like",
+                            tint = if (post.isLikedByMe) Color(0xFFE91E63) else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                } else {
-                    Spacer(Modifier.width(1.dp))
+                    if (post.likes > 0) {
+                        Text(
+                            text = formatCount(post.likes),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (post.isLikedByMe) Color(0xFFE91E63) else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Spacer(Modifier.width(8.dp))
+
+                    // Comment button
+                    IconButton(onClick = onReplyPost) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.Comment,
+                            contentDescription = "Comment",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    // Share button
+                    IconButton(onClick = { onShare(context, post) }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Share,
+                            contentDescription = "Share",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically
+                // Right: Bookmark
+                IconButton(
+                    onClick = {
+                        isBookmarked = !isBookmarked
+                        Toast.makeText(context, if (isBookmarked) "Saved!" else "Removed", Toast.LENGTH_SHORT).show()
+                    }
                 ) {
-                    // Bookmark button (quick access)
-                    IconButton(
-                        onClick = {
-                            isBookmarked = !isBookmarked
-                            Toast.makeText(
-                                context,
-                                if (isBookmarked) "Saved!" else "Removed from saved",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        },
-                        modifier = Modifier.size(40.dp)
-                    ) {
-                        Icon(
-                            if (isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
-                            "Save post",
-                            tint = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-                    IconButton(
-                        onClick = { onShare(context, post) },
-                        modifier = Modifier.size(40.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.Share,
-                            stringResource(R.string.share_button_content_description),
-                            modifier = Modifier.size(22.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                        )
-                    }
-                    IconButton(
-                        onClick = onReplyPost,
-                        modifier = Modifier.size(40.dp)
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Outlined.Comment,
-                            stringResource(R.string.comment_button_content_description),
-                            modifier = Modifier.size(22.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                        )
-                    }
-                    Spacer(Modifier.width(2.dp))
-                    IconButton(
-                        onClick = onLike,
-                        modifier = Modifier.size(40.dp)
-                    ) {
-                        Icon(
-                            if (post.isLikedByMe) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                            stringResource(R.string.like_button_content_description),
-                            tint = if (post.isLikedByMe) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-                    Text(
-                        post.likes.toString(),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
-                        fontWeight = FontWeight.Medium
+                    Icon(
+                        imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                        contentDescription = "Bookmark",
+                        tint = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+            }
+
+            // Emotional tone tag (if present) - neurodivergent-friendly indicator
+            if (emotionalTone != EmotionalTone.NEUTRAL && !safetyState.isKidsMode) {
+                Spacer(Modifier.height(10.dp))
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = emotionalTone.backgroundColor.copy(alpha = 0.2f),
+                    border = BorderStroke(1.dp, emotionalTone.backgroundColor.copy(alpha = 0.4f))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = emotionalTone.emoji,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = stringResource(emotionalTone.labelResId),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = emotionalTone.textColor,
+                            fontWeight = FontWeight.Medium
+                        )
+                        if (emotionalTone.showWarning) {
+                            Text(
+                                text = "•",
+                                color = emotionalTone.textColor.copy(alpha = 0.6f),
+                                fontSize = 8.sp
+                            )
+                            Text(
+                                text = "sensitive",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = emotionalTone.textColor.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -1672,9 +1691,141 @@ fun BubblyPostCard(
             onDismiss = { showReportDialog = false },
             onReport = { reason ->
                 showReportDialog = false
-                Toast.makeText(context, "Report submitted. Thank you for helping keep NeuroComet safe.", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Report submitted. Thank you!", Toast.LENGTH_LONG).show()
             }
         )
+    }
+}
+
+/**
+ * Format count for display (e.g., 1.2K, 3.4M)
+ */
+private fun formatCount(count: Int): String {
+    return when {
+        count >= 1_000_000 -> String.format(java.util.Locale.US, "%.1fM", count / 1_000_000.0)
+        count >= 1_000 -> String.format(java.util.Locale.US, "%.1fK", count / 1_000.0)
+        else -> count.toString()
+    }
+}
+
+/**
+ * Media carousel for posts with multiple images/videos (up to 20 like Instagram).
+ * Features:
+ * - Smooth horizontal paging
+ * - Page indicators
+ * - Optimized media loading
+ * - Support for mixed image/video content
+ */
+@Composable
+fun PostMediaCarousel(
+    mediaItems: List<MediaItem>,
+    modifier: Modifier = Modifier
+) {
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { mediaItems.size.coerceAtMost(Post.MAX_MEDIA_ITEMS) }
+    )
+
+    Box(modifier = modifier) {
+        // Horizontal pager for swiping through media
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(16.dp)),
+            pageSpacing = 0.dp,
+            beyondViewportPageCount = 1 // Preload adjacent pages for smooth scrolling
+        ) { page ->
+            val item = mediaItems[page]
+
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                when (item.type) {
+                    MediaType.VIDEO -> {
+                        VideoPlayerView(
+                            videoUrl = item.url,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                    MediaType.IMAGE -> {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(item.url)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = item.altText,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
+            }
+        }
+
+        // Page indicator dots (only show if more than 1 item)
+        if (mediaItems.size > 1) {
+            // Counter badge in top right
+            Surface(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp),
+                shape = RoundedCornerShape(12.dp),
+                color = Color.Black.copy(alpha = 0.6f)
+            ) {
+                Text(
+                    text = "${pagerState.currentPage + 1}/${mediaItems.size}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+
+            // Dot indicators at bottom
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                repeat(mediaItems.size.coerceAtMost(10)) { index ->
+                    // For more than 10 items, show condensed indicators
+                    val displayIndex = if (mediaItems.size <= 10) {
+                        index
+                    } else {
+                        // Map to visible range around current page
+                        val start = (pagerState.currentPage - 4).coerceAtLeast(0)
+                        start + index
+                    }
+
+                    if (displayIndex < mediaItems.size) {
+                        val isSelected = pagerState.currentPage == displayIndex
+                        Box(
+                            modifier = Modifier
+                                .size(if (isSelected) 8.dp else 6.dp)
+                                .background(
+                                    color = if (isSelected)
+                                        Color.White
+                                    else
+                                        Color.White.copy(alpha = 0.5f),
+                                    shape = CircleShape
+                                )
+                        )
+                    }
+                }
+
+                // Show ellipsis indicator if there are more pages
+                if (mediaItems.size > 10 && pagerState.currentPage < mediaItems.size - 5) {
+                    Text(
+                        text = "•••",
+                        color = Color.White.copy(alpha = 0.7f),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -1828,11 +1979,11 @@ fun StoriesRow(
     val unseenCount = stories.count { !it.isViewed }
 
     Column(modifier = modifier) {
-        // Production-ready section header
+        // Section header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 16.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -1881,8 +2032,8 @@ fun StoriesRow(
 
         LazyRow(
             state = momentsListState,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 2.dp),
             flingBehavior = ScrollableDefaults.flingBehavior()
         ) {
             // "Add Moment" item - current user creates a new moment
@@ -1913,14 +2064,6 @@ fun StoriesRow(
                 )
             }
         }
-
-        Spacer(Modifier.height(8.dp))
-
-        HorizontalDivider(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            thickness = 0.5.dp,
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-        )
     }
 }
 
@@ -2107,7 +2250,7 @@ fun NeuroMomentItem(
             }
         }
 
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(4.dp))
 
         // Username - clean, legible, and centered
         Text(
@@ -2305,7 +2448,7 @@ fun VideoPlayerView(videoUrl: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
-            setMediaItem(MediaItem.fromUri(videoUrl))
+            setMediaItem(ExoMediaItem.fromUri(videoUrl))
             prepare()
             playWhenReady = false // Don't auto-play on load
         }

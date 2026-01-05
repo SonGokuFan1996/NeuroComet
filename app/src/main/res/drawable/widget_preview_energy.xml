@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Background with rounded corners -->
+    <path
+        android:pathData="M24,0 L176,0 Q200,0 200,24 L200,176 Q200,200 176,200 L24,200 Q0,200 0,176 L0,24 Q0,0 24,0 Z"
+        android:fillColor="#667eea"/>
+
+    <!-- Gradient overlay -->
+    <path
+        android:pathData="M24,0 L176,0 Q200,0 200,24 L200,176 Q200,200 176,200 L24,200 Q0,200 0,176 L0,24 Q0,0 24,0 Z"
+        android:fillColor="#764ba2"
+        android:fillAlpha="0.5"/>
+
+    <!-- Energy bolt icon circle background -->
+    <path
+        android:pathData="M100,30 m-30,0 a30,30 0 1,1 60,0 a30,30 0 1,1 -60,0"
+        android:fillColor="#FFFFFF"/>
+
+    <!-- Energy bolt symbol -->
+    <path
+        android:pathData="M105,20 L95,35 L102,35 L95,50 L110,32 L102,32 Z"
+        android:fillColor="#667eea"/>
+
+    <!-- Progress bar background -->
+    <path
+        android:pathData="M20,100 L180,100 Q188,100 188,108 L188,116 Q188,124 180,124 L20,124 Q12,124 12,116 L12,108 Q12,100 20,100 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.3"/>
+
+    <!-- Progress bar fill (70%) -->
+    <path
+        android:pathData="M20,100 L140,100 Q148,100 148,108 L148,116 Q148,124 140,124 L20,124 Q12,124 12,116 L12,108 Q12,100 20,100 Z"
+        android:fillColor="#4CAF50"/>
+
+    <!-- Percentage text background -->
+    <path
+        android:pathData="M60,140 L140,140 Q148,140 148,148 L148,156 Q148,164 140,164 L60,164 Q52,164 52,156 L52,148 Q52,140 60,140 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.4"/>
+
+    <!-- Energy level label background -->
+    <path
+        android:pathData="M30,170 L170,170 Q178,170 178,178 L178,186 Q178,194 170,194 L30,194 Q22,194 22,186 L22,178 Q22,170 30,170 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.25"/>
+</vector>
+

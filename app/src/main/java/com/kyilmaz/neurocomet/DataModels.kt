@@ -7,6 +7,25 @@ import java.time.Instant
 // Prefer a stable avatar CDN over pravatar which intermittently fails
 fun avatarUrl(seed: String): String = "https://api.dicebear.com/7.x/adventurer/png?seed=${seed}&size=256&radius=50&backgroundColor=dae5ff"
 
+/**
+ * Represents a single media item (image or video) in a post.
+ * Supports up to 20 media items per post like Instagram.
+ */
+@Serializable
+data class MediaItem(
+    val url: String,
+    val type: MediaType,
+    val thumbnailUrl: String? = null, // For video thumbnails
+    val aspectRatio: Float = 1f, // Width / Height ratio
+    val altText: String? = null // Accessibility description
+)
+
+@Serializable
+enum class MediaType {
+    IMAGE,
+    VIDEO
+}
+
 @Serializable
 data class Post(
     val id: Long?,
@@ -18,9 +37,10 @@ data class Post(
     val shares: Int,
     var isLikedByMe: Boolean,
     val userAvatar: String? = null,
-    val imageUrl: String? = null,
-    val videoUrl: String? = null, // Added for full media support
-    val minAudience: Audience = Audience.UNDER_13 // Minimum required audience level to view this post
+    val imageUrl: String? = null, // Legacy single image support
+    val videoUrl: String? = null, // Legacy single video support
+    val mediaItems: List<MediaItem> = emptyList(), // New multi-media support (max 20)
+    val minAudience: Audience = Audience.UNDER_13
 ) {
     val timeAgo: String
         get() {
@@ -38,6 +58,34 @@ data class Post(
                 else -> "now"
             }
         }
+
+    /**
+     * Get all media items for this post, combining legacy single media with new multi-media.
+     * Returns up to MAX_MEDIA_ITEMS (20) items.
+     */
+    fun getAllMedia(): List<MediaItem> {
+        if (mediaItems.isNotEmpty()) return mediaItems.take(MAX_MEDIA_ITEMS)
+
+        // Convert legacy single media to MediaItem list
+        val legacyMedia = mutableListOf<MediaItem>()
+        imageUrl?.let { legacyMedia.add(MediaItem(it, MediaType.IMAGE)) }
+        videoUrl?.let { legacyMedia.add(MediaItem(it, MediaType.VIDEO)) }
+        return legacyMedia
+    }
+
+    /**
+     * Check if this post has any media
+     */
+    fun hasMedia(): Boolean = mediaItems.isNotEmpty() || imageUrl != null || videoUrl != null
+
+    /**
+     * Get the media count
+     */
+    fun mediaCount(): Int = getAllMedia().size
+
+    companion object {
+        const val MAX_MEDIA_ITEMS = 20
+    }
 }
 
 @Serializable

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Background with rounded corners -->
+    <path
+        android:pathData="M24,0 L176,0 Q200,0 200,24 L200,176 Q200,200 176,200 L24,200 Q0,200 0,176 L0,24 Q0,0 24,0 Z"
+        android:fillColor="#a8c0ff"/>
+
+    <!-- Gradient overlay -->
+    <path
+        android:pathData="M24,0 L176,0 Q200,0 200,24 L200,176 Q200,200 176,200 L24,200 Q0,200 0,176 L0,24 Q0,0 24,0 Z"
+        android:fillColor="#3f2b96"
+        android:fillAlpha="0.5"/>
+
+    <!-- Title background -->
+    <path
+        android:pathData="M30,15 L170,15 Q178,15 178,23 L178,35 Q178,43 170,43 L30,43 Q22,43 22,35 L22,23 Q22,15 30,15 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.4"/>
+
+    <!-- Spoon 1 (filled) -->
+    <path
+        android:pathData="M30,80 m-18,0 a18,18 0 1,1 36,0 a18,18 0 1,1 -36,0"
+        android:fillColor="#FFD700"/>
+
+    <!-- Spoon 2 (filled) -->
+    <path
+        android:pathData="M70,80 m-18,0 a18,18 0 1,1 36,0 a18,18 0 1,1 -36,0"
+        android:fillColor="#FFD700"/>
+
+    <!-- Spoon 3 (filled) -->
+    <path
+        android:pathData="M110,80 m-18,0 a18,18 0 1,1 36,0 a18,18 0 1,1 -36,0"
+        android:fillColor="#FFD700"/>
+
+    <!-- Spoon 4 (empty) -->
+    <path
+        android:pathData="M150,80 m-18,0 a18,18 0 1,1 36,0 a18,18 0 1,1 -36,0"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="3"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.2"/>
+
+    <!-- Spoon 5 (empty) -->
+    <path
+        android:pathData="M190,80 m-18,0 a18,18 0 1,1 36,0 a18,18 0 1,1 -36,0"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="3"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.2"/>
+
+    <!-- Counter display -->
+    <path
+        android:pathData="M60,120 L140,120 Q150,120 150,130 L150,150 Q150,160 140,160 L60,160 Q50,160 50,150 L50,130 Q50,120 60,120 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.5"/>
+
+    <!-- Bottom label -->
+    <path
+        android:pathData="M30,170 L170,170 Q178,170 178,178 L178,190 Q178,198 170,198 L30,198 Q22,198 22,190 L22,178 Q22,170 30,170 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.25"/>
+</vector>
+

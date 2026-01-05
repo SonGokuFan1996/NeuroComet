@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core UI - Greek (Greece has growing autism awareness) -->
+    <string name="app_name">NeuroComet</string>
+    <string name="nav_feed">Ροή</string>
+    <string name="nav_explore">Εξερεύνηση</string>
+    <string name="nav_messages">Μηνύματα</string>
+    <string name="nav_notifications">Ειδοποιήσεις</string>
+    <string name="nav_settings">Ρυθμίσεις</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in">Σύνδεση</string>
+    <string name="auth_sign_up">Εγγραφή</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_password_label">Κωδικός</string>
+    <string name="auth_create_account">Δημιουργία λογαριασμού</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">Εμφάνιση &amp; Οθόνη</string>
+    <string name="settings_section_privacy">Απόρρητο &amp; Ασφάλεια</string>
+    <string name="settings_section_notifications">Ειδοποιήσεις</string>
+    <string name="settings_section_accessibility">Προσβασιμότητα</string>
+
+    <!-- Explore -->
+    <string name="explore_title">Εξερεύνηση</string>
+    <string name="explore_autism">Αυτισμός</string>
+    <string name="explore_adhd">ΔΕΠΥ</string>
+    <string name="explore_anxiety">Άγχος</string>
+    <string name="explore_sensory">Αισθητηριακό</string>
+
+    <!-- Games -->
+    <string name="games_hub_title">Κέντρο Παιχνιδιών</string>
+    <string name="game_bubble_pop">Σπάσε Φυσαλίδες</string>
+    <string name="game_fidget_spinner">Fidget Spinner</string>
+
+    <!-- Feedback -->
+    <string name="feedback_hub_title">Κέντρο Σχολίων</string>
+    <string name="feedback_report_bug_title">Αναφορά Σφάλματος</string>
+    <string name="feedback_request_feature_title">Αίτημα Λειτουργίας</string>
+    <string name="feedback_send_title">Αποστολή Σχολίων</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">Προγραμματιστής</string>
+    <string name="settings_developer_subtitle">Εργαλεία εντοπισμού σφαλμάτων και δοκιμών</string>
+    <string name="settings_developer_options_group">Επιλογές Προγραμματιστή</string>
+    <string name="settings_dev_options_desc">Προηγμένες επιλογές για δοκιμές και εντοπισμό σφαλμάτων</string>
+    <string name="settings_force_verify_title">Αναγκαστική επαλήθευση</string>
+    <string name="settings_force_verify_subtitle">Εναλλαγή κατάστασης επαλήθευσης χρήστη.</string>
+    <string name="settings_fake_premium_title">Ψεύτικο Premium</string>
+    <string name="settings_fake_premium_subtitle">Προσομοίωση πληρωμένης κατάστασης.</string>
+    <string name="settings_fake_premium">Ψεύτικη Λειτουργία Premium</string>
+    <string name="settings_fake_premium_enabled">Λειτουργίες premium ξεκλειδώθηκαν για δοκιμές</string>
+    <string name="settings_fake_premium_disabled">Ενεργοποίηση για δοκιμή λειτουργιών premium</string>
+    <string name="settings_mock_interface_title">Εικονική διεπαφή</string>
+    <string name="settings_mock_interface_subtitle">Εμφάνιση ψεύτικων δεδομένων για demo.</string>
+    <string name="settings_simulate_badge_title">Προσομοίωση ειδοποίησης σήματος</string>
+    <string name="settings_simulate_badge_subtitle">Ενεργοποιεί ειδοποίηση για \'%s\'.</string>
+    <string name="settings_nuke_db_title">Διαγραφή βάσης δεδομένων</string>
+    <string name="settings_nuke_db_subtitle">Διαγραφή ΟΛΩΝ των αναρτήσεων. Μη αναστρέψιμο.</string>
+    <string name="settings_nuke_db_dialog_title">Διαγραφή βάσης δεδομένων;</string>
+    <string name="settings_nuke_db_dialog_text">Αυτό θα διαγράψει μόνιμα όλες τις αναρτήσεις από τον διακομιστή. Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</string>
+    <string name="settings_nuke_db_dialog_confirm">ΔΙΑΓΡΑΦΗ</string>
+    <string name="settings_nuke_db_dialog_cancel">Ακύρωση</string>
+    <string name="settings_language_test_title">Γλώσσα εφαρμογής (Δοκιμή)</string>
+    <string name="settings_language_test_subtitle">Ορίστε τη γλώσσα χειροκίνητα. Απαιτείται επανεκκίνηση.</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">Επιλογές Προγραμματιστή</string>
+    <string name="dev_phone_format_test">Μορφοποίηση Αριθμού Τηλεφώνου</string>
+    <string name="dev_phone_format_test_desc">Δοκιμή αυτόματης μορφοποίησης για διαφορετικές περιοχές</string>
+    <string name="dev_phone_format_style">Στυλ Μορφοποίησης</string>
+    <string name="dev_phone_test_input">Εισάγετε αριθμό τηλεφώνου</string>
+    <string name="dev_phone_format_pattern">Μοτίβο</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">Αποθήκευση Διαπιστευτηρίων</string>
+    <string name="dev_credential_test_save">Δοκιμή Αποθήκευσης</string>
+    <string name="dev_credential_test_retrieve">Δοκιμή Ανάκτησης</string>
+    <string name="dev_credential_clear_all">Διαγραφή Όλων των Διαπιστευτηρίων</string>
+    <string name="dev_credential_session_status">Κατάσταση Συνεδρίας</string>
+    <string name="dev_credential_biometric_status">Κατάσταση Βιομετρικών</string>
+    <string name="dev_credential_create_session">Δημιουργία Δοκιμαστικής Συνεδρίας</string>
+    <string name="dev_credential_end_session">Τερματισμός Συνεδρίας</string>
+    <string name="dev_credential_extend_session">Επέκταση Συνεδρίας</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">Εργαλεία εντοπισμού σφαλμάτων</string>
+    <string name="debug_performance_overlay">Επικάλυψη απόδοσης</string>
+    <string name="debug_performance_desc">Εμφανίζει FPS, μνήμη και στατιστικά κύλισης</string>
+    <string name="debug_reset_counters">Επαναφορά μετρητών</string>
+
+    <!-- General Settings -->
+    <string name="settings_profile_group">Προφίλ</string>
+    <string name="settings_badges_title">Εμβλήματα</string>
+    <string name="settings_badges_subtitle">Δείτε τα επιτεύγματα και στόχους σας.</string>
+    <string name="settings_visual_comfort_group">Οπτική άνεση &amp; Θέματα</string>
+    <string name="settings_text_size_title">Μέγεθος κειμένου</string>
+    <string name="settings_dark_mode_title">Σκοτεινή λειτουργία</string>
+    <string name="settings_dark_mode_enabled">Ενεργοποιημένη</string>
+    <string name="settings_dark_mode_disabled">Απενεργοποιημένη</string>
+    <string name="settings_high_contrast_title">Λειτουργία υψηλής αντίθεσης</string>
+    <string name="settings_high_contrast_subtitle_enabled">Ενεργοποιημένη (Καθαρό μαύρο/λευκό)</string>
+    <string name="settings_high_contrast_subtitle_disabled">Απενεργοποιημένη</string>
+    <string name="settings_neuro_centric_theme_title">Νευρο-κεντρικό θέμα</string>
+    <string name="settings_go_premium_title">Γίνετε Premium</string>
+    <string name="settings_go_premium_subtitle">Αφαιρέστε τις διαφημίσεις και υποστηρίξτε τους προγραμματιστές.</string>
+    <string name="settings_account_group">Λογαριασμός</string>
+    <string name="settings_logout">Αποσύνδεση</string>
+    <string name="settings_verified_human_title">Επαληθευμένος άνθρωπος</string>
+    <string name="settings_verified_human_subtitle_verified">Κατάσταση: Επαληθευμένη</string>
+    <string name="settings_verified_human_subtitle_unverified">Κατάσταση: Μη επαληθευμένη</string>
+    <string name="settings_2fa_title">Επαλήθευση δύο παραγόντων</string>
+    <string name="settings_2fa_subtitle">Απαίτηση κωδικού κατά τη σύνδεση.</string>
+</resources>
+

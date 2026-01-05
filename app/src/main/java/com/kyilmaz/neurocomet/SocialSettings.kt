@@ -2158,7 +2158,7 @@ private fun MutedWordsSection(context: android.content.Context) {
                     OutlinedTextField(
                         value = newWord,
                         onValueChange = { newWord = it },
-                        label = { Text("Word or phrase") },
+                        label = { Text(stringResource(R.string.privacy_muted_word_label)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )

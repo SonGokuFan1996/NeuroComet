@@ -249,6 +249,41 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { it.copy(activeConversation = null) }
     }
 
+    /**
+     * Start a new conversation with a user or open an existing one.
+     * Returns the conversation ID.
+     */
+    fun startOrOpenConversation(userId: String): String {
+        // Check if conversation already exists
+        val existingConversation = _uiState.value.conversations.find { conv ->
+            conv.participants.contains(userId) && conv.participants.contains(CURRENT_USER_ID_MOCK)
+        }
+
+        if (existingConversation != null) {
+            openConversation(existingConversation.id)
+            return existingConversation.id
+        }
+
+        // Create a new conversation
+        val newConversationId = "conv-${System.currentTimeMillis()}"
+        val newConversation = Conversation(
+            id = newConversationId,
+            participants = listOf(CURRENT_USER_ID_MOCK, userId),
+            messages = emptyList(),
+            lastMessageTimestamp = java.time.Instant.now().toString(),
+            unreadCount = 0
+        )
+
+        _userConversations.update { it + newConversation }
+
+        viewModelScope.launch {
+            fetchConversations()
+            openConversation(newConversationId)
+        }
+
+        return newConversationId
+    }
+
     // --- Conversations / DM actions ---
 
     fun sendDirectMessage(recipientId: String, content: String) {

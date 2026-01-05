@@ -886,7 +886,7 @@ private fun FeaturedCategoryCard(
                                 color = Color.White.copy(alpha = 0.2f)
                             ) {
                                 Text(
-                                    text = "NEW",
+                                    text = stringResource(R.string.explore_new).uppercase(),
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White,
@@ -987,7 +987,7 @@ private fun CategoryCard(
                             color = MaterialTheme.colorScheme.tertiary
                         ) {
                             Text(
-                                text = "NEW",
+                                text = stringResource(R.string.explore_new).uppercase(),
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onTertiary,
@@ -1240,12 +1240,12 @@ private fun ReportCategoryDialog(
                 },
                 enabled = selectedReason != null
             ) {
-                Text("Submit Report")
+                Text(stringResource(R.string.report_dialog_submit))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.button_cancel))
             }
         }
     )
@@ -2100,7 +2100,11 @@ private fun EventsSection(topicName: String) {
                             Text(
                                 text = stringResource(event.titleRes),
                                 fontWeight = FontWeight.SemiBold,
-                                style = MaterialTheme.typography.bodyLarge
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = if (event.isLive)
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                else
+                                    MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             if (event.isLive) {
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -2121,12 +2125,19 @@ private fun EventsSection(topicName: String) {
                         Text(
                             text = stringResource(event.datetimeRes),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = if (event.isLive)
+                                MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             text = stringResource(event.typeRes),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary
+                            fontWeight = FontWeight.Medium,
+                            color = if (event.isLive)
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            else
+                                MaterialTheme.colorScheme.primary
                         )
                     }
                     if (!event.isLive) {

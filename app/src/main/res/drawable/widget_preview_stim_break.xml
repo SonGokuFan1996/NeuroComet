@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Background with rounded corners -->
+    <path
+        android:pathData="M24,0 L176,0 Q200,0 200,24 L200,176 Q200,200 176,200 L24,200 Q0,200 0,176 L0,24 Q0,0 24,0 Z"
+        android:fillColor="#56CCF2"/>
+
+    <!-- Gradient overlay -->
+    <path
+        android:pathData="M24,0 L176,0 Q200,0 200,24 L200,176 Q200,200 176,200 L24,200 Q0,200 0,176 L0,24 Q0,0 24,0 Z"
+        android:fillColor="#2F80ED"
+        android:fillAlpha="0.5"/>
+
+    <!-- Title background -->
+    <path
+        android:pathData="M40,12 L160,12 Q168,12 168,20 L168,32 Q168,40 160,40 L40,40 Q32,40 32,32 L32,20 Q32,12 40,12 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.4"/>
+
+    <!-- Outer breathing glow ring -->
+    <path
+        android:pathData="M100,100 m-55,0 a55,55 0 1,1 110,0 a55,55 0 1,1 -110,0"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.2"/>
+
+    <!-- Middle breathing ring -->
+    <path
+        android:pathData="M100,100 m-45,0 a45,45 0 1,1 90,0 a45,45 0 1,1 -90,0"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.35"/>
+
+    <!-- Inner breathing circle -->
+    <path
+        android:pathData="M100,100 m-35,0 a35,35 0 1,1 70,0 a35,35 0 1,1 -70,0"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.5"/>
+
+    <!-- Core breathing circle -->
+    <path
+        android:pathData="M100,100 m-25,0 a25,25 0 1,1 50,0 a25,25 0 1,1 -50,0"
+        android:fillColor="#FFFFFF"/>
+
+    <!-- Breathe icon (simple wave) -->
+    <path
+        android:pathData="M85,100 Q90,90 100,90 Q110,90 115,100 Q110,110 100,110 Q90,110 85,100"
+        android:strokeColor="#56CCF2"
+        android:strokeWidth="3"
+        android:fillColor="#00000000"/>
+
+    <!-- Bottom instruction label -->
+    <path
+        android:pathData="M40,170 L160,170 Q168,170 168,178 L168,190 Q168,198 160,198 L40,198 Q32,198 32,190 L32,178 Q32,170 40,170 Z"
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.35"/>
+</vector>
+

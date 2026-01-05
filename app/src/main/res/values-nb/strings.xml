@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Core UI -->
+    <string name="app_name">NeuroComet</string>
+    <string name="nav_feed">Strøm</string>
+    <string name="nav_explore">Utforsk</string>
+    <string name="nav_messages">Meldinger</string>
+    <string name="nav_notifications">Varsler</string>
+    <string name="nav_settings">Innstillinger</string>
+
+    <!-- Auth -->
+    <string name="auth_sign_in">Logg inn</string>
+    <string name="auth_sign_up">Registrer</string>
+    <string name="auth_email_label">E-post</string>
+    <string name="auth_password_label">Passord</string>
+    <string name="auth_create_account">Opprett konto</string>
+
+    <!-- Settings -->
+    <string name="settings_section_appearance">Utseende &amp; Visning</string>
+    <string name="settings_section_privacy">Personvern &amp; Sikkerhet</string>
+    <string name="settings_section_notifications">Varsler</string>
+    <string name="settings_section_accessibility">Tilgjengelighet</string>
+
+    <!-- Explore -->
+    <string name="explore_title">Utforsk</string>
+    <string name="explore_autism">Autisme</string>
+    <string name="explore_adhd">ADHD</string>
+    <string name="explore_anxiety">Angst</string>
+    <string name="explore_sensory">Sensorisk</string>
+
+    <!-- Games -->
+    <string name="games_hub_title">Spillsenter</string>
+    <string name="game_bubble_pop">Boblesprett</string>
+    <string name="game_fidget_spinner">Fidget Spinner</string>
+
+    <!-- Feedback -->
+    <string name="feedback_hub_title">Tilbakemeldingssenter</string>
+    <string name="feedback_report_bug_title">Rapporter feil</string>
+    <string name="feedback_request_feature_title">Be om funksjon</string>
+    <string name="feedback_send_title">Send tilbakemelding</string>
+
+    <!-- Developer Section -->
+    <string name="settings_section_developer">Utvikler</string>
+    <string name="settings_developer_subtitle">Feilsøkings- og testverktøy</string>
+    <string name="settings_developer_options_group">Utvikleralternativer</string>
+    <string name="settings_dev_options_desc">Avanserte alternativer for testing og feilsøking</string>
+    <string name="settings_force_verify_title">Tving verifisering</string>
+    <string name="settings_force_verify_subtitle">Bytt brukerens verifiseringsstatus.</string>
+    <string name="settings_fake_premium_title">Falsk Premium</string>
+    <string name="settings_fake_premium_subtitle">Simuler betalt status.</string>
+    <string name="settings_fake_premium">Falsk Premium-modus</string>
+    <string name="settings_fake_premium_enabled">Premium-funksjoner låst opp for testing</string>
+    <string name="settings_fake_premium_disabled">Aktiver for å teste premium-funksjoner</string>
+    <string name="settings_mock_interface_title">Mock-grensesnitt</string>
+    <string name="settings_mock_interface_subtitle">Vis falske data for demo.</string>
+    <string name="settings_simulate_badge_title">Simuler merke-varsling</string>
+    <string name="settings_simulate_badge_subtitle">Utløser varsling for \'%s\'.</string>
+    <string name="settings_nuke_db_title">Slett database</string>
+    <string name="settings_nuke_db_subtitle">Slett ALLE innlegg. Irreversibelt.</string>
+    <string name="settings_nuke_db_dialog_title">Slette database?</string>
+    <string name="settings_nuke_db_dialog_text">Dette vil permanent slette alle innlegg fra serveren. Denne handlingen kan ikke angres.</string>
+    <string name="settings_nuke_db_dialog_confirm">SLETT</string>
+    <string name="settings_nuke_db_dialog_cancel">Avbryt</string>
+    <string name="settings_language_test_title">App-språk (Test)</string>
+    <string name="settings_language_test_subtitle">Angi språk manuelt. Krever omstart.</string>
+
+    <!-- Dev Options -->
+    <string name="dev_options_title">Utvikleralternativer</string>
+    <string name="dev_phone_format_test">Telefonnummerformatering</string>
+    <string name="dev_phone_format_test_desc">Test automatisk formatering for forskjellige regioner</string>
+    <string name="dev_phone_format_style">Formatstil</string>
+    <string name="dev_phone_test_input">Skriv inn telefonnummer</string>
+    <string name="dev_phone_format_pattern">Mønster</string>
+
+    <!-- Credential Storage Dev Options -->
+    <string name="dev_credential_title">Legitimasjonslagring</string>
+    <string name="dev_credential_test_save">Test Lagre</string>
+    <string name="dev_credential_test_retrieve">Test Hent</string>
+    <string name="dev_credential_clear_all">Slett alle legitimasjoner</string>
+    <string name="dev_credential_session_status">Sesjonsstatus</string>
+    <string name="dev_credential_biometric_status">Biometrisk status</string>
+    <string name="dev_credential_create_session">Opprett testsesjon</string>
+    <string name="dev_credential_end_session">Avslutt sesjon</string>
+    <string name="dev_credential_extend_session">Forleng sesjon</string>
+
+    <!-- Debug Tools -->
+    <string name="debug_tools_title">Feilsøkingsverktøy</string>
+    <string name="debug_performance_overlay">Ytelsesoverlegg</string>
+    <string name="debug_performance_desc">Viser FPS, minne og rullestatistikk</string>
+    <string name="debug_reset_counters">Tilbakestill tellere</string>
+
+    <!-- General Settings -->
+    <string name="settings_profile_group">Profil</string>
+    <string name="settings_badges_title">Merker</string>
+    <string name="settings_badges_subtitle">Se dine opptjente prestasjoner og mål.</string>
+    <string name="settings_visual_comfort_group">Visuell komfort og temaer</string>
+    <string name="settings_text_size_title">Tekststørrelse</string>
+    <string name="settings_dark_mode_title">Mørk modus</string>
+    <string name="settings_dark_mode_enabled">Aktivert</string>
+    <string name="settings_dark_mode_disabled">Deaktivert</string>
+    <string name="settings_high_contrast_title">Høykontrast-modus</string>
+    <string name="settings_high_contrast_subtitle_enabled">Aktivert (Ren svart/hvit)</string>
+    <string name="settings_high_contrast_subtitle_disabled">Deaktivert</string>
+    <string name="settings_neuro_centric_theme_title">Nevro-sentrisk tema</string>
+    <string name="settings_go_premium_title">Bli Premium</string>
+    <string name="settings_go_premium_subtitle">Fjern annonser og støtt utviklerne.</string>
+    <string name="settings_account_group">Konto</string>
+    <string name="settings_logout">Logg ut</string>
+    <string name="settings_verified_human_title">Verifisert menneske</string>
+    <string name="settings_verified_human_subtitle_verified">Status: Verifisert</string>
+    <string name="settings_verified_human_subtitle_unverified">Status: Ikke verifisert</string>
+    <string name="settings_2fa_title">Tofaktorautentisering</string>
+    <string name="settings_2fa_subtitle">Krev kode ved innlogging.</string>
+</resources>
+

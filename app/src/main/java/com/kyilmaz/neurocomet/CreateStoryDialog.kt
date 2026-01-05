@@ -25,10 +25,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -275,8 +278,8 @@ fun CreateStoryDialog(
                                     OutlinedTextField(
                                         value = textOverlay,
                                         onValueChange = { if (it.length <= 100) textOverlay = it },
-                                        label = { Text("Caption (optional)") },
-                                        placeholder = { Text("Add a caption...") },
+                                        label = { Text(stringResource(R.string.create_story_caption_label)) },
+                                        placeholder = { Text(stringResource(R.string.create_story_caption_placeholder)) },
                                         modifier = Modifier.fillMaxWidth(),
                                         shape = RoundedCornerShape(12.dp),
                                         maxLines = 2,
@@ -375,7 +378,7 @@ fun CreateStoryDialog(
                     },
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Understood")
+                    Text(stringResource(R.string.create_story_understood))
                 }
             },
             shape = RoundedCornerShape(20.dp)
@@ -581,7 +584,7 @@ private fun StoryActionButtons(
             shape = RoundedCornerShape(12.dp),
             enabled = !isPosting
         ) {
-            Text("Cancel")
+            Text(stringResource(R.string.create_story_cancel))
         }
 
         Button(
@@ -602,7 +605,7 @@ private fun StoryActionButtons(
                     strokeWidth = 2.dp
                 )
                 Spacer(Modifier.width(8.dp))
-                Text("Posting...")
+                Text(stringResource(R.string.create_story_posting))
             } else {
                 Icon(
                     Icons.AutoMirrored.Filled.Send,
@@ -611,7 +614,7 @@ private fun StoryActionButtons(
                 )
                 Spacer(Modifier.width(6.dp))
                 Text(
-                    "Share Moment",
+                    stringResource(R.string.moments_your_story),
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -630,6 +633,9 @@ private fun MediaTabContent(
     onPickDocument: () -> Unit,
     onClear: () -> Unit
 ) {
+    var showImageEditor by remember { mutableStateOf(false) }
+    var editState by remember { mutableStateOf<ImageEditState?>(null) }
+
     Column {
         Text(
             "Choose content from your device",
@@ -694,21 +700,91 @@ private fun MediaTabContent(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(200.dp)
-                                        .clip(RoundedCornerShape(16.dp)),
-                                    contentScale = ContentScale.Crop
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .then(
+                                            if (editState?.filter?.colorMatrix != null) {
+                                                Modifier.graphicsLayer {
+                                                    // Apply filter visually
+                                                }
+                                            } else Modifier
+                                        ),
+                                    contentScale = ContentScale.Crop,
+                                    colorFilter = editState?.filter?.colorMatrix?.let {
+                                        ColorFilter.colorMatrix(ColorMatrix(it))
+                                    }
                                 )
-                                IconButton(
-                                    onClick = onClear,
+
+                                // Edit and Clear buttons
+                                Row(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
-                                        .padding(8.dp)
-                                        .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                                        .padding(8.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
-                                    Icon(
-                                        Icons.Filled.Close,
-                                        contentDescription = "Remove",
-                                        tint = Color.White
-                                    )
+                                    // Edit button
+                                    IconButton(
+                                        onClick = { showImageEditor = true },
+                                        modifier = Modifier
+                                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                                            .size(36.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Filled.Edit,
+                                            contentDescription = "Edit image",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+
+                                    // Clear button
+                                    IconButton(
+                                        onClick = {
+                                            onClear()
+                                            editState = null
+                                        },
+                                        modifier = Modifier
+                                            .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                                            .size(36.dp)
+                                    ) {
+                                        Icon(
+                                            Icons.Filled.Close,
+                                            contentDescription = "Remove",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+
+                                // Show edit badge if edited
+                                if (editState != null && (editState!!.filter != StoryImageFilter.NONE ||
+                                    editState!!.textOverlays.isNotEmpty() ||
+                                    editState!!.drawingPaths.isNotEmpty() ||
+                                    editState!!.stickers.isNotEmpty())) {
+                                    Surface(
+                                        modifier = Modifier
+                                            .align(Alignment.BottomStart)
+                                            .padding(8.dp),
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = MaterialTheme.colorScheme.primaryContainer
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                Icons.Filled.AutoAwesome,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(14.dp),
+                                                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                            )
+                                            Spacer(Modifier.width(4.dp))
+                                            Text(
+                                                "Edited",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -797,6 +873,18 @@ private fun MediaTabContent(
             }
         }
     }
+
+    // Image Editor Dialog
+    if (showImageEditor && selectedUri != null) {
+        ImageEditorDialog(
+            imageUri = selectedUri,
+            onDismiss = { showImageEditor = false },
+            onSave = { state ->
+                editState = state
+                showImageEditor = false
+            }
+        )
+    }
 }
 
 @Composable
@@ -841,7 +929,7 @@ private fun LinkTabContent(
 ) {
     Column {
         Text(
-            "Share a link with a preview",
+            stringResource(R.string.create_story_share_link),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -851,8 +939,8 @@ private fun LinkTabContent(
         OutlinedTextField(
             value = linkUrl,
             onValueChange = onLinkChange,
-            label = { Text("URL") },
-            placeholder = { Text("https://...") },
+            label = { Text(stringResource(R.string.create_story_url_label)) },
+            placeholder = { Text(stringResource(R.string.create_story_url_placeholder)) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             leadingIcon = { Icon(Icons.Filled.Link, contentDescription = null) },
@@ -1011,7 +1099,7 @@ private fun TextTabContent(
 
     Column {
         Text(
-            "Create a text story",
+            stringResource(R.string.create_story_create_text),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -1039,8 +1127,9 @@ private fun TextTabContent(
                     ),
                 contentAlignment = Alignment.Center
             ) {
+                val previewPlaceholder = stringResource(R.string.create_story_text_preview)
                 Text(
-                    text = textContent.ifBlank { "Your text here..." },
+                    text = textContent.ifBlank { previewPlaceholder },
                     style = MaterialTheme.typography.headlineSmall,
                     color = Color.White,
                     textAlign = TextAlign.Center,
@@ -1056,8 +1145,8 @@ private fun TextTabContent(
         OutlinedTextField(
             value = textContent,
             onValueChange = { if (it.length <= 200) onTextChange(it) },
-            label = { Text("Your message") },
-            placeholder = { Text("What's on your mind?") },
+            label = { Text(stringResource(R.string.create_story_message_label)) },
+            placeholder = { Text(stringResource(R.string.create_story_message_placeholder)) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             maxLines = 3,
@@ -1068,7 +1157,7 @@ private fun TextTabContent(
 
         // Solid colors
         Text(
-            "Background Color",
+            stringResource(R.string.create_story_background_color),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold
         )
@@ -1098,7 +1187,7 @@ private fun TextTabContent(
 
         // Gradient backgrounds
         Text(
-            "Gradient Backgrounds",
+            stringResource(R.string.create_story_gradient_backgrounds),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold
         )
