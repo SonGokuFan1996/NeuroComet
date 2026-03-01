@@ -1,6 +1,8 @@
 package com.kyilmaz.neurocomet
 
 import android.app.Application
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -262,6 +264,27 @@ fun SettingsScreen(
                 title = stringResource(R.string.feedback_send_title),
                 subtitle = stringResource(R.string.feedback_send_desc),
                 onClick = onOpenGeneralFeedback
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            SettingsSectionTitle(stringResource(R.string.settings_section_legal))
+            SettingsRow(
+                title = stringResource(R.string.settings_privacy_policy),
+                subtitle = stringResource(R.string.settings_privacy_policy_desc),
+                onClick = {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://songokufan1996.github.io/NeuroComet/privacy.html"))
+                    context.startActivity(intent)
+                },
+                icon = Icons.Default.Lock
+            )
+            SettingsRow(
+                title = stringResource(R.string.settings_terms),
+                subtitle = stringResource(R.string.settings_terms_desc),
+                onClick = {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://songokufan1996.github.io/NeuroComet/terms.html"))
+                    context.startActivity(intent)
+                }
             )
 
             if (canShowDevOptions) {

@@ -37,147 +37,289 @@
         .bento-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .bento-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); }
         .dark .bento-card:hover { box-shadow: 0 20px 40px -10px rgba(0,0,0,0.4); }
-
-        /* Language Transition Fade */
         .fade-text { transition: opacity 0.3s ease; }
     </style>
 </head>
 <body class="font-sans text-gray-800 dark:text-gray-200 antialiased bg-[#f8fafc] dark:bg-gray-900 selection:bg-brand-500 selection:text-white overflow-x-hidden transition-colors duration-300">
 
-<nav class="fixed w-full z-50 glass-panel transition-all duration-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-20">
-            <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer group">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform duration-300">
-                    <i class="fa-solid fa-meteor text-2xl"></i>
+<div id="translation-container" class="fade-text">
+
+    <nav class="fixed w-full z-50 glass-panel transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer group">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform duration-300">
+                        <i class="fa-solid fa-meteor text-2xl"></i>
+                    </div>
+                    <span class="font-extrabold text-2xl tracking-tight text-gray-900 dark:text-white">NeuroComet</span>
                 </div>
-                <span class="font-extrabold text-2xl tracking-tight text-gray-900 dark:text-white">NeuroComet</span>
-            </div>
-            <div class="hidden lg:flex space-x-8 items-center bg-gray-900/5 dark:bg-white/5 px-6 py-2.5 rounded-full border border-gray-900/10 dark:border-white/10">
-                <a href="#ecosystem" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Ecosystem</a>
-                <a href="#safety" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Safety</a>
-                <a href="#global" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Global</a>
-            </div>
-            <div class="flex items-center gap-4">
-                <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full text-lg p-2.5 transition-colors">
-                    <i id="theme-toggle-dark-icon" class="fa-solid fa-moon hidden"></i>
-                    <i id="theme-toggle-light-icon" class="fa-solid fa-sun hidden"></i>
-                </button>
-                <a href="#download" class="hidden md:block bg-gray-900 dark:bg-brand-600 hover:bg-brand-600 dark:hover:bg-brand-500 text-white px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5" data-i18n="nav_cta">Get the App</a>
+                <div class="hidden lg:flex space-x-8 items-center bg-gray-900/5 dark:bg-white/5 px-6 py-2.5 rounded-full border border-gray-900/10 dark:border-white/10">
+                    <a href="#ecosystem" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors" data-i18n="nav_eco">Ecosystem</a>
+                    <a href="#safety" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors" data-i18n="nav_safety">Safety</a>
+                    <a href="#global" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors" data-i18n="nav_global">Global</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full text-lg p-2.5 transition-colors">
+                        <i id="theme-toggle-dark-icon" class="fa-solid fa-moon hidden"></i>
+                        <i id="theme-toggle-light-icon" class="fa-solid fa-sun hidden"></i>
+                    </button>
+                    <a href="#download" class="hidden md:block bg-gray-900 dark:bg-brand-600 hover:bg-brand-600 dark:hover:bg-brand-500 text-white px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5" data-i18n="nav_cta">Get the App</a>
+                </div>
             </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
-<section class="relative pt-40 pb-20 lg:pt-52 lg:pb-32 overflow-hidden fade-text" id="translation-container">
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none -z-10">
-        <div class="absolute top-20 left-0 w-[500px] h-[500px] bg-blue-400/20 dark:bg-brand-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
-        <div class="absolute top-40 right-0 w-[400px] h-[400px] bg-purple-400/20 dark:bg-purple-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 2s;"></div>
-    </div>
+    <section class="relative pt-40 pb-20 lg:pt-52 lg:pb-32 overflow-hidden">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none -z-10">
+            <div class="absolute top-20 left-0 w-[500px] h-[500px] bg-blue-400/20 dark:bg-brand-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+            <div class="absolute top-40 right-0 w-[400px] h-[400px] bg-purple-400/20 dark:bg-purple-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 2s;"></div>
+        </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="text-center max-w-4xl mx-auto">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold text-xs mb-8 shadow-sm backdrop-blur-sm">
-                    <span class="flex h-2 w-2 relative">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                    </span>
-                <span data-i18n="hero_badge">Now expanding to iOS via Flutter</span>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-4xl mx-auto">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold text-xs mb-8 shadow-sm backdrop-blur-sm">
+                        <span class="flex h-2 w-2 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                        </span>
+                    <span data-i18n="hero_badge">Now expanding to iOS via Flutter</span>
+                </div>
+                <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 text-gray-900 dark:text-white leading-[1.1]" data-i18n="hero_title">
+                    Your Digital Environment,<br /><span class="text-gradient">Rewired for You.</span>
+                </h1>
+                <p class="text-xl text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed font-medium" data-i18n="hero_subtitle">
+                    Experience an adaptive ecosystem featuring dynamic sensory themes, AI-driven communication practice, and a secure social space.
+                </p>
+
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                    <button class="w-64 h-16 flex items-center justify-center gap-4 bg-gray-900 dark:bg-black text-white border-2 border-gray-900 dark:border-black rounded-2xl transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1">
+                        <i class="fa-brands fa-google-play text-3xl"></i>
+                        <div class="text-start flex flex-col justify-center">
+                            <span class="text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1" data-i18n="btn_gp_sub">Available on</span>
+                            <span class="text-lg font-bold leading-none">Google Play</span>
+                        </div>
+                    </button>
+                    <button class="w-64 h-16 flex items-center justify-center gap-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-2 border-gray-200 dark:border-gray-700 rounded-2xl transition-all shadow-sm hover:shadow-lg hover:-translate-y-1">
+                        <i class="fa-brands fa-apple text-3xl"></i>
+                        <div class="text-start flex flex-col justify-center">
+                            <span class="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1" data-i18n="btn_as_sub">Flutter Beta</span>
+                            <span class="text-lg font-bold leading-none">App Store</span>
+                        </div>
+                    </button>
+                </div>
             </div>
-            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 text-gray-900 dark:text-white leading-[1.1]" data-i18n="hero_title">
-                Your Digital Environment,<br />
-                <span class="text-gradient">Rewired for You.</span>
-            </h1>
-            <p class="text-xl text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed font-medium" data-i18n="hero_subtitle">
-                Experience an adaptive ecosystem featuring dynamic sensory themes, AI-driven communication practice, and a secure social space.
+        </div>
+    </section>
+
+    <section id="ecosystem" class="py-24 bg-white dark:bg-gray-900 relative rounded-[3rem] shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.05)] dark:shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.3)] transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-16">
+                <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-4 tracking-tight" data-i18n="eco_title">The NeuroComet Ecosystem</h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400" data-i18n="eco_sub">Every feature is architected from the ground up for accessibility, safety, and growth.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-[280px]">
+                <div class="bento-card bg-gray-50 dark:bg-gray-800 rounded-3xl p-8 border border-gray-100 dark:border-gray-700 col-span-1 md:col-span-2 lg:col-span-2 row-span-1 md:row-span-2 flex flex-col relative overflow-hidden group transition-colors">
+                    <div class="relative z-10 flex-grow">
+                        <div class="w-12 h-12 bg-white dark:bg-gray-700 rounded-xl shadow-sm flex items-center justify-center mb-6 transition-colors">
+                            <i class="fa-solid fa-palette text-xl text-brand-600 dark:text-brand-400"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3" data-i18n="bento1_title">Adaptive Sensory Themes</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-6 max-w-sm" data-i18n="bento1_desc">Switch UI profiles seamlessly. We dynamically alter contrast, fonts, and motion to match your current cognitive state.</p>
+                    </div>
+                    <div class="w-full bg-white dark:bg-gray-900 rounded-t-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-4 mt-auto transition-colors duration-500" id="theme-preview-box">
+                        <div class="flex gap-2 mb-4">
+                            <button onclick="setBentoTheme('calm')" class="w-8 h-8 rounded-full bg-teal-500 ring-2 ring-offset-2 dark:ring-offset-gray-900 ring-transparent hover:ring-teal-500 transition-all"></button>
+                            <button onclick="setBentoTheme('focus')" class="w-8 h-8 rounded-full bg-indigo-500 ring-2 ring-offset-2 dark:ring-offset-gray-900 ring-transparent hover:ring-indigo-500 transition-all"></button>
+                            <button onclick="setBentoTheme('energy')" class="w-8 h-8 rounded-full bg-amber-500 ring-2 ring-offset-2 dark:ring-offset-gray-900 ring-transparent hover:ring-amber-500 transition-all"></button>
+                            <button onclick="setBentoTheme('pride')" class="w-8 h-8 rounded-full bg-pride-gradient ring-2 ring-offset-2 dark:ring-offset-gray-900 ring-transparent hover:ring-pink-500 transition-all"></button>
+                        </div>
+                        <div class="h-4 w-3/4 rounded-md bg-gray-100 dark:bg-gray-800 mb-2 bento-element transition-colors"></div>
+                        <div class="h-4 w-1/2 rounded-md bg-gray-100 dark:bg-gray-800 bento-element transition-colors"></div>
+                    </div>
+                </div>
+
+                <div class="bento-card bg-orange-50 dark:bg-orange-900/20 rounded-3xl p-8 border border-orange-100 dark:border-orange-900/50 col-span-1 md:col-span-1 lg:col-span-1 row-span-1 flex flex-col relative overflow-hidden transition-colors">
+                    <i class="fa-solid fa-spoon absolute -right-4 -bottom-4 text-9xl text-orange-500/10 dark:text-orange-500/20 rotate-[-15deg]"></i>
+                    <div class="w-12 h-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm flex items-center justify-center mb-6 relative z-10 transition-colors">
+                        <i class="fa-solid fa-battery-three-quarters text-xl text-orange-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2 relative z-10" data-i18n="bento2_title">Spoon Tracking</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm relative z-10" data-i18n="bento2_desc">Monitor daily energy levels with home screen widgets. Track stim breaks and mood fluctuations instantly.</p>
+                </div>
+
+                <div class="bento-card bg-emerald-50 dark:bg-emerald-900/20 rounded-3xl p-8 border border-emerald-100 dark:border-emerald-900/50 col-span-1 md:col-span-1 lg:col-span-1 row-span-1 flex flex-col relative overflow-hidden transition-colors">
+                    <i class="fa-solid fa-gamepad absolute -right-4 -top-4 text-9xl text-emerald-500/10 dark:text-emerald-500/20 rotate-[15deg]"></i>
+                    <div class="w-12 h-12 bg-white dark:bg-gray-800 rounded-xl shadow-sm flex items-center justify-center mb-6 relative z-10 transition-colors">
+                        <i class="fa-solid fa-puzzle-piece text-xl text-emerald-500"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2 relative z-10" data-i18n="bento3_title">NeuroGames</h3>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm relative z-10" data-i18n="bento3_desc">Interactive tutorials and gamified coping mechanisms built natively to assist with focus and emotional regulation.</p>
+                </div>
+
+                <div class="bento-card bg-gray-900 dark:bg-black text-white rounded-3xl p-8 border border-gray-800 dark:border-gray-800 col-span-1 md:col-span-2 lg:col-span-2 row-span-1 relative overflow-hidden group">
+                    <div class="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-brand-600/30 to-transparent pointer-events-none"></div>
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center border border-gray-700">
+                            <i class="fa-solid fa-phone-volume text-xl text-brand-400 animate-pulse"></i>
+                        </div>
+                        <div class="text-xs font-bold tracking-wider text-brand-400 uppercase bg-brand-400/10 px-3 py-1 rounded-full" data-i18n="bento4_badge">Gemini AI Powered</div>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2" data-i18n="bento4_title">Mock Call Simulator</h3>
+                    <p class="text-gray-400 max-w-md text-sm leading-relaxed" data-i18n="bento4_desc">Experiencing phone anxiety? Practice real-world conversations in a safe, AI-moderated WebRTC voice environment before making the real call.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="safety" class="py-24 bg-[#f8fafc] dark:bg-gray-900 overflow-hidden transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row items-center gap-16">
+                <div class="w-full lg:w-1/2 relative">
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-green-200 to-brand-200 dark:from-green-900/40 dark:to-brand-900/40 rounded-full blur-3xl opacity-40 -z-10"></div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-2xl relative z-10 transform -rotate-2 hover:rotate-0 transition-all duration-500">
+                        <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-100 dark:border-gray-700">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full flex items-center justify-center">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900 dark:text-white" data-i18n="safe_dash_title">Safety Dashboard</h4>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400" data-i18n="safe_dash_sub">SecurityUtils Active</p>
+                                </div>
+                            </div>
+                            <div class="w-12 h-6 bg-green-500 rounded-full relative">
+                                <div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl transition-colors">
+                                <span class="font-medium text-sm text-gray-700 dark:text-gray-200" data-i18n="safe_item1">DM Privacy Filters</span>
+                                <i class="fa-solid fa-lock text-gray-400 dark:text-gray-500"></i>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl transition-colors">
+                                <span class="font-medium text-sm text-gray-700 dark:text-gray-200" data-i18n="safe_item2">Parental Controls</span>
+                                <i class="fa-solid fa-user-group text-gray-400 dark:text-gray-500"></i>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-red-100 dark:border-red-900/50 transition-colors">
+                                <span class="font-medium text-sm text-red-600 dark:text-red-400" data-i18n="safe_item3">Trigger Word Blocking</span>
+                                <i class="fa-solid fa-ban text-red-400 dark:text-red-500"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full lg:w-1/2">
+                    <h2 class="text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6" data-i18n="safe_title">
+                        Uncompromising End-to-End Safety.
+                    </h2>
+                    <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed mb-8" data-i18n="safe_desc">
+                        Social interaction shouldn't mean exposure to harm. We’ve built custom robust content filtering to ensure the NeuroComet feed remains a strictly moderated, trigger-free sanctuary.
+                    </p>
+                    <ul class="space-y-6">
+                        <li class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0 transition-colors">
+                                <i class="fa-solid fa-layer-group"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900 dark:text-white text-lg" data-i18n="safe_feat1_title">Universal Scaffold Architecture</h4>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm mt-1" data-i18n="safe_feat1_desc">Consistent, accessible layouts across Android and iOS, preventing cognitive fatigue when switching devices.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-full bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 transition-colors">
+                                <i class="fa-solid fa-eye-slash"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900 dark:text-white text-lg" data-i18n="safe_feat2_title">Caregiver Screen Blocking</h4>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm mt-1" data-i18n="safe_feat2_desc">Optional linked accounts with robust Parental Control modules, allowing trusted guardians to assist in navigating safely.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="global" class="py-24 bg-gray-900 dark:bg-black text-white relative overflow-hidden transition-colors duration-300">
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand-500 via-transparent to-transparent"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            <div class="w-16 h-16 bg-white/10 rounded-2xl mx-auto flex items-center justify-center mb-8 backdrop-blur-md border border-white/20">
+                <i class="fa-solid fa-earth-americas text-3xl text-brand-400"></i>
+            </div>
+            <h2 class="text-4xl md:text-5xl font-extrabold mb-6" data-i18n="global_title">Speak your mind.<br/><span class="text-brand-400">In your language.</span></h2>
+            <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-12" data-i18n="global_sub">
+                Neurodiversity is global. Utilizing automated translation pipelines, NeuroComet is localized into over 15+ languages.
             </p>
 
-            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-                <button class="w-64 h-16 flex items-center justify-center gap-4 bg-gray-900 dark:bg-black text-white border-2 border-gray-900 dark:border-black rounded-2xl transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1">
-                    <i class="fa-brands fa-google-play text-3xl"></i>
-                    <div class="text-start flex flex-col justify-center" data-i18n="btn_android">
-                        <span class="text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1">Available on</span>
-                        <span class="text-lg font-bold leading-none">Google Play</span>
-                    </div>
-                </button>
-                <button class="w-64 h-16 flex items-center justify-center gap-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-2 border-gray-200 dark:border-gray-700 rounded-2xl transition-all shadow-sm hover:shadow-lg hover:-translate-y-1">
-                    <i class="fa-brands fa-apple text-3xl"></i>
-                    <div class="text-start flex flex-col justify-center" data-i18n="btn_ios">
-                        <span class="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1">Flutter Beta</span>
-                        <span class="text-lg font-bold leading-none">App Store</span>
-                    </div>
-                </button>
+            <div class="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto" id="lang-buttons">
+                <button onclick="changeLanguage('en', this)" class="lang-btn px-4 py-2 rounded-full bg-brand-500 text-white border border-brand-400 text-sm font-bold transition-colors">English</button>
+                <button onclick="changeLanguage('es', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Español</button>
+                <button onclick="changeLanguage('fr', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Français</button>
+                <button onclick="changeLanguage('de', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Deutsch</button>
+                <button onclick="changeLanguage('ja', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">日本語</button>
+                <button onclick="changeLanguage('ko', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">한국어</button>
+                <button onclick="changeLanguage('ar', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">العربية</button>
+                <button onclick="changeLanguage('tr', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Türkçe</button>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<section id="global" class="py-24 bg-gray-900 dark:bg-black text-white relative overflow-hidden transition-colors duration-300">
-    <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand-500 via-transparent to-transparent"></div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-        <div class="w-16 h-16 bg-white/10 rounded-2xl mx-auto flex items-center justify-center mb-8 backdrop-blur-md border border-white/20">
-            <i class="fa-solid fa-earth-americas text-3xl text-brand-400"></i>
+    <section id="download" class="py-24 bg-white dark:bg-gray-800 text-center transition-colors duration-300">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-6" data-i18n="cta_title">Find your orbit today.</h2>
+            <p class="text-xl text-gray-500 dark:text-gray-400 mb-10 max-w-2xl mx-auto" data-i18n="cta_sub">
+                Download NeuroComet and experience a platform built explicitly for the way your mind works.
+            </p>
+            <button class="bg-brand-600 hover:bg-brand-700 text-white px-10 py-5 rounded-full font-bold text-lg transition-all shadow-[0_10px_30px_-10px_rgba(37,99,235,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(37,99,235,0.7)] transform hover:-translate-y-1" data-i18n="cta_btn">
+                Download for Android & iOS
+            </button>
+            <p class="text-gray-400 dark:text-gray-500 text-sm mt-6 font-medium" data-i18n="cta_powered">Powered by Kotlin, Flutter, and Supabase.</p>
         </div>
-        <h2 class="text-4xl md:text-5xl font-extrabold mb-6">Speak your mind.<br/><span class="text-brand-400">In your language.</span></h2>
-        <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-12">
-            Click a language below to instantly translate the Hero Section above.
-        </p>
+    </section>
 
-        <div class="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto" id="lang-buttons">
-            <button onclick="changeLanguage('en', this)" class="lang-btn px-4 py-2 rounded-full bg-brand-500 text-white border border-brand-400 text-sm font-bold transition-colors">English</button>
-            <button onclick="changeLanguage('es', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Español</button>
-            <button onclick="changeLanguage('fr', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Français</button>
-            <button onclick="changeLanguage('de', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Deutsch</button>
-            <button onclick="changeLanguage('ja', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">日本語</button>
-            <button onclick="changeLanguage('ko', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">한국어</button>
-            <button onclick="changeLanguage('ar', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">العربية</button>
-            <button onclick="changeLanguage('tr', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Türkçe</button>
-        </div>
-    </div>
-</section>
-
-<footer class="bg-gray-50 dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 pt-16 pb-8 transition-colors duration-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-            <div class="col-span-1 md:col-span-2">
-                <div class="flex items-center gap-2 mb-6">
-                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white">
-                        <i class="fa-solid fa-meteor text-sm"></i>
+    <footer class="bg-gray-50 dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 pt-16 pb-8 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center gap-2 mb-6">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white">
+                            <i class="fa-solid fa-meteor text-sm"></i>
+                        </div>
+                        <span class="font-extrabold text-xl text-gray-900 dark:text-white tracking-tight">NeuroComet</span>
                     </div>
-                    <span class="font-extrabold text-xl text-gray-900 dark:text-white tracking-tight">NeuroComet</span>
+                    <p class="text-gray-500 dark:text-gray-400 max-w-md text-sm leading-relaxed" data-i18n="foot_desc">
+                        A dedicated, multi-platform environment giving the neurodivergent community the tools, safety, and customizable environment they deserve.
+                    </p>
                 </div>
-                <p class="text-gray-500 dark:text-gray-400 max-w-md text-sm leading-relaxed">
-                    A dedicated, multi-platform environment giving the neurodivergent community the tools, safety, and customizable environment they deserve.
+                <div>
+                    <h4 class="font-bold text-gray-900 dark:text-white mb-4 tracking-wide" data-i18n="foot_col1">Platform</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 transition-colors font-medium" data-i18n="foot_link1">Sensory Customization</a></li>
+                        <li><a href="#" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 transition-colors font-medium" data-i18n="foot_link2">Mock Call AI</a></li>
+                        <li><a href="#" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 transition-colors font-medium" data-i18n="foot_link3">Safety Dashboard</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-900 dark:text-white mb-4 tracking-wide" data-i18n="foot_col2">Resources</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 transition-colors font-medium" data-i18n="foot_link4">Parental Guide</a></li>
+                        <li><a href="privacy.html" class="text-gray-900 dark:text-white font-bold hover:text-brand-600 transition-colors" data-i18n="foot_link5">Privacy Policy</a></li>
+                        <li><a href="#" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 transition-colors font-medium" data-i18n="foot_link6">Terms of Service</a></li>
+                        <li><a href="https://github.com/songokufan1996/neurocomet" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 transition-colors font-medium" data-i18n="foot_link7">GitHub Repository</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-200 dark:border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-gray-400 dark:text-gray-500 text-sm font-medium">
+                    &copy; <script>document.write(new Date().getFullYear())</script> <span data-i18n="foot_copy">NeuroComet. All rights reserved.</span>
                 </p>
             </div>
-            <div>
-                <h4 class="font-bold text-gray-900 dark:text-white mb-4 tracking-wide">Platform</h4>
-                <ul class="space-y-3 text-sm">
-                    <li><a href="#" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors font-medium">Sensory Customization</a></li>
-                    <li><a href="#" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors font-medium">Mock Call AI</a></li>
-                    <li><a href="#" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors font-medium">Safety Dashboard</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="font-bold text-gray-900 dark:text-white mb-4 tracking-wide">Resources</h4>
-                <ul class="space-y-3 text-sm">
-                    <li><a href="#" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors font-medium">Parental Guide</a></li>
-                    <li><a href="privacy.html" class="text-gray-900 dark:text-white font-bold hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Privacy Policy</a></li>
-                    <li><a href="#" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors font-medium">Terms of Service</a></li>
-                    <li><a href="https://github.com/songokufan1996/neurocomet" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors font-medium">GitHub Repository</a></li>
-                </ul>
-            </div>
         </div>
-        <div class="border-t border-gray-200 dark:border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-gray-400 dark:text-gray-500 text-sm font-medium">
-                &copy; <script>document.write(new Date().getFullYear())</script> NeuroComet. All rights reserved.
-            </p>
-        </div>
-    </div>
-</footer>
+    </footer>
+</div>
 
 <script>
-    // --- Dark Mode Logic ---
     const themeToggleBtn = document.getElementById('theme-toggle');
     const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
     const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
@@ -209,80 +351,203 @@
                 localStorage.setItem('color-theme', 'dark');
             }
         }
+        setBentoTheme('default'); // reset to match mode
     });
 
-    // --- Internationalization (i18n) Engine ---
+    function setBentoTheme(theme) {
+        const previewBox = document.getElementById('theme-preview-box');
+        const elements = document.querySelectorAll('.bento-element');
+        const baseBoxClasses = "w-full rounded-t-2xl shadow-xl border p-4 mt-auto transition-colors duration-500";
+        previewBox.className = baseBoxClasses;
+        elements.forEach(el => el.className = "h-4 rounded-md transition-colors bento-element");
+
+        switch(theme) {
+            case 'calm':
+                previewBox.classList.add('bg-teal-50', 'border-teal-100', 'dark:bg-teal-900/30', 'dark:border-teal-800');
+                elements[0].classList.add('bg-teal-200', 'dark:bg-teal-700', 'w-3/4', 'mb-2');
+                elements[1].classList.add('bg-teal-300', 'dark:bg-teal-600', 'w-1/2');
+                break;
+            case 'focus':
+                previewBox.classList.add('bg-indigo-50', 'border-indigo-100', 'dark:bg-indigo-900/30', 'dark:border-indigo-800');
+                elements[0].classList.add('bg-indigo-200', 'dark:bg-indigo-700', 'w-3/4', 'mb-2');
+                elements[1].classList.add('bg-indigo-300', 'dark:bg-indigo-600', 'w-1/2');
+                break;
+            case 'energy':
+                previewBox.classList.add('bg-amber-50', 'border-amber-100', 'dark:bg-amber-900/30', 'dark:border-amber-800');
+                elements[0].classList.add('bg-amber-200', 'dark:bg-amber-700', 'w-3/4', 'mb-2');
+                elements[1].classList.add('bg-amber-300', 'dark:bg-amber-600', 'w-1/2');
+                break;
+            case 'pride':
+                previewBox.classList.add('bg-gray-900', 'border-gray-800', 'dark:bg-black', 'dark:border-gray-800');
+                elements[0].classList.add('bg-gradient-to-r', 'from-red-400', 'to-yellow-400', 'w-3/4', 'mb-2');
+                elements[1].classList.add('bg-gradient-to-r', 'from-green-400', 'to-blue-400', 'w-1/2');
+                break;
+            default:
+                previewBox.classList.add('bg-white', 'dark:bg-gray-900', 'border-gray-200', 'dark:border-gray-700');
+                elements[0].classList.add('bg-gray-100', 'dark:bg-gray-800', 'w-3/4', 'mb-2');
+                elements[1].classList.add('bg-gray-200', 'dark:bg-gray-700', 'w-1/2');
+        }
+    }
+    setBentoTheme('default');
+
+    // --- FULL DICTIONARY ---
     const translations = {
         en: {
-            nav_cta: "Get the App",
+            nav_eco: "Ecosystem", nav_safety: "Safety", nav_global: "Global", nav_cta: "Get the App",
             hero_badge: "Now expanding to iOS via Flutter",
             hero_title: "Your Digital Environment,<br /><span class=\"text-gradient\">Rewired for You.</span>",
             hero_subtitle: "Experience an adaptive ecosystem featuring dynamic sensory themes, AI-driven communication practice, and a secure social space.",
-            btn_android: "<span class=\"text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1\">Available on</span><span class=\"text-lg font-bold leading-none\">Google Play</span>",
-            btn_ios: "<span class=\"text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1\">Flutter Beta</span><span class=\"text-lg font-bold leading-none\">App Store</span>"
+            btn_gp_sub: "Available on", btn_as_sub: "Flutter Beta",
+            eco_title: "The NeuroComet Ecosystem", eco_sub: "Every feature is architected from the ground up for accessibility, safety, and growth.",
+            bento1_title: "Adaptive Sensory Themes", bento1_desc: "Switch UI profiles seamlessly. We dynamically alter contrast, fonts, and motion to match your current cognitive state.",
+            bento2_title: "Spoon Tracking", bento2_desc: "Monitor daily energy levels with home screen widgets. Track stim breaks and mood fluctuations instantly.",
+            bento3_title: "NeuroGames", bento3_desc: "Interactive tutorials and gamified coping mechanisms built natively to assist with focus and emotional regulation.",
+            bento4_badge: "Gemini AI Powered", bento4_title: "Mock Call Simulator", bento4_desc: "Experiencing phone anxiety? Practice real-world conversations in a safe, AI-moderated WebRTC voice environment before making the real call.",
+            safe_dash_title: "Safety Dashboard", safe_dash_sub: "SecurityUtils Active", safe_item1: "DM Privacy Filters", safe_item2: "Parental Controls", safe_item3: "Trigger Word Blocking",
+            safe_title: "Uncompromising End-to-End Safety.", safe_desc: "Social interaction shouldn't mean exposure to harm. We’ve built custom robust content filtering to ensure the NeuroComet feed remains a strictly moderated, trigger-free sanctuary.",
+            safe_feat1_title: "Universal Scaffold Architecture", safe_feat1_desc: "Consistent, accessible layouts across Android and iOS, preventing cognitive fatigue when switching devices.",
+            safe_feat2_title: "Caregiver Screen Blocking", safe_feat2_desc: "Optional linked accounts with robust Parental Control modules, allowing trusted guardians to assist in navigating safely.",
+            global_title: "Speak your mind.<br/><span class=\"text-brand-400\">In your language.</span>", global_sub: "Neurodiversity is global. Utilizing automated translation pipelines, NeuroComet is localized into over 15+ languages.",
+            cta_title: "Find your orbit today.", cta_sub: "Download NeuroComet and experience a platform built explicitly for the way your mind works.", cta_btn: "Download for Android & iOS", cta_powered: "Powered by Kotlin, Flutter, and Supabase.",
+            foot_desc: "A dedicated, multi-platform environment giving the neurodivergent community the tools, safety, and customizable environment they deserve.", foot_col1: "Platform", foot_link1: "Sensory Customization", foot_link2: "Mock Call AI", foot_link3: "Safety Dashboard", foot_col2: "Resources", foot_link4: "Parental Guide", foot_link5: "Privacy Policy", foot_link6: "Terms of Service", foot_link7: "GitHub Repository", foot_copy: "NeuroComet. All rights reserved."
         },
         es: {
-            nav_cta: "Descargar",
+            nav_eco: "Ecosistema", nav_safety: "Seguridad", nav_global: "Global", nav_cta: "Obtener la App",
             hero_badge: "Ahora expandiéndose a iOS con Flutter",
             hero_title: "Tu Entorno Digital,<br /><span class=\"text-gradient\">Reconectado para Ti.</span>",
             hero_subtitle: "Experimenta un ecosistema adaptativo con temas sensoriales dinámicos, práctica de comunicación por IA y un espacio social seguro.",
-            btn_android: "<span class=\"text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1\">Disponible en</span><span class=\"text-lg font-bold leading-none\">Google Play</span>",
-            btn_ios: "<span class=\"text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1\">Beta de Flutter</span><span class=\"text-lg font-bold leading-none\">App Store</span>"
+            btn_gp_sub: "Disponible en", btn_as_sub: "Beta de Flutter",
+            eco_title: "El Ecosistema NeuroComet", eco_sub: "Cada función está diseñada desde cero para la accesibilidad, seguridad y crecimiento.",
+            bento1_title: "Temas Sensoriales Adaptativos", bento1_desc: "Cambia de perfil sin problemas. Alteramos el contraste, las fuentes y el movimiento para adaptarnos a tu estado cognitivo.",
+            bento2_title: "Rastreo de Cucharas", bento2_desc: "Monitorea tus niveles de energía con widgets. Registra descansos sensoriales y cambios de humor al instante.",
+            bento3_title: "NeuroJuegos", bento3_desc: "Tutoriales interactivos y mecanismos de afrontamiento gamificados para ayudar con el enfoque y la regulación emocional.",
+            bento4_badge: "Impulsado por IA Gemini", bento4_title: "Simulador de Llamadas", bento4_desc: "¿Ansiedad telefónica? Practica conversaciones reales en un entorno de voz seguro y moderado por IA antes de hacer la llamada real.",
+            safe_dash_title: "Panel de Seguridad", safe_dash_sub: "SecurityUtils Activo", safe_item1: "Filtros de Privacidad", safe_item2: "Control Parental", safe_item3: "Bloqueo de Palabras",
+            safe_title: "Seguridad Integral Intransigente.", safe_desc: "La interacción social no debe significar exposición al daño. Hemos construido un filtrado de contenido robusto para asegurar un santuario libre de factores desencadenantes.",
+            safe_feat1_title: "Arquitectura de Andamiaje", safe_feat1_desc: "Diseños consistentes y accesibles en Android e iOS, evitando la fatiga cognitiva al cambiar de dispositivo.",
+            safe_feat2_title: "Bloqueo para Cuidadores", safe_feat2_desc: "Cuentas vinculadas opcionales con controles parentales, permitiendo a tutores ayudar a navegar con seguridad.",
+            global_title: "Exprésate.<br/><span class=\"text-brand-400\">En tu idioma.</span>", global_sub: "La neurodiversidad es global. Utilizando canales de traducción automática, NeuroComet está en más de 15 idiomas.",
+            cta_title: "Encuentra tu órbita hoy.", cta_sub: "Descarga NeuroComet y experimenta una plataforma construida explícitamente para cómo funciona tu mente.", cta_btn: "Descargar para Android e iOS", cta_powered: "Desarrollado por Kotlin, Flutter y Supabase.",
+            foot_desc: "Un entorno dedicado y multiplataforma que brinda a la comunidad neurodivergente las herramientas que merece.", foot_col1: "Plataforma", foot_link1: "Personalización Sensorial", foot_link2: "IA de Llamadas", foot_link3: "Panel de Seguridad", foot_col2: "Recursos", foot_link4: "Guía Parental", foot_link5: "Política de Privacidad", foot_link6: "Términos de Servicio", foot_link7: "Repositorio GitHub", foot_copy: "NeuroComet. Todos los derechos reservados."
         },
         fr: {
-            nav_cta: "Obtenir l'Appli",
+            nav_eco: "Écosystème", nav_safety: "Sécurité", nav_global: "Mondial", nav_cta: "Obtenir l'Appli",
             hero_badge: "En expansion vers iOS via Flutter",
             hero_title: "Votre Environnement Numérique,<br /><span class=\"text-gradient\">Recâblé pour Vous.</span>",
-            hero_subtitle: "Découvrez un écosystème adaptatif avec des thèmes sensoriels, une pratique de la communication par IA et un espace social sécurisé.",
-            btn_android: "<span class=\"text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1\">Disponible sur</span><span class=\"text-lg font-bold leading-none\">Google Play</span>",
-            btn_ios: "<span class=\"text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1\">Bêta Flutter</span><span class=\"text-lg font-bold leading-none\">App Store</span>"
+            hero_subtitle: "Découvrez un écosystème adaptatif avec des thèmes sensoriels dynamiques, une pratique de l'IA et un espace social sécurisé.",
+            btn_gp_sub: "Disponible sur", btn_as_sub: "Bêta Flutter",
+            eco_title: "L'Écosystème NeuroComet", eco_sub: "Chaque fonctionnalité est conçue pour l'accessibilité, la sécurité et la croissance.",
+            bento1_title: "Thèmes Sensoriels Adaptatifs", bento1_desc: "Changez de profil facilement. Nous modifions le contraste, les polices et les mouvements selon votre état cognitif.",
+            bento2_title: "Suivi de l'Énergie", bento2_desc: "Surveillez votre énergie avec des widgets. Suivez vos pauses sensorielles et votre humeur instantanément.",
+            bento3_title: "NeuroJeux", bento3_desc: "Tutoriels interactifs et mécanismes d'adaptation ludiques pour aider à la concentration et à la régulation émotionnelle.",
+            bento4_badge: "Propulsé par IA Gemini", bento4_title: "Simulateur d'Appels", bento4_desc: "Anxiété téléphonique ? Pratiquez des conversations réelles dans un environnement vocal modéré par IA.",
+            safe_dash_title: "Tableau de Bord de Sécurité", safe_dash_sub: "SecurityUtils Actif", safe_item1: "Filtres de Confidentialité", safe_item2: "Contrôle Parental", safe_item3: "Blocage de Mots",
+            safe_title: "Sécurité de Bout en Bout.", safe_desc: "L'interaction sociale ne devrait pas signifier une exposition au danger. Nous avons conçu un filtrage de contenu robuste pour un sanctuaire sûr.",
+            safe_feat1_title: "Architecture Universelle", safe_feat1_desc: "Mises en page cohérentes et accessibles sur Android et iOS, prévenant la fatigue cognitive.",
+            safe_feat2_title: "Blocage d'Écran par le Tuteur", safe_feat2_desc: "Comptes liés avec contrôles parentaux permettant aux tuteurs d'aider à naviguer en toute sécurité.",
+            global_title: "Exprimez-vous.<br/><span class=\"text-brand-400\">Dans votre langue.</span>", global_sub: "La neurodiversité est mondiale. Grâce à la traduction automatique, NeuroComet est localisé dans 15+ langues.",
+            cta_title: "Trouvez votre orbite aujourd'hui.", cta_sub: "Téléchargez NeuroComet et découvrez une plateforme construite explicitement pour votre esprit.", cta_btn: "Télécharger pour Android & iOS", cta_powered: "Propulsé par Kotlin, Flutter et Supabase.",
+            foot_desc: "Un environnement multiplateforme dédié donnant à la communauté neurodivergente les outils qu'elle mérite.", foot_col1: "Plateforme", foot_link1: "Personnalisation Sensorielle", foot_link2: "IA d'Appels", foot_link3: "Tableau de Sécurité", foot_col2: "Ressources", foot_link4: "Guide Parental", foot_link5: "Confidentialité", foot_link6: "Conditions d'Utilisation", foot_link7: "Dépôt GitHub", foot_copy: "NeuroComet. Tous droits réservés."
         },
         de: {
-            nav_cta: "App holen",
+            nav_eco: "Ökosystem", nav_safety: "Sicherheit", nav_global: "Global", nav_cta: "App holen",
             hero_badge: "Jetzt auch für iOS über Flutter",
             hero_title: "Deine digitale Umgebung,<br /><span class=\"text-gradient\">Neu vernetzt für dich.</span>",
             hero_subtitle: "Erlebe ein adaptives Ökosystem mit dynamischen sensorischen Themen, KI-gesteuerter Kommunikation und einem sicheren sozialen Raum.",
-            btn_android: "<span class=\"text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1\">Erhältlich bei</span><span class=\"text-lg font-bold leading-none\">Google Play</span>",
-            btn_ios: "<span class=\"text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1\">Flutter Beta</span><span class=\"text-lg font-bold leading-none\">App Store</span>"
-        },
-        tr: {
-            nav_cta: "Uygulamayı İndir",
-            hero_badge: "Şimdi Flutter ile iOS'ta",
-            hero_title: "Dijital Dünyanız,<br /><span class=\"text-gradient\">Zihniniz İçin Yeniden Tasarlandı.</span>",
-            hero_subtitle: "Dinamik duyusal temalar, yapay zeka destekli iletişim pratikleri ve güvenli bir sosyal alan sunan adaptif ekosistemi keşfedin.",
-            btn_android: "<span class=\"text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1\">Şuradan İndirin</span><span class=\"text-lg font-bold leading-none\">Google Play</span>",
-            btn_ios: "<span class=\"text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1\">Flutter Beta</span><span class=\"text-lg font-bold leading-none\">App Store</span>"
+            btn_gp_sub: "Erhältlich bei", btn_as_sub: "Flutter Beta",
+            eco_title: "Das NeuroComet Ökosystem", eco_sub: "Jede Funktion wurde von Grund auf für Zugänglichkeit, Sicherheit und Wachstum entwickelt.",
+            bento1_title: "Adaptive Sensorische Themen", bento1_desc: "Wechsle Profile nahtlos. Wir ändern dynamisch Kontrast, Schriftarten und Bewegung passend zu deinem kognitiven Zustand.",
+            bento2_title: "Löffel-Tracking", bento2_desc: "Überwache deine Energie mit Widgets. Verfolge Stim-Pausen und Stimmungsschwankungen sofort.",
+            bento3_title: "NeuroGames", bento3_desc: "Interaktive Tutorials und spielerische Bewältigungsmechanismen zur Unterstützung von Fokus und emotionaler Regulation.",
+            bento4_badge: "Angetrieben von Gemini KI", bento4_title: "Anruf-Simulator", bento4_desc: "Telefonangst? Übe reale Gespräche in einer sicheren, KI-moderierten Sprachumgebung, bevor du wirklich anrufst.",
+            safe_dash_title: "Sicherheits-Dashboard", safe_dash_sub: "SecurityUtils Aktiv", safe_item1: "DM-Privatsphäre-Filter", safe_item2: "Kindersicherung", safe_item3: "Triggerwort-Blockierung",
+            safe_title: "Kompromisslose Sicherheit.", safe_desc: "Soziale Interaktion sollte nicht bedeuten, Schaden ausgesetzt zu sein. Wir haben einen robusten Inhaltsfilter entwickelt, um einen sicheren Zufluchtsort zu gewährleisten.",
+            safe_feat1_title: "Universelle Architektur", safe_feat1_desc: "Konsistente, zugängliche Layouts auf Android und iOS verhindern kognitive Ermüdung beim Gerätewechsel.",
+            safe_feat2_title: "Betreuer-Bildschirmsperre", safe_feat2_desc: "Verknüpfte Konten mit Kindersicherungsmodulen ermöglichen es vertrauenswürdigen Personen, beim sicheren Navigieren zu helfen.",
+            global_title: "Sag, was du denkst.<br/><span class=\"text-brand-400\">In deiner Sprache.</span>", global_sub: "Neurodiversität ist global. Mithilfe automatisierter Pipelines wird NeuroComet in über 15 Sprachen übersetzt.",
+            cta_title: "Finde noch heute deinen Orbit.", cta_sub: "Lade NeuroComet herunter und erlebe eine Plattform, die speziell für deinen Verstand entwickelt wurde.", cta_btn: "Download für Android & iOS", cta_powered: "Angetrieben von Kotlin, Flutter und Supabase.",
+            foot_desc: "Eine dedizierte Multi-Plattform-Umgebung, die der neurodivergenten Gemeinschaft die Tools gibt, die sie verdient.", foot_col1: "Plattform", foot_link1: "Sensorische Anpassung", foot_link2: "Mock Call KI", foot_link3: "Sicherheits-Dashboard", foot_col2: "Ressourcen", foot_link4: "Elternratgeber", foot_link5: "Datenschutzrichtlinie", foot_link6: "Nutzungsbedingungen", foot_link7: "GitHub-Repository", foot_copy: "NeuroComet. Alle Rechte vorbehalten."
         },
         ja: {
-            nav_cta: "アプリを入手",
+            nav_eco: "エコシステム", nav_safety: "安全性", nav_global: "グローバル", nav_cta: "アプリを入手",
             hero_badge: "FlutterでiOSにも対応",
             hero_title: "あなたのデジタル環境、<br /><span class=\"text-gradient\">あなたのために再構築。</span>",
             hero_subtitle: "ダイナミックな感覚テーマ、AIによるコミュニケーション練習、安全なソーシャルスペースを備えた適応型エコシステムを体験してください。",
-            btn_android: "<span class=\"text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1\">ダウンロード</span><span class=\"text-lg font-bold leading-none\">Google Play</span>",
-            btn_ios: "<span class=\"text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1\">Flutterベータ</span><span class=\"text-lg font-bold leading-none\">App Store</span>"
+            btn_gp_sub: "ダウンロード", btn_as_sub: "Flutterベータ",
+            eco_title: "NeuroComet エコシステム", eco_sub: "すべての機能はアクセシビリティ、安全性、成長のために一から設計されています。",
+            bento1_title: "適応型感覚テーマ", bento1_desc: "UIプロファイルをシームレスに切り替え。現在の認知状態に合わせてコントラスト、フォント、動きを動的に変更します。",
+            bento2_title: "スプーントラッキング", bento2_desc: "ウィジェットで毎日のエネルギーを監視。刺激の休憩や気分の変動を即座に記録します。",
+            bento3_title: "ニューロゲーム", bento3_desc: "集中力と感情の調整を支援するためにネイティブに構築されたインタラクティブなチュートリアルとゲーム化された対処メカニズム。",
+            bento4_badge: "Gemini AI 搭載", bento4_title: "模擬通話シミュレーター", bento4_desc: "電話不安がありますか？実際の電話をかける前に、安全なAIモデレートの音声環境で会話を練習しましょう。",
+            safe_dash_title: "安全ダッシュボード", safe_dash_sub: "SecurityUtils アクティブ", safe_item1: "DM プライバシーフィルター", safe_item2: "ペアレンタルコントロール", safe_item3: "トリガーワードのブロック",
+            safe_title: "妥協のないエンドツーエンドの安全性", safe_desc: "社会的交流は害にさらされることを意味するべきではありません。厳密にモデレートされたトリガーのない聖域を確保するために、強力なコンテンツフィルタリングを構築しました。",
+            safe_feat1_title: "ユニバーサルスキャフォールド", safe_feat1_desc: "AndroidとiOSで一貫したアクセス可能なレイアウトにより、デバイス切り替え時の認知的疲労を防ぎます。",
+            safe_feat2_title: "保護者の画面ブロック", safe_feat2_desc: "保護者管理モジュールを備えたオプションのリンクされたアカウント。信頼できる保護者が安全なナビゲーションを支援できます。",
+            global_title: "あなたの言葉で、<br/><span class=\"text-brand-400\">思いを伝えよう。</span>", global_sub: "ニューロダイバーシティは世界的なものです。自動翻訳を活用し、15以上の言語にローカライズされています。",
+            cta_title: "今日、あなたの軌道を見つけてください。", cta_sub: "NeuroCometをダウンロードして、あなたの心のために明示的に構築されたプラットフォームを体験してください。", cta_btn: "Android と iOS 向けにダウンロード", cta_powered: "Kotlin、Flutter、Supabaseを活用",
+            foot_desc: "ニューロダイバージェントコミュニティに、彼らがふさわしいツール、安全性、カスタマイズ可能な環境を提供する専用のマルチプラットフォーム環境。", foot_col1: "プラットフォーム", foot_link1: "感覚のカスタマイズ", foot_link2: "模擬通話 AI", foot_link3: "安全ダッシュボード", foot_col2: "リソース", foot_link4: "保護者向けガイド", foot_link5: "プライバシーポリシー", foot_link6: "利用規約", foot_link7: "GitHub リポジトリ", foot_copy: "NeuroComet. 無断転載を禁じます。"
         },
         ko: {
-            nav_cta: "앱 다운로드",
+            nav_eco: "에코시스템", nav_safety: "안전", nav_global: "글로벌", nav_cta: "앱 다운로드",
             hero_badge: "이제 Flutter를 통해 iOS 지원",
             hero_title: "당신의 디지털 환경,<br /><span class=\"text-gradient\">당신을 위해 재구성됩니다.</span>",
             hero_subtitle: "동적 감각 테마, AI 기반 커뮤니케이션 연습 및 안전한 소셜 공간을 특징으로 하는 적응형 에코시스템을 경험하세요.",
-            btn_android: "<span class=\"text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1\">다운로드</span><span class=\"text-lg font-bold leading-none\">Google Play</span>",
-            btn_ios: "<span class=\"text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1\">Flutter 베타</span><span class=\"text-lg font-bold leading-none\">App Store</span>"
+            btn_gp_sub: "다운로드", btn_as_sub: "Flutter 베타",
+            eco_title: "NeuroComet 에코시스템", eco_sub: "모든 기능은 접근성, 안전 및 성장을 위해 기초부터 설계되었습니다.",
+            bento1_title: "적응형 감각 테마", bento1_desc: "UI 프로필을 매끄럽게 전환하세요. 현재 인지 상태에 맞게 대비, 글꼴 및 모션을 동적으로 변경합니다.",
+            bento2_title: "스푼 트래킹", bento2_desc: "위젯으로 일일 에너지를 모니터링하세요. 자극 휴식과 감정 변화를 즉시 추적합니다.",
+            bento3_title: "뉴로게임", bento3_desc: "집중력과 감정 조절을 돕기 위해 기본적으로 구축된 대화형 튜토리얼 및 게임화된 대처 메커니즘.",
+            bento4_badge: "Gemini AI 기반", bento4_title: "모의 통화 시뮬레이터", bento4_desc: "전화 불안증이 있나요? 실제 통화를 하기 전에 안전한 AI 조정 음성 환경에서 실제 대화를 연습하세요.",
+            safe_dash_title: "안전 대시보드", safe_dash_sub: "SecurityUtils 활성", safe_item1: "DM 개인정보 필터", safe_item2: "자녀 보호 기능", safe_item3: "트리거 단어 차단",
+            safe_title: "타협 없는 종단간 안전.", safe_desc: "사회적 상호 작용이 피해 노출을 의미해서는 안 됩니다. 엄격하게 조정되고 트리거가 없는 피드를 보장하기 위해 강력한 콘텐츠 필터링을 구축했습니다.",
+            safe_feat1_title: "범용 스캐폴드 아키텍처", safe_feat1_desc: "Android 및 iOS 전반에 걸친 일관되고 접근 가능한 레이아웃으로 기기 전환 시 인지 피로를 방지합니다.",
+            safe_feat2_title: "보호자 화면 차단", safe_feat2_desc: "자녀 보호 모듈이 포함된 선택적 연결 계정으로, 신뢰할 수 있는 보호자가 안전하게 탐색하도록 도울 수 있습니다.",
+            global_title: "당신의 언어로,<br/><span class=\"text-brand-400\">생각을 표현하세요.</span>", global_sub: "신경 다양성은 전 세계적인 것입니다. 자동 번역 파이프라인을 활용하여 15개 이상의 언어로 현지화되었습니다.",
+            cta_title: "오늘 당신의 궤도를 찾으세요.", cta_sub: "NeuroComet을 다운로드하고 마음이 작동하는 방식에 맞게 명시적으로 구축된 플랫폼을 경험하세요.", cta_btn: "Android 및 iOS용 다운로드", cta_powered: "Kotlin, Flutter 및 Supabase로 구동",
+            foot_desc: "신경 다양성 커뮤니티에 그들이 마땅히 누려야 할 도구, 안전 및 사용자 정의 가능한 환경을 제공하는 전용 다중 플랫폼 환경입니다.", foot_col1: "플랫폼", foot_link1: "감각 사용자 정의", foot_link2: "모의 통화 AI", foot_link3: "안전 대시보드", foot_col2: "리소스", foot_link4: "부모 가이드", foot_link5: "개인정보 보호정책", foot_link6: "서비스 약관", foot_link7: "GitHub 리포지토리", foot_copy: "NeuroComet. 판권 소유."
+        },
+        tr: {
+            nav_eco: "Ekosistem", nav_safety: "Güvenlik", nav_global: "Küresel", nav_cta: "Uygulamayı İndir",
+            hero_badge: "Şimdi Flutter ile iOS'ta",
+            hero_title: "Dijital Dünyanız,<br /><span class=\"text-gradient\">Zihniniz İçin Yeniden Tasarlandı.</span>",
+            hero_subtitle: "Dinamik duyusal temalar, yapay zeka destekli iletişim pratikleri ve güvenli bir sosyal alan sunan adaptif ekosistemi keşfedin.",
+            btn_gp_sub: "Şuradan İndirin", btn_as_sub: "Flutter Beta",
+            eco_title: "NeuroComet Ekosistemi", eco_sub: "Her özellik erişilebilirlik, güvenlik ve gelişim için temelden tasarlandı.",
+            bento1_title: "Adaptif Duyusal Temalar", bento1_desc: "Kullanıcı arayüzü profillerini sorunsuzca değiştirin. Mevcut bilişsel durumunuza uyması için kontrastı, yazı tiplerini ve hareketleri dinamik olarak değiştiriyoruz.",
+            bento2_title: "Kaşık (Enerji) Takibi", bento2_desc: "Ana ekran araç takımlarıyla günlük enerji seviyenizi izleyin. Rahatlama molalarını ve ruh hali dalgalanmalarını anında takip edin.",
+            bento3_title: "NöroOyunlar", bento3_desc: "Odaklanma ve duygu düzenlemesine yardımcı olmak için yerel olarak oluşturulmuş etkileşimli eğitimler ve oyunlaştırılmış başa çıkma mekanizmaları.",
+            bento4_badge: "Gemini AI Destekli", bento4_title: "Örnek Çağrı Simülatörü", bento4_desc: "Telefon kaygısı mı yaşıyorsunuz? Gerçek aramayı yapmadan önce güvenli, yapay zeka tarafından yönetilen bir ses ortamında gerçek dünya görüşmelerini pratik yapın.",
+            safe_dash_title: "Güvenlik Panosu", safe_dash_sub: "SecurityUtils Aktif", safe_item1: "DM Gizlilik Filtreleri", safe_item2: "Ebeveyn Kontrolleri", safe_item3: "Tetikleyici Kelime Engelleme",
+            safe_title: "Tavizsiz Uçtan Uca Güvenlik.", safe_desc: "Sosyal etkileşim zarar görme anlamına gelmemelidir. NeuroComet akışının sıkı bir şekilde denetlenen, tetikleyicisiz bir sığınak olarak kalmasını sağlamak için sağlam içerik filtrelemesi oluşturduk.",
+            safe_feat1_title: "Evrensel İskelet Mimarisi", safe_feat1_desc: "Cihaz değiştirirken bilişsel yorgunluğu önleyen, Android ve iOS'ta tutarlı, erişilebilir düzenler.",
+            safe_feat2_title: "Bakıcı Ekran Engelleme", safe_feat2_desc: "Güvenilir vasilerin güvenli bir şekilde gezinmeye yardımcı olmasını sağlayan ebeveyn kontrol modüllerine sahip isteğe bağlı bağlı hesaplar.",
+            global_title: "Düşüncelerinizi ifade edin.<br/><span class=\"text-brand-400\">Kendi dilinizde.</span>", global_sub: "Nöroçeşitlilik küreseldir. Otomatik çeviri hatlarını kullanan NeuroComet, 15'ten fazla dilde yerelleştirilmiştir.",
+            cta_title: "Yörüngenizi bugün bulun.", cta_sub: "NeuroComet'i indirin ve zihninizin çalışma şekli için özel olarak oluşturulmuş bir platformu deneyimleyin.", cta_btn: "Android ve iOS için İndir", cta_powered: "Kotlin, Flutter ve Supabase tarafından desteklenmektedir.",
+            foot_desc: "Nöroçeşitli topluluğa hak ettikleri araçları, güvenliği ve özelleştirilebilir ortamı sunan özel, çok platformlu bir ortam.", foot_col1: "Platform", foot_link1: "Duyusal Özelleştirme", foot_link2: "Yapay Zeka Çağrıları", foot_link3: "Güvenlik Panosu", foot_col2: "Kaynaklar", foot_link4: "Ebeveyn Rehberi", foot_link5: "Gizlilik Politikası", foot_link6: "Hizmet Şartları", foot_link7: "GitHub Deposu", foot_copy: "NeuroComet. Tüm hakları saklıdır."
         },
         ar: {
-            nav_cta: "احصل على التطبيق",
+            nav_eco: "النظام البيئي", nav_safety: "الأمان", nav_global: "عالمي", nav_cta: "احصل على التطبيق",
             hero_badge: "يتوسع الآن إلى نظام iOS عبر Flutter",
             hero_title: "بيئتك الرقمية،<br /><span class=\"text-gradient\">أُعيد تصميمها من أجلك.</span>",
             hero_subtitle: "جرب نظامًا بيئيًا تكيفيًا يتميز بسمات حسية ديناميكية، وممارسة اتصال مدفوعة بالذكاء الاصطناعي، ومساحة اجتماعية آمنة.",
-            btn_android: "<span class=\"text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1\">متاح على</span><span class=\"text-lg font-bold leading-none\">Google Play</span>",
-            btn_ios: "<span class=\"text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1\">نسخة Flutter التجريبية</span><span class=\"text-lg font-bold leading-none\">App Store</span>"
+            btn_gp_sub: "متاح على", btn_as_sub: "نسخة Flutter التجريبية",
+            eco_title: "نظام NeuroComet البيئي", eco_sub: "تم تصميم كل ميزة من الألف إلى الياء من أجل إمكانية الوصول والسلامة والنمو.",
+            bento1_title: "السمات الحسية التكيفية", bento1_desc: "قم بتبديل ملفات تعريف واجهة المستخدم بسلاسة. نقوم بتغيير التباين والخطوط والحركة ديناميكيًا لمطابقة حالتك المعرفية الحالية.",
+            bento2_title: "تتبع الطاقة (الملاعق)", bento2_desc: "راقب مستويات الطاقة اليومية باستخدام عناصر واجهة الشاشة الرئيسية. تتبع فترات الراحة والتقلبات المزاجية على الفور.",
+            bento3_title: "ألعاب الأعصاب", bento3_desc: "برامج تعليمية تفاعلية وآليات تأقلم مبنية بشكل أصلي للمساعدة في التركيز والتنظيم العاطفي.",
+            bento4_badge: "مدعوم من Gemini AI", bento4_title: "محاكي المكالمات الوهمية", bento4_desc: "هل تعاني من قلق الهاتف؟ تدرب على المحادثات في بيئة صوتية آمنة يديرها الذكاء الاصطناعي قبل إجراء المكالمة الحقيقية.",
+            safe_dash_title: "لوحة تحكم الأمان", safe_dash_sub: "أدوات الأمان نشطة", safe_item1: "فلاتر خصوصية الرسائل", safe_item2: "الرقابة الأبوية", safe_item3: "حظر الكلمات المزعجة",
+            safe_title: "أمان شامل لا هوادة فيه.", safe_desc: "التفاعل الاجتماعي لا ينبغي أن يعني التعرض للضرر. لقد صممنا تصفية قوية للمحتوى لضمان بقاء مجتمعنا ملاذًا آمنًا وخاليًا من المحفزات.",
+            safe_feat1_title: "بنية هندسية عالمية", safe_feat1_desc: "تخطيطات متسقة يسهل الوصول إليها عبر Android و iOS، مما يمنع الإرهاق المعرفي عند تبديل الأجهزة.",
+            safe_feat2_title: "حظر الشاشة لمقدمي الرعاية", safe_feat2_desc: "حسابات مرتبطة اختيارية مع وحدات رقابة أبوية، مما يسمح للأوصياء الموثوق بهم بالمساعدة في التنقل بأمان.",
+            global_title: "عبر عن أفكارك.<br/><span class=\"text-brand-400\">بلغتك.</span>", global_sub: "التنوع العصبي عالمي. باستخدام خطوط الترجمة الآلية، تم توطين NeuroComet إلى أكثر من 15 لغة.",
+            cta_title: "ابحث عن مدارك اليوم.", cta_sub: "قم بتنزيل NeuroComet واختبر منصة مصممة خصيصًا للطريقة التي يعمل بها عقلك.", cta_btn: "تنزيل لنظامي Android و iOS", cta_powered: "مدعوم من Kotlin و Flutter و Supabase.",
+            foot_desc: "بيئة مخصصة متعددة المنصات تمنح مجتمع التنوع العصبي الأدوات والأمان والبيئة القابلة للتخصيص التي يستحقونها.", foot_col1: "المنصة", foot_link1: "التخصيص الحسي", foot_link2: "الذكاء الاصطناعي للمكالمات", foot_link3: "لوحة الأمان", foot_col2: "الموارد", foot_link4: "دليل الآباء", foot_link5: "سياسة الخصوصية", foot_link6: "شروط الخدمة", foot_link7: "مستودع GitHub", foot_copy: "NeuroComet. جميع الحقوق محفوظة."
         }
     };
 
-    // Added clickedBtn parameter to fix the Javascript scoping error
     function changeLanguage(langCode, clickedBtn) {
         const container = document.getElementById('translation-container');
-
         container.style.opacity = '0';
 
         setTimeout(() => {
@@ -303,13 +568,11 @@
                 btn.className = "lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors";
             });
 
-            // Using the specific clicked object instead of event.target
             if(clickedBtn) {
                 clickedBtn.className = "lang-btn px-4 py-2 rounded-full bg-brand-500 text-white border border-brand-400 text-sm font-bold transition-colors";
             }
 
             container.style.opacity = '1';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }, 300);
     }
 </script>
