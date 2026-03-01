@@ -63,7 +63,7 @@
                         <i id="theme-toggle-dark-icon" class="fa-solid fa-moon hidden"></i>
                         <i id="theme-toggle-light-icon" class="fa-solid fa-sun hidden"></i>
                     </button>
-                    <a href="#download" class="hidden md:block bg-gray-900 dark:bg-brand-600 hover:bg-brand-600 dark:hover:bg-brand-500 text-white px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5" data-i18n="nav_cta">Get the App</a>
+                    <a href="#download" class="hidden md:block bg-gray-900 dark:bg-brand-600 hover:bg-brand-600 dark:hover:bg-brand-500 text-white px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5" data-i18n="nav_cta">Join Orbit (Soon)</a>
                 </div>
             </div>
         </div>
@@ -92,17 +92,17 @@
                 </p>
 
                 <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-                    <button class="w-64 h-16 flex items-center justify-center gap-4 bg-gray-900 dark:bg-black text-white border-2 border-gray-900 dark:border-black rounded-2xl transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1">
-                        <i class="fa-brands fa-google-play text-3xl"></i>
+                    <button class="w-64 h-16 flex items-center justify-center gap-4 bg-gray-900 dark:bg-black text-white border-2 border-gray-900 dark:border-black rounded-2xl transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 cursor-default">
+                        <i class="fa-brands fa-google-play text-3xl opacity-50"></i>
                         <div class="text-start flex flex-col justify-center">
-                            <span class="text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1" data-i18n="btn_gp_sub">Available on</span>
+                            <span class="text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1 text-brand-400" data-i18n="btn_gp_sub">Hyperfixating soon on</span>
                             <span class="text-lg font-bold leading-none">Google Play</span>
                         </div>
                     </button>
-                    <button class="w-64 h-16 flex items-center justify-center gap-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-2 border-gray-200 dark:border-gray-700 rounded-2xl transition-all shadow-sm hover:shadow-lg hover:-translate-y-1">
-                        <i class="fa-brands fa-apple text-3xl"></i>
+                    <button class="w-64 h-16 flex items-center justify-center gap-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-2 border-gray-200 dark:border-gray-700 rounded-2xl transition-all shadow-sm hover:shadow-lg hover:-translate-y-1 cursor-default">
+                        <i class="fa-brands fa-apple text-3xl opacity-50"></i>
                         <div class="text-start flex flex-col justify-center">
-                            <span class="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1" data-i18n="btn_as_sub">Flutter Beta</span>
+                            <span class="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1" data-i18n="btn_as_sub">Conserving spoons for</span>
                             <span class="text-lg font-bold leading-none">App Store</span>
                         </div>
                     </button>
@@ -271,8 +271,8 @@
             <p class="text-xl text-gray-500 dark:text-gray-400 mb-10 max-w-2xl mx-auto" data-i18n="cta_sub">
                 Download NeuroComet and experience a platform built explicitly for the way your mind works.
             </p>
-            <button class="bg-brand-600 hover:bg-brand-700 text-white px-10 py-5 rounded-full font-bold text-lg transition-all shadow-[0_10px_30px_-10px_rgba(37,99,235,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(37,99,235,0.7)] transform hover:-translate-y-1" data-i18n="cta_btn">
-                Download for Android & iOS
+            <button class="bg-brand-600 hover:bg-brand-700 text-white px-10 py-5 rounded-full font-bold text-lg transition-all shadow-[0_10px_30px_-10px_rgba(37,99,235,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(37,99,235,0.7)] transform hover:-translate-y-1 cursor-default" data-i18n="cta_btn">
+                Prepare your spoons (Coming Soon)
             </button>
             <p class="text-gray-400 dark:text-gray-500 text-sm mt-6 font-medium" data-i18n="cta_powered">Powered by Kotlin, Flutter, and Supabase.</p>
         </div>
@@ -390,14 +390,14 @@
     }
     setBentoTheme('default');
 
-    // --- FULL DICTIONARY ---
+    // --- FULL DICTIONARY WITH ND-HYPE TERMINOLOGY ---
     const translations = {
         en: {
-            nav_eco: "Ecosystem", nav_safety: "Safety", nav_global: "Global", nav_cta: "Get the App",
+            nav_eco: "Ecosystem", nav_safety: "Safety", nav_global: "Global", nav_cta: "Join Orbit (Soon)",
             hero_badge: "Now expanding to iOS via Flutter",
             hero_title: "Your Digital Environment,<br /><span class=\"text-gradient\">Rewired for You.</span>",
             hero_subtitle: "Experience an adaptive ecosystem featuring dynamic sensory themes, AI-driven communication practice, and a secure social space.",
-            btn_gp_sub: "Available on", btn_as_sub: "Flutter Beta",
+            btn_gp_sub: "Hyperfixating soon on", btn_as_sub: "Conserving spoons for",
             eco_title: "The NeuroComet Ecosystem", eco_sub: "Every feature is architected from the ground up for accessibility, safety, and growth.",
             bento1_title: "Adaptive Sensory Themes", bento1_desc: "Switch UI profiles seamlessly. We dynamically alter contrast, fonts, and motion to match your current cognitive state.",
             bento2_title: "Spoon Tracking", bento2_desc: "Monitor daily energy levels with home screen widgets. Track stim breaks and mood fluctuations instantly.",
@@ -408,15 +408,15 @@
             safe_feat1_title: "Universal Scaffold Architecture", safe_feat1_desc: "Consistent, accessible layouts across Android and iOS, preventing cognitive fatigue when switching devices.",
             safe_feat2_title: "Caregiver Screen Blocking", safe_feat2_desc: "Optional linked accounts with robust Parental Control modules, allowing trusted guardians to assist in navigating safely.",
             global_title: "Speak your mind.<br/><span class=\"text-brand-400\">In your language.</span>", global_sub: "Neurodiversity is global. Utilizing automated translation pipelines, NeuroComet is localized into over 15+ languages.",
-            cta_title: "Find your orbit today.", cta_sub: "Download NeuroComet and experience a platform built explicitly for the way your mind works.", cta_btn: "Download for Android & iOS", cta_powered: "Powered by Kotlin, Flutter, and Supabase.",
+            cta_title: "Find your orbit today.", cta_sub: "Download NeuroComet and experience a platform built explicitly for the way your mind works.", cta_btn: "Prepare your spoons (Coming Soon)", cta_powered: "Powered by Kotlin, Flutter, and Supabase.",
             foot_desc: "A dedicated, multi-platform environment giving the neurodivergent community the tools, safety, and customizable environment they deserve.", foot_col1: "Platform", foot_link1: "Sensory Customization", foot_link2: "Mock Call AI", foot_link3: "Safety Dashboard", foot_col2: "Resources", foot_link4: "Parental Guide", foot_link5: "Privacy Policy", foot_link6: "Terms of Service", foot_link7: "GitHub Repository", foot_copy: "NeuroComet. All rights reserved."
         },
         es: {
-            nav_eco: "Ecosistema", nav_safety: "Seguridad", nav_global: "Global", nav_cta: "Obtener la App",
+            nav_eco: "Ecosistema", nav_safety: "Seguridad", nav_global: "Global", nav_cta: "Únete a la órbita (Pronto)",
             hero_badge: "Ahora expandiéndose a iOS con Flutter",
             hero_title: "Tu Entorno Digital,<br /><span class=\"text-gradient\">Reconectado para Ti.</span>",
             hero_subtitle: "Experimenta un ecosistema adaptativo con temas sensoriales dinámicos, práctica de comunicación por IA y un espacio social seguro.",
-            btn_gp_sub: "Disponible en", btn_as_sub: "Beta de Flutter",
+            btn_gp_sub: "Hiperfijación pronto en", btn_as_sub: "Guardando cucharas para",
             eco_title: "El Ecosistema NeuroComet", eco_sub: "Cada función está diseñada desde cero para la accesibilidad, seguridad y crecimiento.",
             bento1_title: "Temas Sensoriales Adaptativos", bento1_desc: "Cambia de perfil sin problemas. Alteramos el contraste, las fuentes y el movimiento para adaptarnos a tu estado cognitivo.",
             bento2_title: "Rastreo de Cucharas", bento2_desc: "Monitorea tus niveles de energía con widgets. Registra descansos sensoriales y cambios de humor al instante.",
@@ -427,15 +427,15 @@
             safe_feat1_title: "Arquitectura de Andamiaje", safe_feat1_desc: "Diseños consistentes y accesibles en Android e iOS, evitando la fatiga cognitiva al cambiar de dispositivo.",
             safe_feat2_title: "Bloqueo para Cuidadores", safe_feat2_desc: "Cuentas vinculadas opcionales con controles parentales, permitiendo a tutores ayudar a navegar con seguridad.",
             global_title: "Exprésate.<br/><span class=\"text-brand-400\">En tu idioma.</span>", global_sub: "La neurodiversidad es global. Utilizando canales de traducción automática, NeuroComet está en más de 15 idiomas.",
-            cta_title: "Encuentra tu órbita hoy.", cta_sub: "Descarga NeuroComet y experimenta una plataforma construida explícitamente para cómo funciona tu mente.", cta_btn: "Descargar para Android e iOS", cta_powered: "Desarrollado por Kotlin, Flutter y Supabase.",
+            cta_title: "Encuentra tu órbita hoy.", cta_sub: "Descarga NeuroComet y experimenta una plataforma construida explícitamente para cómo funciona tu mente.", cta_btn: "Prepara tus cucharas (Próximamente)", cta_powered: "Desarrollado por Kotlin, Flutter y Supabase.",
             foot_desc: "Un entorno dedicado y multiplataforma que brinda a la comunidad neurodivergente las herramientas que merece.", foot_col1: "Plataforma", foot_link1: "Personalización Sensorial", foot_link2: "IA de Llamadas", foot_link3: "Panel de Seguridad", foot_col2: "Recursos", foot_link4: "Guía Parental", foot_link5: "Política de Privacidad", foot_link6: "Términos de Servicio", foot_link7: "Repositorio GitHub", foot_copy: "NeuroComet. Todos los derechos reservados."
         },
         fr: {
-            nav_eco: "Écosystème", nav_safety: "Sécurité", nav_global: "Mondial", nav_cta: "Obtenir l'Appli",
+            nav_eco: "Écosystème", nav_safety: "Sécurité", nav_global: "Mondial", nav_cta: "Rejoindre l'orbite (Bientôt)",
             hero_badge: "En expansion vers iOS via Flutter",
             hero_title: "Votre Environnement Numérique,<br /><span class=\"text-gradient\">Recâblé pour Vous.</span>",
             hero_subtitle: "Découvrez un écosystème adaptatif avec des thèmes sensoriels dynamiques, une pratique de l'IA et un espace social sécurisé.",
-            btn_gp_sub: "Disponible sur", btn_as_sub: "Bêta Flutter",
+            btn_gp_sub: "Hyperfixation bientôt sur", btn_as_sub: "Conservation des cuillères pour",
             eco_title: "L'Écosystème NeuroComet", eco_sub: "Chaque fonctionnalité est conçue pour l'accessibilité, la sécurité et la croissance.",
             bento1_title: "Thèmes Sensoriels Adaptatifs", bento1_desc: "Changez de profil facilement. Nous modifions le contraste, les polices et les mouvements selon votre état cognitif.",
             bento2_title: "Suivi de l'Énergie", bento2_desc: "Surveillez votre énergie avec des widgets. Suivez vos pauses sensorielles et votre humeur instantanément.",
@@ -446,15 +446,15 @@
             safe_feat1_title: "Architecture Universelle", safe_feat1_desc: "Mises en page cohérentes et accessibles sur Android et iOS, prévenant la fatigue cognitive.",
             safe_feat2_title: "Blocage d'Écran par le Tuteur", safe_feat2_desc: "Comptes liés avec contrôles parentaux permettant aux tuteurs d'aider à naviguer en toute sécurité.",
             global_title: "Exprimez-vous.<br/><span class=\"text-brand-400\">Dans votre langue.</span>", global_sub: "La neurodiversité est mondiale. Grâce à la traduction automatique, NeuroComet est localisé dans 15+ langues.",
-            cta_title: "Trouvez votre orbite aujourd'hui.", cta_sub: "Téléchargez NeuroComet et découvrez une plateforme construite explicitement pour votre esprit.", cta_btn: "Télécharger pour Android & iOS", cta_powered: "Propulsé par Kotlin, Flutter et Supabase.",
+            cta_title: "Trouvez votre orbite aujourd'hui.", cta_sub: "Téléchargez NeuroComet et découvrez une plateforme construite explicitement pour votre esprit.", cta_btn: "Préparez vos cuillères (Bientôt)", cta_powered: "Propulsé par Kotlin, Flutter et Supabase.",
             foot_desc: "Un environnement multiplateforme dédié donnant à la communauté neurodivergente les outils qu'elle mérite.", foot_col1: "Plateforme", foot_link1: "Personnalisation Sensorielle", foot_link2: "IA d'Appels", foot_link3: "Tableau de Sécurité", foot_col2: "Ressources", foot_link4: "Guide Parental", foot_link5: "Confidentialité", foot_link6: "Conditions d'Utilisation", foot_link7: "Dépôt GitHub", foot_copy: "NeuroComet. Tous droits réservés."
         },
         de: {
-            nav_eco: "Ökosystem", nav_safety: "Sicherheit", nav_global: "Global", nav_cta: "App holen",
+            nav_eco: "Ökosystem", nav_safety: "Sicherheit", nav_global: "Global", nav_cta: "Umlaufbahn beitreten (Bald)",
             hero_badge: "Jetzt auch für iOS über Flutter",
             hero_title: "Deine digitale Umgebung,<br /><span class=\"text-gradient\">Neu vernetzt für dich.</span>",
             hero_subtitle: "Erlebe ein adaptives Ökosystem mit dynamischen sensorischen Themen, KI-gesteuerter Kommunikation und einem sicheren sozialen Raum.",
-            btn_gp_sub: "Erhältlich bei", btn_as_sub: "Flutter Beta",
+            btn_gp_sub: "Bald hyperfixiert auf", btn_as_sub: "Löffel sparen für",
             eco_title: "Das NeuroComet Ökosystem", eco_sub: "Jede Funktion wurde von Grund auf für Zugänglichkeit, Sicherheit und Wachstum entwickelt.",
             bento1_title: "Adaptive Sensorische Themen", bento1_desc: "Wechsle Profile nahtlos. Wir ändern dynamisch Kontrast, Schriftarten und Bewegung passend zu deinem kognitiven Zustand.",
             bento2_title: "Löffel-Tracking", bento2_desc: "Überwache deine Energie mit Widgets. Verfolge Stim-Pausen und Stimmungsschwankungen sofort.",
@@ -465,15 +465,15 @@
             safe_feat1_title: "Universelle Architektur", safe_feat1_desc: "Konsistente, zugängliche Layouts auf Android und iOS verhindern kognitive Ermüdung beim Gerätewechsel.",
             safe_feat2_title: "Betreuer-Bildschirmsperre", safe_feat2_desc: "Verknüpfte Konten mit Kindersicherungsmodulen ermöglichen es vertrauenswürdigen Personen, beim sicheren Navigieren zu helfen.",
             global_title: "Sag, was du denkst.<br/><span class=\"text-brand-400\">In deiner Sprache.</span>", global_sub: "Neurodiversität ist global. Mithilfe automatisierter Pipelines wird NeuroComet in über 15 Sprachen übersetzt.",
-            cta_title: "Finde noch heute deinen Orbit.", cta_sub: "Lade NeuroComet herunter und erlebe eine Plattform, die speziell für deinen Verstand entwickelt wurde.", cta_btn: "Download für Android & iOS", cta_powered: "Angetrieben von Kotlin, Flutter und Supabase.",
+            cta_title: "Finde noch heute deinen Orbit.", cta_sub: "Lade NeuroComet herunter und erlebe eine Plattform, die speziell für deinen Verstand entwickelt wurde.", cta_btn: "Bereite deine Löffel vor (Bald)", cta_powered: "Angetrieben von Kotlin, Flutter und Supabase.",
             foot_desc: "Eine dedizierte Multi-Plattform-Umgebung, die der neurodivergenten Gemeinschaft die Tools gibt, die sie verdient.", foot_col1: "Plattform", foot_link1: "Sensorische Anpassung", foot_link2: "Mock Call KI", foot_link3: "Sicherheits-Dashboard", foot_col2: "Ressourcen", foot_link4: "Elternratgeber", foot_link5: "Datenschutzrichtlinie", foot_link6: "Nutzungsbedingungen", foot_link7: "GitHub-Repository", foot_copy: "NeuroComet. Alle Rechte vorbehalten."
         },
         ja: {
-            nav_eco: "エコシステム", nav_safety: "安全性", nav_global: "グローバル", nav_cta: "アプリを入手",
+            nav_eco: "エコシステム", nav_safety: "安全性", nav_global: "グローバル", nav_cta: "軌道に参加 (間もなく)",
             hero_badge: "FlutterでiOSにも対応",
             hero_title: "あなたのデジタル環境、<br /><span class=\"text-gradient\">あなたのために再構築。</span>",
             hero_subtitle: "ダイナミックな感覚テーマ、AIによるコミュニケーション練習、安全なソーシャルスペースを備えた適応型エコシステムを体験してください。",
-            btn_gp_sub: "ダウンロード", btn_as_sub: "Flutterベータ",
+            btn_gp_sub: "もうすぐ過集中", btn_as_sub: "スプーンを温存中",
             eco_title: "NeuroComet エコシステム", eco_sub: "すべての機能はアクセシビリティ、安全性、成長のために一から設計されています。",
             bento1_title: "適応型感覚テーマ", bento1_desc: "UIプロファイルをシームレスに切り替え。現在の認知状態に合わせてコントラスト、フォント、動きを動的に変更します。",
             bento2_title: "スプーントラッキング", bento2_desc: "ウィジェットで毎日のエネルギーを監視。刺激の休憩や気分の変動を即座に記録します。",
@@ -484,15 +484,15 @@
             safe_feat1_title: "ユニバーサルスキャフォールド", safe_feat1_desc: "AndroidとiOSで一貫したアクセス可能なレイアウトにより、デバイス切り替え時の認知的疲労を防ぎます。",
             safe_feat2_title: "保護者の画面ブロック", safe_feat2_desc: "保護者管理モジュールを備えたオプションのリンクされたアカウント。信頼できる保護者が安全なナビゲーションを支援できます。",
             global_title: "あなたの言葉で、<br/><span class=\"text-brand-400\">思いを伝えよう。</span>", global_sub: "ニューロダイバーシティは世界的なものです。自動翻訳を活用し、15以上の言語にローカライズされています。",
-            cta_title: "今日、あなたの軌道を見つけてください。", cta_sub: "NeuroCometをダウンロードして、あなたの心のために明示的に構築されたプラットフォームを体験してください。", cta_btn: "Android と iOS 向けにダウンロード", cta_powered: "Kotlin、Flutter、Supabaseを活用",
+            cta_title: "今日、あなたの軌道を見つけてください。", cta_sub: "NeuroCometをダウンロードして、あなたの心のために明示的に構築されたプラットフォームを体験してください。", cta_btn: "スプーンの準備を (近日公開)", cta_powered: "Kotlin、Flutter、Supabaseを活用",
             foot_desc: "ニューロダイバージェントコミュニティに、彼らがふさわしいツール、安全性、カスタマイズ可能な環境を提供する専用のマルチプラットフォーム環境。", foot_col1: "プラットフォーム", foot_link1: "感覚のカスタマイズ", foot_link2: "模擬通話 AI", foot_link3: "安全ダッシュボード", foot_col2: "リソース", foot_link4: "保護者向けガイド", foot_link5: "プライバシーポリシー", foot_link6: "利用規約", foot_link7: "GitHub リポジトリ", foot_copy: "NeuroComet. 無断転載を禁じます。"
         },
         ko: {
-            nav_eco: "에코시스템", nav_safety: "안전", nav_global: "글로벌", nav_cta: "앱 다운로드",
+            nav_eco: "에코시스템", nav_safety: "안전", nav_global: "글로벌", nav_cta: "궤도 진입 (곧)",
             hero_badge: "이제 Flutter를 통해 iOS 지원",
             hero_title: "당신의 디지털 환경,<br /><span class=\"text-gradient\">당신을 위해 재구성됩니다.</span>",
             hero_subtitle: "동적 감각 테마, AI 기반 커뮤니케이션 연습 및 안전한 소셜 공간을 특징으로 하는 적응형 에코시스템을 경험하세요.",
-            btn_gp_sub: "다운로드", btn_as_sub: "Flutter 베타",
+            btn_gp_sub: "곧 과몰입 예정", btn_as_sub: "스푼을 아끼는 중",
             eco_title: "NeuroComet 에코시스템", eco_sub: "모든 기능은 접근성, 안전 및 성장을 위해 기초부터 설계되었습니다.",
             bento1_title: "적응형 감각 테마", bento1_desc: "UI 프로필을 매끄럽게 전환하세요. 현재 인지 상태에 맞게 대비, 글꼴 및 모션을 동적으로 변경합니다.",
             bento2_title: "스푼 트래킹", bento2_desc: "위젯으로 일일 에너지를 모니터링하세요. 자극 휴식과 감정 변화를 즉시 추적합니다.",
@@ -503,15 +503,15 @@
             safe_feat1_title: "범용 스캐폴드 아키텍처", safe_feat1_desc: "Android 및 iOS 전반에 걸친 일관되고 접근 가능한 레이아웃으로 기기 전환 시 인지 피로를 방지합니다.",
             safe_feat2_title: "보호자 화면 차단", safe_feat2_desc: "자녀 보호 모듈이 포함된 선택적 연결 계정으로, 신뢰할 수 있는 보호자가 안전하게 탐색하도록 도울 수 있습니다.",
             global_title: "당신의 언어로,<br/><span class=\"text-brand-400\">생각을 표현하세요.</span>", global_sub: "신경 다양성은 전 세계적인 것입니다. 자동 번역 파이프라인을 활용하여 15개 이상의 언어로 현지화되었습니다.",
-            cta_title: "오늘 당신의 궤도를 찾으세요.", cta_sub: "NeuroComet을 다운로드하고 마음이 작동하는 방식에 맞게 명시적으로 구축된 플랫폼을 경험하세요.", cta_btn: "Android 및 iOS용 다운로드", cta_powered: "Kotlin, Flutter 및 Supabase로 구동",
+            cta_title: "오늘 당신의 궤도를 찾으세요.", cta_sub: "NeuroComet을 다운로드하고 마음이 작동하는 방식에 맞게 명시적으로 구축된 플랫폼을 경험하세요.", cta_btn: "스푼을 준비하세요 (출시 예정)", cta_powered: "Kotlin, Flutter 및 Supabase로 구동",
             foot_desc: "신경 다양성 커뮤니티에 그들이 마땅히 누려야 할 도구, 안전 및 사용자 정의 가능한 환경을 제공하는 전용 다중 플랫폼 환경입니다.", foot_col1: "플랫폼", foot_link1: "감각 사용자 정의", foot_link2: "모의 통화 AI", foot_link3: "안전 대시보드", foot_col2: "리소스", foot_link4: "부모 가이드", foot_link5: "개인정보 보호정책", foot_link6: "서비스 약관", foot_link7: "GitHub 리포지토리", foot_copy: "NeuroComet. 판권 소유."
         },
         tr: {
-            nav_eco: "Ekosistem", nav_safety: "Güvenlik", nav_global: "Küresel", nav_cta: "Uygulamayı İndir",
+            nav_eco: "Ekosistem", nav_safety: "Güvenlik", nav_global: "Küresel", nav_cta: "Yörüngeye Katıl (Yakında)",
             hero_badge: "Şimdi Flutter ile iOS'ta",
             hero_title: "Dijital Dünyanız,<br /><span class=\"text-gradient\">Zihniniz İçin Yeniden Tasarlandı.</span>",
             hero_subtitle: "Dinamik duyusal temalar, yapay zeka destekli iletişim pratikleri ve güvenli bir sosyal alan sunan adaptif ekosistemi keşfedin.",
-            btn_gp_sub: "Şuradan İndirin", btn_as_sub: "Flutter Beta",
+            btn_gp_sub: "Yakında hiperfokus oluyoruz:", btn_as_sub: "Kaşıkları şunun için saklıyoruz:",
             eco_title: "NeuroComet Ekosistemi", eco_sub: "Her özellik erişilebilirlik, güvenlik ve gelişim için temelden tasarlandı.",
             bento1_title: "Adaptif Duyusal Temalar", bento1_desc: "Kullanıcı arayüzü profillerini sorunsuzca değiştirin. Mevcut bilişsel durumunuza uyması için kontrastı, yazı tiplerini ve hareketleri dinamik olarak değiştiriyoruz.",
             bento2_title: "Kaşık (Enerji) Takibi", bento2_desc: "Ana ekran araç takımlarıyla günlük enerji seviyenizi izleyin. Rahatlama molalarını ve ruh hali dalgalanmalarını anında takip edin.",
@@ -522,15 +522,15 @@
             safe_feat1_title: "Evrensel İskelet Mimarisi", safe_feat1_desc: "Cihaz değiştirirken bilişsel yorgunluğu önleyen, Android ve iOS'ta tutarlı, erişilebilir düzenler.",
             safe_feat2_title: "Bakıcı Ekran Engelleme", safe_feat2_desc: "Güvenilir vasilerin güvenli bir şekilde gezinmeye yardımcı olmasını sağlayan ebeveyn kontrol modüllerine sahip isteğe bağlı bağlı hesaplar.",
             global_title: "Düşüncelerinizi ifade edin.<br/><span class=\"text-brand-400\">Kendi dilinizde.</span>", global_sub: "Nöroçeşitlilik küreseldir. Otomatik çeviri hatlarını kullanan NeuroComet, 15'ten fazla dilde yerelleştirilmiştir.",
-            cta_title: "Yörüngenizi bugün bulun.", cta_sub: "NeuroComet'i indirin ve zihninizin çalışma şekli için özel olarak oluşturulmuş bir platformu deneyimleyin.", cta_btn: "Android ve iOS için İndir", cta_powered: "Kotlin, Flutter ve Supabase tarafından desteklenmektedir.",
+            cta_title: "Yörüngenizi bugün bulun.", cta_sub: "NeuroComet'i indirin ve zihninizin çalışma şekli için özel olarak oluşturulmuş bir platformu deneyimleyin.", cta_btn: "Kaşıklarını hazırla (Yakında)", cta_powered: "Kotlin, Flutter ve Supabase tarafından desteklenmektedir.",
             foot_desc: "Nöroçeşitli topluluğa hak ettikleri araçları, güvenliği ve özelleştirilebilir ortamı sunan özel, çok platformlu bir ortam.", foot_col1: "Platform", foot_link1: "Duyusal Özelleştirme", foot_link2: "Yapay Zeka Çağrıları", foot_link3: "Güvenlik Panosu", foot_col2: "Kaynaklar", foot_link4: "Ebeveyn Rehberi", foot_link5: "Gizlilik Politikası", foot_link6: "Hizmet Şartları", foot_link7: "GitHub Deposu", foot_copy: "NeuroComet. Tüm hakları saklıdır."
         },
         ar: {
-            nav_eco: "النظام البيئي", nav_safety: "الأمان", nav_global: "عالمي", nav_cta: "احصل على التطبيق",
+            nav_eco: "النظام البيئي", nav_safety: "الأمان", nav_global: "عالمي", nav_cta: "انضم للمدار (قريباً)",
             hero_badge: "يتوسع الآن إلى نظام iOS عبر Flutter",
             hero_title: "بيئتك الرقمية،<br /><span class=\"text-gradient\">أُعيد تصميمها من أجلك.</span>",
             hero_subtitle: "جرب نظامًا بيئيًا تكيفيًا يتميز بسمات حسية ديناميكية، وممارسة اتصال مدفوعة بالذكاء الاصطناعي، ومساحة اجتماعية آمنة.",
-            btn_gp_sub: "متاح على", btn_as_sub: "نسخة Flutter التجريبية",
+            btn_gp_sub: "التركيز المفرط قريباً على", btn_as_sub: "نحفظ طاقة الملاعق لـ",
             eco_title: "نظام NeuroComet البيئي", eco_sub: "تم تصميم كل ميزة من الألف إلى الياء من أجل إمكانية الوصول والسلامة والنمو.",
             bento1_title: "السمات الحسية التكيفية", bento1_desc: "قم بتبديل ملفات تعريف واجهة المستخدم بسلاسة. نقوم بتغيير التباين والخطوط والحركة ديناميكيًا لمطابقة حالتك المعرفية الحالية.",
             bento2_title: "تتبع الطاقة (الملاعق)", bento2_desc: "راقب مستويات الطاقة اليومية باستخدام عناصر واجهة الشاشة الرئيسية. تتبع فترات الراحة والتقلبات المزاجية على الفور.",
@@ -541,7 +541,7 @@
             safe_feat1_title: "بنية هندسية عالمية", safe_feat1_desc: "تخطيطات متسقة يسهل الوصول إليها عبر Android و iOS، مما يمنع الإرهاق المعرفي عند تبديل الأجهزة.",
             safe_feat2_title: "حظر الشاشة لمقدمي الرعاية", safe_feat2_desc: "حسابات مرتبطة اختيارية مع وحدات رقابة أبوية، مما يسمح للأوصياء الموثوق بهم بالمساعدة في التنقل بأمان.",
             global_title: "عبر عن أفكارك.<br/><span class=\"text-brand-400\">بلغتك.</span>", global_sub: "التنوع العصبي عالمي. باستخدام خطوط الترجمة الآلية، تم توطين NeuroComet إلى أكثر من 15 لغة.",
-            cta_title: "ابحث عن مدارك اليوم.", cta_sub: "قم بتنزيل NeuroComet واختبر منصة مصممة خصيصًا للطريقة التي يعمل بها عقلك.", cta_btn: "تنزيل لنظامي Android و iOS", cta_powered: "مدعوم من Kotlin و Flutter و Supabase.",
+            cta_title: "ابحث عن مدارك اليوم.", cta_sub: "قم بتنزيل NeuroComet واختبر منصة مصممة خصيصًا للطريقة التي يعمل بها عقلك.", cta_btn: "جهز ملاعقك (قريباً)", cta_powered: "مدعوم من Kotlin و Flutter و Supabase.",
             foot_desc: "بيئة مخصصة متعددة المنصات تمنح مجتمع التنوع العصبي الأدوات والأمان والبيئة القابلة للتخصيص التي يستحقونها.", foot_col1: "المنصة", foot_link1: "التخصيص الحسي", foot_link2: "الذكاء الاصطناعي للمكالمات", foot_link3: "لوحة الأمان", foot_col2: "الموارد", foot_link4: "دليل الآباء", foot_link5: "سياسة الخصوصية", foot_link6: "شروط الخدمة", foot_link7: "مستودع GitHub", foot_copy: "NeuroComet. جميع الحقوق محفوظة."
         }
     };
