@@ -29,7 +29,6 @@ class GameTutorial {
 
 /// Manages game tutorial state - tracks which tutorials have been seen
 class GameTutorialManager {
-  static const String _prefsName = 'neuro_games_tutorial_prefs';
   static const String _keyPrefix = 'tutorial_seen_';
 
   static Future<bool> hasSeenTutorial(String gameId) async {

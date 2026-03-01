@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Neurodiversity Pride Icon Foreground - Rainbow colors with infinity symbol -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <group
+        android:translateX="54"
+        android:translateY="54">
+
+        <!-- Outer rainbow glow - red -->
+        <path
+            android:fillColor="#FF5252"
+            android:fillAlpha="0.12"
+            android:pathData="M 0,0 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" />
+
+        <!-- Middle rainbow glow - gold -->
+        <path
+            android:fillColor="#FFD54F"
+            android:fillAlpha="0.18"
+            android:pathData="M 0,0 m -32,0 a 32,32 0 1,1 64,0 a 32,32 0 1,1 -64,0" />
+
+        <!-- Rainbow connection 1 - Red -->
+        <path
+            android:strokeColor="#FF5252"
+            android:strokeAlpha="0.4"
+            android:strokeWidth="10"
+            android:strokeLineCap="round"
+            android:pathData="M -35,-25 Q -15,-10 0,0" />
+        <path
+            android:strokeColor="#FF1744"
+            android:strokeWidth="5"
+            android:strokeLineCap="round"
+            android:pathData="M -35,-25 Q -15,-10 0,0" />
+
+        <!-- Rainbow connection 2 - Orange -->
+        <path
+            android:strokeColor="#FFAB40"
+            android:strokeAlpha="0.4"
+            android:strokeWidth="10"
+            android:strokeLineCap="round"
+            android:pathData="M 0,-38 Q 0,-15 0,0" />
+        <path
+            android:strokeColor="#FF6D00"
+            android:strokeWidth="5"
+            android:strokeLineCap="round"
+            android:pathData="M 0,-38 Q 0,-15 0,0" />
+
+        <!-- Rainbow connection 3 - Yellow -->
+        <path
+            android:strokeColor="#FFEE58"
+            android:strokeAlpha="0.4"
+            android:strokeWidth="10"
+            android:strokeLineCap="round"
+            android:pathData="M 35,-25 Q 15,-10 0,0" />
+        <path
+            android:strokeColor="#FFD600"
+            android:strokeWidth="5"
+            android:strokeLineCap="round"
+            android:pathData="M 35,-25 Q 15,-10 0,0" />
+
+        <!-- Rainbow connection 4 - Green -->
+        <path
+            android:strokeColor="#69F0AE"
+            android:strokeAlpha="0.4"
+            android:strokeWidth="10"
+            android:strokeLineCap="round"
+            android:pathData="M 35,25 Q 15,10 0,0" />
+        <path
+            android:strokeColor="#00E676"
+            android:strokeWidth="5"
+            android:strokeLineCap="round"
+            android:pathData="M 35,25 Q 15,10 0,0" />
+
+        <!-- Rainbow connection 5 - Blue -->
+        <path
+            android:strokeColor="#40C4FF"
+            android:strokeAlpha="0.4"
+            android:strokeWidth="10"
+            android:strokeLineCap="round"
+            android:pathData="M 0,38 Q 0,15 0,0" />
+        <path
+            android:strokeColor="#00B0FF"
+            android:strokeWidth="5"
+            android:strokeLineCap="round"
+            android:pathData="M 0,38 Q 0,15 0,0" />
+
+        <!-- Rainbow connection 6 - Purple -->
+        <path
+            android:strokeColor="#E040FB"
+            android:strokeAlpha="0.4"
+            android:strokeWidth="10"
+            android:strokeLineCap="round"
+            android:pathData="M -35,25 Q -15,10 0,0" />
+        <path
+            android:strokeColor="#D500F9"
+            android:strokeWidth="5"
+            android:strokeLineCap="round"
+            android:pathData="M -35,25 Q -15,10 0,0" />
+
+        <!-- Rainbow nodes -->
+        <path
+            android:fillColor="#FF1744"
+            android:pathData="M -35,-25 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+        <path
+            android:fillColor="#FF6D00"
+            android:pathData="M 0,-38 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+        <path
+            android:fillColor="#FFD600"
+            android:pathData="M 35,-25 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+        <path
+            android:fillColor="#00E676"
+            android:pathData="M 35,25 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+        <path
+            android:fillColor="#00B0FF"
+            android:pathData="M 0,38 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+        <path
+            android:fillColor="#D500F9"
+            android:pathData="M -35,25 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+
+        <!-- Center - Gold infinity-inspired core -->
+        <path
+            android:fillColor="#FFD54F"
+            android:pathData="M 0,0 m -25,0 a 25,25 0 1,1 50,0 a 25,25 0 1,1 -50,0" />
+
+        <!-- Inner highlight - warm glow -->
+        <path
+            android:fillColor="#FFF8E1"
+            android:fillAlpha="0.7"
+            android:pathData="M -8,-8 m -8,0 a 8,8 0 1,1 16,0 a 8,8 0 1,1 -16,0" />
+    </group>
+</vector>
+

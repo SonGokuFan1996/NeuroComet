@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+
+  <!-- Primary Meta Tags -->
+  <title>NeuroComet - A Safe Space for Neurodivergent Minds</title>
+  <meta name="title" content="NeuroComet - A Safe Space for Neurodivergent Minds">
+  <meta name="description" content="NeuroComet is an inclusive social platform designed for neurodivergent individuals. Connect with a supportive community, enjoy sensory-friendly features, and access calming tools.">
+  <meta name="keywords" content="neurodivergent, autism, ADHD, social platform, mental health, sensory-friendly, community, support, accessibility">
+  <meta name="author" content="NeuroComet">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#6B4EFF">
+  <meta name="color-scheme" content="dark light">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://neurocomet.app/">
+  <meta property="og:title" content="NeuroComet - A Safe Space for Neurodivergent Minds">
+  <meta property="og:description" content="NeuroComet is an inclusive social platform designed for neurodivergent individuals. Connect with a supportive community, enjoy sensory-friendly features, and access calming tools.">
+  <meta property="og:image" content="icons/Icon-512.png">
+  <meta property="og:site_name" content="NeuroComet">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://neurocomet.app/">
+  <meta property="twitter:title" content="NeuroComet - A Safe Space for Neurodivergent Minds">
+  <meta property="twitter:description" content="NeuroComet is an inclusive social platform designed for neurodivergent individuals. Connect with a supportive community, enjoy sensory-friendly features, and access calming tools.">
+  <meta property="twitter:image" content="icons/Icon-512.png">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="NeuroComet">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon.png">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://neurocomet.app/">
+
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    /* Loading styles */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    /* Loading indicator */
+    .loading-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      z-index: 999;
+    }
+
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(107, 78, 255, 0.2);
+      border-top: 4px solid #6B4EFF;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+      margin-top: 20px;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 16px;
+      opacity: 0.8;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Hide loading when Flutter is ready */
+    .flutter-loaded .loading-container {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="loading-container">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading NeuroComet...</div>
+  </div>
+  <script>
+    window.addEventListener('flutter-first-frame', function() {
+      document.body.classList.add('flutter-loaded');
+    });
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

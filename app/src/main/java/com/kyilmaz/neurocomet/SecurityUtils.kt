@@ -1,6 +1,6 @@
 package com.kyilmaz.neurocomet
 
-import android.util.Base64
+import android.util.Log
 
 /**
  * Utility for basic string obfuscation to prevent simple string searches in the APK.
@@ -9,41 +9,44 @@ import android.util.Base64
  */
 object SecurityUtils {
 
-    // Simple XOR key - should be different from the one used in build.gradle.kts if possible,
-    // but for simplicity we'll keep them consistent.
+    private const val TAG = "SecurityUtils"
+
+    // Simple XOR key - MUST match the one in build.gradle.kts
     private const val XOR_KEY = "neurocomet_internal_security_key_2025"
 
     /**
-     * De-obfuscates a string that was obfuscated with XOR and Base64 encoded.
+     * De-obfuscates a string that was obfuscated with XOR and Hex encoded.
      */
     fun decrypt(obfuscated: String?): String {
-        if (obfuscated == null || obfuscated.isEmpty() || obfuscated == "null" || obfuscated == "\"\"") {
+        if (obfuscated.isNullOrEmpty() || obfuscated == "null" || obfuscated == "\"\"") {
             return ""
         }
 
         return try {
-            val decoded = Base64.decode(obfuscated, Base64.DEFAULT)
             val result = StringBuilder()
-            for (i in decoded.indices) {
-                result.append((decoded[i].toInt() xor XOR_KEY[i % XOR_KEY.length].toInt()).toChar())
+            for (i in 0 until obfuscated.length step 2) {
+                val hex = obfuscated.substring(i, i + 2)
+                val byte = hex.toInt(16)
+                val keyChar = XOR_KEY[(i / 2) % XOR_KEY.length].code
+                result.append((byte xor keyChar).toChar())
             }
             result.toString()
         } catch (e: Exception) {
+            Log.e(TAG, "Failed to decrypt string", e)
             ""
         }
     }
 
     /**
-     * Obfuscates a string using XOR and Base64 encoding.
-     * Use this to generate obfuscated strings for your local.properties if you want
-     * an extra layer of security, though build.gradle.kts will handle it automatically now.
+     * Obfuscates a string using XOR and Hex encoding.
      */
     fun encrypt(plain: String): String {
         val bytes = plain.toByteArray(Charsets.UTF_8)
-        val obfuscated = ByteArray(bytes.size)
+        val result = StringBuilder()
         for (i in bytes.indices) {
-            obfuscated[i] = (bytes[i].toInt() xor XOR_KEY[i % XOR_KEY.length].toInt()).toByte()
+            val obfuscatedByte = bytes[i].toInt() xor XOR_KEY[i % XOR_KEY.length].code
+            result.append(String.format("%02x", obfuscatedByte and 0xFF))
         }
-        return Base64.encodeToString(obfuscated, Base64.NO_WRAP)
+        return result.toString()
     }
 }

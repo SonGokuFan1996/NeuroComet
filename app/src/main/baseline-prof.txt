@@ -1,0 +1,86 @@
+# Baseline Profile for NeuroComet
+# These rules tell the Android runtime to AOT-compile these classes/methods
+# at install time, improving startup time and reducing jank on first launch.
+
+# Application startup
+HSPLcom/kyilmaz/neurocomet/NeuroCometApplication;->onCreate()V
+HSPLcom/kyilmaz/neurocomet/NeuroCometApplication;->restoreSavedLocale()V
+HSPLcom/kyilmaz/neurocomet/NeuroCometApplication;->initializeImageLoader()V
+HSPLcom/kyilmaz/neurocomet/ApplicationProvider;->init(Landroid/app/Application;)V
+
+# MainActivity - critical path
+HSPLcom/kyilmaz/neurocomet/MainActivity;->onCreate(Landroid/os/Bundle;)V
+HSPLcom/kyilmaz/neurocomet/MainActivity;->configureOrientationForDevice()V
+
+# Compose entry points
+HSPLcom/kyilmaz/neurocomet/MainActivityKt;->NeuroCometApp(**
+HSPLcom/kyilmaz/neurocomet/SplashScreenKt;->NeuroSplashScreen(**
+
+# Theme system - used on every frame
+HSPLcom/kyilmaz/neurocomet/ThemingKt;->**
+HSPLcom/kyilmaz/neurocomet/ThemeViewModel;->**
+HSPLcom/kyilmaz/neurocomet/ThemeComposablesKt;->**
+
+# Auth flow
+HSPLcom/kyilmaz/neurocomet/AuthScreenKt;->**
+HSPLcom/kyilmaz/neurocomet/AuthViewModel;->**
+
+# Feed - primary user screen
+HSPLcom/kyilmaz/neurocomet/FeedScreenKt;->**
+HSPLcom/kyilmaz/neurocomet/FeedViewModel;->**
+HSPLcom/kyilmaz/neurocomet/PostCardKt;->**
+
+# Navigation
+HSPLcom/kyilmaz/neurocomet/Screen;->**
+HSPLcom/kyilmaz/neurocomet/AdaptiveNavigationKt;->**
+
+# Image loading (Coil)
+HSPLcom/kyilmaz/neurocomet/CoilConfiguration;->**
+HSPLcoil/compose/**;->**
+HSPLcoil/ImageLoader;->**
+HSPLcoil/memory/MemoryCache;->**
+
+# Performance system
+HSPLcom/kyilmaz/neurocomet/PerformanceOptimizations;->**
+
+# Settings & credential storage
+HSPLcom/kyilmaz/neurocomet/SettingsManager;->**
+HSPLcom/kyilmaz/neurocomet/CredentialStorage;->**
+
+# Security
+HSPLcom/kyilmaz/neurocomet/SecurityManager;->**
+HSPLcom/kyilmaz/neurocomet/SecurityUtils;->**
+
+# Data models
+HSPLcom/kyilmaz/neurocomet/Post;->**
+HSPLcom/kyilmaz/neurocomet/User;->**
+HSPLcom/kyilmaz/neurocomet/Story;->**
+HSPLcom/kyilmaz/neurocomet/NotificationItem;->**
+
+# Serialization - used heavily during data loading
+HSPLkotlinx/serialization/**;->**
+
+# Ktor networking
+HSPLio/ktor/client/**;->**
+
+# Supabase
+HSPLio/github/jan/supabase/**;->**
+
+# Firebase Auth
+HSPLcom/google/firebase/auth/**;->**
+
+# AndroidX Core
+HSPLandroidx/core/**;->**
+HSPLandroidx/activity/**;->**
+HSPLandroidx/lifecycle/**;->**
+
+# Compose runtime & foundation - critical for first frame
+HSPLandroidx/compose/runtime/**;->**
+HSPLandroidx/compose/foundation/**;->**
+HSPLandroidx/compose/ui/**;->**
+HSPLandroidx/compose/material3/**;->**
+HSPLandroidx/compose/animation/**;->**
+
+# Navigation Compose
+HSPLandroidx/navigation/**;->**
+

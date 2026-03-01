@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Calm Waters Icon Foreground - Soothing ocean blues with wave motifs -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <group
+        android:translateX="54"
+        android:translateY="54">
+
+        <!-- Outer glow ring - soft cyan -->
+        <path
+            android:fillColor="#4DD0E1"
+            android:fillAlpha="0.15"
+            android:pathData="M 0,0 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" />
+
+        <!-- Middle glow ring - ocean blue -->
+        <path
+            android:fillColor="#00ACC1"
+            android:fillAlpha="0.25"
+            android:pathData="M 0,0 m -32,0 a 32,32 0 1,1 64,0 a 32,32 0 1,1 -64,0" />
+
+        <!-- Wave line 1 (top-left) - Light cyan with glow -->
+        <path
+            android:strokeColor="#80DEEA"
+            android:strokeAlpha="0.3"
+            android:strokeWidth="10"
+            android:strokeLineCap="round"
+            android:pathData="M -35,-30 Q -20,-20 -10,0 Q 0,15 0,0" />
+        <path
+            android:strokeColor="#4DD0E1"
+            android:strokeWidth="5"
+            android:strokeLineCap="round"
+            android:pathData="M -35,-30 Q -20,-20 -10,0 Q 0,15 0,0" />
+
+        <!-- Wave line 2 (top-right) - Teal with glow -->
+        <path
+            android:strokeColor="#26C6DA"
+            android:strokeAlpha="0.3"
+            android:strokeWidth="10"
+            android:strokeLineCap="round"
+            android:pathData="M 35,-30 Q 20,-20 10,0 Q 0,15 0,0" />
+        <path
+            android:strokeColor="#00BCD4"
+            android:strokeWidth="5"
+            android:strokeLineCap="round"
+            android:pathData="M 35,-30 Q 20,-20 10,0 Q 0,15 0,0" />
+
+        <!-- Wave line 3 (bottom) - Deep blue with glow -->
+        <path
+            android:strokeColor="#0097A7"
+            android:strokeAlpha="0.3"
+            android:strokeWidth="10"
+            android:strokeLineCap="round"
+            android:pathData="M 0,40 Q -10,25 0,10 Q 10,0 0,0" />
+        <path
+            android:strokeColor="#00838F"
+            android:strokeWidth="5"
+            android:strokeLineCap="round"
+            android:pathData="M 0,40 Q -10,25 0,10 Q 10,0 0,0" />
+
+        <!-- Water drop nodes - varying cyan shades -->
+        <path
+            android:fillColor="#4DD0E1"
+            android:pathData="M -35,-30 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+
+        <path
+            android:fillColor="#26C6DA"
+            android:pathData="M 35,-30 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+
+        <path
+            android:fillColor="#00ACC1"
+            android:pathData="M 0,40 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+
+        <!-- Center circle - Deep ocean teal -->
+        <path
+            android:fillColor="#00ACC1"
+            android:pathData="M 0,0 m -25,0 a 25,25 0 1,1 50,0 a 25,25 0 1,1 -50,0" />
+
+        <!-- Inner highlight - light wave reflection -->
+        <path
+            android:fillColor="#B2EBF2"
+            android:fillAlpha="0.7"
+            android:pathData="M -8,-8 m -8,0 a 8,8 0 1,1 16,0 a 8,8 0 1,1 -16,0" />
+    </group>
+</vector>

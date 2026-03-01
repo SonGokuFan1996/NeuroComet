@@ -212,7 +212,7 @@ class ResponsiveGridView extends StatelessWidget {
 }
 
 /// Platform-aware dialog that displays correctly on all screen sizes
-class ResponsiveDialog extends StatelessWidget {
+class AdaptiveDialog extends StatelessWidget {
   final String? title;
   final Widget content;
   final List<Widget>? actions;
@@ -220,7 +220,7 @@ class ResponsiveDialog extends StatelessWidget {
   final EdgeInsetsGeometry? contentPadding;
   final bool scrollable;
 
-  const ResponsiveDialog({
+  const AdaptiveDialog({
     super.key,
     this.title,
     required this.content,
@@ -258,7 +258,7 @@ class ResponsiveDialog extends StatelessWidget {
     return showDialog<T>(
       context: context,
       barrierDismissible: barrierDismissible,
-      builder: (context) => ResponsiveDialog(
+      builder: (context) => AdaptiveDialog(
         title: title,
         content: content,
         actions: actions,
@@ -346,7 +346,7 @@ class _MobileDialogSheet extends StatelessWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.4),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),

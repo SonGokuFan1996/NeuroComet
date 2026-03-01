@@ -713,9 +713,9 @@ def main():
     for lang_dir, translations in ALL_TRANSLATIONS.items():
         count = update_strings_file(lang_dir, translations)
         total += count
-        print(f"✓ {lang_dir}: Updated {count} strings")
+        print(f"v {lang_dir}: Updated {count} strings")
 
-    print(f"\n✅ Total: {total} strings updated")
+    print(f"\nTotal: {total} strings updated")
 
 
 if __name__ == '__main__':

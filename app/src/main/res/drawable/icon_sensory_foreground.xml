@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sensory Friendly Icon Foreground - Muted grays/soft colors for reduced stimulation -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <group
+        android:translateX="54"
+        android:translateY="54">
+
+        <!-- Outer glow ring - very soft gray -->
+        <path
+            android:fillColor="#9E9E9E"
+            android:fillAlpha="0.1"
+            android:pathData="M 0,0 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" />
+
+        <!-- Middle glow ring - soft gray -->
+        <path
+            android:fillColor="#757575"
+            android:fillAlpha="0.15"
+            android:pathData="M 0,0 m -32,0 a 32,32 0 1,1 64,0 a 32,32 0 1,1 -64,0" />
+
+        <!-- Gentle wave 1 (top-left) - Light gray -->
+        <path
+            android:strokeColor="#BDBDBD"
+            android:strokeAlpha="0.3"
+            android:strokeWidth="8"
+            android:strokeLineCap="round"
+            android:pathData="M -32,-32 Q -12,-8 0,0" />
+        <path
+            android:strokeColor="#9E9E9E"
+            android:strokeWidth="4"
+            android:strokeLineCap="round"
+            android:pathData="M -32,-32 Q -12,-8 0,0" />
+
+        <!-- Gentle wave 2 (top-right) - Warm gray -->
+        <path
+            android:strokeColor="#A1887F"
+            android:strokeAlpha="0.3"
+            android:strokeWidth="8"
+            android:strokeLineCap="round"
+            android:pathData="M 32,-32 Q 12,-8 0,0" />
+        <path
+            android:strokeColor="#8D6E63"
+            android:strokeWidth="4"
+            android:strokeLineCap="round"
+            android:pathData="M 32,-32 Q 12,-8 0,0" />
+
+        <!-- Gentle wave 3 (bottom) - Cool gray -->
+        <path
+            android:strokeColor="#90A4AE"
+            android:strokeAlpha="0.3"
+            android:strokeWidth="8"
+            android:strokeLineCap="round"
+            android:pathData="M 0,38 Q 0,12 0,0" />
+        <path
+            android:strokeColor="#78909C"
+            android:strokeWidth="4"
+            android:strokeLineCap="round"
+            android:pathData="M 0,38 Q 0,12 0,0" />
+
+        <!-- Soft nodes -->
+        <path
+            android:fillColor="#9E9E9E"
+            android:pathData="M -32,-32 m -4,0 a 4,4 0 1,1 8,0 a 4,4 0 1,1 -8,0" />
+
+        <path
+            android:fillColor="#8D6E63"
+            android:pathData="M 32,-32 m -4,0 a 4,4 0 1,1 8,0 a 4,4 0 1,1 -8,0" />
+
+        <path
+            android:fillColor="#78909C"
+            android:pathData="M 0,38 m -4,0 a 4,4 0 1,1 8,0 a 4,4 0 1,1 -8,0" />
+
+        <!-- Center circle - Muted charcoal -->
+        <path
+            android:fillColor="#616161"
+            android:pathData="M 0,0 m -25,0 a 25,25 0 1,1 50,0 a 25,25 0 1,1 -50,0" />
+
+        <!-- Inner highlight - soft light -->
+        <path
+            android:fillColor="#E0E0E0"
+            android:fillAlpha="0.5"
+            android:pathData="M -8,-8 m -8,0 a 8,8 0 1,1 16,0 a 8,8 0 1,1 -16,0" />
+    </group>
+</vector>
+
