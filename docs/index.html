@@ -95,14 +95,14 @@
             <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
                 <button class="w-64 h-16 flex items-center justify-center gap-4 bg-gray-900 dark:bg-black text-white border-2 border-gray-900 dark:border-black rounded-2xl transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1">
                     <i class="fa-brands fa-google-play text-3xl"></i>
-                    <div class="text-left flex flex-col justify-center" data-i18n="btn_android">
+                    <div class="text-start flex flex-col justify-center" data-i18n="btn_android">
                         <span class="text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1">Available on</span>
                         <span class="text-lg font-bold leading-none">Google Play</span>
                     </div>
                 </button>
                 <button class="w-64 h-16 flex items-center justify-center gap-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-2 border-gray-200 dark:border-gray-700 rounded-2xl transition-all shadow-sm hover:shadow-lg hover:-translate-y-1">
                     <i class="fa-brands fa-apple text-3xl"></i>
-                    <div class="text-left flex flex-col justify-center" data-i18n="btn_ios">
+                    <div class="text-start flex flex-col justify-center" data-i18n="btn_ios">
                         <span class="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1">Flutter Beta</span>
                         <span class="text-lg font-bold leading-none">App Store</span>
                     </div>
@@ -124,14 +124,14 @@
         </p>
 
         <div class="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto" id="lang-buttons">
-            <button onclick="changeLanguage('en')" class="lang-btn px-4 py-2 rounded-full bg-brand-500 text-white border border-brand-400 text-sm font-bold transition-colors">English</button>
-            <button onclick="changeLanguage('es')" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Español</button>
-            <button onclick="changeLanguage('fr')" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Français</button>
-            <button onclick="changeLanguage('de')" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Deutsch</button>
-            <button onclick="changeLanguage('ja')" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">日本語</button>
-            <button onclick="changeLanguage('ko')" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">한국어</button>
-            <button onclick="changeLanguage('ar')" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">العربية</button>
-            <button onclick="changeLanguage('tr')" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Türkçe</button>
+            <button onclick="changeLanguage('en', this)" class="lang-btn px-4 py-2 rounded-full bg-brand-500 text-white border border-brand-400 text-sm font-bold transition-colors">English</button>
+            <button onclick="changeLanguage('es', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Español</button>
+            <button onclick="changeLanguage('fr', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Français</button>
+            <button onclick="changeLanguage('de', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Deutsch</button>
+            <button onclick="changeLanguage('ja', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">日本語</button>
+            <button onclick="changeLanguage('ko', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">한국어</button>
+            <button onclick="changeLanguage('ar', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">العربية</button>
+            <button onclick="changeLanguage('tr', this)" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Türkçe</button>
         </div>
     </div>
 </section>
@@ -279,14 +279,13 @@
         }
     };
 
-    function changeLanguage(langCode) {
+    // Added clickedBtn parameter to fix the Javascript scoping error
+    function changeLanguage(langCode, clickedBtn) {
         const container = document.getElementById('translation-container');
 
-        // UI fade out
         container.style.opacity = '0';
 
         setTimeout(() => {
-            // Update elements with data-i18n attributes
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (translations[langCode] && translations[langCode][key]) {
@@ -294,26 +293,24 @@
                 }
             });
 
-            // Handle RTL for Arabic
             if(langCode === 'ar') {
                 document.documentElement.setAttribute('dir', 'rtl');
             } else {
                 document.documentElement.setAttribute('dir', 'ltr');
             }
 
-            // Update Button Styling
             document.querySelectorAll('.lang-btn').forEach(btn => {
                 btn.className = "lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors";
             });
-            // Highlight active button (find the one clicked)
-            event.target.className = "lang-btn px-4 py-2 rounded-full bg-brand-500 text-white border border-brand-400 text-sm font-bold transition-colors";
 
-            // UI fade in
+            // Using the specific clicked object instead of event.target
+            if(clickedBtn) {
+                clickedBtn.className = "lang-btn px-4 py-2 rounded-full bg-brand-500 text-white border border-brand-400 text-sm font-bold transition-colors";
+            }
+
             container.style.opacity = '1';
-
-            // Scroll back up to see the translation
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        }, 300); // matches CSS transition time
+        }, 300);
     }
 </script>
 </body>
