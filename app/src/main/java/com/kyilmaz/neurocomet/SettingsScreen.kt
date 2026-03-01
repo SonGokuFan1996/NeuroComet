@@ -273,7 +273,7 @@ fun SettingsScreen(
                 title = stringResource(R.string.settings_privacy_policy),
                 subtitle = stringResource(R.string.settings_privacy_policy_desc),
                 onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://songokufan1996.github.io/NeuroComet/privacy.html"))
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://neurocomet.github.io/NeuroComet/"))
                     context.startActivity(intent)
                 },
                 icon = Icons.Default.Lock
@@ -282,7 +282,7 @@ fun SettingsScreen(
                 title = stringResource(R.string.settings_terms),
                 subtitle = stringResource(R.string.settings_terms_desc),
                 onClick = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://songokufan1996.github.io/NeuroComet/terms.html"))
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://neurocomet.github.io/NeuroComet/"))
                     context.startActivity(intent)
                 }
             )
