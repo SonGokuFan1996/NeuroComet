@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy | NeuroComet</title>
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: { brand: { 50: '#f0f5ff', 500: '#3b82f6', 600: '#2563eb', 900: '#0f172a' } }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans text-gray-800 dark:text-gray-200 antialiased bg-[#f8fafc] dark:bg-gray-900 transition-colors duration-300">
+
+<nav class="w-full z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-800/50 sticky top-0">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-20">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-meteor"></i>
+                </div>
+                <span class="font-extrabold text-xl text-gray-900 dark:text-white">NeuroComet</span>
+            </a>
+            <a href="index.html" class="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-brand-600 transition-colors">
+                <i class="fa-solid fa-arrow-left mr-2"></i>Back to Home
+            </a>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="mb-12">
+        <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">Privacy Policy</h1>
+        <p class="text-gray-500 dark:text-gray-400">Last Updated: <script>document.write(new Date().toLocaleDateString())</script></p>
+    </div>
+
+    <div class="space-y-8 text-gray-600 dark:text-gray-300 leading-relaxed">
+        <section>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">1. Introduction</h2>
+            <p>Welcome to NeuroComet. We are committed to protecting your privacy and ensuring a safe, secure digital environment tailored to the neurodivergent community. This Privacy Policy explains how we collect, use, and safeguard your information when you use our mobile applications (Android/iOS) and website.</p>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">2. Information We Collect</h2>
+            <ul class="list-disc pl-5 space-y-2 mt-2">
+                <li><strong>Account Information:</strong> When you register, we collect authentication data via our backend provider (Supabase), which may include your email address and profile credentials.</li>
+                <li><strong>App Activity & Preferences:</strong> We store your UI theme preferences (Calm, Focus, Energy), "Spoon" energy tracking logs, and app settings locally on your device to ensure a consistent experience.</li>
+                <li><strong>Social Feed Data:</strong> Posts, stories, and interactions within the community feed are stored securely on our servers. This data is subject to rigorous automated Content Filtering.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">3. Gemini AI Mock Call Simulator (Audio Data)</h2>
+            <p>Our Mock Call Practice feature utilizes WebRTC and Google's Gemini AI. When using this feature:</p>
+            <ul class="list-disc pl-5 space-y-2 mt-2">
+                <li>Microphone access is required locally on your device.</li>
+                <li>Voice data is processed in real-time to facilitate the AI conversation.</li>
+                <li><strong>We do not record, store, or sell your voice data.</strong> Transcripts or audio from practice calls are transient and strictly used to simulate the conversational experience.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">4. Parental Controls & Caregiver Features</h2>
+            <p>NeuroComet includes optional linked accounts for caregivers. If Parental Controls are activated, a designated caregiver may have visibility into specific app usages or the ability to restrict certain content/DMs to protect the primary user from harm or overstimulation.</p>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">5. Data Security & Content Filtering</h2>
+            <p>We use end-to-end security utility frameworks to protect your data. Furthermore, our community guidelines are enforced by strict Direct Message (DM) privacy filters and trigger-word blocking to maintain a safe ecosystem. Data is encrypted in transit and at rest using industry-standard protocols.</p>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">6. Contact Us</h2>
+            <p>If you have any questions or concerns about this Privacy Policy or our data practices, please contact us via our GitHub Repository or official support channels.</p>
+        </section>
+    </div>
+</main>
+
+<footer class="bg-gray-50 dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 py-8 text-center mt-12">
+    <p class="text-gray-400 dark:text-gray-500 text-sm">
+        &copy; <script>document.write(new Date().getFullYear())</script> NeuroComet. All rights reserved.
+    </p>
+</footer>
+</body>
+</html>

@@ -1,118 +1,110 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="scroll-smooth" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NeuroComet | A Universe Built for Your Mind</title>
+
+    <script>
+        // Check Dark Mode
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
-                    colors: {
-                        brand: { 50: '#f0f5ff', 100: '#e5edff', 500: '#3b82f6', 600: '#2563eb', 900: '#0f172a' },
-                        themeCalm: '#0d9488',
-                        themeFocus: '#4f46e5',
-                        themeEnergy: '#f59e0b',
-                        themeSensory: '#8b5cf6'
-                    },
-                    animation: {
-                        'float': 'float 6s ease-in-out infinite',
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-20px)' },
-                        }
-                    }
+                    colors: { brand: { 50: '#f0f5ff', 500: '#3b82f6', 600: '#2563eb', 900: '#0f172a' } },
+                    animation: { 'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite' },
                 }
             }
         }
     </script>
     <style>
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-        }
-        .text-gradient {
-            background: linear-gradient(135deg, #2563eb 0%, #8b5cf6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .bg-pride-gradient {
-            background: linear-gradient(45deg, #ef4444, #f59e0b, #10b981, #3b82f6, #8b5cf6);
-        }
-
-        /* Grid transitions */
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(229, 231, 235, 0.5); }
+        .dark .glass-panel { background: rgba(15, 23, 42, 0.8); border-bottom: 1px solid rgba(51, 65, 85, 0.5); }
+        .text-gradient { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .bg-pride-gradient { background: linear-gradient(45deg, #ef4444, #f59e0b, #10b981, #3b82f6, #8b5cf6); }
         .bento-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .bento-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); }
+        .dark .bento-card:hover { box-shadow: 0 20px 40px -10px rgba(0,0,0,0.4); }
+
+        /* Language Transition Fade */
+        .fade-text { transition: opacity 0.3s ease; }
     </style>
 </head>
-<body class="font-sans text-gray-800 antialiased bg-[#f8fafc] selection:bg-brand-500 selection:text-white overflow-x-hidden">
+<body class="font-sans text-gray-800 dark:text-gray-200 antialiased bg-[#f8fafc] dark:bg-gray-900 selection:bg-brand-500 selection:text-white overflow-x-hidden transition-colors duration-300">
 
-<nav class="fixed w-full z-50 glass-panel transition-all duration-300 border-b border-gray-200/50">
+<nav class="fixed w-full z-50 glass-panel transition-all duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-20">
             <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer group">
                 <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform duration-300">
                     <i class="fa-solid fa-meteor text-2xl"></i>
                 </div>
-                <span class="font-extrabold text-2xl tracking-tight text-gray-900">NeuroComet</span>
+                <span class="font-extrabold text-2xl tracking-tight text-gray-900 dark:text-white">NeuroComet</span>
             </div>
-            <div class="hidden lg:flex space-x-8 items-center bg-gray-900/5 px-6 py-2.5 rounded-full border border-gray-900/10">
-                <a href="#ecosystem" class="text-sm font-semibold text-gray-600 hover:text-brand-600 transition-colors">Ecosystem</a>
-                <a href="#safety" class="text-sm font-semibold text-gray-600 hover:text-brand-600 transition-colors">Safety</a>
-                <a href="#global" class="text-sm font-semibold text-gray-600 hover:text-brand-600 transition-colors">Global</a>
+            <div class="hidden lg:flex space-x-8 items-center bg-gray-900/5 dark:bg-white/5 px-6 py-2.5 rounded-full border border-gray-900/10 dark:border-white/10">
+                <a href="#ecosystem" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Ecosystem</a>
+                <a href="#safety" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Safety</a>
+                <a href="#global" class="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Global</a>
             </div>
-            <div class="hidden md:flex items-center gap-4">
-                <a href="#" class="text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors">Log In</a>
-                <a href="#download" class="bg-gray-900 hover:bg-brand-600 text-white px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-xl transform hover:-translate-y-0.5">Get the App</a>
+            <div class="flex items-center gap-4">
+                <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full text-lg p-2.5 transition-colors">
+                    <i id="theme-toggle-dark-icon" class="fa-solid fa-moon hidden"></i>
+                    <i id="theme-toggle-light-icon" class="fa-solid fa-sun hidden"></i>
+                </button>
+                <a href="#download" class="hidden md:block bg-gray-900 dark:bg-brand-600 hover:bg-brand-600 dark:hover:bg-brand-500 text-white px-6 py-3 rounded-xl font-bold text-sm transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5" data-i18n="nav_cta">Get the App</a>
             </div>
         </div>
     </div>
 </nav>
 
-<section class="relative pt-40 pb-20 lg:pt-52 lg:pb-32 overflow-hidden">
+<section class="relative pt-40 pb-20 lg:pt-52 lg:pb-32 overflow-hidden fade-text" id="translation-container">
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none -z-10">
-        <div class="absolute top-20 left-0 w-[500px] h-[500px] bg-blue-400/20 rounded-full blur-[100px] mix-blend-multiply animate-pulse-slow"></div>
-        <div class="absolute top-40 right-0 w-[400px] h-[400px] bg-purple-400/20 rounded-full blur-[100px] mix-blend-multiply animate-pulse-slow" style="animation-delay: 2s;"></div>
+        <div class="absolute top-20 left-0 w-[500px] h-[500px] bg-blue-400/20 dark:bg-brand-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
+        <div class="absolute top-40 right-0 w-[400px] h-[400px] bg-purple-400/20 dark:bg-purple-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 2s;"></div>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="text-center max-w-4xl mx-auto">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 border border-gray-200 text-gray-600 font-semibold text-xs mb-8 shadow-sm backdrop-blur-sm">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold text-xs mb-8 shadow-sm backdrop-blur-sm">
                     <span class="flex h-2 w-2 relative">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                     </span>
-                Now expanding to iOS via Flutter & Global Translations
+                <span data-i18n="hero_badge">Now expanding to iOS via Flutter</span>
             </div>
-            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 text-gray-900 leading-[1.1]">
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 text-gray-900 dark:text-white leading-[1.1]" data-i18n="hero_title">
                 Your Digital Environment,<br />
                 <span class="text-gradient">Rewired for You.</span>
             </h1>
-            <p class="text-xl text-gray-500 mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
-                Experience an adaptive ecosystem featuring dynamic sensory themes, AI-driven communication practice, and a secure social space tailored to the neurodivergent community.
+            <p class="text-xl text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed font-medium" data-i18n="hero_subtitle">
+                Experience an adaptive ecosystem featuring dynamic sensory themes, AI-driven communication practice, and a secure social space.
             </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <button class="flex items-center justify-center gap-3 bg-gray-900 hover:bg-gray-800 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1">
-                    <i class="fa-brands fa-google-play text-2xl"></i>
-                    <div class="text-left">
-                        <div class="text-[10px] font-normal opacity-80 uppercase tracking-wider">Available on</div>
-                        <div class="leading-none text-base">Google Play</div>
+
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <button class="w-64 h-16 flex items-center justify-center gap-4 bg-gray-900 dark:bg-black text-white border-2 border-gray-900 dark:border-black rounded-2xl transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1">
+                    <i class="fa-brands fa-google-play text-3xl"></i>
+                    <div class="text-left flex flex-col justify-center" data-i18n="btn_android">
+                        <span class="text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1">Available on</span>
+                        <span class="text-lg font-bold leading-none">Google Play</span>
                     </div>
                 </button>
-                <button class="flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-200 px-8 py-4 rounded-2xl font-semibold text-lg transition-all shadow-sm hover:shadow-lg hover:-translate-y-1">
+                <button class="w-64 h-16 flex items-center justify-center gap-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-2 border-gray-200 dark:border-gray-700 rounded-2xl transition-all shadow-sm hover:shadow-lg hover:-translate-y-1">
                     <i class="fa-brands fa-apple text-3xl"></i>
-                    <div class="text-left">
-                        <div class="text-[10px] font-bold text-brand-600 uppercase tracking-wider">Flutter Beta</div>
-                        <div class="leading-none text-base">iOS App Store</div>
+                    <div class="text-left flex flex-col justify-center" data-i18n="btn_ios">
+                        <span class="text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1">Flutter Beta</span>
+                        <span class="text-lg font-bold leading-none">App Store</span>
                     </div>
                 </button>
             </div>
@@ -120,189 +112,31 @@
     </div>
 </section>
 
-<section id="ecosystem" class="py-24 bg-white relative rounded-[3rem] shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.05)]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="mb-16">
-            <h2 class="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">The NeuroComet Ecosystem</h2>
-            <p class="text-xl text-gray-500">Every feature is architected from the ground up for accessibility, safety, and growth.</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-[280px]">
-
-            <div class="bento-card bg-gray-50 rounded-3xl p-8 border border-gray-100 col-span-1 md:col-span-2 lg:col-span-2 row-span-1 md:row-span-2 flex flex-col relative overflow-hidden group">
-                <div class="relative z-10 flex-grow">
-                    <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center mb-6">
-                        <i class="fa-solid fa-palette text-xl text-brand-600"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Adaptive Sensory Themes</h3>
-                    <p class="text-gray-600 mb-6 max-w-sm">
-                        Switch UI profiles seamlessly via <code>ThemeComposables</code>. We dynamically alter contrast, fonts, and motion to match your current cognitive state.
-                    </p>
-                </div>
-                <div class="w-full bg-white rounded-t-2xl shadow-xl border border-gray-200 p-4 mt-auto transition-colors duration-500" id="theme-preview-box">
-                    <div class="flex gap-2 mb-4">
-                        <button onclick="setTheme('calm')" class="w-8 h-8 rounded-full bg-teal-500 ring-2 ring-offset-2 ring-transparent hover:ring-teal-500 transition-all shadow-sm" title="Calm Mode"></button>
-                        <button onclick="setTheme('focus')" class="w-8 h-8 rounded-full bg-indigo-500 ring-2 ring-offset-2 ring-transparent hover:ring-indigo-500 transition-all shadow-sm" title="Focus Mode"></button>
-                        <button onclick="setTheme('energy')" class="w-8 h-8 rounded-full bg-amber-500 ring-2 ring-offset-2 ring-transparent hover:ring-amber-500 transition-all shadow-sm" title="Energy Mode"></button>
-                        <button onclick="setTheme('pride')" class="w-8 h-8 rounded-full bg-pride-gradient ring-2 ring-offset-2 ring-transparent hover:ring-pink-500 transition-all shadow-sm" title="Pride Mode"></button>
-                        <button onclick="setTheme('sensory')" class="w-8 h-8 rounded-full bg-purple-400 ring-2 ring-offset-2 ring-transparent hover:ring-purple-400 transition-all shadow-sm" title="Sensory Mode"></button>
-                    </div>
-                    <div class="h-4 w-3/4 rounded-md bg-gray-100 mb-2 theme-element transition-colors"></div>
-                    <div class="h-4 w-1/2 rounded-md bg-gray-100 theme-element transition-colors"></div>
-                </div>
-            </div>
-
-            <div class="bento-card bg-orange-50 rounded-3xl p-8 border border-orange-100 col-span-1 md:col-span-1 lg:col-span-1 row-span-1 flex flex-col relative overflow-hidden">
-                <i class="fa-solid fa-spoon absolute -right-4 -bottom-4 text-9xl text-orange-500/10 rotate-[-15deg]"></i>
-                <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center mb-6 relative z-10">
-                    <i class="fa-solid fa-battery-three-quarters text-xl text-orange-500"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 relative z-10">Spoon Tracking</h3>
-                <p class="text-gray-600 text-sm relative z-10">
-                    Monitor daily energy levels with home screen widgets. Track stim breaks, mood fluctuations, and daily affirmations instantly.
-                </p>
-            </div>
-
-            <div class="bento-card bg-emerald-50 rounded-3xl p-8 border border-emerald-100 col-span-1 md:col-span-1 lg:col-span-1 row-span-1 flex flex-col relative overflow-hidden">
-                <i class="fa-solid fa-gamepad absolute -right-4 -top-4 text-9xl text-emerald-500/10 rotate-[15deg]"></i>
-                <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center mb-6 relative z-10">
-                    <i class="fa-solid fa-puzzle-piece text-xl text-emerald-500"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2 relative z-10">NeuroGames</h3>
-                <p class="text-gray-600 text-sm relative z-10">
-                    Interactive tutorials and gamified coping mechanisms built natively to assist with focus and emotional regulation.
-                </p>
-            </div>
-
-            <div class="bento-card bg-gray-900 text-white rounded-3xl p-8 border border-gray-800 col-span-1 md:col-span-2 lg:col-span-2 row-span-1 relative overflow-hidden group">
-                <div class="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-brand-600/30 to-transparent pointer-events-none"></div>
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center border border-gray-700">
-                        <i class="fa-solid fa-phone-volume text-xl text-brand-400 animate-pulse"></i>
-                    </div>
-                    <div class="text-xs font-bold tracking-wider text-brand-400 uppercase bg-brand-400/10 px-3 py-1 rounded-full">Gemini AI Powered</div>
-                </div>
-                <h3 class="text-2xl font-bold mb-2">Mock Call Simulator</h3>
-                <p class="text-gray-400 max-w-md text-sm leading-relaxed">
-                    Experiencing phone anxiety? Practice real-world conversations (doctors, interviews) in a safe, AI-moderated WebRTC voice environment before making the real call.
-                </p>
-            </div>
-
-        </div>
-    </div>
-</section>
-
-<section id="safety" class="py-24 bg-[#f8fafc] overflow-hidden">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col lg:flex-row items-center gap-16">
-            <div class="w-full lg:w-1/2 relative">
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-green-200 to-brand-200 rounded-full blur-3xl opacity-40 -z-10"></div>
-
-                <div class="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-2xl relative z-10 transform -rotate-2 hover:rotate-0 transition-transform duration-500">
-                    <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center">
-                                <i class="fa-solid fa-shield-halved"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-gray-900">Safety Dashboard</h4>
-                                <p class="text-xs text-gray-500">SecurityUtils Active</p>
-                            </div>
-                        </div>
-                        <div class="w-12 h-6 bg-green-500 rounded-full relative">
-                            <div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
-                        </div>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                            <span class="font-medium text-sm text-gray-700">DM Privacy Filters</span>
-                            <i class="fa-solid fa-lock text-gray-400"></i>
-                        </div>
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                            <span class="font-medium text-sm text-gray-700">Parental/Caregiver Controls</span>
-                            <i class="fa-solid fa-user-group text-gray-400"></i>
-                        </div>
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-red-100">
-                            <span class="font-medium text-sm text-red-600">Trigger Word Blocking</span>
-                            <i class="fa-solid fa-ban text-red-400"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="w-full lg:w-1/2">
-                <h2 class="text-4xl lg:text-5xl font-extrabold text-gray-900 leading-tight mb-6">
-                    Uncompromising End-to-End Safety.
-                </h2>
-                <p class="text-lg text-gray-600 leading-relaxed mb-8">
-                    Social interaction shouldn't mean exposure to harm. We’ve rebuilt the social experience using custom <code>SafetyModels</code> and rigorous <code>ContentFiltering</code> to ensure the NeuroComet feed remains a strictly moderated, trigger-free sanctuary.
-                </p>
-                <ul class="space-y-6">
-                    <li class="flex items-start gap-4">
-                        <div class="w-10 h-10 rounded-full bg-blue-50 text-brand-600 flex items-center justify-center shrink-0">
-                            <i class="fa-solid fa-layer-group"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-gray-900 text-lg">Universal Scaffold Architecture</h4>
-                            <p class="text-gray-600 text-sm mt-1">Consistent, accessible layouts across Android and iOS, preventing cognitive fatigue when switching devices.</p>
-                        </div>
-                    </li>
-                    <li class="flex items-start gap-4">
-                        <div class="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                            <i class="fa-solid fa-eye-slash"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-gray-900 text-lg">Caregiver Screen Blocking</h4>
-                            <p class="text-gray-600 text-sm mt-1">Optional linked accounts with robust Parental Control modules, allowing trusted guardians to assist in navigating complex digital scenarios safely.</p>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section id="global" class="py-24 bg-gray-900 text-white relative overflow-hidden">
-    <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand-500 via-gray-900 to-gray-900"></div>
+<section id="global" class="py-24 bg-gray-900 dark:bg-black text-white relative overflow-hidden transition-colors duration-300">
+    <div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand-500 via-transparent to-transparent"></div>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
         <div class="w-16 h-16 bg-white/10 rounded-2xl mx-auto flex items-center justify-center mb-8 backdrop-blur-md border border-white/20">
             <i class="fa-solid fa-earth-americas text-3xl text-brand-400"></i>
         </div>
         <h2 class="text-4xl md:text-5xl font-extrabold mb-6">Speak your mind.<br/><span class="text-brand-400">In your language.</span></h2>
         <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-12">
-            Neurodiversity is global. Utilizing automated mass-translation pipelines, NeuroComet is fully localized into over 15+ languages.
+            Click a language below to instantly translate the Hero Section above.
         </p>
 
-        <div class="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
-            <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/20 transition-colors cursor-default">English (US/UK/AU)</span>
-            <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/20 transition-colors cursor-default">Español</span>
-            <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/20 transition-colors cursor-default">Français</span>
-            <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/20 transition-colors cursor-default">Deutsch</span>
-            <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/20 transition-colors cursor-default">日本語</span>
-            <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/20 transition-colors cursor-default">한국어</span>
-            <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/20 transition-colors cursor-default">العربية</span>
-            <span class="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/20 transition-colors cursor-default">Türkçe</span>
-            <span class="px-4 py-2 rounded-full text-brand-400 text-sm font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-plus"></i> Many more
-                </span>
+        <div class="flex flex-wrap justify-center gap-3 max-w-3xl mx-auto" id="lang-buttons">
+            <button onclick="changeLanguage('en')" class="lang-btn px-4 py-2 rounded-full bg-brand-500 text-white border border-brand-400 text-sm font-bold transition-colors">English</button>
+            <button onclick="changeLanguage('es')" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Español</button>
+            <button onclick="changeLanguage('fr')" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Français</button>
+            <button onclick="changeLanguage('de')" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Deutsch</button>
+            <button onclick="changeLanguage('ja')" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">日本語</button>
+            <button onclick="changeLanguage('ko')" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">한국어</button>
+            <button onclick="changeLanguage('ar')" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">العربية</button>
+            <button onclick="changeLanguage('tr')" class="lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors">Türkçe</button>
         </div>
     </div>
 </section>
 
-<section id="download" class="py-24 bg-white text-center">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6">Find your orbit today.</h2>
-        <p class="text-xl text-gray-500 mb-10 max-w-2xl mx-auto">
-            Download NeuroComet and experience a platform built explicitly for the way your mind works.
-        </p>
-        <button class="bg-brand-600 hover:bg-brand-700 text-white px-10 py-5 rounded-full font-bold text-lg transition-all shadow-[0_10px_30px_-10px_rgba(37,99,235,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(37,99,235,0.7)] transform hover:-translate-y-1">
-            Download for Android & iOS
-        </button>
-        <p class="text-gray-400 text-sm mt-6 font-medium">Powered by Kotlin, Flutter, and Supabase.</p>
-    </div>
-</section>
-
-<footer class="bg-gray-50 border-t border-gray-200 pt-16 pb-8">
+<footer class="bg-gray-50 dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 pt-16 pb-8 transition-colors duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
             <div class="col-span-1 md:col-span-2">
@@ -310,88 +144,177 @@
                     <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white">
                         <i class="fa-solid fa-meteor text-sm"></i>
                     </div>
-                    <span class="font-extrabold text-xl text-gray-900 tracking-tight">NeuroComet</span>
+                    <span class="font-extrabold text-xl text-gray-900 dark:text-white tracking-tight">NeuroComet</span>
                 </div>
-                <p class="text-gray-500 max-w-md text-sm leading-relaxed">
+                <p class="text-gray-500 dark:text-gray-400 max-w-md text-sm leading-relaxed">
                     A dedicated, multi-platform environment giving the neurodivergent community the tools, safety, and customizable environment they deserve.
                 </p>
             </div>
             <div>
-                <h4 class="font-bold text-gray-900 mb-4 tracking-wide">Platform</h4>
+                <h4 class="font-bold text-gray-900 dark:text-white mb-4 tracking-wide">Platform</h4>
                 <ul class="space-y-3 text-sm">
-                    <li><a href="#" class="text-gray-500 hover:text-brand-600 transition-colors font-medium">Sensory Customization</a></li>
-                    <li><a href="#" class="text-gray-500 hover:text-brand-600 transition-colors font-medium">Mock Call AI</a></li>
-                    <li><a href="#" class="text-gray-500 hover:text-brand-600 transition-colors font-medium">NeuroGames</a></li>
-                    <li><a href="#" class="text-gray-500 hover:text-brand-600 transition-colors font-medium">Safety Dashboard</a></li>
+                    <li><a href="#" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors font-medium">Sensory Customization</a></li>
+                    <li><a href="#" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors font-medium">Mock Call AI</a></li>
+                    <li><a href="#" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors font-medium">Safety Dashboard</a></li>
                 </ul>
             </div>
             <div>
-                <h4 class="font-bold text-gray-900 mb-4 tracking-wide">Resources</h4>
+                <h4 class="font-bold text-gray-900 dark:text-white mb-4 tracking-wide">Resources</h4>
                 <ul class="space-y-3 text-sm">
-                    <li><a href="#" class="text-gray-500 hover:text-brand-600 transition-colors font-medium">Parental Guide</a></li>
-                    <li><a href="#" class="text-gray-500 hover:text-brand-600 transition-colors font-medium">Privacy Policy</a></li>
-                    <li><a href="#" class="text-gray-500 hover:text-brand-600 transition-colors font-medium">Terms of Service</a></li>
-                    <li><a href="#" class="text-gray-500 hover:text-brand-600 transition-colors font-medium">GitHub Repository</a></li>
+                    <li><a href="#" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors font-medium">Parental Guide</a></li>
+                    <li><a href="privacy.html" class="text-gray-900 dark:text-white font-bold hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Privacy Policy</a></li>
+                    <li><a href="#" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors font-medium">Terms of Service</a></li>
+                    <li><a href="https://github.com/songokufan1996/neurocomet" class="text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors font-medium">GitHub Repository</a></li>
                 </ul>
             </div>
         </div>
-        <div class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-gray-400 text-sm font-medium">
+        <div class="border-t border-gray-200 dark:border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-gray-400 dark:text-gray-500 text-sm font-medium">
                 &copy; <script>document.write(new Date().getFullYear())</script> NeuroComet. All rights reserved.
             </p>
-            <div class="flex space-x-6">
-                <a href="#" class="text-gray-400 hover:text-gray-900 transition-colors"><i class="fa-brands fa-twitter text-lg"></i></a>
-                <a href="#" class="text-gray-400 hover:text-gray-900 transition-colors"><i class="fa-brands fa-github text-lg"></i></a>
-                <a href="#" class="text-gray-400 hover:text-gray-900 transition-colors"><i class="fa-brands fa-discord text-lg"></i></a>
-            </div>
         </div>
     </div>
 </footer>
 
 <script>
-    function setTheme(theme) {
-        const previewBox = document.getElementById('theme-preview-box');
-        const elements = document.querySelectorAll('.theme-element');
+    // --- Dark Mode Logic ---
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+    const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
 
-        // Reset classes
-        previewBox.className = "w-full rounded-t-2xl shadow-xl border p-4 mt-auto transition-colors duration-500";
-        elements.forEach(el => el.className = "h-4 rounded-md transition-colors theme-element");
-
-        switch(theme) {
-            case 'calm':
-                previewBox.classList.add('bg-teal-50', 'border-teal-100');
-                elements[0].classList.add('bg-teal-200', 'w-3/4', 'mb-2');
-                elements[1].classList.add('bg-teal-300', 'w-1/2');
-                break;
-            case 'focus':
-                previewBox.classList.add('bg-indigo-50', 'border-indigo-100');
-                elements[0].classList.add('bg-indigo-200', 'w-3/4', 'mb-2');
-                elements[1].classList.add('bg-indigo-300', 'w-1/2');
-                break;
-            case 'energy':
-                previewBox.classList.add('bg-amber-50', 'border-amber-100');
-                elements[0].classList.add('bg-amber-200', 'w-3/4', 'mb-2');
-                elements[1].classList.add('bg-amber-300', 'w-1/2');
-                break;
-            case 'pride':
-                previewBox.classList.add('bg-gray-900', 'border-gray-800');
-                elements[0].classList.add('bg-gradient-to-r', 'from-red-400', 'to-yellow-400', 'w-3/4', 'mb-2');
-                elements[1].classList.add('bg-gradient-to-r', 'from-green-400', 'to-blue-400', 'w-1/2');
-                break;
-            case 'sensory':
-                previewBox.classList.add('bg-purple-900', 'border-purple-800');
-                elements[0].classList.add('bg-purple-300', 'w-3/4', 'mb-2', 'opacity-50');
-                elements[1].classList.add('bg-purple-400', 'w-1/2', 'opacity-50');
-                break;
-            default:
-                previewBox.classList.add('bg-white', 'border-gray-200');
-                elements[0].classList.add('bg-gray-100', 'w-3/4', 'mb-2');
-                elements[1].classList.add('bg-gray-200', 'w-1/2');
-        }
+    if (document.documentElement.classList.contains('dark')) {
+        themeToggleLightIcon.classList.remove('hidden');
+    } else {
+        themeToggleDarkIcon.classList.remove('hidden');
     }
 
-    // Initialize default theme state
-    setTheme('default');
+    themeToggleBtn.addEventListener('click', function() {
+        themeToggleDarkIcon.classList.toggle('hidden');
+        themeToggleLightIcon.classList.toggle('hidden');
+
+        if (localStorage.getItem('color-theme')) {
+            if (localStorage.getItem('color-theme') === 'light') {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+            }
+        } else {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+            }
+        }
+    });
+
+    // --- Internationalization (i18n) Engine ---
+    const translations = {
+        en: {
+            nav_cta: "Get the App",
+            hero_badge: "Now expanding to iOS via Flutter",
+            hero_title: "Your Digital Environment,<br /><span class=\"text-gradient\">Rewired for You.</span>",
+            hero_subtitle: "Experience an adaptive ecosystem featuring dynamic sensory themes, AI-driven communication practice, and a secure social space.",
+            btn_android: "<span class=\"text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1\">Available on</span><span class=\"text-lg font-bold leading-none\">Google Play</span>",
+            btn_ios: "<span class=\"text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1\">Flutter Beta</span><span class=\"text-lg font-bold leading-none\">App Store</span>"
+        },
+        es: {
+            nav_cta: "Descargar",
+            hero_badge: "Ahora expandiéndose a iOS con Flutter",
+            hero_title: "Tu Entorno Digital,<br /><span class=\"text-gradient\">Reconectado para Ti.</span>",
+            hero_subtitle: "Experimenta un ecosistema adaptativo con temas sensoriales dinámicos, práctica de comunicación por IA y un espacio social seguro.",
+            btn_android: "<span class=\"text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1\">Disponible en</span><span class=\"text-lg font-bold leading-none\">Google Play</span>",
+            btn_ios: "<span class=\"text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1\">Beta de Flutter</span><span class=\"text-lg font-bold leading-none\">App Store</span>"
+        },
+        fr: {
+            nav_cta: "Obtenir l'Appli",
+            hero_badge: "En expansion vers iOS via Flutter",
+            hero_title: "Votre Environnement Numérique,<br /><span class=\"text-gradient\">Recâblé pour Vous.</span>",
+            hero_subtitle: "Découvrez un écosystème adaptatif avec des thèmes sensoriels, une pratique de la communication par IA et un espace social sécurisé.",
+            btn_android: "<span class=\"text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1\">Disponible sur</span><span class=\"text-lg font-bold leading-none\">Google Play</span>",
+            btn_ios: "<span class=\"text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1\">Bêta Flutter</span><span class=\"text-lg font-bold leading-none\">App Store</span>"
+        },
+        de: {
+            nav_cta: "App holen",
+            hero_badge: "Jetzt auch für iOS über Flutter",
+            hero_title: "Deine digitale Umgebung,<br /><span class=\"text-gradient\">Neu vernetzt für dich.</span>",
+            hero_subtitle: "Erlebe ein adaptives Ökosystem mit dynamischen sensorischen Themen, KI-gesteuerter Kommunikation und einem sicheren sozialen Raum.",
+            btn_android: "<span class=\"text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1\">Erhältlich bei</span><span class=\"text-lg font-bold leading-none\">Google Play</span>",
+            btn_ios: "<span class=\"text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1\">Flutter Beta</span><span class=\"text-lg font-bold leading-none\">App Store</span>"
+        },
+        tr: {
+            nav_cta: "Uygulamayı İndir",
+            hero_badge: "Şimdi Flutter ile iOS'ta",
+            hero_title: "Dijital Dünyanız,<br /><span class=\"text-gradient\">Zihniniz İçin Yeniden Tasarlandı.</span>",
+            hero_subtitle: "Dinamik duyusal temalar, yapay zeka destekli iletişim pratikleri ve güvenli bir sosyal alan sunan adaptif ekosistemi keşfedin.",
+            btn_android: "<span class=\"text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1\">Şuradan İndirin</span><span class=\"text-lg font-bold leading-none\">Google Play</span>",
+            btn_ios: "<span class=\"text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1\">Flutter Beta</span><span class=\"text-lg font-bold leading-none\">App Store</span>"
+        },
+        ja: {
+            nav_cta: "アプリを入手",
+            hero_badge: "FlutterでiOSにも対応",
+            hero_title: "あなたのデジタル環境、<br /><span class=\"text-gradient\">あなたのために再構築。</span>",
+            hero_subtitle: "ダイナミックな感覚テーマ、AIによるコミュニケーション練習、安全なソーシャルスペースを備えた適応型エコシステムを体験してください。",
+            btn_android: "<span class=\"text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1\">ダウンロード</span><span class=\"text-lg font-bold leading-none\">Google Play</span>",
+            btn_ios: "<span class=\"text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1\">Flutterベータ</span><span class=\"text-lg font-bold leading-none\">App Store</span>"
+        },
+        ko: {
+            nav_cta: "앱 다운로드",
+            hero_badge: "이제 Flutter를 통해 iOS 지원",
+            hero_title: "당신의 디지털 환경,<br /><span class=\"text-gradient\">당신을 위해 재구성됩니다.</span>",
+            hero_subtitle: "동적 감각 테마, AI 기반 커뮤니케이션 연습 및 안전한 소셜 공간을 특징으로 하는 적응형 에코시스템을 경험하세요.",
+            btn_android: "<span class=\"text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1\">다운로드</span><span class=\"text-lg font-bold leading-none\">Google Play</span>",
+            btn_ios: "<span class=\"text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1\">Flutter 베타</span><span class=\"text-lg font-bold leading-none\">App Store</span>"
+        },
+        ar: {
+            nav_cta: "احصل على التطبيق",
+            hero_badge: "يتوسع الآن إلى نظام iOS عبر Flutter",
+            hero_title: "بيئتك الرقمية،<br /><span class=\"text-gradient\">أُعيد تصميمها من أجلك.</span>",
+            hero_subtitle: "جرب نظامًا بيئيًا تكيفيًا يتميز بسمات حسية ديناميكية، وممارسة اتصال مدفوعة بالذكاء الاصطناعي، ومساحة اجتماعية آمنة.",
+            btn_android: "<span class=\"text-[10px] font-normal opacity-80 uppercase tracking-wider leading-none mb-1\">متاح على</span><span class=\"text-lg font-bold leading-none\">Google Play</span>",
+            btn_ios: "<span class=\"text-[10px] font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider leading-none mb-1\">نسخة Flutter التجريبية</span><span class=\"text-lg font-bold leading-none\">App Store</span>"
+        }
+    };
+
+    function changeLanguage(langCode) {
+        const container = document.getElementById('translation-container');
+
+        // UI fade out
+        container.style.opacity = '0';
+
+        setTimeout(() => {
+            // Update elements with data-i18n attributes
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[langCode] && translations[langCode][key]) {
+                    el.innerHTML = translations[langCode][key];
+                }
+            });
+
+            // Handle RTL for Arabic
+            if(langCode === 'ar') {
+                document.documentElement.setAttribute('dir', 'rtl');
+            } else {
+                document.documentElement.setAttribute('dir', 'ltr');
+            }
+
+            // Update Button Styling
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.className = "lang-btn px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm font-medium hover:bg-brand-500/50 transition-colors";
+            });
+            // Highlight active button (find the one clicked)
+            event.target.className = "lang-btn px-4 py-2 rounded-full bg-brand-500 text-white border border-brand-400 text-sm font-bold transition-colors";
+
+            // UI fade in
+            container.style.opacity = '1';
+
+            // Scroll back up to see the translation
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 300); // matches CSS transition time
+    }
 </script>
 </body>
 </html>
