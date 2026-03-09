@@ -8,6 +8,8 @@ import '../../models/dev_options.dart';
 import '../../screens/settings/dev_options_screen.dart';
 import '../../widgets/common/neuro_avatar.dart';
 import '../../core/theme/app_colors.dart';
+import '../../services/webrtc_call_service.dart';
+import '../calling/active_call_screen.dart';
 
 /// Chat screen for individual conversations
 class ChatScreen extends ConsumerStatefulWidget {
@@ -225,7 +227,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 20,
                     offset: const Offset(0, -4),
                   ),
@@ -241,7 +243,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.onSurfaceVariant.withOpacity(0.3),
+                        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -256,7 +258,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           width: 42,
                           height: 42,
                           decoration: BoxDecoration(
-                            color: AppColors.primaryPurple.withOpacity(0.12),
+                            color: AppColors.primaryPurple.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
@@ -289,7 +291,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           icon: const Icon(Icons.close_rounded),
                           onPressed: () => Navigator.pop(sheetContext),
                           style: IconButton.styleFrom(
-                            backgroundColor: theme.colorScheme.onSurfaceVariant.withOpacity(0.08),
+                            backgroundColor: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.08),
                           ),
                         ),
                       ],
@@ -496,13 +498,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           IconButton(
             icon: const Icon(Icons.videocam_outlined),
             onPressed: () {
-              // Video call
+              HapticFeedback.selectionClick();
+              WebRTCCallService.instance.startCall(
+                recipientId: widget.userId ?? widget.conversationId ?? '',
+                recipientName: 'User',
+                recipientAvatar: '',
+                callType: CallType.video,
+              );
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ActiveCallScreen()),
+              );
             },
           ),
           IconButton(
             icon: const Icon(Icons.call_outlined),
             onPressed: () {
-              // Voice call
+              HapticFeedback.selectionClick();
+              WebRTCCallService.instance.startCall(
+                recipientId: widget.userId ?? widget.conversationId ?? '',
+                recipientName: 'User',
+                recipientAvatar: '',
+                callType: CallType.voice,
+              );
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ActiveCallScreen()),
+              );
             },
           ),
           PopupMenuButton<String>(
@@ -629,7 +649,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -686,7 +706,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 leading: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryPurple.withOpacity(0.1),
+                    color: AppColors.primaryPurple.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.photo, color: AppColors.primaryPurple),
@@ -716,7 +736,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 leading: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.secondaryTeal.withOpacity(0.1),
+                    color: AppColors.secondaryTeal.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.camera_alt, color: AppColors.secondaryTeal),
@@ -746,7 +766,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 leading: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.accentOrange.withOpacity(0.1),
+                    color: AppColors.accentOrange.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.attach_file, color: AppColors.accentOrange),
@@ -848,7 +868,7 @@ class _MessageBubbleState extends State<_MessageBubble> {
                               _formatTime(widget.message.createdAt),
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: widget.isMe
-                                    ? Colors.white.withOpacity(0.7)
+                                    ? Colors.white.withValues(alpha: 0.7)
                                     : theme.colorScheme.outline,
                               ),
                             ),
@@ -871,7 +891,7 @@ class _MessageBubbleState extends State<_MessageBubble> {
                           color: theme.colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: theme.colorScheme.outline.withOpacity(0.2),
+                            color: theme.colorScheme.outline.withValues(alpha: 0.2),
                           ),
                         ),
                         child: Row(
@@ -898,20 +918,20 @@ class _MessageBubbleState extends State<_MessageBubble> {
           height: 12,
           child: CircularProgressIndicator(
             strokeWidth: 1.5,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
           ),
         );
       case MessageStatus.sent:
         return Icon(
           Icons.check,
           size: 14,
-          color: Colors.white.withOpacity(0.7),
+          color: Colors.white.withValues(alpha: 0.7),
         );
       case MessageStatus.delivered:
         return Icon(
           Icons.done_all,
           size: 14,
-          color: Colors.white.withOpacity(0.7),
+          color: Colors.white.withValues(alpha: 0.7),
         );
       case MessageStatus.read:
         return const Icon(
@@ -968,7 +988,7 @@ class _MessageBubbleState extends State<_MessageBubble> {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: _reactions.contains(emoji)
-                          ? AppColors.primaryPurple.withOpacity(0.2)
+                          ? AppColors.primaryPurple.withValues(alpha: 0.2)
                           : Theme.of(context).colorScheme.surfaceContainerHighest,
                       shape: BoxShape.circle,
                     ),
@@ -1121,19 +1141,19 @@ class _DevCardContainer extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDark
-              ? Colors.white.withOpacity(0.08)
-              : Colors.black.withOpacity(0.06),
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.06),
           width: 1,
         ),
         boxShadow: isDark
             ? null
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -1164,7 +1184,7 @@ class _DevCardHeader extends StatelessWidget {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.12),
+            color: iconColor.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: iconColor, size: 18),
@@ -1250,7 +1270,7 @@ class _DevToggleRow extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.12),
+                color: iconColor.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, color: iconColor, size: 20),
@@ -1308,7 +1328,7 @@ class _DevActionButton extends StatelessWidget {
     final color = isDestructive ? theme.colorScheme.error : AppColors.primaryPurple;
 
     return Material(
-      color: color.withOpacity(0.08),
+      color: color.withValues(alpha: 0.08),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: () {
@@ -1324,7 +1344,7 @@ class _DevActionButton extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
+                  color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, color: color, size: 20),

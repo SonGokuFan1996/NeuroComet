@@ -377,7 +377,7 @@ class _CommandPaletteItemTileState extends State<_CommandPaletteItemTile> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           color: _isHovered
-              ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
               : Colors.transparent,
           child: Row(
             children: [
@@ -455,7 +455,7 @@ class _KeyboardHint extends StatelessWidget {
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(4),
             border: Border.all(
-              color: theme.colorScheme.outline.withOpacity(0.3),
+              color: theme.colorScheme.outline.withValues(alpha: 0.3),
             ),
           ),
           child: Text(

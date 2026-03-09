@@ -78,7 +78,7 @@ object ThemeSettings {
         return ThemeState(
             isDarkMode = prefs.getBoolean(KEY_DARK, false),
             isHighContrast = prefs.getBoolean(KEY_HIGH_CONTRAST, false),
-            textScaleFactor = prefs.getFloat(KEY_TEXT_SCALE, 1.0f),
+            textScaleFactor = try { prefs.getFloat(KEY_TEXT_SCALE, 1.0f) } catch (_: ClassCastException) { 1.0f },
             selectedState = selectedState,
             languageCode = prefs.getString(KEY_LANGUAGE, "") ?: "",
             storyAnimationEnabled = prefs.getBoolean(KEY_STORY_ANIMATION, true),

@@ -176,7 +176,7 @@ class _BubblePopGameState extends State<BubblePopGame>
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  theme.colorScheme.primaryContainer.withOpacity(0.3),
+                  theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
                   theme.colorScheme.surface,
                 ],
               ),
@@ -249,15 +249,15 @@ class _BubbleWidget extends StatelessWidget {
             gradient: RadialGradient(
               center: const Alignment(-0.3, -0.3),
               colors: [
-                bubble.color.withOpacity(0.8),
+                bubble.color.withValues(alpha: 0.8),
                 bubble.color,
-                bubble.color.withOpacity(0.6),
+                bubble.color.withValues(alpha: 0.6),
               ],
               stops: const [0.0, 0.5, 1.0],
             ),
             boxShadow: [
               BoxShadow(
-                color: bubble.color.withOpacity(0.3),
+                color: bubble.color.withValues(alpha: 0.3),
                 blurRadius: 8,
                 spreadRadius: 2,
               ),
@@ -273,7 +273,7 @@ class _BubbleWidget extends StatelessWidget {
                   width: bubble.size * 0.25,
                   height: bubble.size * 0.2,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(bubble.size),
                   ),
                 ),

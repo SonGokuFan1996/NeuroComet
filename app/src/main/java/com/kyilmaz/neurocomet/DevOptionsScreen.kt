@@ -101,7 +101,8 @@ fun DevOptionsScreen(
     feedViewModel: FeedViewModel? = null,
     authViewModel: AuthViewModel? = null,
     themeViewModel: ThemeViewModel? = null,
-    onNavigateToGame: (String) -> Unit = {}
+    onNavigateToGame: (String) -> Unit = {},
+    onNavigateToBackup: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val application = context.applicationContext as Application
@@ -113,8 +114,10 @@ fun DevOptionsScreen(
     val sectionGroups = remember(devOptionsViewModel, safetyViewModel, feedViewModel, authViewModel, themeViewModel) {
         listOf(
             DevSectionGroup("app_info", "App Info & Diagnostics", Icons.Filled.Info, "version build device os memory") { AppInfoDevSection() },
+            DevSectionGroup("live_session_lab", "Live Session Lab", Icons.Filled.Timer, "live activity live session regulation recharge focus sprint stim braille notification") { RegulationLiveSessionLabSection() },
             DevSectionGroup("environment", "Environment", Icons.Filled.Cloud, "staging production local backend") { EnvironmentPickerDevSection(devOptionsViewModel) },
             DevSectionGroup("feature_flags", "Feature Flags", Icons.Filled.Flag, "flags feed video chat story search ai") { FeatureFlagsDevSection(devOptionsViewModel) },
+            DevSectionGroup("ab_testing", "A/B Testing", Icons.Filled.Science, "ab test experiment variant split traffic control") { ABTestingDevSection() },
             DevSectionGroup("ads", "Google Ads", Icons.Filled.Tv, "ads banner interstitial rewarded premium") { GoogleAdsDevTestSection() },
             DevSectionGroup("auth", "Authentication", Icons.Filled.Lock, "auth login sign in session user 2fa") { AuthenticationTestingSection(authViewModel) },
             DevSectionGroup("biometric", "Biometric & MFA", Icons.Filled.Fingerprint, "biometric fido passkey totp backup codes mfa") { BiometricFidoDevSection(authViewModel) },
@@ -133,6 +136,7 @@ fun DevOptionsScreen(
             DevSectionGroup("supabase", "Supabase", Icons.Filled.CloudUpload, "supabase database posts") { SupabaseTestDataSection() },
             DevSectionGroup("games", "Games", Icons.Filled.SportsEsports, "games achievements") { GamesTestingSection(onNavigateToGame) },
             DevSectionGroup("language", "Language", Icons.Filled.Language, "language locale translation") { LanguageTestingSection(themeViewModel) },
+            DevSectionGroup("backup", "Backup & Restore", Icons.Filled.CloudUpload, "backup restore export import data") { BackupDevTestSection(onNavigateToBackup) },
             DevSectionGroup("stress", "Stress Testing", Icons.Filled.Speed, "stress test performance diagnostic") { StressTestingSection(feedViewModel, context) }
         )
     }
@@ -335,5 +339,123 @@ private fun DevHeader() {
                 Text("Internal tools only. Changes persist across restarts.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
+    }
+}
+
+@Composable
+private fun RegulationLiveSessionLabSection() {
+    val context = LocalContext.current
+    LaunchedEffect(context) {
+        RegulationLiveSessionManager.initialize(context)
+    }
+    val session by RegulationLiveSessionManager.session.collectAsState()
+
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            "NeuroComet’s Live Activities-style surface is a Regulation Session: an ongoing Android notification plus an in-app live banner tuned to spoons, calming states, and sensory breaks.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = { RegulationLiveSessionManager.startPreset(context, RegulationSessionPreset.RECHARGE_WINDOW) },
+                modifier = Modifier.weight(1f)
+            ) { Text("Recharge") }
+            Button(
+                onClick = { RegulationLiveSessionManager.startPreset(context, RegulationSessionPreset.FOCUS_SPRINT) },
+                modifier = Modifier.weight(1f)
+            ) { Text("Focus") }
+            Button(
+                onClick = { RegulationLiveSessionManager.startPreset(context, RegulationSessionPreset.STIM_BREAK) },
+                modifier = Modifier.weight(1f)
+            ) { Text("Stim") }
+        }
+
+        if (session != null) {
+            val activeSession = session!!
+            val remaining by rememberDevLiveSessionRemaining(activeSession)
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(activeSession.preset.title, fontWeight = FontWeight.Bold)
+                    Text(
+                        "${activeSession.preset.subtitle}\n${activeSession.preset.neuroState.getDisplayName(context)} • ${formatDuration(remaining)} remaining • ${activeSession.spoonsRemaining}/${activeSession.spoonsTotal} spoons${if (activeSession.brailleOptimized) " • braille mode" else ""}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(
+                            onClick = { RegulationLiveSessionManager.togglePause(context) },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(if (activeSession.isPaused) "Resume" else "Pause")
+                        }
+                        OutlinedButton(
+                            onClick = { RegulationLiveSessionManager.adjustMinutes(context, 2) },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("+2 min")
+                        }
+                        OutlinedButton(
+                            onClick = { RegulationLiveSessionManager.adjustMinutes(context, -2) },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("-2 min")
+                        }
+                    }
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        AssistChip(
+                            onClick = { RegulationLiveSessionManager.spendSpoon(context) },
+                            label = { Text("Spend spoon") }
+                        )
+                        AssistChip(
+                            onClick = { RegulationLiveSessionManager.restoreSpoon(context) },
+                            label = { Text("Restore spoon") }
+                        )
+                        AssistChip(
+                            onClick = { RegulationLiveSessionManager.refreshAccessibilityMode(context) },
+                            label = { Text("Refresh braille mode") }
+                        )
+                    }
+
+                    TextButton(onClick = { RegulationLiveSessionManager.end(context) }) {
+                        Text("End live session")
+                    }
+                }
+            }
+        } else {
+            Text(
+                "No regulation session is active. Start one above to test the ongoing notification and the in-app live banner.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun rememberDevLiveSessionRemaining(session: RegulationLiveSession): State<Long> = produceState(
+    initialValue = RegulationLiveSessionManager.remainingMillis(session),
+    key1 = session
+) {
+    while (true) {
+        value = RegulationLiveSessionManager.remainingMillis(session)
+        if (session.isPaused || value <= 0L) break
+        kotlinx.coroutines.delay(1_000L)
     }
 }

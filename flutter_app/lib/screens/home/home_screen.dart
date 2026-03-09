@@ -158,18 +158,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           _RightPanelCard(
-            title: 'How are you feeling?',
+            title: l10n.howAreYouFeeling,
             icon: Icons.emoji_emotions_outlined,
+            onTap: () => context.push('/settings/neuro-state'),
             child: Wrap(
               spacing: 8,
               children: [
-                _MoodChip(emoji: '😊', label: 'Great'),
-                _MoodChip(emoji: '😐', label: 'Okay'),
-                _MoodChip(emoji: '😔', label: 'Struggling'),
-                _MoodChip(emoji: '😰', label: 'Anxious'),
+                _MoodChip(emoji: '😊', label: l10n.moodGreat),
+                _MoodChip(emoji: '😐', label: l10n.okay),
+                _MoodChip(emoji: '😔', label: l10n.struggling),
+                _MoodChip(emoji: '😰', label: l10n.anxious),
               ],
             ),
-            onTap: () => context.push('/settings/neuro-state'),
           ),
           const SizedBox(height: 16),
           _RightPanelCard(
@@ -201,17 +201,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             icon: Icons.trending_up,
             child: Column(
               children: [
-                const _TrendingTopic(
+                _TrendingTopic(
                   tag: '#ADHDTips',
-                  count: '2.4k posts',
+                  count: l10n.trendingPostsCount('2.4k'),
                 ),
-                const _TrendingTopic(
+                _TrendingTopic(
                   tag: '#SensoryFriendly',
-                  count: '1.8k posts',
+                  count: l10n.trendingPostsCount('1.8k'),
                 ),
-                const _TrendingTopic(
+                _TrendingTopic(
                   tag: '#NeurodivergentWins',
-                  count: '1.2k posts',
+                  count: l10n.trendingPostsCount('1.2k'),
                 ),
               ],
             ),
@@ -346,7 +346,7 @@ class _QuickActionTileState extends State<_QuickActionTile> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
             color: _isHovered
-                ? theme.colorScheme.primaryContainer.withOpacity(0.5)
+                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.5)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/message_delete_mode_provider.dart';
@@ -21,6 +22,8 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen>
     with TickerProviderStateMixin {
+  static const _devOptionsUnlockedKey = 'dev_options_unlocked';
+
   // Easter egg state - tap version info 7 times!
   int _easterEggTapCount = 0;
   DateTime _lastTapTime = DateTime.now();
@@ -46,6 +49,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   @override
   void initState() {
     super.initState();
+    _loadDevOptionsUnlocked();
     _headerAnimController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
@@ -63,6 +67,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     super.dispose();
   }
 
+  Future<void> _loadDevOptionsUnlocked() async {
+    if (kDebugMode) return;
+    final prefs = await SharedPreferences.getInstance();
+    final unlocked = prefs.getBool(_devOptionsUnlockedKey) ?? false;
+    if (!mounted || unlocked == _devOptionsUnlocked) return;
+    setState(() {
+      _devOptionsUnlocked = unlocked;
+    });
+  }
+
+  Future<void> _saveDevOptionsUnlocked(bool unlocked) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_devOptionsUnlockedKey, unlocked);
+  }
+
   void _handleVersionTap() {
     HapticFeedback.lightImpact();
     final now = DateTime.now();
@@ -78,6 +97,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         _devOptionsUnlocked = true;
         _easterEggTapCount = 0;
       });
+      _saveDevOptionsUnlocked(true);
       _showEasterEggDialog(context);
     } else if (_easterEggTapCount >= 3) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -260,6 +280,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                       ),
                     ],
                   ),
+                  // ═══════════════════════════════════════════════════════════════
+                  // BACKUP & STORAGE SECTION — dev testing only
+                  // ═══════════════════════════════════════════════════════════════
+                  if (kDebugMode) ...[
+                    const SizedBox(height: 20),
+                    _SettingsSectionHeader(
+                      title: 'Backup & Storage (Dev)',
+                      icon: Icons.cloud_sync_rounded,
+                      subtitle: 'Dev testing only',
+                    ),
+                    _ModernSettingsCard(
+                      children: [
+                        _ModernSettingsItem(
+                          title: 'Backup & Storage',
+                          description: 'Back up and restore your data — dev testing only',
+                          icon: Icons.cloud_sync_rounded,
+                          iconColor: const Color(0xFF42A5F5),
+                          onTap: () => context.push('/settings/backup'),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 20),
 
                   // ═══════════════════════════════════════════════════════════════
@@ -737,8 +779,8 @@ class _DeleteModeOption extends StatelessWidget {
 
     return Material(
       color: isSelected
-          ? primaryColor.withOpacity(0.1)
-          : theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+          ? primaryColor.withValues(alpha: 0.1)
+          : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -751,7 +793,7 @@ class _DeleteModeOption extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? primaryColor.withOpacity(0.15)
+                      ? primaryColor.withValues(alpha: 0.15)
                       : theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -883,8 +925,8 @@ class _HeaderIconButton extends StatelessWidget {
       message: tooltip ?? '',
       child: Material(
         color: isDestructive
-            ? theme.colorScheme.errorContainer.withOpacity(0.5)
-            : (isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05)),
+            ? theme.colorScheme.errorContainer.withValues(alpha: 0.5)
+            : (isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05)),
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           onTap: () {
@@ -930,7 +972,7 @@ class _SettingsSectionHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: AppColors.primaryPurple.withOpacity(0.1),
+              color: AppColors.primaryPurple.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, size: 16, color: AppColors.primaryPurple),
@@ -976,19 +1018,19 @@ class _ModernSettingsCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDark
-              ? Colors.white.withOpacity(0.08)
-              : Colors.black.withOpacity(0.06),
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.06),
           width: 1,
         ),
         boxShadow: isDark
             ? null
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -1038,13 +1080,13 @@ class _ModernSettingsItem extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.12),
+                  color: iconColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                   gradient: showGradientIcon
                       ? LinearGradient(
                           colors: [
-                            const Color(0xFFD4AF37).withOpacity(0.2),
-                            const Color(0xFFE8C547).withOpacity(0.2),
+                            const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                            const Color(0xFFE8C547).withValues(alpha: 0.2),
                           ],
                         )
                       : null,
@@ -1074,7 +1116,7 @@ class _ModernSettingsItem extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
               ),
             ],
           ),
@@ -1117,7 +1159,7 @@ class _ModernSettingsToggle extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.12),
+                  color: iconColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: iconColor, size: 22),
@@ -1166,7 +1208,7 @@ class _ModernSettingsDivider extends StatelessWidget {
       padding: const EdgeInsets.only(left: 72),
       child: Divider(
         height: 1,
-        color: theme.colorScheme.outlineVariant.withOpacity(0.4),
+        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
       ),
     );
   }
@@ -1189,12 +1231,12 @@ class _AccountInfoCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDark
-              ? [AppColors.primaryPurple.withOpacity(0.15), AppColors.secondaryTeal.withOpacity(0.1)]
-              : [AppColors.primaryPurple.withOpacity(0.08), AppColors.secondaryTeal.withOpacity(0.05)],
+              ? [AppColors.primaryPurple.withValues(alpha: 0.15), AppColors.secondaryTeal.withValues(alpha: 0.1)]
+              : [AppColors.primaryPurple.withValues(alpha: 0.08), AppColors.secondaryTeal.withValues(alpha: 0.05)],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.primaryPurple.withOpacity(0.2),
+          color: AppColors.primaryPurple.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -1275,12 +1317,12 @@ class _PremiumActiveCard extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFFD4AF37).withOpacity(0.4),
+          color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFD4AF37).withOpacity(0.2),
+            color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -1400,19 +1442,19 @@ class _ModernTipsCardState extends State<_ModernTipsCard>
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDark
-              ? Colors.white.withOpacity(0.08)
-              : Colors.black.withOpacity(0.06),
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.06),
           width: 1,
         ),
         boxShadow: isDark
             ? null
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -1434,7 +1476,7 @@ class _ModernTipsCardState extends State<_ModernTipsCard>
                       width: 42,
                       height: 42,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFB300).withOpacity(0.15),
+                        color: const Color(0xFFFFB300).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Center(
@@ -1485,7 +1527,7 @@ class _ModernTipsCardState extends State<_ModernTipsCard>
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Divider(
-                    color: theme.colorScheme.outlineVariant.withOpacity(0.4),
+                    color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
                   ),
                 ),
                 Padding(
@@ -1573,7 +1615,7 @@ class _SignOutButton extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: theme.colorScheme.error.withOpacity(0.5),
+          color: theme.colorScheme.error.withValues(alpha: 0.5),
           width: 1.5,
         ),
       ),
@@ -1643,7 +1685,7 @@ class _AppVersionInfo extends StatelessWidget {
           Text(
             'Version 1.0.0',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
             ),
           ),
           if (tapCount >= 3 && tapCount < 7)

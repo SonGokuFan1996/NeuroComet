@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.provider.ContactsContract
-import android.provider.ContactsPickerSessionContract
 import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -14,15 +13,8 @@ import io.flutter.plugin.common.MethodChannel
 /**
  * Flutter host activity.
  *
- * [ContactsPickerSessionContract] is an `ActivityResultContract<Intent, Uri?>`
- * (see https://developer.android.com/reference/kotlin/android/provider/ContactsPickerSessionContract).
- * Ideally it is registered via `registerForActivityResult(ContactsPickerSessionContract())`.
- *
- * However, [FlutterActivity] extends [android.app.Activity] — not
- * `ComponentActivity` — so the Activity Result API is unavailable here.
- * We therefore fall back to [startActivityForResult] / [onActivityResult]
- * while still using the official [ContactsPickerSessionContract.ACTION_PICK_CONTACTS]
- * and [ContactsPickerSessionContract.EXTRA_PICK_CONTACTS_REQUESTED_DATA_FIELDS] constants.
+ * On API 37+ uses the privacy-preserving ContactsPickerSessionContract.
+ * On API 36 and below uses the legacy Intent.ACTION_PICK path.
  */
 class MainActivity : FlutterActivity() {
 
@@ -30,18 +22,21 @@ class MainActivity : FlutterActivity() {
         private const val TAG = "ContactsPicker"
         private const val CONTACTS_PICKER_CHANNEL = "com.kyilmaz.neurocomet/contacts_picker"
         private const val PICK_CONTACT_REQUEST_LEGACY = 9001
-        private const val PICK_CONTACT_REQUEST_CINNAMON_BUN = 9002
+        private const val PICK_CONTACT_REQUEST_API37 = 9002
     }
 
     private var pendingResult: MethodChannel.Result? = null
 
+    @Suppress("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Android 17+ (CinnamonBun): Enable cross-device handoff.
-        // See https://developer.android.com/reference/kotlin/android/app/Activity#sethandoffenabled
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
-            setHandoffEnabled(true)
+        // API 37+: enable cross-device handoff via reflection
+        // (not available in SDK 36 compile target)
+        if (Build.VERSION.SDK_INT >= 37) {
+            try {
+                val method = Activity::class.java.getMethod("setHandoffEnabled", Boolean::class.javaPrimitiveType)
+                method.invoke(this, true)
+            } catch (_: Exception) {}
         }
     }
 
@@ -52,12 +47,11 @@ class MainActivity : FlutterActivity() {
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "supportsPrivacyPicker" -> {
-                        // CinnamonBun+ supports the ContactsPickerSessionContract
-                        result.success(Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN)
+                        result.success(Build.VERSION.SDK_INT >= 37)
                     }
                     "needsContactsPermission" -> {
-                        // On CinnamonBun+ the session-based picker doesn't need READ_CONTACTS
-                        result.success(Build.VERSION.SDK_INT < Build.VERSION_CODES.CINNAMON_BUN)
+                        // On API 37+ the session picker doesn't need READ_CONTACTS
+                        result.success(Build.VERSION.SDK_INT < 37)
                     }
                     "pickContact" -> {
                         pendingResult = result
@@ -68,39 +62,25 @@ class MainActivity : FlutterActivity() {
             }
     }
 
-    /**
-     * Launch the correct contacts picker based on API level.
-     *
-     * CinnamonBun+ (Android 17): Builds an `Intent` with
-     * [ContactsPickerSessionContract.ACTION_PICK_CONTACTS] and populates
-     * [ContactsPickerSessionContract.EXTRA_PICK_CONTACTS_REQUESTED_DATA_FIELDS]
-     * with the MIME types for phone and email.  The system contacts picker
-     * returns a session-scoped `content://` URI whose cursor exposes
-     * `display_name`, `mimetype` and `data1` columns.
-     * No `READ_CONTACTS` permission is required.
-     *
-     * Pre-CinnamonBun: Falls back to [Intent.ACTION_PICK] with
-     * [ContactsContract], which requires `READ_CONTACTS`.
-     */
     @Suppress("NewApi", "DEPRECATION")
     private fun launchContactPicker() {
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
-                // Android 17 (CinnamonBun) — ContactsPickerSessionContract
+            if (Build.VERSION.SDK_INT >= 37) {
+                // API 37+ ContactsPickerSessionContract — use reflection since we compile against SDK 36
                 val dataFields = arrayListOf(
                     ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
                     ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE
                 )
-                val intent = Intent(ContactsPickerSessionContract.ACTION_PICK_CONTACTS).apply {
-                    putStringArrayListExtra(
-                        ContactsPickerSessionContract.EXTRA_PICK_CONTACTS_REQUESTED_DATA_FIELDS,
-                        dataFields
-                    )
-                    putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
-                }
-                startActivityForResult(intent, PICK_CONTACT_REQUEST_CINNAMON_BUN)
+                val contractClass = Class.forName("android.provider.ContactsPickerSessionContract")
+                val actionField = contractClass.getField("ACTION_PICK_CONTACTS")
+                val extraField = contractClass.getField("EXTRA_PICK_CONTACTS_REQUESTED_DATA_FIELDS")
+                val action = actionField.get(null) as String
+                val extraKey = extraField.get(null) as String
+                val intent = Intent(action)
+                intent.putStringArrayListExtra(extraKey, dataFields)
+                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
+                startActivityForResult(intent, PICK_CONTACT_REQUEST_API37)
             } else {
-                // Legacy path (pre-CinnamonBun)
                 val intent = Intent(Intent.ACTION_PICK).apply {
                     type = ContactsContract.Contacts.CONTENT_TYPE
                 }
@@ -116,27 +96,19 @@ class MainActivity : FlutterActivity() {
     @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         when (requestCode) {
-            PICK_CONTACT_REQUEST_CINNAMON_BUN -> handleCinnamonBunResult(resultCode, data)
+            PICK_CONTACT_REQUEST_API37 -> handleApi37Result(resultCode, data)
             PICK_CONTACT_REQUEST_LEGACY -> handleLegacyResult(resultCode, data)
         }
     }
 
-    // ── CinnamonBun (Android 17) result handler ──────────────────
+    // ── API 37 session-based result handler ────────────────────────
 
-    /**
-     * Handle the result from the CinnamonBun [ContactsPickerSessionContract].
-     *
-     * The session-scoped `content://` URI can be queried for rows containing
-     * `display_name`, `mimetype` and `data1` columns.
-     */
-    private fun handleCinnamonBunResult(resultCode: Int, data: Intent?) {
+    private fun handleApi37Result(resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK && data?.data != null) {
             val sessionUri = data.data!!
             val contactMap = mutableMapOf<String, Any?>()
             contactMap["contactUri"] = sessionUri.toString()
-
             try {
                 contentResolver.query(
                     sessionUri,
@@ -146,12 +118,10 @@ class MainActivity : FlutterActivity() {
                     val nameIdx = cursor.getColumnIndex("display_name")
                     val mimeIdx = cursor.getColumnIndex("mimetype")
                     val dataIdx = cursor.getColumnIndex("data1")
-
                     while (cursor.moveToNext()) {
                         val name = if (nameIdx >= 0) cursor.getString(nameIdx) else null
                         val mime = if (mimeIdx >= 0) cursor.getString(mimeIdx) else null
                         val value = if (dataIdx >= 0) cursor.getString(dataIdx) else null
-
                         if (name != null && !contactMap.containsKey("displayName")) {
                             contactMap["displayName"] = name
                         }
@@ -166,11 +136,7 @@ class MainActivity : FlutterActivity() {
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to query contacts picker session", e)
             }
-
-            if (!contactMap.containsKey("displayName")) {
-                contactMap["displayName"] = "Contact"
-            }
-
+            if (!contactMap.containsKey("displayName")) contactMap["displayName"] = "Contact"
             pendingResult?.success(contactMap)
         } else {
             pendingResult?.success(null)
@@ -178,12 +144,8 @@ class MainActivity : FlutterActivity() {
         pendingResult = null
     }
 
-    // ── Legacy (pre-CinnamonBun) result handler ──────────────────
+    // ── Legacy (pre-API 37) result handler ─────────────────────────
 
-    /**
-     * Handle the result from the legacy [Intent.ACTION_PICK] contacts picker.
-     * Requires READ_CONTACTS permission and queries [ContactsContract] directly.
-     */
     private fun handleLegacyResult(resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK && data?.data != null) {
             val contactUri = data.data!!

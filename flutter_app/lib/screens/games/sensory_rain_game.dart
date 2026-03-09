@@ -183,7 +183,7 @@ class _SensoryRainGameState extends State<SensoryRainGame>
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withOpacity(0.5),
+                    Colors.black.withValues(alpha: 0.5),
                   ],
                 ),
               ),
@@ -289,7 +289,7 @@ class RainPainter extends CustomPainter {
     // Draw rain drops
     for (final drop in rainDrops) {
       final paint = Paint()
-        ..color = rainColor.withOpacity(drop.opacity * 0.6)
+        ..color = rainColor.withValues(alpha: drop.opacity * 0.6)
         ..strokeWidth = 2
         ..strokeCap = StrokeCap.round;
 
@@ -307,7 +307,7 @@ class RainPainter extends CustomPainter {
     // Draw ripples
     for (final ripple in ripples) {
       final paint = Paint()
-        ..color = rainColor.withOpacity(ripple.opacity * 0.5)
+        ..color = rainColor.withValues(alpha: ripple.opacity * 0.5)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.5;
 

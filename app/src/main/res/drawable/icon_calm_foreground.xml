@@ -10,22 +10,33 @@
         android:translateX="54"
         android:translateY="54">
 
-        <!-- Outer glow ring - soft cyan -->
+        <path
+            android:fillColor="#072F38"
+            android:fillAlpha="0.07"
+            android:pathData="M 0,0 m -41,0 a 41,41 0 1,1 82,0 a 41,41 0 1,1 -82,0" />
         <path
             android:fillColor="#4DD0E1"
-            android:fillAlpha="0.15"
+            android:fillAlpha="0.16"
             android:pathData="M 0,0 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" />
-
-        <!-- Middle glow ring - ocean blue -->
         <path
             android:fillColor="#00ACC1"
-            android:fillAlpha="0.25"
+            android:fillAlpha="0.28"
             android:pathData="M 0,0 m -32,0 a 32,32 0 1,1 64,0 a 32,32 0 1,1 -64,0" />
+        <path
+            android:strokeColor="#E7FDFF"
+            android:strokeAlpha="0.12"
+            android:strokeWidth="2"
+            android:pathData="M 0,0 m -29,0 a 29,29 0 1,1 58,0 a 29,29 0 1,1 -58,0" />
 
-        <!-- Wave line 1 (top-left) - Light cyan with glow -->
+        <path
+            android:strokeColor="#082F36"
+            android:strokeAlpha="0.12"
+            android:strokeWidth="12"
+            android:strokeLineCap="round"
+            android:pathData="M -33,-27 Q -18,-17 -8,3 Q 2,18 2,3" />
         <path
             android:strokeColor="#80DEEA"
-            android:strokeAlpha="0.3"
+            android:strokeAlpha="0.34"
             android:strokeWidth="10"
             android:strokeLineCap="round"
             android:pathData="M -35,-30 Q -20,-20 -10,0 Q 0,15 0,0" />
@@ -34,11 +45,22 @@
             android:strokeWidth="5"
             android:strokeLineCap="round"
             android:pathData="M -35,-30 Q -20,-20 -10,0 Q 0,15 0,0" />
+        <path
+            android:strokeColor="#F2FEFF"
+            android:strokeAlpha="0.18"
+            android:strokeWidth="1.5"
+            android:strokeLineCap="round"
+            android:pathData="M -35,-30 Q -20,-20 -10,0 Q 0,15 0,0" />
 
-        <!-- Wave line 2 (top-right) - Teal with glow -->
+        <path
+            android:strokeColor="#082F36"
+            android:strokeAlpha="0.12"
+            android:strokeWidth="12"
+            android:strokeLineCap="round"
+            android:pathData="M 37,-27 Q 22,-17 12,3 Q 2,18 2,3" />
         <path
             android:strokeColor="#26C6DA"
-            android:strokeAlpha="0.3"
+            android:strokeAlpha="0.34"
             android:strokeWidth="10"
             android:strokeLineCap="round"
             android:pathData="M 35,-30 Q 20,-20 10,0 Q 0,15 0,0" />
@@ -47,11 +69,22 @@
             android:strokeWidth="5"
             android:strokeLineCap="round"
             android:pathData="M 35,-30 Q 20,-20 10,0 Q 0,15 0,0" />
+        <path
+            android:strokeColor="#F2FEFF"
+            android:strokeAlpha="0.18"
+            android:strokeWidth="1.5"
+            android:strokeLineCap="round"
+            android:pathData="M 35,-30 Q 20,-20 10,0 Q 0,15 0,0" />
 
-        <!-- Wave line 3 (bottom) - Deep blue with glow -->
+        <path
+            android:strokeColor="#082F36"
+            android:strokeAlpha="0.12"
+            android:strokeWidth="12"
+            android:strokeLineCap="round"
+            android:pathData="M 2,43 Q -8,28 2,13 Q 12,3 2,3" />
         <path
             android:strokeColor="#0097A7"
-            android:strokeAlpha="0.3"
+            android:strokeAlpha="0.34"
             android:strokeWidth="10"
             android:strokeLineCap="round"
             android:pathData="M 0,40 Q -10,25 0,10 Q 10,0 0,0" />
@@ -60,29 +93,41 @@
             android:strokeWidth="5"
             android:strokeLineCap="round"
             android:pathData="M 0,40 Q -10,25 0,10 Q 10,0 0,0" />
-
-        <!-- Water drop nodes - varying cyan shades -->
         <path
-            android:fillColor="#4DD0E1"
-            android:pathData="M -35,-30 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
-
-        <path
-            android:fillColor="#26C6DA"
-            android:pathData="M 35,-30 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+            android:strokeColor="#F2FEFF"
+            android:strokeAlpha="0.18"
+            android:strokeWidth="1.5"
+            android:strokeLineCap="round"
+            android:pathData="M 0,40 Q -10,25 0,10 Q 10,0 0,0" />
 
         <path
-            android:fillColor="#00ACC1"
-            android:pathData="M 0,40 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+            android:fillColor="#082F36"
+            android:fillAlpha="0.14"
+            android:pathData="M -33,-27 m -5.5,0 a 5.5,5.5 0 1,1 11,0 a 5.5,5.5 0 1,1 -11,0" />
+        <path android:fillColor="#4DD0E1" android:pathData="M -35,-30 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+        <path android:fillColor="#FFFFFF" android:fillAlpha="0.28" android:pathData="M -36,-31.2 m -2,0 a 2,2 0 1,1 4,0 a 2,2 0 1,1 -4,0" />
 
-        <!-- Center circle - Deep ocean teal -->
         <path
-            android:fillColor="#00ACC1"
-            android:pathData="M 0,0 m -25,0 a 25,25 0 1,1 50,0 a 25,25 0 1,1 -50,0" />
+            android:fillColor="#082F36"
+            android:fillAlpha="0.14"
+            android:pathData="M 37,-27 m -5.5,0 a 5.5,5.5 0 1,1 11,0 a 5.5,5.5 0 1,1 -11,0" />
+        <path android:fillColor="#26C6DA" android:pathData="M 35,-30 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+        <path android:fillColor="#FFFFFF" android:fillAlpha="0.28" android:pathData="M 34,-31.2 m -2,0 a 2,2 0 1,1 4,0 a 2,2 0 1,1 -4,0" />
 
-        <!-- Inner highlight - light wave reflection -->
         <path
-            android:fillColor="#B2EBF2"
-            android:fillAlpha="0.7"
-            android:pathData="M -8,-8 m -8,0 a 8,8 0 1,1 16,0 a 8,8 0 1,1 -16,0" />
+            android:fillColor="#082F36"
+            android:fillAlpha="0.14"
+            android:pathData="M 2,43 m -5.5,0 a 5.5,5.5 0 1,1 11,0 a 5.5,5.5 0 1,1 -11,0" />
+        <path android:fillColor="#00ACC1" android:pathData="M 0,40 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+        <path android:fillColor="#FFFFFF" android:fillAlpha="0.26" android:pathData="M -1.5,38.5 m -2,0 a 2,2 0 1,1 4,0 a 2,2 0 1,1 -4,0" />
+
+        <path
+            android:fillColor="#082F36"
+            android:fillAlpha="0.16"
+            android:pathData="M 3,4 m -27,0 a 27,27 0 1,1 54,0 a 27,27 0 1,1 -54,0" />
+        <path android:fillColor="#00ACC1" android:pathData="M 0,0 m -25,0 a 25,25 0 1,1 50,0 a 25,25 0 1,1 -50,0" />
+        <path android:fillColor="#4DD0E1" android:fillAlpha="0.20" android:pathData="M -2,-2 m -16,0 a 16,16 0 1,1 32,0 a 16,16 0 1,1 -32,0" />
+        <path android:strokeColor="#F2FEFF" android:strokeAlpha="0.16" android:strokeWidth="2" android:pathData="M 0,0 m -24,0 a 24,24 0 1,1 48,0 a 24,24 0 1,1 -48,0" />
+        <path android:fillColor="#B2EBF2" android:fillAlpha="0.76" android:pathData="M -8,-8 m -8,0 a 8,8 0 1,1 16,0 a 8,8 0 1,1 -16,0" />
     </group>
 </vector>

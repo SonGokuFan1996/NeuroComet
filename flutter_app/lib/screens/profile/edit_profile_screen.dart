@@ -117,6 +117,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Future<void> _saveProfile() async {
+    final l10n = context.l10n;
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSaving = true);
@@ -178,8 +179,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile updated successfully!'),
+          SnackBar(
+            content: Text(l10n.get('profileUpdateSuccess')),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -188,7 +189,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update profile: $e'),
+            content: Text(l10n.get('profileUpdateFailed')),
             behavior: SnackBarBehavior.floating,
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
@@ -204,19 +205,21 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   Future<bool> _onWillPop() async {
     if (!_hasChanges) return true;
 
+    final l10n = context.l10n;
+
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Discard changes?'),
-        content: const Text('You have unsaved changes. Are you sure you want to leave?'),
+        title: Text(l10n.get('discardChangesTitle')),
+        content: Text(l10n.get('discardChangesMessage')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Keep Editing'),
+            child: Text(l10n.get('keepEditing')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Discard'),
+            child: Text(l10n.get('discard')),
           ),
         ],
       ),
@@ -241,7 +244,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(l10n.edit),
+          title: Text(l10n.editProfile),
           leading: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () async {
@@ -268,7 +271,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         ),
         body: profileState.when(
           loading: () => const NeuroLoading(),
-          error: (error, stack) => Center(child: Text('Error: $error')),
+          error: (error, stack) => Center(child: Text('${l10n.error}: $error')),
           data: (user) => _buildForm(user),
         ),
       ),
@@ -321,14 +324,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         color: Colors.black54,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.camera_alt, size: 16, color: Colors.white),
-                          SizedBox(width: 4),
+                          const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                          const SizedBox(width: 4),
                           Text(
-                            'Change Banner',
-                            style: TextStyle(color: Colors.white, fontSize: 12),
+                            l10n.get('changeBanner'),
+                            style: const TextStyle(color: Colors.white, fontSize: 12),
                           ),
                         ],
                       ),
@@ -391,15 +394,15 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     controller: _displayNameController,
                     decoration: InputDecoration(
                       labelText: l10n.displayName,
-                      hintText: 'Enter your display name',
+                      hintText: l10n.get('editProfileDisplayNameHint'),
                     ),
                     maxLength: 50,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Display name is required';
+                        return l10n.get('displayNameRequired');
                       }
                       if (value.trim().length < 2) {
-                        return 'Display name must be at least 2 characters';
+                        return l10n.get('displayNameTooShort');
                       }
                       return null;
                     },
@@ -413,7 +416,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     controller: _usernameController,
                     decoration: InputDecoration(
                       labelText: l10n.username,
-                      hintText: 'Choose a unique username',
+                      hintText: l10n.get('editProfileUsernameHint'),
                       prefixText: '@',
                     ),
                     maxLength: 30,
@@ -421,10 +424,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       if (value != null && value.isNotEmpty) {
                         final regex = RegExp(r'^[a-zA-Z0-9_]+$');
                         if (!regex.hasMatch(value)) {
-                          return 'Only letters, numbers, and underscores allowed';
+                          return l10n.get('usernameInvalidChars');
                         }
                         if (value.length < 3) {
-                          return 'Username must be at least 3 characters';
+                          return l10n.get('usernameTooShort');
                         }
                       }
                       return null;
@@ -439,7 +442,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     controller: _bioController,
                     decoration: InputDecoration(
                       labelText: l10n.bio,
-                      hintText: 'Tell us about yourself...',
+                      hintText: l10n.get('editProfileBioHint'),
                       alignLabelWithHint: true,
                     ),
                     maxLines: 4,
@@ -453,7 +456,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -468,16 +471,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Profile Tips',
+                              l10n.get('profileTipsTitle'),
                               style: theme.textTheme.titleSmall,
                             ),
                           ],
                         ),
                         const SizedBox(height: 12),
-                        _buildTip('Use a friendly display name that you\'re comfortable with'),
-                        _buildTip('Your bio is a great place to share your interests'),
-                        _buildTip('You can mention your neurodivergent identity if you want'),
-                        _buildTip('A profile picture helps others recognize you'),
+                        _buildTip(l10n.get('profileTipDisplayName')),
+                        _buildTip(l10n.get('profileTipBio')),
+                        _buildTip(l10n.get('profileTipIdentity')),
+                        _buildTip(l10n.get('profileTipAvatar')),
                       ],
                     ),
                   ),
@@ -493,7 +496,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Widget _buildAvatarPreview(User? user, ThemeData theme) {
-    // Priority: 1. Custom avatar, 2. Selected image, 3. User's existing avatar
+    final l10n = context.l10n;
+     // Priority: 1. Custom avatar, 2. Selected image, 3. User's existing avatar
     if (_useCustomAvatar && _customAvatar != null) {
       return CustomAvatarWidget(
         avatar: _customAvatar!,
@@ -514,7 +518,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     return NeuroAvatar(
       imageUrl: user?.avatarUrl,
-      name: user?.displayName ?? 'User',
+      name: user?.displayName ?? l10n.get('userFallbackName'),
       size: 100,
     );
   }
@@ -526,8 +530,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            theme.colorScheme.primary.withOpacity(0.5),
-            theme.colorScheme.secondary.withOpacity(0.5),
+            theme.colorScheme.primary.withValues(alpha: 0.5),
+            theme.colorScheme.secondary.withValues(alpha: 0.5),
           ],
         ),
       ),

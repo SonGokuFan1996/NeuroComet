@@ -76,9 +76,9 @@ class TraitChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: trait.color.withOpacity(0.15),
+          color: trait.color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: trait.color.withOpacity(0.3)),
+          border: Border.all(color: trait.color.withValues(alpha: 0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -171,9 +171,9 @@ class EnergyStatusBadge extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: status.color.withOpacity(0.15),
+          color: status.color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: status.color.withOpacity(0.4)),
+          border: Border.all(color: status.color.withValues(alpha: 0.4)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -219,7 +219,7 @@ class CommunicationNotesCard extends StatelessWidget {
         color: containerColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: onContainerColor.withOpacity(0.12),
+          color: onContainerColor.withValues(alpha: 0.12),
         ),
       ),
       child: Column(
@@ -230,7 +230,7 @@ class CommunicationNotesCard extends StatelessWidget {
               Icon(
                 Icons.chat_bubble_outline,
                 size: 18,
-                color: onContainerColor.withOpacity(0.72),
+                color: onContainerColor.withValues(alpha: 0.72),
               ),
               const SizedBox(width: 8),
               Text(
@@ -247,7 +247,7 @@ class CommunicationNotesCard extends StatelessWidget {
             notes,
             style: theme.textTheme.bodyMedium?.copyWith(
               height: 1.5,
-              color: onContainerColor.withOpacity(0.82),
+              color: onContainerColor.withValues(alpha: 0.82),
             ),
           ),
         ],
@@ -389,7 +389,7 @@ class EnergyStatusPickerDialog extends StatelessWidget {
           return ListTile(
             shape: RoundedCornerShape.circular(12),
             selected: isSelected,
-            selectedTileColor: status.color.withOpacity(0.15),
+            selectedTileColor: status.color.withValues(alpha: 0.15),
             leading: Text(status.emoji, style: const TextStyle(fontSize: 24)),
             title: Text(
               status.label,

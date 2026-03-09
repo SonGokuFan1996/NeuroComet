@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
+import android.util.Log
 import android.widget.RemoteViews
 import com.kyilmaz.neurocomet.MainActivity
 import com.kyilmaz.neurocomet.R
@@ -897,7 +898,7 @@ class StimBreakWidgetProvider : AppWidgetProvider() {
         when (intent.action) {
             ACTION_TAKE_BREAK -> {
                 // Log the stim break action
-                println("StimBreakWidgetProvider: ACTION_TAKE_BREAK received")
+                Log.d("StimBreakWidget", "ACTION_TAKE_BREAK received")
 
                 // Register the stim break
                 WidgetPreferences.setLastStimBreak(context)
@@ -907,7 +908,7 @@ class StimBreakWidgetProvider : AppWidgetProvider() {
             }
             ACTION_RESET_BREAK_TIMER -> {
                 // Log the reset action
-                println("StimBreakWidgetProvider: ACTION_RESET_BREAK_TIMER received")
+                Log.d("StimBreakWidget", "ACTION_RESET_BREAK_TIMER received")
 
                 // Reset the stim break timer
                 WidgetPreferences.setLastStimBreak(context)

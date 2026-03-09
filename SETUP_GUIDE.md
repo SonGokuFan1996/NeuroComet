@@ -26,7 +26,7 @@ cd NeuroComet
 
 ---
 
-## 🔐 Step 2: Configure local.properties
+## 🔐 Step 2: Create `local.properties`
 
 **Location**: `C:\Users\bkyil\AndroidStudioProjects\NeuroComet\local.properties`
 
@@ -60,6 +60,14 @@ DEVELOPER_DEVICE_HASH=your_sha256_hash_here
    - **Project URL** → paste as `SUPABASE_URL`
    - **anon public** key → paste as `SUPABASE_KEY`
 
+> Note: These `local.properties` values are used by the native Android app under `app/`.
+> The Flutter app under `flutter_app/` does **not** read the root `local.properties` file for Supabase.
+> Start the Flutter app with compile-time defines instead:
+>
+> `--dart-define=SUPABASE_URL=https://YOUR-PROJECT-REF.supabase.co`
+>
+> `--dart-define=SUPABASE_ANON_KEY=eyJ...`
+
 ---
 
 ## 🔥 Step 3: Configure Firebase (google-services.json)
@@ -72,9 +80,11 @@ DEVELOPER_DEVICE_HASH=your_sha256_hash_here
 1. Go to https://console.firebase.google.com/
 2. Create a new project or select existing one
 3. Click **Add app** → **Android**
-4. Enter package name: `com.kyilmaz.NeuroComet`
+4. Use the actual native Android package names from `app/build.gradle.kts`:
+   - Release: `com.kyilmaz.neurocomet`
+   - Debug: `com.kyilmaz.neurocomet.debug`
 5. Download `google-services.json`
-6. Replace the existing file at `app/google-services.json`
+6. Place it at `app/google-services.json` if the file contains the client you need, or use variant-specific files such as `app/src/debug/google-services.json` for the debug package.
 
 ### Services to enable in Firebase Console:
 - [ ] **Authentication** (if using Firebase Auth)
@@ -225,19 +235,21 @@ CREATE TABLE IF NOT EXISTS conversation_participants (
     PRIMARY KEY (conversation_id, user_id)
 );
 
--- Messages table
-CREATE TABLE IF NOT EXISTS messages (
+-- Direct messages table
+CREATE TABLE IF NOT EXISTS dm_messages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     conversation_id UUID REFERENCES conversations(id) ON DELETE CASCADE,
     sender_id UUID REFERENCES users(id) ON DELETE SET NULL,
     content TEXT NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    read_at TIMESTAMPTZ
+    type TEXT DEFAULT 'text',
+    media_url TEXT,
+    is_read BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Indexes for message queries
-CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id);
-CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_dm_messages_conversation ON dm_messages(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_dm_messages_created ON dm_messages(created_at DESC);
 ```
 
 #### Block 5: Message Reactions Table
@@ -245,7 +257,7 @@ CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at DESC);
 -- Message reactions (like WhatsApp/iMessage/Telegram)
 CREATE TABLE IF NOT EXISTS message_reactions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    message_id UUID REFERENCES messages(id) ON DELETE CASCADE,
+    message_id UUID REFERENCES dm_messages(id) ON DELETE CASCADE,
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     emoji TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -285,9 +297,10 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS banner_url TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS deletion_scheduled_at TIMESTAMPTZ;
 
--- Messages table: add columns for message types and media
-ALTER TABLE messages ADD COLUMN IF NOT EXISTS type TEXT DEFAULT 'text';
-ALTER TABLE messages ADD COLUMN IF NOT EXISTS media_url TEXT;
+-- Direct messages table: add columns for message types, media, and read state
+ALTER TABLE dm_messages ADD COLUMN IF NOT EXISTS type TEXT DEFAULT 'text';
+ALTER TABLE dm_messages ADD COLUMN IF NOT EXISTS media_url TEXT;
+ALTER TABLE dm_messages ADD COLUMN IF NOT EXISTS is_read BOOLEAN DEFAULT false;
 
 -- Posts table: add columns if upgrading from an older schema
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS comments INTEGER DEFAULT 0;
@@ -415,7 +428,7 @@ ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE post_likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE conversation_participants ENABLE ROW LEVEL SECURITY;
-ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE dm_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE message_reactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE stories ENABLE ROW LEVEL SECURITY;
 
@@ -446,8 +459,8 @@ DROP POLICY IF EXISTS "Anyone can like posts" ON post_likes;
 DROP POLICY IF EXISTS "Users can unlike posts" ON post_likes;
 DROP POLICY IF EXISTS "Users can view own conversations" ON conversations;
 DROP POLICY IF EXISTS "Users can view conversation participants" ON conversation_participants;
-DROP POLICY IF EXISTS "Users can read own messages" ON messages;
-DROP POLICY IF EXISTS "Users can send messages" ON messages;
+DROP POLICY IF EXISTS "Users can read own messages" ON dm_messages;
+DROP POLICY IF EXISTS "Users can send messages" ON dm_messages;
 DROP POLICY IF EXISTS "Users can view reactions" ON message_reactions;
 DROP POLICY IF EXISTS "Users can add reactions" ON message_reactions;
 DROP POLICY IF EXISTS "Users can remove own reactions" ON message_reactions;
@@ -582,11 +595,11 @@ USING (
 ```sql
 -- MESSAGES: Users can read messages in their conversations
 CREATE POLICY "Users can read own messages" 
-ON messages FOR SELECT 
+ON dm_messages FOR SELECT 
 USING (
     EXISTS (
         SELECT 1 FROM conversation_participants cp
-        WHERE cp.conversation_id = messages.conversation_id 
+        WHERE cp.conversation_id = dm_messages.conversation_id 
         AND cp.user_id = auth.uid()
     )
 );
@@ -595,12 +608,12 @@ USING (
 ```sql
 -- MESSAGES: Users can send messages to their conversations
 CREATE POLICY "Users can send messages" 
-ON messages FOR INSERT 
+ON dm_messages FOR INSERT 
 WITH CHECK (
     sender_id = auth.uid() AND
     EXISTS (
         SELECT 1 FROM conversation_participants cp
-        WHERE cp.conversation_id = messages.conversation_id 
+        WHERE cp.conversation_id = dm_messages.conversation_id 
         AND cp.user_id = auth.uid()
     )
 );
@@ -612,7 +625,7 @@ CREATE POLICY "Users can view reactions"
 ON message_reactions FOR SELECT 
 USING (
     EXISTS (
-        SELECT 1 FROM messages m
+        SELECT 1 FROM dm_messages m
         JOIN conversation_participants cp ON m.conversation_id = cp.conversation_id
         WHERE m.id = message_reactions.message_id 
         AND cp.user_id = auth.uid()
@@ -627,7 +640,7 @@ ON message_reactions FOR INSERT
 WITH CHECK (
     message_reactions.user_id = auth.uid() AND
     EXISTS (
-        SELECT 1 FROM messages m
+        SELECT 1 FROM dm_messages m
         JOIN conversation_participants cp ON m.conversation_id = cp.conversation_id
         WHERE m.id = message_reactions.message_id 
         AND cp.user_id = auth.uid()
@@ -822,8 +835,8 @@ ORDER BY table_name;
 **Expected output:**
 - conversation_participants
 - conversations
+- dm_messages
 - message_reactions
-- messages
 - posts
 - stories
 - users
@@ -1089,7 +1102,8 @@ Languages like Arabic (`ar`) and Hebrew (`he`) are fully supported with:
 
 ### Firebase Errors
 - Ensure `google-services.json` matches your package name
-- Package name must be: `com.kyilmaz.NeuroComet`
+- Native Android release package: `com.kyilmaz.neurocomet`
+- Native Android debug package: `com.kyilmaz.neurocomet.debug`
 
 ### App Crashes on Start
 - Check Logcat for the specific error
@@ -1114,4 +1128,3 @@ Before testing, ensure you've completed:
 **You're ready to test!** 🎉
 
 The app will work with mock data if backends aren't configured, so you can test UI features immediately.
-

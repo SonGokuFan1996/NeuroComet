@@ -29,6 +29,14 @@ enum DevEnvironmentTarget {
   local,
 }
 
+/// A/B test variant options for experimental UI
+enum ABTestVariant {
+  control,
+  liquidGlass,
+  compactCards,
+  boldTypography,
+}
+
 /// Developer options state
 ///
 /// All options default to safe/disabled values.
@@ -102,6 +110,9 @@ class DevOptions {
   // ── Custom Avatar ──────────────────────────────────────
   final CustomAvatar? mockCustomAvatar;
 
+  // ── A/B Testing ─────────────────────────────────────────
+  final ABTestVariant abTestVariant;
+
   const DevOptions({
     // General
     this.showDebugOverlay = false,
@@ -157,6 +168,7 @@ class DevOptions {
     this.stressTestLargeImages = false,
     this.stressTestLocalStorage = false,
     this.mockCustomAvatar,
+    this.abTestVariant = ABTestVariant.control,
   });
 
   /// Returns the number of options that differ from defaults.
@@ -189,6 +201,7 @@ class DevOptions {
     if (force2FA != d.force2FA) count++;
     if (simulateOffline != d.simulateOffline) count++;
     if (networkLatencyMs != d.networkLatencyMs) count++;
+    if (abTestVariant != d.abTestVariant) count++;
     return count;
   }
 
@@ -237,6 +250,7 @@ class DevOptions {
     bool? stressTestLargeImages,
     bool? stressTestLocalStorage,
     CustomAvatar? mockCustomAvatar,
+    ABTestVariant? abTestVariant,
   }) {
     return DevOptions(
       showDebugOverlay: showDebugOverlay ?? this.showDebugOverlay,
@@ -282,6 +296,7 @@ class DevOptions {
       stressTestLargeImages: stressTestLargeImages ?? this.stressTestLargeImages,
       stressTestLocalStorage: stressTestLocalStorage ?? this.stressTestLocalStorage,
       mockCustomAvatar: mockCustomAvatar ?? this.mockCustomAvatar,
+      abTestVariant: abTestVariant ?? this.abTestVariant,
     );
   }
 
@@ -316,6 +331,7 @@ class DevOptions {
     'networkLatencyMs': networkLatencyMs,
     'mockPostCount': mockPostCount,
     'showSponsoredPosts': showSponsoredPosts,
+    'abTestVariant': abTestVariant.index,
   };
 
   /// Deserialize from a SharedPreferences map
@@ -350,6 +366,7 @@ class DevOptions {
       networkLatencyMs: map['networkLatencyMs'] as int? ?? 0,
       mockPostCount: map['mockPostCount'] as int? ?? 10,
       showSponsoredPosts: map['showSponsoredPosts'] as bool? ?? true,
+      abTestVariant: ABTestVariant.values.elementAtOrNull(map['abTestVariant'] as int? ?? 0) ?? ABTestVariant.control,
     );
   }
 }

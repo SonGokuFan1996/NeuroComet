@@ -125,7 +125,13 @@ object FeedbackManager {
     private fun getAppVersion(context: Context): String {
         return try {
             val pInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-            "${pInfo.versionName} (${pInfo.longVersionCode})"
+            val buildCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                pInfo.longVersionCode.toString()
+            } else {
+                @Suppress("DEPRECATION")
+                pInfo.versionCode.toString()
+            }
+            "${pInfo.versionName} ($buildCode)"
         } catch (e: Exception) {
             "Unknown"
         }

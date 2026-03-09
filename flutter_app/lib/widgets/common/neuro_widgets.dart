@@ -91,7 +91,7 @@ class NeuroButton extends StatefulWidget {
       isEnabled: isEnabled,
       padding: padding,
       enableHapticFeedback: enableHapticFeedback,
-      backgroundColor: AppColors.calmBlue.withOpacity(0.2),
+      backgroundColor: AppColors.calmBlue.withValues(alpha: 0.2),
       foregroundColor: AppColors.calmBlue,
       child: child,
     );
@@ -172,7 +172,7 @@ class _NeuroButtonState extends State<NeuroButton>
                   ? [
                       BoxShadow(
                         color: (widget.backgroundColor ?? theme.colorScheme.primary)
-                            .withOpacity(0.3),
+                            .withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -238,7 +238,7 @@ class NeuroCard extends StatelessWidget {
         boxShadow: showShadow
             ? [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 2),
                 ),
@@ -360,7 +360,7 @@ class _NeuroTextFieldState extends State<NeuroTextField> {
             boxShadow: _isFocused
                 ? [
                     BoxShadow(
-                      color: theme.colorScheme.primary.withOpacity(0.15),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.15),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -388,7 +388,7 @@ class _NeuroTextFieldState extends State<NeuroTextField> {
               prefixIcon: widget.prefixIcon,
               suffixIcon: widget.suffixIcon,
               filled: true,
-              fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -396,7 +396,7 @@ class _NeuroTextFieldState extends State<NeuroTextField> {
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: theme.colorScheme.outline.withOpacity(0.2),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.2),
                 ),
               ),
               focusedBorder: OutlineInputBorder(
@@ -452,13 +452,13 @@ class NeuroEmptyState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 size: 48,
-                color: theme.colorScheme.primary.withOpacity(0.7),
+                color: theme.colorScheme.primary.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 24),
@@ -523,11 +523,11 @@ class NeuroChip extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: selected ? chipColor : chipColor.withOpacity(0.1),
+            color: selected ? chipColor : chipColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
             border: showBorder
                 ? Border.all(
-                    color: selected ? chipColor : chipColor.withOpacity(0.3),
+                    color: selected ? chipColor : chipColor.withValues(alpha: 0.3),
                   )
                 : null,
           ),

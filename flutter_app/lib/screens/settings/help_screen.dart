@@ -608,7 +608,7 @@ class _LiveChatSheetState extends State<_LiveChatSheet> {
           Padding(
             padding: const EdgeInsets.only(top: 12, bottom: 8),
             child: Container(width: 40, height: 4,
-              decoration: BoxDecoration(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.4), borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(2)),
             ),
           ),
           Padding(

@@ -5,6 +5,7 @@ import '../../models/custom_avatar.dart';
 import '../../widgets/avatar/custom_avatar_widget.dart';
 import '../../widgets/common/neuro_avatar.dart';
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import 'avatar_maker_screen.dart';
 
 /// A bottom sheet that provides options for picking or creating a profile picture
@@ -85,6 +86,7 @@ class _ProfilePicturePickerSheetState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -103,7 +105,7 @@ class _ProfilePicturePickerSheetState
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withOpacity(0.3),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -112,16 +114,16 @@ class _ProfilePicturePickerSheetState
 
             // Title
             Text(
-              'Profile Picture',
+              l10n.get('profilePictureTitle'),
               style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Choose how you want to be seen',
+              l10n.get('profilePictureSubtitle'),
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 24),
@@ -151,8 +153,8 @@ class _ProfilePicturePickerSheetState
             _buildOption(
               icon: Icons.photo_library,
               iconColor: AppColors.primaryPurple,
-              title: 'Choose from Gallery',
-              subtitle: 'Pick an existing photo',
+              title: l10n.get('chooseFromGallery'),
+              subtitle: l10n.get('pickExistingPhoto'),
               onTap: _pickFromGallery,
             ),
             const SizedBox(height: 12),
@@ -160,8 +162,8 @@ class _ProfilePicturePickerSheetState
             _buildOption(
               icon: Icons.camera_alt,
               iconColor: AppColors.secondaryTeal,
-              title: 'Take a Photo',
-              subtitle: 'Use your camera',
+              title: l10n.get('takePhoto'),
+              subtitle: l10n.get('useYourCamera'),
               onTap: _pickFromCamera,
             ),
             const SizedBox(height: 12),
@@ -169,8 +171,8 @@ class _ProfilePicturePickerSheetState
             _buildOption(
               icon: Icons.face,
               iconColor: AppColors.accentOrange,
-              title: 'Create Avatar',
-              subtitle: 'Design your own custom avatar',
+              title: l10n.get('createAvatar'),
+              subtitle: l10n.get('designCustomAvatar'),
               onTap: _openAvatarMaker,
               highlighted: true,
             ),
@@ -181,8 +183,8 @@ class _ProfilePicturePickerSheetState
               _buildOption(
                 icon: Icons.delete_outline,
                 iconColor: theme.colorScheme.error,
-                title: 'Remove Picture',
-                subtitle: 'Use default initials avatar',
+                title: l10n.get('removePicture'),
+                subtitle: l10n.get('useDefaultInitialsAvatar'),
                 onTap: _removeProfilePicture,
               ),
             ],
@@ -213,11 +215,11 @@ class _ProfilePicturePickerSheetState
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: highlighted
-                ? iconColor.withOpacity(0.5)
-                : theme.colorScheme.outline.withOpacity(0.2),
+                ? iconColor.withValues(alpha: 0.5)
+                : theme.colorScheme.outline.withValues(alpha: 0.2),
             width: highlighted ? 2 : 1,
           ),
-          color: highlighted ? iconColor.withOpacity(0.05) : null,
+          color: highlighted ? iconColor.withValues(alpha: 0.05) : null,
         ),
         child: Row(
           children: [
@@ -225,7 +227,7 @@ class _ProfilePicturePickerSheetState
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
+                color: iconColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -248,7 +250,7 @@ class _ProfilePicturePickerSheetState
                   Text(
                     subtitle,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.6),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ],
@@ -256,7 +258,7 @@ class _ProfilePicturePickerSheetState
             ),
             Icon(
               Icons.chevron_right,
-              color: theme.colorScheme.onSurface.withOpacity(0.4),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
             ),
           ],
         ),
@@ -287,4 +289,3 @@ Future<void> showProfilePicturePicker({
     ),
   );
 }
-

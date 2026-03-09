@@ -113,6 +113,14 @@ object LikesRepository {
                 filters = "id=eq.$postId"
             )
 
+            // Safety: if the post doesn't exist in the database, bail out.
+            // This prevents phantom updates when mock/local-only post IDs
+            // coincidentally match the filter.
+            if (rows.isEmpty()) {
+                Log.d(TAG, "Post #$postId not found in DB — skipping like count update")
+                return
+            }
+
             val currentLikes = rows.firstOrNull()
                 ?.jsonObject?.get("likes")?.jsonPrimitive?.int ?: 0
             val delta = if (increment) 1 else -1

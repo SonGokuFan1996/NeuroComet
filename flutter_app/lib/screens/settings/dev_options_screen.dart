@@ -98,6 +98,9 @@ class DevOptionsNotifier extends Notifier<DevOptions> {
   void setMockPostCount(int value) => _update((s) => s.copyWith(mockPostCount: value));
   void setShowSponsoredPosts(bool value) => _update((s) => s.copyWith(showSponsoredPosts: value));
 
+  // ── A/B Testing ─────────────────────────────────────────
+  void setAbTestVariant(ABTestVariant value) => _update((s) => s.copyWith(abTestVariant: value));
+
   // ── Reset ────────────────────────────────────────────
   void resetAll() {
     state = const DevOptions();
@@ -180,6 +183,7 @@ class _DevOptionsScreenState extends ConsumerState<DevOptionsScreen> {
     final sections = <_SectionEntry>[
       _SectionEntry('App Info & Diagnostics', 'version build device os memory', Icons.info, const AppInfoDevSection()),
       _SectionEntry('Environment', 'staging production local backend', Icons.cloud, EnvironmentPickerDevSection()),
+      _SectionEntry('A/B Testing', 'ab test variant liquid glass compact bold typography experiment', Icons.science, const ABTestingDevSection()),
       _SectionEntry('Feature Flags', 'flags feed video chat story search ai', Icons.flag, const FeatureFlagsDevSection()),
       _SectionEntry('Authentication', 'auth login sign in session user', Icons.lock, const AuthDevSection()),
       _SectionEntry('Content Safety', 'content safety audience kids filter pin parental', Icons.security, const ContentSafetyDevSection()),
@@ -232,7 +236,7 @@ class _DevOptionsScreenState extends ConsumerState<DevOptionsScreen> {
           // Active overrides indicator
           if (options.activeOverrideCount > 0)
             Card(
-              color: theme.colorScheme.tertiaryContainer.withOpacity(0.3),
+              color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.3),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               child: Padding(
                 padding: const EdgeInsets.all(12),
@@ -309,7 +313,7 @@ class _CollapsibleSectionState extends State<_CollapsibleSection>
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: theme.colorScheme.outlineVariant.withOpacity(0.5)),
+        side: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -399,10 +403,10 @@ class _DevHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Card(
-      color: theme.colorScheme.errorContainer.withOpacity(0.1),
+      color: theme.colorScheme.errorContainer.withValues(alpha: 0.1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: theme.colorScheme.error.withOpacity(0.5)),
+        side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.5)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),

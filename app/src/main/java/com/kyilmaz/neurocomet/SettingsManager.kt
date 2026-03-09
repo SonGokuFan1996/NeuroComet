@@ -69,6 +69,10 @@ object SettingsManager {
     // Developer
     private const val KEY_DEVELOPER_MODE = "developer_mode"
 
+    // Chat Wallpaper
+    private const val KEY_GLOBAL_WALLPAPER = "global_chat_wallpaper"
+    private const val KEY_PREFIX_CONV_WALLPAPER = "conv_wallpaper_"
+
     // ═══════════════════════════════════════════════════════════════
     // STATE VARIABLES (with defaults)
     // ═══════════════════════════════════════════════════════════════
@@ -183,6 +187,10 @@ object SettingsManager {
     private var _developerMode by mutableStateOf(false)
     val developerMode: Boolean get() = _developerMode
 
+    // Chat Wallpaper
+    private var _globalWallpaper by mutableStateOf("NONE")
+    val globalWallpaper: String get() = _globalWallpaper
+
     private var context: Context? = null
     private var isInitialized = false
 
@@ -200,6 +208,14 @@ object SettingsManager {
         isInitialized = true
     }
 
+    /**
+     * Force-reload all settings from disk. Call this after restoring a backup
+     * so the in-memory state reflects the restored values.
+     */
+    fun reload() {
+        loadAllSettings()
+    }
+
     private fun getPrefs(): SharedPreferences? {
         return context?.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
@@ -207,55 +223,62 @@ object SettingsManager {
     private fun loadAllSettings() {
         val prefs = getPrefs() ?: return
 
-        // Theme
-        _themeMode = prefs.getString(KEY_THEME_MODE, "system") ?: "system"
-        _dynamicColorsEnabled = prefs.getBoolean(KEY_DYNAMIC_COLORS, true)
-        _selectedTheme = prefs.getString(KEY_SELECTED_THEME, "default") ?: "default"
-        _amoledBlack = prefs.getBoolean(KEY_AMOLED_BLACK, false)
-        _highContrast = prefs.getBoolean(KEY_HIGH_CONTRAST, false)
+        try {
+            // Theme
+            _themeMode = prefs.getString(KEY_THEME_MODE, "system") ?: "system"
+            _dynamicColorsEnabled = prefs.getBoolean(KEY_DYNAMIC_COLORS, true)
+            _selectedTheme = prefs.getString(KEY_SELECTED_THEME, "default") ?: "default"
+            _amoledBlack = prefs.getBoolean(KEY_AMOLED_BLACK, false)
+            _highContrast = prefs.getBoolean(KEY_HIGH_CONTRAST, false)
 
-        // Accessibility
-        _reducedMotion = prefs.getBoolean(KEY_REDUCED_MOTION, false)
-        _fontScale = prefs.getFloat(KEY_FONT_SCALE, 1.0f)
-        _selectedFont = prefs.getString(KEY_SELECTED_FONT, "default") ?: "default"
-        _dyslexiaFriendly = prefs.getBoolean(KEY_DYSLEXIA_FRIENDLY, false)
-        _screenReaderMode = prefs.getBoolean(KEY_SCREEN_READER_MODE, false)
+            // Accessibility
+            _reducedMotion = prefs.getBoolean(KEY_REDUCED_MOTION, false)
+            _fontScale = try { prefs.getFloat(KEY_FONT_SCALE, 1.0f) } catch (_: ClassCastException) { 1.0f }
+            _selectedFont = prefs.getString(KEY_SELECTED_FONT, "default") ?: "default"
+            _dyslexiaFriendly = prefs.getBoolean(KEY_DYSLEXIA_FRIENDLY, false)
+            _screenReaderMode = prefs.getBoolean(KEY_SCREEN_READER_MODE, false)
 
-        // Notifications
-        _notificationsEnabled = prefs.getBoolean(KEY_NOTIFICATIONS_ENABLED, true)
-        _messageNotifications = prefs.getBoolean(KEY_MESSAGE_NOTIFICATIONS, true)
-        _likeNotifications = prefs.getBoolean(KEY_LIKE_NOTIFICATIONS, true)
-        _commentNotifications = prefs.getBoolean(KEY_COMMENT_NOTIFICATIONS, true)
-        _followNotifications = prefs.getBoolean(KEY_FOLLOW_NOTIFICATIONS, true)
-        _notificationSound = prefs.getBoolean(KEY_NOTIFICATION_SOUND, true)
-        _notificationVibration = prefs.getBoolean(KEY_NOTIFICATION_VIBRATION, true)
+            // Notifications
+            _notificationsEnabled = prefs.getBoolean(KEY_NOTIFICATIONS_ENABLED, true)
+            _messageNotifications = prefs.getBoolean(KEY_MESSAGE_NOTIFICATIONS, true)
+            _likeNotifications = prefs.getBoolean(KEY_LIKE_NOTIFICATIONS, true)
+            _commentNotifications = prefs.getBoolean(KEY_COMMENT_NOTIFICATIONS, true)
+            _followNotifications = prefs.getBoolean(KEY_FOLLOW_NOTIFICATIONS, true)
+            _notificationSound = prefs.getBoolean(KEY_NOTIFICATION_SOUND, true)
+            _notificationVibration = prefs.getBoolean(KEY_NOTIFICATION_VIBRATION, true)
 
-        // Privacy
-        _profileVisibility = prefs.getString(KEY_PROFILE_VISIBILITY, "public") ?: "public"
-        _onlineStatusVisible = prefs.getBoolean(KEY_ONLINE_STATUS_VISIBLE, true)
-        _readReceipts = prefs.getBoolean(KEY_READ_RECEIPTS, true)
-        _typingIndicators = prefs.getBoolean(KEY_TYPING_INDICATORS, true)
-        _activityStatus = prefs.getBoolean(KEY_ACTIVITY_STATUS, true)
+            // Privacy
+            _profileVisibility = prefs.getString(KEY_PROFILE_VISIBILITY, "public") ?: "public"
+            _onlineStatusVisible = prefs.getBoolean(KEY_ONLINE_STATUS_VISIBLE, true)
+            _readReceipts = prefs.getBoolean(KEY_READ_RECEIPTS, true)
+            _typingIndicators = prefs.getBoolean(KEY_TYPING_INDICATORS, true)
+            _activityStatus = prefs.getBoolean(KEY_ACTIVITY_STATUS, true)
 
-        // Content
-        _autoplayVideos = prefs.getBoolean(KEY_AUTOPLAY_VIDEOS, true)
-        _dataSaver = prefs.getBoolean(KEY_DATA_SAVER, false)
-        _hdImages = prefs.getBoolean(KEY_HD_IMAGES, true)
-        _nsfwFilter = prefs.getBoolean(KEY_NSFW_FILTER, true)
-        _contentFilterLevel = prefs.getString(KEY_CONTENT_FILTER_LEVEL, "moderate") ?: "moderate"
+            // Content
+            _autoplayVideos = prefs.getBoolean(KEY_AUTOPLAY_VIDEOS, true)
+            _dataSaver = prefs.getBoolean(KEY_DATA_SAVER, false)
+            _hdImages = prefs.getBoolean(KEY_HD_IMAGES, true)
+            _nsfwFilter = prefs.getBoolean(KEY_NSFW_FILTER, true)
+            _contentFilterLevel = prefs.getString(KEY_CONTENT_FILTER_LEVEL, "moderate") ?: "moderate"
 
-        // Parental Controls
-        _parentalPinHash = prefs.getString(KEY_PARENTAL_PIN_HASH, null)
-        _screenTimeLimit = prefs.getInt(KEY_SCREEN_TIME_LIMIT, 0)
-        _bedtimeStart = prefs.getString(KEY_BEDTIME_START, "22:00") ?: "22:00"
-        _bedtimeEnd = prefs.getString(KEY_BEDTIME_END, "07:00") ?: "07:00"
-        _bedtimeEnabled = prefs.getBoolean(KEY_BEDTIME_ENABLED, false)
+            // Parental Controls
+            _parentalPinHash = prefs.getString(KEY_PARENTAL_PIN_HASH, null)
+            _screenTimeLimit = try { prefs.getInt(KEY_SCREEN_TIME_LIMIT, 0) } catch (_: ClassCastException) { 0 }
+            _bedtimeStart = prefs.getString(KEY_BEDTIME_START, "22:00") ?: "22:00"
+            _bedtimeEnd = prefs.getString(KEY_BEDTIME_END, "07:00") ?: "07:00"
+            _bedtimeEnabled = prefs.getBoolean(KEY_BEDTIME_ENABLED, false)
 
-        // Language
-        _selectedLocale = prefs.getString(KEY_SELECTED_LOCALE, null)
+            // Language
+            _selectedLocale = prefs.getString(KEY_SELECTED_LOCALE, null)
 
-        // Developer
-        _developerMode = prefs.getBoolean(KEY_DEVELOPER_MODE, false)
+            // Developer
+            _developerMode = prefs.getBoolean(KEY_DEVELOPER_MODE, false)
+
+            // Chat Wallpaper
+            _globalWallpaper = prefs.getString(KEY_GLOBAL_WALLPAPER, "NONE") ?: "NONE"
+        } catch (e: Exception) {
+            android.util.Log.e("SettingsManager", "Error loading settings, using defaults", e)
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -444,6 +467,25 @@ object SettingsManager {
         getPrefs()?.edit()?.putBoolean(KEY_DEVELOPER_MODE, value)?.apply()
     }
 
+    // Chat Wallpaper setters
+    fun setGlobalWallpaper(value: String) {
+        _globalWallpaper = value
+        getPrefs()?.edit()?.putString(KEY_GLOBAL_WALLPAPER, value)?.apply()
+    }
+
+    /** Get per-conversation wallpaper override, or null to use global default. */
+    fun getConversationWallpaper(conversationId: String): String? {
+        return getPrefs()?.getString(KEY_PREFIX_CONV_WALLPAPER + conversationId, null)
+    }
+
+    /** Set per-conversation wallpaper override. Pass null to clear and fall back to global. */
+    fun setConversationWallpaper(conversationId: String, value: String?) {
+        getPrefs()?.edit()?.apply {
+            if (value == null) remove(KEY_PREFIX_CONV_WALLPAPER + conversationId)
+            else putString(KEY_PREFIX_CONV_WALLPAPER + conversationId, value)
+        }?.apply()
+    }
+
     // ═══════════════════════════════════════════════════════════════
     // RESET
     // ═══════════════════════════════════════════════════════════════
@@ -498,6 +540,10 @@ object SettingsManager {
             // Developer
             remove(KEY_DEVELOPER_MODE)
 
+            // Chat Wallpaper
+            remove(KEY_GLOBAL_WALLPAPER)
+            // Note: per-conversation wallpapers are NOT cleared on reset (user preference)
+
             if (includeParentalControls) {
                 remove(KEY_PARENTAL_PIN_HASH)
                 remove(KEY_SCREEN_TIME_LIMIT)
@@ -530,7 +576,8 @@ object SettingsManager {
             "autoplayVideos" to autoplayVideos,
             "dataSaver" to dataSaver,
             "selectedLocale" to selectedLocale,
-            "developerMode" to developerMode
+            "developerMode" to developerMode,
+            "globalWallpaper" to globalWallpaper
         )
     }
 }

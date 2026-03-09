@@ -1,10 +1,10 @@
 package com.kyilmaz.neurocomet
 
 import android.content.Context
+import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kyilmaz.neurocomet.auth.AuthMethod
 import com.kyilmaz.neurocomet.auth.AuthResult
 import com.kyilmaz.neurocomet.auth.AuthenticationManager
 import com.kyilmaz.neurocomet.auth.BiometricStatus
@@ -23,7 +23,16 @@ import kotlinx.coroutines.launch
  */
 class AuthViewModel : ViewModel() {
 
+    private val TAG = "AuthViewModel"
     private var authManager: AuthenticationManager? = null
+
+    private fun buildMockUser(name: String): User = User(
+        id = "mock_user_id",
+        name = name,
+        avatarUrl = "",
+        isVerified = true,
+        personality = "A mock user."
+    )
 
     private val _user = MutableStateFlow<User?>(null)
     val user = _user.asStateFlow()
@@ -243,11 +252,16 @@ class AuthViewModel : ViewModel() {
     // ==================== EMAIL VERIFICATION ====================
 
     /**
-     * Send email verification code
-     * Returns the code for demo purposes
+     * Send email verification code when the current build supports it.
      */
-    fun sendEmailVerificationCode(email: String): String {
-        return authManager?.sendEmailVerificationCode(email) ?: "000000"
+    fun sendEmailVerificationCode(email: String): AuthResult {
+        val result = authManager?.sendEmailVerificationCode(email) ?: AuthResult.NotAvailable
+        when (result) {
+            is AuthResult.Error -> _error.value = result.message
+            AuthResult.NotAvailable -> _error.value = "Email verification is unavailable in this build"
+            else -> Unit
+        }
+        return result
     }
 
     /**
@@ -284,14 +298,18 @@ class AuthViewModel : ViewModel() {
         onResult(result)
     }
 
-    // ==================== LEGACY METHODS (Updated) ====================
+    // ==================== PRIMARY AUTH FLOWS ====================
 
+    /**
+     * Sign in with email and password
+     */
     fun signIn(email: String, password: String) {
         viewModelScope.launch {
             try {
                 // Input validation — prevent login with empty or malformed credentials
                 val trimmedEmail = email.trim()
-                val trimmedPassword = password.trim()
+                // Passwords are NOT trimmed — spaces may be intentional
+                val trimmedPassword = password
 
                 if (trimmedEmail.isBlank()) {
                     _error.value = "Email is required"
@@ -333,18 +351,16 @@ class AuthViewModel : ViewModel() {
                         _error.value = "Sign in failed. Please check your credentials."
                     }
                 } else {
+                    if (!BuildConfig.DEBUG) {
+                        _error.value = "Authentication is temporarily unavailable in this build"
+                        return@launch
+                    }
                     // Mock mode fallback
                     delay(1000)
                     if (_is2FAEnabled.value) {
                         _is2FARequired.value = true
                     } else {
-                        _user.value = User(
-                            id = "mock_user_id",
-                            name = trimmedEmail.substringBefore("@"),
-                            avatarUrl = "",
-                            isVerified = true,
-                            personality = "A mock user."
-                        )
+                        _user.value = buildMockUser(trimmedEmail.substringBefore("@"))
                     }
                 }
             } catch (e: Exception) {
@@ -353,34 +369,34 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Verify 2FA code
+     */
     fun verify2FA(code: String) {
         viewModelScope.launch {
             delay(500)
             // Try TOTP first
             if (verifyTotpCode(code)) {
                 _is2FARequired.value = false
-                _user.value = User(
-                    id = "mock_user_id",
-                    name = "Mock User",
-                    avatarUrl = "",
-                    isVerified = true,
-                    personality = "A mock user."
-                )
-            } else if (code == "123456") { // Fallback mock verification
+                if (_user.value == null) {
+                    if (!BuildConfig.DEBUG) {
+                        _error.value = "Two-factor verification requires an active sign-in session"
+                        return@launch
+                    }
+                    _user.value = buildMockUser("Mock User")
+                }
+            } else if (BuildConfig.DEBUG && code == "123456") { // Debug-only fallback mock verification
                 _is2FARequired.value = false
-                _user.value = User(
-                    id = "mock_user_id",
-                    name = "Mock User",
-                    avatarUrl = "",
-                    isVerified = true,
-                    personality = "A mock user."
-                )
+                _user.value = buildMockUser("Mock User")
             } else {
                 _error.value = "Invalid 2FA Code"
             }
         }
     }
 
+    /**
+     * Toggle 2FA enabled state
+     */
     fun toggle2FA(enabled: Boolean) {
         _is2FAEnabled.value = enabled
     }
@@ -393,16 +409,23 @@ class AuthViewModel : ViewModel() {
         _is2FAEnabled.value = anyEnabled
     }
 
+    /**
+     * Set the audience for age verification
+     */
     fun setAgeVerifiedAudience(audience: Audience) {
         _ageVerifiedAudience.value = audience
     }
 
+    /**
+     * Sign up with email and password
+     */
     fun signUp(email: String, password: String, audience: Audience?) {
         viewModelScope.launch {
             try {
                 // Input validation — prevent sign-up with empty or malformed credentials
                 val trimmedEmail = email.trim()
-                val trimmedPassword = password.trim()
+                // Passwords are NOT trimmed — spaces may be intentional
+                val trimmedPassword = password
 
                 if (trimmedEmail.isBlank()) {
                     _error.value = "Email is required"
@@ -448,15 +471,13 @@ class AuthViewModel : ViewModel() {
                         _error.value = "Check your email to confirm your account, then sign in."
                     }
                 } else {
+                    if (!BuildConfig.DEBUG) {
+                        _error.value = "Sign up is temporarily unavailable in this build"
+                        return@launch
+                    }
                     // Mock mode fallback
                     delay(1000)
-                    _user.value = User(
-                        id = "mock_user_id",
-                        name = trimmedEmail.substringBefore("@"),
-                        avatarUrl = "",
-                        isVerified = true,
-                        personality = "A mock user."
-                    )
+                    _user.value = buildMockUser(trimmedEmail.substringBefore("@"))
                 }
                 audience?.let { _ageVerifiedAudience.value = it }
             } catch (e: Exception) {
@@ -465,16 +486,24 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Sign out the current user
+     */
     fun signOut() {
         viewModelScope.launch {
             try {
                 AppSupabaseClient.client?.auth?.signOut()
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                Log.w(TAG, "Error during sign out (non-fatal)", e)
+            }
         }
         _user.value = null
         _is2FARequired.value = false
     }
 
+    /**
+     * Skip authentication (guest access)
+     */
     fun skipAuth() {
         // Only allow guest access in debug builds to prevent unauthorized feed access
         if (!BuildConfig.DEBUG) {
@@ -490,10 +519,16 @@ class AuthViewModel : ViewModel() {
         )
     }
 
+    /**
+     * Clear the current error message
+     */
     fun clearError() {
         _error.value = null
     }
 
+    /**
+     * Reset the 2FA state
+     */
     fun reset2FAState() {
         _is2FARequired.value = false
         _is2FAEnabled.value = false

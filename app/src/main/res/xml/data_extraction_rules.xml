@@ -1,19 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Data extraction rules for NeuroComet (API 31+).
+   Exclude secure credential storage from cloud backup and device transfer.
    See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <exclude domain="sharedpref" path="neurocomet_secure_prefs.xml" />
+        <exclude domain="sharedpref" path="neurocomet_credential_store.xml" />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="sharedpref" path="neurocomet_secure_prefs.xml" />
+        <exclude domain="sharedpref" path="neurocomet_credential_store.xml" />
     </device-transfer>
-    -->
 </data-extraction-rules>

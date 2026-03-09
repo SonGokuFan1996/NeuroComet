@@ -9,33 +9,31 @@
     <!-- Camera & Microphone -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
-    <!-- Camera is optional — allow install on devices without a camera -->
+    <!-- Camera & microphone are optional — allow install on devices without them -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
 
-    <!-- Location -->
+    <!-- Location — foreground only (no background location) -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <!-- Storage: granular media permissions on API 33+ -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <!-- Android 14+ Selected Photos Access -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
     <!-- Legacy storage for API < 33 -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
     <!-- Notifications (API 33+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-    <!-- Bluetooth (API 31+) -->
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-
-    <!-- Local Network Access (API 37+ / CinnamonBun) — required for local device
-         discovery, WebRTC ICE candidate gathering over LAN, and casting. -->
-    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
 
     <!-- Required for Google Ads -->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
@@ -53,15 +51,21 @@
     <!-- Huawei launcher -->
     <uses-permission android:name="com.huawei.android.launcher.permission.INSTALL_SHORTCUT" />
 
-    <!-- Contacts: On CinnamonBun+ (Android 17) the ContactsPickerSessionContract
-         provides privacy-preserving contact access without READ_CONTACTS.
-         The permission is still declared (without maxSdkVersion) so the legacy
-         picker fallback and third-party libraries can function on all API levels. -->
+    <!-- Local Network Access (API 37+ / CinnamonBun) — required for local device
+         discovery, WebRTC ICE candidate gathering over LAN, and casting.
+         On API 36 and below this permission does not exist and is ignored. -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+
+    <!-- Contacts: On API 37+ the ContactsPickerSessionContract provides
+         privacy-preserving contact access without READ_CONTACTS.
+         The permission is still declared so the legacy picker and
+         friend-finding features work on all API levels. -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
         android:name=".NeuroCometApplication"
         android:allowBackup="true"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -81,7 +85,8 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.NeuroComet">
+            android:theme="@style/Theme.NeuroComet"
+            android:windowSoftInputMode="adjustResize">
         </activity>
 
         <!-- Transparent activity for shortcut requests -->
@@ -200,15 +205,27 @@
                 android:resource="@xml/shortcuts" />
         </activity-alias>
 
-        <!-- Shortcut receiver for handling shortcut creation callbacks -->
+        <!-- Shortcut receiver for handling shortcut creation callbacks.
+             Not exported: only receives PendingIntent broadcasts from our own
+             ShortcutManagerCompat calls, so external apps cannot trigger it. -->
         <receiver
             android:name=".ShortcutReceiver"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.kyilmaz.neurocomet.SHORTCUT_ADDED" />
-                <action android:name="com.android.launcher.action.INSTALL_SHORTCUT" />
             </intent-filter>
         </receiver>
+
+        <!-- FileProvider for camera capture and file sharing -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

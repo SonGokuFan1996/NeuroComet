@@ -94,33 +94,26 @@ object LocationService {
     }
 
     /**
-     * Check if background location permission is granted (Android 10+)
+     * Background location is NOT used by this app.
+     * Location is only accessed while the app is in the foreground.
      */
+    @Suppress("unused")
     fun hasBackgroundLocationPermission(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            true // Not needed on older versions
-        }
+        // Background location removed — app only uses foreground location
+        return false
     }
 
     /**
-     * Get required permissions based on use case
+     * Get required permissions — foreground location only.
+     * The includeBackground parameter is retained for API compatibility but ignored.
      */
+    @Suppress("UNUSED_PARAMETER")
     fun getRequiredPermissions(includeBackground: Boolean = false): Array<String> {
-        val permissions = mutableListOf(
+        // Only foreground location permissions — no background location
+        return arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
-
-        if (includeBackground && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-        }
-
-        return permissions.toTypedArray()
     }
 
     // ═══════════════════════════════════════════════════════════════

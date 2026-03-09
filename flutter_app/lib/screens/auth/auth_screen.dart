@@ -32,6 +32,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
 
   late AnimationController _gradientController;
 
+  static const _supabaseConfigMessage =
+      'Supabase is not configured for this Flutter build. Start the app with SUPABASE_URL and SUPABASE_ANON_KEY dart-defines.';
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +56,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
   Future<void> _handleAuth() async {
     final l10n = context.l10n;
     if (!_formKey.currentState!.validate()) return;
+
+    if (!SupabaseService.isInitialized) {
+      setState(() {
+        _error = _supabaseConfigMessage;
+      });
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -161,6 +171,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                           resultMessage = null;
                         });
                         try {
+                          if (!SupabaseService.isInitialized) {
+                            setDialogState(() {
+                              isSending = false;
+                              resultMessage = 'Error: $_supabaseConfigMessage';
+                            });
+                            return;
+                          }
+
                           await SupabaseService.client.auth.resetPasswordForEmail(email);
                           setDialogState(() {
                             isSending = false;
@@ -217,13 +235,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                       ]
                     : [
                         Color.lerp(
-                          AppColors.primaryPurple.withOpacity(0.1),
-                          AppColors.secondaryTeal.withOpacity(0.1),
+                          AppColors.primaryPurple.withValues(alpha: 0.1),
+                          AppColors.secondaryTeal.withValues(alpha: 0.1),
                           _gradientController.value,
                         )!,
                         Color.lerp(
-                          AppColors.calmLavender.withOpacity(0.1),
-                          AppColors.calmBlue.withOpacity(0.1),
+                          AppColors.calmLavender.withValues(alpha: 0.1),
+                          AppColors.calmBlue.withValues(alpha: 0.1),
                           _gradientController.value,
                         )!,
                       ],
@@ -256,7 +274,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                   Text(
                     l10n.safeSpace,
                     style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -329,7 +347,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                                 controller: _confirmPasswordController,
                                 obscureText: _obscureConfirmPassword,
                                 decoration: InputDecoration(
-                                  labelText: l10n.reply, // Wait, need confirm password string
+                                  labelText: l10n.reply,
                                   prefixIcon: const Icon(Icons.lock_outlined),
                                   suffixIcon: IconButton(
                                     icon: Icon(
@@ -339,7 +357,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                                     ),
                                     onPressed: () {
                                       setState(() {
-                                        _obscureConfirmPassword = !_obscureConfirmPassword;
+                                        _obscureConfirmPassword =
+                                            !_obscureConfirmPassword;
                                       });
                                     },
                                   ),
@@ -367,7 +386,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: AppColors.error.withOpacity(0.1),
+                                  color: AppColors.error.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Row(
@@ -407,7 +426,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                                         height: 24,
                                         child: CircularProgressIndicator(
                                           strokeWidth: 2,
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(Colors.white),
                                         ),
                                       )
                                     : Text(
@@ -435,7 +455,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                               child: Text(
                                 l10n.authSkipDev,
                                 style: TextStyle(
-                                  color: theme.colorScheme.onSurface.withOpacity(0.5),
+                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                                   fontSize: 14,
                                 ),
                               ),
@@ -511,9 +531,7 @@ class _TabButton extends StatelessWidget {
           label,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: isSelected
-                ? Colors.white
-                : theme.colorScheme.onSurfaceVariant,
+            color: isSelected ? Colors.white : theme.colorScheme.onSurfaceVariant,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
           ),
         ),

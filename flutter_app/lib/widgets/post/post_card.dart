@@ -247,11 +247,11 @@ class _PostCardState extends ConsumerState<PostCard>
     final cardWidget = Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       elevation: 0.5,
-      shadowColor: theme.colorScheme.shadow.withOpacity(0.1),
+      shadowColor: theme.colorScheme.shadow.withValues(alpha: 0.1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
         side: BorderSide(
-          color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
           width: 1.0,
         ),
       ),
@@ -271,7 +271,7 @@ class _PostCardState extends ConsumerState<PostCard>
             Divider(
               height: 1,
               thickness: 0.5,
-              color: theme.colorScheme.outlineVariant.withOpacity(0.3),
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 4),
             _buildActions(context),
@@ -320,12 +320,12 @@ class _PostCardState extends ConsumerState<PostCard>
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: theme.colorScheme.outline.withOpacity(0.18),
+                color: theme.colorScheme.outline.withValues(alpha: 0.18),
                 width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: theme.colorScheme.shadow.withOpacity(0.06),
+                  color: theme.colorScheme.shadow.withValues(alpha: 0.06),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
@@ -346,14 +346,14 @@ class _PostCardState extends ConsumerState<PostCard>
                           Icons.account_circle,
                           size: 40,
                           color: theme.colorScheme.onSurfaceVariant
-                              .withOpacity(0.4),
+                              .withValues(alpha: 0.4),
                         ),
                       )
                     : Icon(
                         Icons.account_circle,
                         size: 40,
                         color:
-                            theme.colorScheme.onSurfaceVariant.withOpacity(0.4),
+                            theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                       ),
               ),
             ),
@@ -388,7 +388,7 @@ class _PostCardState extends ConsumerState<PostCard>
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer.withOpacity(0.7),
+                        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.7),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
@@ -407,7 +407,7 @@ class _PostCardState extends ConsumerState<PostCard>
               Text(
                 _formatTimeAgo(widget.post.createdAt),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.6),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                   fontSize: 12,
                   letterSpacing: 0.1,
                 ),
@@ -629,10 +629,10 @@ class _PostCardState extends ConsumerState<PostCard>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: tone.backgroundColor.withOpacity(0.12),
+          color: tone.backgroundColor.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: tone.backgroundColor.withOpacity(0.22),
+            color: tone.backgroundColor.withValues(alpha: 0.22),
             width: 0.75,
           ),
         ),
@@ -656,7 +656,7 @@ class _PostCardState extends ConsumerState<PostCard>
                 '·',
                 style: TextStyle(
                   fontSize: 10,
-                  color: blendedTextColor.withOpacity(0.5),
+                  color: blendedTextColor.withValues(alpha: 0.5),
                 ),
               ),
               const SizedBox(width: 4),
@@ -664,7 +664,7 @@ class _PostCardState extends ConsumerState<PostCard>
                 'sensitive',
                 style: TextStyle(
                   fontSize: 10.5,
-                  color: blendedTextColor.withOpacity(0.6),
+                  color: blendedTextColor.withValues(alpha: 0.6),
                   letterSpacing: 0.1,
                 ),
               ),
@@ -1056,7 +1056,7 @@ class _MediaCarouselState extends State<_MediaCarousel> {
                   shape: BoxShape.circle,
                   color: index == _currentIndex
                       ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.outline.withOpacity(0.5),
+                      : Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
                 ),
               );
             }),
@@ -1154,7 +1154,7 @@ class _ReportPostDialogState extends State<ReportPostDialog> {
             Text(
               'Your report is anonymous and helps keep our community safe.',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
               ),
             ),
             const SizedBox(height: 16),

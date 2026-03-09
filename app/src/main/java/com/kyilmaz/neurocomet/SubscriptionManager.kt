@@ -37,6 +37,7 @@ import java.security.MessageDigest
 object SubscriptionManager {
 
     private const val TAG = "SubscriptionManager"
+    private const val BILLING_UNAVAILABLE_MESSAGE = "Purchases are temporarily unavailable. Please try again later."
 
     // =========================================================================
     // TEST MODE — enabled automatically in debug builds.
@@ -67,6 +68,10 @@ object SubscriptionManager {
     private var lastVerificationTime: Long = 0L
 
     private const val VERIFICATION_VALIDITY_MS = 60_000L // 1 minute
+
+    // Billing configuration state
+    @Volatile
+    private var isBillingConfigured = BuildConfig.DEBUG
 
     // State
     private val _subscriptionState = MutableStateFlow(SubscriptionState())
@@ -151,6 +156,41 @@ object SubscriptionManager {
     }
 
     /**
+     * Set billing availability
+     */
+    fun setBillingConfigured(isConfigured: Boolean, errorMessage: String? = null) {
+        isBillingConfigured = isConfigured
+        if (!testMode && !isConfigured) {
+            verificationToken = null
+            _subscriptionState.value = _subscriptionState.value.copy(
+                isLoading = false,
+                isPremium = false,
+                offerings = null,
+                currentOffering = null,
+                monthlyPackage = null,
+                lifetimePackage = null,
+                error = errorMessage ?: BILLING_UNAVAILABLE_MESSAGE,
+                purchaseSuccess = false,
+                purchaseType = null
+            )
+        }
+    }
+
+    fun isBillingConfigured(): Boolean = testMode || isBillingConfigured
+
+    private fun requireBillingConfigured(onError: ((String) -> Unit)? = null): Boolean {
+        if (testMode || isBillingConfigured) return true
+        val message = _subscriptionState.value.error ?: BILLING_UNAVAILABLE_MESSAGE
+        _subscriptionState.value = _subscriptionState.value.copy(
+            isLoading = false,
+            error = message,
+            isPremium = false
+        )
+        onError?.invoke(message)
+        return false
+    }
+
+    /**
      * Fetch available offerings from RevenueCat
      */
     fun fetchOfferings() {
@@ -169,6 +209,8 @@ object SubscriptionManager {
             }
             return
         }
+
+        if (!requireBillingConfigured()) return
 
         _subscriptionState.value = _subscriptionState.value.copy(isLoading = true, error = null)
 
@@ -216,6 +258,8 @@ object SubscriptionManager {
             return
         }
 
+        if (!requireBillingConfigured { onResult(false) }) return
+
         try {
             Purchases.sharedInstance.getCustomerInfo(
                 callback = object : com.revenuecat.purchases.interfaces.ReceiveCustomerInfoCallback {
@@ -258,6 +302,8 @@ object SubscriptionManager {
             return
         }
 
+        if (!requireBillingConfigured(onError)) return
+
         val pkg = _subscriptionState.value.monthlyPackage
         if (pkg == null) {
             onError("Monthly subscription not available")
@@ -274,6 +320,8 @@ object SubscriptionManager {
             simulateTestPurchase("lifetime", onSuccess)
             return
         }
+
+        if (!requireBillingConfigured(onError)) return
 
         val pkg = _subscriptionState.value.lifetimePackage
         if (pkg == null) {
@@ -293,6 +341,8 @@ object SubscriptionManager {
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
+        if (!requireBillingConfigured(onError)) return
+
         _subscriptionState.value = _subscriptionState.value.copy(isLoading = true, error = null)
 
         Purchases.sharedInstance.purchase(
@@ -353,6 +403,11 @@ object SubscriptionManager {
             }
             return
         }
+
+        if (!requireBillingConfigured {
+                onError(it)
+                onSuccess(false)
+            }) return
 
         _subscriptionState.value = _subscriptionState.value.copy(isLoading = true, error = null)
 

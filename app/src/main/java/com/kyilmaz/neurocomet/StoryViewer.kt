@@ -29,6 +29,13 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
@@ -55,21 +62,23 @@ fun StoryViewerDialog(
     onDismiss: () -> Unit,
     onStoryViewed: (Story) -> Unit,
     onReply: (Story, String) -> Unit = { _, _ -> },
-    enableReactions: Boolean = true
+    enableReactions: Boolean = true,
+    onNextStory: (() -> Unit)? = null
 ) {
-    var currentItemIndex by remember { mutableIntStateOf(0) }
-    var isPaused by remember { mutableStateOf(false) }
-    var showReplyField by remember { mutableStateOf(false) }
-    var replyText by remember { mutableStateOf("") }
-    var isLiked by remember { mutableStateOf(false) }
+    var currentItemIndex by remember(story.id) { mutableIntStateOf(0) }
+    var isPaused by remember(story.id) { mutableStateOf(false) }
+    var showReplyField by remember(story.id) { mutableStateOf(false) }
+    var replyText by remember(story.id) { mutableStateOf("") }
+    var isLiked by remember(story.id) { mutableStateOf(false) }
     val context = LocalContext.current
     val appContext = remember { context.applicationContext }
+    val brailleOptimized = SocialSettingsManager.isBrailleOptimized(context)
 
     // Swipe-down to dismiss state (neurodivergent-centric: smooth, predictable motion)
-    val swipeOffsetY = remember { Animatable(0f) }
+    val swipeOffsetY = remember(story.id) { Animatable(0f) }
     val dismissThreshold = 300f // Generous threshold for easier dismissal
-    var isDragging by remember { mutableStateOf(false) }
-    var showDismissHint by remember { mutableStateOf(false) }
+    var isDragging by remember(story.id) { mutableStateOf(false) }
+    var showDismissHint by remember(story.id) { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     // Calculate visual feedback for swipe
@@ -79,10 +88,11 @@ fun StoryViewerDialog(
     val cornerRadius = (swipeProgress * 32).dp // Rounded corners appear during swipe
 
     val currentItem = story.items.getOrNull(currentItemIndex)
-    val progress = remember { Animatable(0f) }
+    val activeItemKey = remember(story.id, currentItem?.id) { "${story.id}:${currentItem?.id ?: "none"}" }
+    val progress = remember(activeItemKey) { Animatable(0f) }
 
     // Detect if current item is video
-    val isVideo = remember(currentItem) {
+    val isVideo = remember(currentItem?.id, currentItem?.imageUrl) {
         currentItem?.imageUrl?.let { url ->
             url.endsWith(".mp4", ignoreCase = true) ||
             url.endsWith(".mov", ignoreCase = true) ||
@@ -99,13 +109,13 @@ fun StoryViewerDialog(
         onStoryViewed(story)
     }
 
-    // Reset progress when item changes
-    LaunchedEffect(currentItemIndex) {
+    // Reset progress when the active story item changes, including next-user transitions.
+    LaunchedEffect(activeItemKey) {
         progress.snapTo(0f)
     }
 
     // Auto-advance timer (only for images)
-    LaunchedEffect(currentItemIndex, isPaused) {
+    LaunchedEffect(activeItemKey, isPaused, isVideo) {
         if (!isPaused && currentItem != null && !isVideo) {
             val duration = currentItem.duration.toFloat()
             val currentProgress = progress.value
@@ -119,18 +129,16 @@ fun StoryViewerDialog(
                         easing = LinearEasing
                     )
                 )
-                // Move to next item or close
                 if (currentItemIndex < story.items.size - 1) {
                     currentItemIndex++
                 } else {
-                    onDismiss()
+                    if (onNextStory != null) onNextStory() else onDismiss()
                 }
             } else if (progress.value >= 0.99f) {
-                 // Move to next if already finished (edge case)
-                 if (currentItemIndex < story.items.size - 1) {
+                if (currentItemIndex < story.items.size - 1) {
                     currentItemIndex++
                 } else {
-                    onDismiss()
+                    if (onNextStory != null) onNextStory() else onDismiss()
                 }
             }
         }
@@ -254,13 +262,13 @@ fun StoryViewerDialog(
                                         currentItemIndex--
                                         scope.launch { progress.snapTo(0f) }
                                     }
-                                } else if (offset.x > width * 2 / 3) {
+                                    } else if (offset.x > width * 2 / 3) {
                                     // Tap right - go forward
                                     if (currentItemIndex < story.items.size - 1) {
                                         currentItemIndex++
                                         scope.launch { progress.snapTo(0f) }
                                     } else {
-                                        onDismiss()
+                                        if (onNextStory != null) onNextStory() else onDismiss()
                                     }
                                 }
                             },
@@ -285,7 +293,7 @@ fun StoryViewerDialog(
                             if (currentItemIndex < story.items.size - 1) {
                                 currentItemIndex++
                             } else {
-                                onDismiss()
+                                if (onNextStory != null) onNextStory() else onDismiss()
                             }
                         },
                         onProgressUpdate = { videoProgress ->
@@ -354,7 +362,10 @@ fun StoryViewerDialog(
                                 index == currentItemIndex -> progress.value
                                 else -> 0f
                             },
-                            modifier = Modifier.weight(1f)
+                            itemIndex = index,
+                            currentItemIndex = currentItemIndex,
+                            totalItems = story.items.size,
+                             modifier = Modifier.weight(1f)
                         )
                     }
                 }
@@ -427,7 +438,12 @@ fun StoryViewerDialog(
                             value = replyText,
                             onValueChange = { replyText = it },
                             placeholder = { Text(stringResource(R.string.dm_reply_to_placeholder, story.userName)) },
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                                .weight(1f)
+                                .semantics {
+                                    contentDescription = if (brailleOptimized) "Story reply input" else "Reply to ${story.userName}"
+                                    stateDescription = if (replyText.isBlank()) "Empty" else "${replyText.length} characters entered"
+                                },
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
                                 unfocusedTextColor = Color.White,
@@ -440,6 +456,9 @@ fun StoryViewerDialog(
                         )
                         Spacer(Modifier.width(8.dp))
                         IconButton(
+                            modifier = Modifier.semantics {
+                                contentDescription = if (replyText.isBlank()) "Send story reply disabled" else "Send story reply"
+                            },
                             onClick = {
                                 if (replyText.isNotBlank()) {
                                     onReply(story, replyText)
@@ -512,12 +531,20 @@ fun StoryViewerDialog(
 @Composable
 private fun StoryProgressBar(
     progress: Float,
+    itemIndex: Int,
+    currentItemIndex: Int,
+    totalItems: Int,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .height(3.dp)
             .clip(RoundedCornerShape(1.5.dp))
+            .semantics {
+                contentDescription = "Story progress"
+                stateDescription = "Item ${currentItemIndex + 1} of $totalItems. Segment ${itemIndex + 1} is ${(progress * 100).toInt()} percent complete"
+                progressBarRangeInfo = ProgressBarRangeInfo(progress.coerceIn(0f, 1f), 0f..1f)
+            }
             .background(Color.White.copy(alpha = 0.3f))
     ) {
         Box(
@@ -538,7 +565,12 @@ private fun StoryActionButton(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.clickable(onClick = onClick)
+        modifier = Modifier
+            .clickable(onClick = onClick)
+            .semantics(mergeDescendants = true) {
+                role = Role.Button
+                contentDescription = label
+            }
     ) {
         Icon(
             imageVector = icon,

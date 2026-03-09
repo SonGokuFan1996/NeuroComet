@@ -38,12 +38,14 @@ import '../screens/stories/create_story_screen.dart';
 import '../screens/subscription/subscription_screen.dart';
 import '../screens/neuro_state/neuro_state_screen.dart';
 import '../screens/calling/practice_calls_screen.dart';
+import '../screens/calling/active_call_screen.dart';
 import '../screens/onboarding/tutorial_screen.dart';
 import '../screens/feed/category_feed_screen.dart';
 import '../screens/auth/stay_signed_in_screen.dart';
 import '../screens/settings/parental_blocked_screen.dart';
 import '../screens/settings/dm_privacy_settings_screen.dart';
 import '../screens/settings/social_settings_screen.dart';
+import '../screens/settings/backup_settings_screen.dart';
 import '../services/supabase_service.dart';
 
 class AppRouter {
@@ -232,6 +234,12 @@ class AppRouter {
         builder: (context, state) => const PracticeCallsScreen(),
       ),
 
+      // Active Call (voice/video)
+      GoRoute(
+        path: '/active-call',
+        builder: (context, state) => const ActiveCallScreen(),
+      ),
+
       // Settings sub-routes
       GoRoute(
         path: '/settings/accessibility',
@@ -314,6 +322,12 @@ class AppRouter {
       GoRoute(
         path: '/settings/dm-privacy',
         builder: (context, state) => const DmPrivacySettingsScreen(),
+      ),
+
+      // Backup & Storage Settings
+      GoRoute(
+        path: '/settings/backup',
+        builder: (context, state) => const BackupSettingsScreen(),
       ),
 
       // Parental Blocked Screen

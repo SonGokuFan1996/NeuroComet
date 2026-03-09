@@ -286,7 +286,16 @@ class AppLocalizations {
       'debugToolsDesc': 'Debug and testing tools',
       'appInfo': 'App Info',
       'version': 'Version',
+      'chooseYourState': 'Choose Your State',
+      'activeTheme': 'Active Theme',
+      'themePreviewDescription': 'Theme colors are carefully designed for this neuro state.',
+      'primary': 'Primary',
+      'secondary': 'Secondary',
+      'tertiary': 'Tertiary',
+      'surface': 'Surface',
+      'entriesCount': '{count} entries',
       'trendingTopics': 'Trending Topics',
+      'trendingPostsCount': '{count} posts',
       'quickActions': 'Quick Actions',
       'breathingExercise': 'Breathing Exercise',
       'practiceCall': 'Practice Call',
@@ -342,6 +351,7 @@ class AppLocalizations {
       'neuroCategoryColorblind': 'Colorblind',
       'neuroCategoryBlind': 'Visual Impairment',
       'neuroCategoryMood': 'Mood',
+      'neuroCategorySpecial': 'Special',
       'neuroCategorySecret': 'Secret',
       // Account Management
       'deleteAccount': 'Delete Account',
@@ -11987,10 +11997,17 @@ class AppLocalizations {
   String get reportProblem => get('reportProblem');
   String get developerOptions => get('developerOptions');
   String get debugToolsDesc => get('debugToolsDesc');
-  String get appInfo => get('appInfo');
-  String get version => get('version');
-  String get trendingTopics => get('trendingTopics');
-  String get quickActions => get('quickActions');
+    String get appInfo => get('appInfo');
+    String get version => get('version');
+    String get chooseYourState => get('chooseYourState');
+    String get activeTheme => get('activeTheme');
+    String get themePreviewDescription => get('themePreviewDescription');
+    String entriesCount(int count) =>
+      get('entriesCount').replaceAll('{count}', count.toString());
+    String get trendingTopics => get('trendingTopics');
+    String trendingPostsCount(String count) =>
+      get('trendingPostsCount').replaceAll('{count}', count);
+    String get quickActions => get('quickActions');
   String get breathingExercise => get('breathingExercise');
   String get practiceCall => get('practiceCall');
   String get createStory => get('createStory');

@@ -15,7 +15,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -25,7 +25,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -42,6 +41,7 @@ import com.revenuecat.purchases.interfaces.ReceiveCustomerInfoCallback
 import com.kyilmaz.neurocomet.calling.NeurodivergentPersona
 import com.kyilmaz.neurocomet.calling.PracticeCallScreen
 import com.kyilmaz.neurocomet.calling.PracticeCallSelectionScreen
+import com.kyilmaz.neurocomet.calling.WebRTCCallManager
 
 // --- 1. NAVIGATION & ROUTES ---
 sealed class Screen(val route: String, val labelId: Int, val iconFilled: ImageVector, val iconOutlined: ImageVector) {
@@ -85,6 +85,7 @@ sealed class Screen(val route: String, val labelId: Int, val iconFilled: ImageVe
     data object FeedbackHub : Screen("feedback_hub/{action}", R.string.feedback_hub_title, Icons.Filled.Feedback, Icons.Outlined.Feedback) {
         fun route(action: String = "none") = "feedback_hub/$action"
     }
+    data object BackupSettings : Screen("backup_settings", R.string.nav_settings, Icons.Filled.Cloud, Icons.Outlined.Cloud)
 }
 
 class MainActivity : AppCompatActivity() {
@@ -123,6 +124,7 @@ class MainActivity : AppCompatActivity() {
         PerformanceOverlayState.init(this)
         SettingsManager.init(this)
         CredentialStorage.initialize(this)
+        RegulationLiveSessionManager.initialize(this)
 
         try {
             SecurityManager.performSecurityCheck(this)
@@ -144,18 +146,28 @@ class MainActivity : AppCompatActivity() {
             NotificationChannels.requestNotificationPermission(this)
         }
 
-        // RevenueCat: Only configure in release builds (or when a real key is present).
-        // In debug builds, SubscriptionManager operates in test mode and simulates
-        // the full purchase flow without the SDK.
-        if (!BuildConfig.DEBUG) {
-            val revenueCatKey = SecurityUtils.decrypt(BuildConfig.REVENUECAT_API_KEY).ifEmpty {
-                "test_ghfalVJOgCZfjWpsJdiyCbHARmz"
+        // RevenueCat: only configure when a real release key is present.
+        // Debug builds stay in SubscriptionManager test mode.
+        val billingConfigured = if (!BuildConfig.DEBUG) {
+            val revenueCatKey = SecurityUtils.decrypt(BuildConfig.REVENUECAT_API_KEY)
+            if (revenueCatKey.isNotBlank()) {
+                Purchases.logLevel = LogLevel.DEBUG
+                Purchases.configure(PurchasesConfiguration.Builder(this, revenueCatKey).build())
+                true
+            } else {
+                Log.e("MainActivity", "RevenueCat key missing in release build; billing disabled")
+                false
             }
-            Purchases.logLevel = LogLevel.DEBUG
-            Purchases.configure(PurchasesConfiguration.Builder(this, revenueCatKey).build())
         } else {
             Log.d("MainActivity", "🧪 TEST MODE: RevenueCat SDK skipped — purchases will be simulated")
+            false
         }
+        SubscriptionManager.setBillingConfigured(
+            isConfigured = billingConfigured,
+            errorMessage = if (!BuildConfig.DEBUG && !billingConfigured) {
+                "Purchases are temporarily unavailable in this build."
+            } else null
+        )
 
         setContent {
             val feedViewModel: FeedViewModel = viewModel()
@@ -171,6 +183,18 @@ class MainActivity : AppCompatActivity() {
             val authState by authViewModel.user.collectAsState()
             val authError by authViewModel.error.collectAsState()
             val is2FARequired by authViewModel.is2FARequired.collectAsState()
+
+            // Initialize WebRTC call manager for real voice/video calls
+            val webRtcUserId = authState?.id
+            LaunchedEffect(webRtcUserId) {
+                if (webRtcUserId != null) {
+                    WebRTCCallManager.getInstance().initialize(
+                        context = context,
+                        supabase = AppSupabaseClient.client,
+                        userId = webRtcUserId
+                    )
+                }
+            }
 
             val themeState by themeViewModel.themeState.collectAsState()
             val isDark = themeState.isDarkMode
@@ -190,16 +214,18 @@ class MainActivity : AppCompatActivity() {
                 }
                 themeViewModel.setLanguageCode(languageTag)
 
-                if (!BuildConfig.DEBUG) {
+                if (!BuildConfig.DEBUG && billingConfigured) {
                     Purchases.sharedInstance.getCustomerInfo(object : ReceiveCustomerInfoCallback {
                         override fun onReceived(customerInfo: CustomerInfo) {
                             val isPremium = customerInfo.entitlements["premium"]?.isActive == true
                             feedViewModel.setPremiumStatus(isPremium)
                         }
-                        override fun onError(error: PurchasesError) { }
+                        override fun onError(error: PurchasesError) {
+                            feedViewModel.setPremiumStatus(false)
+                        }
                     })
                 } else {
-                    // In debug/test mode, use SubscriptionManager which simulates everything
+                    // In debug/test mode, or when billing is unavailable, use the safe fallback path.
                     SubscriptionManager.checkPremiumStatus { isPremium ->
                         feedViewModel.setPremiumStatus(isPremium)
                     }
@@ -301,6 +327,7 @@ fun NeuroCometApp(
     val devOptions by devOptionsViewModel.options.collectAsState()
     val messagesViewModel: MessagesViewModel = viewModel()
     val messagesState by messagesViewModel.state.collectAsState()
+    val abExperiments by ABTestManager.experiments.collectAsState()
 
     LaunchedEffect(Unit) {
         devOptionsViewModel.refresh(app)
@@ -321,6 +348,7 @@ fun NeuroCometApp(
             // Accessibility → ThemeViewModel
             val a11y = SocialSettingsManager.getAccessibilitySettings(context)
             themeViewModel.setDisableAllAnimations(a11y.reduceMotion)
+            RegulationLiveSessionManager.refreshAccessibilityMode(context)
             if (a11y.dyslexiaFont) {
                 themeViewModel.setSelectedFont(AccessibilityFont.OPEN_DYSLEXIC)
             }
@@ -351,6 +379,19 @@ fun NeuroCometApp(
         // Re-fetch posts when simulation flags change so they take effect immediately
         feedViewModel.fetchPosts()
     }
+
+    val compactFeedExperimentEnabled =
+        (abExperiments[ABExperiment.COMPACT_FEED_CARDS]?.activeVariant
+            ?: ABTestManager.getVariant(app, ABExperiment.COMPACT_FEED_CARDS)) != "control"
+    val settingsSearchEnabled =
+        (abExperiments[ABExperiment.SETTINGS_SEARCH]?.activeVariant
+            ?: ABTestManager.getVariant(app, ABExperiment.SETTINGS_SEARCH)) != "control"
+    val notificationGroupingEnabled =
+        (abExperiments[ABExperiment.NOTIFICATION_GROUPING]?.activeVariant
+            ?: ABTestManager.getVariant(app, ABExperiment.NOTIFICATION_GROUPING)) != "control"
+    val dmTypingIndicatorVariant =
+        abExperiments[ABExperiment.DM_TYPING_INDICATOR]?.activeVariant
+            ?: ABTestManager.getVariant(app, ABExperiment.DM_TYPING_INDICATOR)
 
     // Wellbeing: Break reminders via snackbar
     LaunchedEffect(Unit) {
@@ -436,25 +477,46 @@ fun NeuroCometApp(
                                 screens.forEach { screen ->
                                     val isSelected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
                                     NavigationBarItem(
-                                        icon = {
-                                            Box(
-                                                modifier = if (screen == Screen.Settings) {
-                                                    Modifier.pointerInput(Unit) {
-                                                        detectTapGestures(
-                                                            onLongPress = {
-                                                                DevOptionsSettings.setDevMenuEnabled(app, true)
-                                                                devOptionsViewModel.refresh(app)
-                                                                navController.navigate(Screen.DevOptions.route)
-                                                            }
-                                                        )
+                                        modifier = if (screen == Screen.Settings) {
+                                            Modifier.combinedClickable(
+                                                onClick = {
+                                                    navController.navigate(screen.route) {
+                                                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                                        launchSingleTop = true
+                                                        restoreState = true
                                                     }
-                                                } else Modifier
-                                            ) {
-                                                Icon(
-                                                    if (isSelected) screen.iconFilled else screen.iconOutlined,
-                                                    stringResource(screen.labelId)
-                                                )
-                                            }
+                                                },
+                                                onLongClick = {
+                                                    if (DeviceAuthority.isAuthorizedDevice(app)) {
+                                                        val wasDevMenuEnabled = devOptions.devMenuEnabled
+                                                        DevOptionsSettings.setDevMenuEnabled(app, true)
+                                                        devOptionsViewModel.refresh(app)
+                                                        if (!wasDevMenuEnabled) {
+                                                            android.widget.Toast.makeText(
+                                                                app,
+                                                                app.getString(R.string.easter_egg_secret_unlocked),
+                                                                android.widget.Toast.LENGTH_SHORT
+                                                            ).show()
+                                                        }
+                                                        navController.navigate(Screen.DevOptions.route)
+                                                    } else {
+                                                        android.widget.Toast.makeText(
+                                                            app,
+                                                            app.getString(
+                                                                R.string.error_feature_unavailable,
+                                                                app.getString(R.string.settings_developer_options_group)
+                                                            ),
+                                                            android.widget.Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    }
+                                                }
+                                            )
+                                        } else Modifier,
+                                        icon = {
+                                            Icon(
+                                                if (isSelected) screen.iconFilled else screen.iconOutlined,
+                                                stringResource(screen.labelId)
+                                            )
                                         },
                                         label = { Text(stringResource(screen.labelId)) },
                                         selected = isSelected,
@@ -516,26 +578,32 @@ fun NeuroCometApp(
                         isMockInterfaceEnabled = feedState.isMockInterfaceEnabled,
                         animationSettings = themeState.animationSettings,
                         safetyState = safetyState,
-                        enableNewFeedLayout = devOptions.enableNewFeedLayout,
+                        enableNewFeedLayout = devOptions.enableNewFeedLayout || compactFeedExperimentEnabled,
                         onSettingsClick = {
                             navController.navigate(Screen.Settings.route) {
                                 popUpTo(navController.graph.startDestinationId) { saveState = true }
                                 launchSingleTop = true
                                 restoreState = true
                             }
+                        },
+                        onHashtagClick = { hashtag ->
+                            navController.navigate(Screen.TopicDetail.route(hashtag))
                         }
                     )
 
                     feedState.activeStory?.let { story ->
-                        StoryViewerDialog(
-                            story = story,
-                            onDismiss = { feedViewModel.dismissStory() },
-                            onStoryViewed = { viewedStory ->
-                                feedViewModel.markStoryAsViewed(viewedStory.id)
-                            },
-                            onReply = { _, _ -> },
-                            enableReactions = devOptions.enableStoryReactions
-                        )
+                        key(story.id) {
+                            StoryViewerDialog(
+                                story = story,
+                                onDismiss = { feedViewModel.dismissStory() },
+                                onStoryViewed = { viewedStory ->
+                                    feedViewModel.markStoryAsViewed(viewedStory.id)
+                                },
+                                onReply = { _, _ -> },
+                                enableReactions = devOptions.enableStoryReactions,
+                                onNextStory = { feedViewModel.advanceToNextStory() }
+                            )
+                        }
                     }
                 }
                 composable(Screen.Explore.route) {
@@ -618,7 +686,12 @@ fun NeuroCometApp(
                             },
                             isBlocked = { messagesViewModel.isUserBlocked(it) },
                             isMuted = { messagesViewModel.isUserMuted(it) },
-                            enableVideoChat = devOptions.enableVideoChat
+                            enableVideoChat = devOptions.enableVideoChat,
+                            typingIndicatorVariant = dmTypingIndicatorVariant,
+                            enableSimulatedReplies = BuildConfig.DEBUG && messagesState.currentUserId == "me",
+                            onSimulatedReply = { conversationId, senderId, content ->
+                                messagesViewModel.receiveMockReply(conversationId, senderId, content)
+                            }
                         )
                     }
                 }
@@ -653,7 +726,8 @@ fun NeuroCometApp(
                         },
                         onDismissNotification = { notificationId ->
                             feedViewModel.dismissNotification(notificationId)
-                        }
+                        },
+                        enableGrouping = notificationGroupingEnabled
                     )
                 }
                 composable(Screen.Settings.route) {
@@ -721,12 +795,21 @@ fun NeuroCometApp(
                         onOpenGeneralFeedback = {
                             navController.navigate(Screen.FeedbackHub.route("feedback"))
                         },
+                        onOpenBackupSettings = {
+                            navController.navigate(Screen.BackupSettings.route)
+                        },
                         isPremium = feedState.isPremium,
                         isFakePremiumEnabled = feedState.isFakePremiumEnabled,
                         onFakePremiumToggle = { enabled ->
                             feedViewModel.toggleFakePremium(enabled)
                         },
-                        themeViewModel = themeViewModel
+                        themeViewModel = themeViewModel,
+                        showSearchBar = settingsSearchEnabled
+                    )
+                }
+                composable(Screen.BackupSettings.route) {
+                    BackupSettingsScreen(
+                        onBack = { navController.popBackStack() }
                     )
                 }
                 composable(Screen.ThemeSettings.route) {
@@ -787,6 +870,9 @@ fun NeuroCometApp(
                         themeViewModel = themeViewModel,
                         onNavigateToGame = { gameId ->
                             navController.navigate(Screen.GamePlay.route(gameId))
+                        },
+                        onNavigateToBackup = {
+                            navController.navigate(Screen.BackupSettings.route)
                         }
                     )
                 }
@@ -815,11 +901,14 @@ fun NeuroCometApp(
                     CallHistoryScreen(
                         onBack = { navController.popBackStack() },
                         onCallUser = { userId, userName, userAvatar, callType ->
-                            MockCallManager.startCall(
+                            WebRTCCallManager.getInstance().startCall(
                                 recipientId = userId,
                                 recipientName = userName,
                                 recipientAvatar = userAvatar,
-                                callType = callType
+                                callType = when (callType) {
+                                    CallType.VIDEO -> com.kyilmaz.neurocomet.calling.CallType.VIDEO
+                                    else -> com.kyilmaz.neurocomet.calling.CallType.VOICE
+                                }
                             )
                         },
                         onOpenPracticeCallSelection = {
@@ -923,6 +1012,49 @@ fun NeuroCometApp(
                     .align(Alignment.TopEnd)
                     .statusBarsPadding()
             )
+
+            // Global call overlay — shows from ANY screen when a call is active
+            val globalCallManager = remember { WebRTCCallManager.getInstance() }
+            val globalCallState = globalCallManager.callState
+            var showGlobalCallDialog by remember { mutableStateOf(false) }
+
+            // Auto-show dialog whenever a call is active (outgoing, incoming, connected)
+            LaunchedEffect(globalCallState) {
+                when (globalCallState) {
+                    com.kyilmaz.neurocomet.calling.CallState.RINGING,
+                    com.kyilmaz.neurocomet.calling.CallState.INCOMING,
+                    com.kyilmaz.neurocomet.calling.CallState.CONNECTING,
+                    com.kyilmaz.neurocomet.calling.CallState.CONNECTED,
+                    com.kyilmaz.neurocomet.calling.CallState.RECONNECTING -> {
+                        showGlobalCallDialog = true
+                    }
+                    com.kyilmaz.neurocomet.calling.CallState.ENDED -> {
+                        // Keep showing briefly so user sees "Call Ended"
+                        kotlinx.coroutines.delay(1500)
+                        showGlobalCallDialog = false
+                    }
+                    com.kyilmaz.neurocomet.calling.CallState.IDLE -> {
+                        showGlobalCallDialog = false
+                    }
+                }
+            }
+
+            if (showGlobalCallDialog && globalCallManager.currentCall != null) {
+                com.kyilmaz.neurocomet.calling.ActiveCallDialog(
+                    callManager = globalCallManager,
+                    onDismiss = { showGlobalCallDialog = false }
+                )
+            }
+
+            RegulationLiveSessionHost(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = innerPadding.calculateBottomPadding() + 12.dp
+                    )
+            )
         }
         }
 
@@ -942,7 +1074,9 @@ fun NeuroCometApp(
             comments = feedState.activePostComments,
             onDismiss = { feedViewModel.dismissCommentSheet() },
             onAddComment = { content -> feedViewModel.addComment(content) },
-            postAuthor = feedState.posts.find { it.id == feedState.activePostId }?.userId
+            postAuthor = feedState.posts.find { it.id == feedState.activePostId }?.userId,
+            draftText = feedState.activePostId?.let { feedState.commentDraftsByPostId[it] }.orEmpty(),
+            onDraftChange = { draft -> feedViewModel.updateActiveCommentDraft(draft) }
         )
 
         TutorialTrigger()

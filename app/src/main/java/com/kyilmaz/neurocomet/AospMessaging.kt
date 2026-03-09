@@ -3,8 +3,6 @@
 package com.kyilmaz.neurocomet
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -482,7 +480,7 @@ fun AospConversationScreen(
         }
     }
 
-    // Column layout: TopBar -> Messages (weight 1f) -> Composer (with imePadding)
+    // Column layout: TopBar -> Messages (weight 1f) -> Composer
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -642,13 +640,11 @@ fun AospConversationScreen(
         }
 
         // Bottom bar - composer
-        // Handle IME and nav bar insets - union ensures we get the max of both
+        // Apply both nav-bar and IME insets here so only the composer lifts.
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .windowInsetsPadding(
-                    WindowInsets.ime.union(WindowInsets.navigationBars)
-                )
+                .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
         ) {
             if (isUserBlocked) {
                 // Blocked user notice

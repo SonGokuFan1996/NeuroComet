@@ -723,7 +723,7 @@ class _FlashyNeuroCometTextState extends State<_FlashyNeuroCometText>
                   color: Colors.transparent,
                   shadows: [
                     Shadow(
-                      color: glowColor.withOpacity(glowIntensity * 0.3),
+                      color: glowColor.withValues(alpha: glowIntensity * 0.3),
                       blurRadius: 16,
                     ),
                   ],
@@ -739,7 +739,7 @@ class _FlashyNeuroCometTextState extends State<_FlashyNeuroCometText>
                   color: Colors.transparent,
                   shadows: [
                     Shadow(
-                      color: glowColor.withOpacity(glowIntensity),
+                      color: glowColor.withValues(alpha: glowIntensity),
                       offset: const Offset(0, 1.5),
                       blurRadius: 6,
                     ),

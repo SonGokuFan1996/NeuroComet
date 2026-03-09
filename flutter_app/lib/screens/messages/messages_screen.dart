@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,11 +10,16 @@ import '../../widgets/common/neuro_avatar.dart';
 import '../../widgets/common/neuro_loading.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
+import '../../services/contacts_picker_service.dart';
+import '../../services/webrtc_call_service.dart';
+import '../../services/contacts_call_service.dart';
+import '../calling/active_call_screen.dart';
 
 /// Message tab filter options
 enum MessageFilter {
   all,
   primary,
+  calls,
   requests,
 }
 
@@ -64,7 +70,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
       backgroundColor: theme.colorScheme.surface,
       body: SafeArea(
         child: messagesState.when(
-          loading: () => const NeuroLoading(message: 'Loading messages...'),
+          loading: () => NeuroLoading(message: l10n.get('loadingMessages')),
           error: (error, stack) => _buildErrorState(error.toString()),
           data: (conversations) => isTablet
               ? _buildTabletLayout(context, conversations, l10n, theme)
@@ -113,14 +119,14 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Select a conversation',
+                  l10n.get('selectConversation'),
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Choose a conversation to start messaging',
+                  l10n.get('chooseConversationToStartMessaging'),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -194,7 +200,14 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
         ),
 
         // Content
-        if (filteredConversations.isEmpty)
+        if (_selectedFilter == MessageFilter.calls)
+          SliverFillRemaining(
+            hasScrollBody: true,
+            child: _InlineCallHistoryView(
+              onOpenPracticeCall: () => context.push('/practice-calls'),
+            ),
+          )
+        else if (filteredConversations.isEmpty)
           SliverFillRemaining(
             hasScrollBody: false,
             child: _buildEmptyState(),
@@ -237,7 +250,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Delete',
+                              l10n.delete,
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.onErrorContainer,
                                 fontSize: 12,
@@ -267,6 +280,8 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
         return conversations;
       case MessageFilter.primary:
         return conversations.where((c) => c.isPrimary).toList();
+      case MessageFilter.calls:
+        return []; // Calls tab shows its own view, not conversations
       case MessageFilter.requests:
         return conversations.where((c) => !c.isPrimary && c.unreadCount > 0).toList();
     }
@@ -295,7 +310,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
             Text(l10n.noMessages, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Text(
-              'Start a conversation with someone in the community!',
+              l10n.get('startConversationHint'),
               style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
@@ -335,6 +350,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
   }
 
   void _showConversationOptions(Conversation conversation) {
+    final l10n = AppLocalizations.of(context)!;
     HapticFeedback.mediumImpact();
     showModalBottomSheet(
       context: context,
@@ -349,14 +365,14 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
             ),
             ListTile(
               leading: Icon(conversation.isPinned ? Icons.push_pin_outlined : Icons.push_pin),
-              title: Text(conversation.isPinned ? 'Unpin' : 'Pin'),
+              title: Text(conversation.isPinned ? l10n.unpin : l10n.pin),
               onTap: () => Navigator.pop(ctx),
             ),
-            ListTile(leading: const Icon(Icons.notifications_off_outlined), title: const Text('Mute'), onTap: () => Navigator.pop(ctx)),
-            ListTile(leading: const Icon(Icons.archive_outlined), title: const Text('Archive'), onTap: () => Navigator.pop(ctx)),
+            ListTile(leading: const Icon(Icons.notifications_off_outlined), title: Text(l10n.mute), onTap: () => Navigator.pop(ctx)),
+            ListTile(leading: const Icon(Icons.archive_outlined), title: Text(l10n.archive), onTap: () => Navigator.pop(ctx)),
             ListTile(
               leading: Icon(Icons.delete_outline, color: Theme.of(ctx).colorScheme.error),
-              title: Text('Delete', style: TextStyle(color: Theme.of(ctx).colorScheme.error)),
+              title: Text(l10n.delete, style: TextStyle(color: Theme.of(ctx).colorScheme.error)),
               onTap: () { Navigator.pop(ctx); _confirmDelete(conversation); },
             ),
             const SizedBox(height: 16),
@@ -367,20 +383,21 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
   }
 
   void _confirmDelete(Conversation conversation) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Conversation?'),
-        content: const Text('This will permanently delete this conversation.'),
+        title: Text(l10n.deleteConversation),
+        content: Text(l10n.deleteConversationDesc),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
           FilledButton(
             onPressed: () {
               Navigator.pop(ctx);
               ref.read(conversationsProvider.notifier).deleteConversation(conversation.id);
             },
             style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -389,20 +406,21 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
 
   /// Used by Dismissible.confirmDismiss – returns true only if user taps "Delete".
   Future<bool> _confirmDeleteSwipe(Conversation conversation) async {
+    final l10n = AppLocalizations.of(context)!;
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Conversation?'),
-        content: const Text('This will permanently delete this conversation.'),
+        title: Text(l10n.deleteConversation),
+        content: Text(l10n.deleteConversationDesc),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -446,7 +464,7 @@ class _MessagesScreenState extends ConsumerState<MessagesScreen>
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryPurple.withOpacity(0.1),
+                      color: AppColors.primaryPurple.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
@@ -540,7 +558,7 @@ class _ConversationTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Material(
         color: hasUnread
-            ? primaryColor.withOpacity(0.08)
+            ? primaryColor.withValues(alpha: 0.08)
             : theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
@@ -688,12 +706,60 @@ class _ConversationTile extends StatelessWidget {
                     ],
                   ),
                 ),
+                // Call shortcut icons — matches native Android
+                if (!conversation.isGroup)
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          iconSize: 18,
+                          icon: Icon(Icons.phone, color: theme.colorScheme.onSurfaceVariant),
+                          onPressed: () {
+                            HapticFeedback.selectionClick();
+                            WebRTCCallService.instance.startCall(
+                              recipientId: conversation.id,
+                              recipientName: conversation.displayName,
+                              recipientAvatar: conversation.avatarUrl ?? '',
+                              callType: CallType.voice,
+                            );
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const ActiveCallScreen()),
+                            );
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          iconSize: 18,
+                          icon: Icon(Icons.videocam, color: theme.colorScheme.onSurfaceVariant),
+                          onPressed: () {
+                            HapticFeedback.selectionClick();
+                            WebRTCCallService.instance.startCall(
+                              recipientId: conversation.id,
+                              recipientName: conversation.displayName,
+                              recipientAvatar: conversation.avatarUrl ?? '',
+                              callType: CallType.video,
+                            );
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const ActiveCallScreen()),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 
   String _formatTime(DateTime? dateTime) {
@@ -763,6 +829,8 @@ class _NewMessageSheet extends StatefulWidget {
 
 class _NewMessageSheetState extends State<_NewMessageSheet> {
   final TextEditingController _searchController = TextEditingController();
+  final ContactsPickerService _contactsService = ContactsPickerService();
+  bool _isPickingContact = false;
   final List<_User> _suggestedUsers = [
     _User(id: '1', name: 'Alex Thompson', username: 'alex_t', avatarUrl: 'https://i.pravatar.cc/150?img=1', isOnline: true),
     _User(id: '2', name: 'Jordan Lee', username: 'jordanlee', avatarUrl: 'https://i.pravatar.cc/150?img=2'),
@@ -771,6 +839,39 @@ class _NewMessageSheetState extends State<_NewMessageSheet> {
 
   @override
   void dispose() { _searchController.dispose(); super.dispose(); }
+
+  Future<void> _pickFromContacts() async {
+    HapticFeedback.selectionClick();
+    setState(() => _isPickingContact = true);
+
+    try {
+      final contact = await _contactsService.pickContact();
+      if (contact != null && mounted) {
+        setState(() {
+          _isPickingContact = false;
+        });
+        // Navigate to chat with the picked contact
+        if (mounted) {
+          Navigator.pop(context);
+          context.push('/chat', extra: {
+            'userId': contact.displayName.replaceAll(' ', '_').toLowerCase(),
+            'contactName': contact.displayName,
+            'contactPhone': contact.phoneNumber,
+            'contactEmail': contact.email,
+          });
+        }
+      } else {
+        if (mounted) setState(() => _isPickingContact = false);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isPickingContact = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not access contacts: $e')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -808,7 +909,7 @@ class _NewMessageSheetState extends State<_NewMessageSheet> {
                   controller: _searchController,
                   autofocus: true,
                   decoration: InputDecoration(
-                    hintText: 'Search by name or username...',
+                    hintText: l10n.searchByUsername,
                     prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     filled: true,
@@ -821,7 +922,71 @@ class _NewMessageSheetState extends State<_NewMessageSheet> {
                   controller: scrollController,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
-                    Text('Suggested', style: theme.textTheme.labelMedium?.copyWith(
+                    // ── Pick from device contacts ──
+                    Material(
+                      color: AppColors.primaryPurple.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(16),
+                      child: InkWell(
+                        onTap: _isPickingContact ? null : _pickFromContacts,
+                        borderRadius: BorderRadius.circular(16),
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [AppColors.primaryPurple, AppColors.secondaryTeal],
+                                  ),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: _isPickingContact
+                                    ? const Padding(
+                                        padding: EdgeInsets.all(12),
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Icon(Icons.contacts_rounded, color: Colors.white, size: 24),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      l10n.pickFromContacts,
+                                      style: theme.textTheme.titleSmall?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.primaryPurple,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      l10n.get('chooseContactFromPhone'),
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: theme.colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                color: AppColors.primaryPurple.withValues(alpha: 0.6),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // ── Suggested users ──
+                    Text(l10n.get('suggested'), style: theme.textTheme.labelMedium?.copyWith(
                       color: theme.colorScheme.outline, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
                     ..._suggestedUsers.map((user) => ListTile(
@@ -920,8 +1085,8 @@ class _MessagesHeader extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       unreadCount > 0
-                          ? 'You have $unreadCount unread ${unreadCount == 1 ? 'message' : 'messages'}'
-                          : 'Your conversations ✨',
+                          ? l10n.get('youHaveUnreadMessages', {'count': unreadCount.toString()})
+                          : l10n.yourConversations,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -938,9 +1103,14 @@ class _MessagesHeader extends StatelessWidget {
                     tooltip: 'Search',
                   ),
                   _HeaderIconButton(
+                    icon: Icons.videocam_outlined,
+                    onPressed: onPracticeCall,
+                    tooltip: 'Video Calls',
+                  ),
+                  _HeaderIconButton(
                     icon: Icons.phone_rounded,
                     onPressed: onPracticeCall,
-                    tooltip: 'Practice Calls',
+                    tooltip: 'Call History',
                   ),
                   _HeaderIconButton(
                     icon: Icons.tune_rounded,
@@ -1019,7 +1189,7 @@ class _UnreadBadgeState extends State<_UnreadBadge>
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: primaryColor.withOpacity(0.3),
+              color: primaryColor.withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -1059,7 +1229,7 @@ class _HeaderIconButton extends StatelessWidget {
 
     Widget button = Material(
       color: isPrimary
-          ? primaryColor.withOpacity(0.15)
+          ? primaryColor.withValues(alpha: 0.15)
           : theme.colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
@@ -1101,6 +1271,7 @@ class _SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return Padding(
@@ -1114,8 +1285,8 @@ class _SearchBar extends StatelessWidget {
           controller: controller,
           autofocus: true,
           decoration: InputDecoration(
-            hintText: 'Search messages...',
-            prefixIcon: const Icon(Icons.search_rounded),
+            hintText: l10n.searchByUsername,
+            prefixIcon: const Icon(Icons.search),
             suffixIcon: IconButton(
               icon: const Icon(Icons.close_rounded),
               onPressed: onClose,
@@ -1146,6 +1317,7 @@ class _FilterChipsSection extends StatelessWidget {
     final filters = [
       (MessageFilter.all, 'All', Icons.chat_bubble_rounded, null),
       (MessageFilter.primary, 'Primary', Icons.star_rounded, null),
+      (MessageFilter.calls, 'Calls', Icons.phone_rounded, null),
       (MessageFilter.requests, 'Requests', Icons.mark_email_unread_rounded, null),
     ];
 
@@ -1197,7 +1369,7 @@ class _FilterPill extends StatelessWidget {
 
     return Material(
       color: isSelected
-          ? primaryColor.withOpacity(0.15)
+          ? primaryColor.withValues(alpha: 0.15)
           : theme.colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(24),
       child: InkWell(
@@ -1209,7 +1381,7 @@ class _FilterPill extends StatelessWidget {
               ? BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: primaryColor.withOpacity(0.3),
+                    color: primaryColor.withValues(alpha: 0.3),
                     width: 1.5,
                   ),
                 )
@@ -1238,7 +1410,7 @@ class _FilterPill extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.2),
+                    color: primaryColor.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -1283,7 +1455,7 @@ class _ModerationBadge extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.3),
+              color: color.withValues(alpha: 0.3),
               blurRadius: 4,
               spreadRadius: 1,
             ),
@@ -1339,8 +1511,8 @@ class _DeleteModeOptionTile extends StatelessWidget {
 
     return Material(
       color: isSelected
-          ? primaryColor.withOpacity(0.1)
-          : theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+          ? primaryColor.withValues(alpha: 0.1)
+          : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -1353,7 +1525,7 @@ class _DeleteModeOptionTile extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? primaryColor.withOpacity(0.15)
+                      ? primaryColor.withValues(alpha: 0.15)
                       : theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -1399,3 +1571,401 @@ class _DeleteModeOptionTile extends StatelessWidget {
   }
 }
 
+/// Inline call history view shown when "Calls" filter pill is selected.
+/// Matches the native Android InlineCallHistoryView.
+class _InlineCallHistoryView extends StatefulWidget {
+  final VoidCallback onOpenPracticeCall;
+
+  const _InlineCallHistoryView({required this.onOpenPracticeCall});
+
+  @override
+  State<_InlineCallHistoryView> createState() => _InlineCallHistoryViewState();
+}
+
+class _InlineCallHistoryViewState extends State<_InlineCallHistoryView> {
+  final _callService = WebRTCCallService.instance;
+  final _contactsService = ContactsCallService.instance;
+  bool _loadingContacts = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadContacts();
+  }
+
+  Future<void> _loadContacts() async {
+    if (_contactsService.hasPermission && _contactsService.callableContacts.isEmpty) {
+      setState(() => _loadingContacts = true);
+      await _contactsService.loadContacts();
+      if (mounted) setState(() => _loadingContacts = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final callHistory = _callService.callHistory;
+    final contacts = _contactsService.callableContacts;
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      children: [
+        // Permission prompt if not granted
+        if (!_contactsService.hasPermission)
+          _ContactsPermissionCard(
+            onGrant: () async {
+              HapticFeedback.selectionClick();
+              final granted = await _contactsService.requestPermissionAndLoad();
+              if (mounted && granted) setState(() {});
+            },
+          ),
+
+        // Action buttons
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: widget.onOpenPracticeCall,
+                  icon: const Icon(Icons.headset, size: 18),
+                  label: Text(l10n.practiceCall),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton.tonalIcon(
+                  onPressed: () {
+                    HapticFeedback.selectionClick();
+                  },
+                  icon: const Icon(Icons.history, size: 18),
+                  label: Text(l10n.get('callHistory')),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        if (callHistory.isEmpty && contacts.isEmpty && !_loadingContacts) ...[
+          const SizedBox(height: 32),
+          Center(
+            child: Column(
+              children: [
+                Icon(
+                  Icons.phone_outlined,
+                  size: 64,
+                  color: theme.colorScheme.primary.withValues(alpha: 0.6),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.get('noCallsYet'),
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 48),
+                  child: Text(
+                    l10n.get('callContactsHint'),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+
+        if (_loadingContacts)
+          const Padding(
+            padding: EdgeInsets.all(32),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+
+        // Contacts section
+        if (contacts.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+            child: Text(
+              'Contacts',
+              style: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          ...contacts.take(20).map((contact) => _CallableContactRow(
+            name: contact.name,
+            subtitle: contact.isAppUser
+                ? (contact.phoneNumber != null ? 'NeuroComet · ${contact.phoneNumber}' : 'NeuroComet')
+                : (contact.phoneNumber ?? 'Contact'),
+            photoBytes: contact.photoBytes,
+            isAppUser: contact.isAppUser,
+            onVoiceCall: () {
+              HapticFeedback.selectionClick();
+              _contactsService.startVoiceCall(contact);
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ActiveCallScreen()),
+              );
+            },
+            onVideoCall: () {
+              HapticFeedback.selectionClick();
+              _contactsService.startVideoCall(contact);
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ActiveCallScreen()),
+              );
+            },
+          )),
+        ],
+
+        // Call history section
+        if (callHistory.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+            child: Text(
+              'Recent',
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          ...callHistory.map((entry) => _CallHistoryRow(
+            entry: entry,
+            onCallBack: () {
+              HapticFeedback.selectionClick();
+              WebRTCCallService.instance.startCall(
+                recipientId: entry.recipientId,
+                recipientName: entry.recipientName,
+                recipientAvatar: entry.recipientAvatar,
+                callType: entry.callType,
+              );
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ActiveCallScreen()),
+              );
+            },
+          )),
+        ],
+
+        const SizedBox(height: 100),
+      ],
+    );
+  }
+}
+
+/// Full-width contact row with avatar, name, phone, and call buttons.
+class _CallableContactRow extends StatelessWidget {
+  final String name;
+  final String subtitle;
+  final Uint8List? photoBytes;
+  final bool isAppUser;
+  final VoidCallback onVoiceCall;
+  final VoidCallback onVideoCall;
+
+  const _CallableContactRow({
+    required this.name,
+    required this.subtitle,
+    this.photoBytes,
+    this.isAppUser = false,
+    required this.onVoiceCall,
+    required this.onVideoCall,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: onVoiceCall,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        child: Row(
+          children: [
+            // Avatar
+            Stack(
+              children: [
+                if (photoBytes != null)
+                  ClipOval(
+                    child: Image.memory(photoBytes!, width: 48, height: 48, fit: BoxFit.cover),
+                  )
+                else
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundColor: theme.colorScheme.primaryContainer,
+                    child: Text(
+                      name.isNotEmpty ? name[0].toUpperCase() : '?',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                if (isAppUser)
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: AppColors.success,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: theme.scaffoldBackgroundColor, width: 1.5),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(name, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500)),
+                  Text(subtitle, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.phone_outlined, color: theme.colorScheme.primary, size: 22),
+              onPressed: onVoiceCall,
+              constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+            ),
+            IconButton(
+              icon: Icon(Icons.videocam_outlined, color: theme.colorScheme.primary, size: 22),
+              onPressed: onVideoCall,
+              constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Call history row — shows call direction, outcome, and callback button.
+class _CallHistoryRow extends StatelessWidget {
+  final CallHistoryEntry entry;
+  final VoidCallback onCallBack;
+
+  const _CallHistoryRow({required this.entry, required this.onCallBack});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isMissed = entry.outcome == CallOutcome.missed || entry.outcome == CallOutcome.declined;
+    final callIcon = entry.callType == CallType.video ? Icons.videocam : Icons.phone;
+    final outcomeColor = isMissed ? theme.colorScheme.error : theme.colorScheme.primary;
+
+    final outcomeText = switch (entry.outcome) {
+      CallOutcome.completed => entry.formattedDuration.isNotEmpty ? entry.formattedDuration : 'Connected',
+      CallOutcome.missed => 'Missed',
+      CallOutcome.declined => 'Declined',
+      CallOutcome.noAnswer => 'No answer',
+      CallOutcome.cancelled => 'Cancelled',
+      CallOutcome.failed => 'Failed',
+    };
+    final directionLabel = entry.isOutgoing ? 'Outgoing' : 'Incoming';
+
+    return InkWell(
+      onTap: onCallBack,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: theme.colorScheme.primaryContainer,
+              child: Text(
+                entry.recipientName.isNotEmpty ? entry.recipientName[0].toUpperCase() : '?',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    entry.recipientName,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: isMissed ? theme.colorScheme.error : null,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Icon(callIcon, size: 14, color: outcomeColor),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$directionLabel · $outcomeText',
+                        style: theme.textTheme.bodySmall?.copyWith(color: outcomeColor),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: Icon(callIcon, color: theme.colorScheme.primary),
+              onPressed: onCallBack,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Card prompting user to grant contacts permission.
+class _ContactsPermissionCard extends StatelessWidget {
+  final VoidCallback onGrant;
+
+  const _ContactsPermissionCard({required this.onGrant});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.contact_phone_outlined, size: 36, color: theme.colorScheme.primary),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.get('accessYourContacts'),
+                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                Text(
+                  l10n.get('accessContactsDirectly'),
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          FilledButton.tonal(
+            onPressed: onGrant,
+            child: Text(l10n.get('allow')),
+          ),
+        ],
+      ),
+    );
+  }
+}

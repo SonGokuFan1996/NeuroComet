@@ -89,8 +89,17 @@ object ParentalControlsSettings {
     fun detectTimeTampering(context: Context): Boolean {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
-        val lastSystemTime = prefs.getLong(KEY_LAST_KNOWN_SYSTEM_TIME, 0)
-        val lastElapsedRealtime = prefs.getLong(KEY_LAST_KNOWN_ELAPSED_REALTIME, 0)
+        val lastSystemTime: Long
+        val lastElapsedRealtime: Long
+        try {
+            lastSystemTime = prefs.getLong(KEY_LAST_KNOWN_SYSTEM_TIME, 0)
+            lastElapsedRealtime = prefs.getLong(KEY_LAST_KNOWN_ELAPSED_REALTIME, 0)
+        } catch (_: ClassCastException) {
+            // Prefs were corrupted (e.g., backup restore stored Long as Int).
+            // Clear the bad values and re-establish baseline.
+            updateTimeBaseline(context)
+            return false
+        }
 
         if (lastSystemTime == 0L || lastElapsedRealtime == 0L) {
             // First run, record baseline
@@ -241,7 +250,7 @@ object ParentalControlsSettings {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
         // Check if locked out using monotonic time to prevent bypass
-        val lockoutElapsedRealtime = prefs.getLong(KEY_LOCKOUT_ELAPSED_REALTIME, 0)
+        val lockoutElapsedRealtime = try { prefs.getLong(KEY_LOCKOUT_ELAPSED_REALTIME, 0) } catch (_: ClassCastException) { 0L }
         val currentElapsedRealtime = SystemClock.elapsedRealtime()
 
         if (lockoutElapsedRealtime > 0) {
@@ -332,10 +341,10 @@ object ParentalControlsSettings {
 
         val isPinSet = prefs.getString(KEY_PIN_HASH, null) != null
         val isEnabled = prefs.getBoolean(KEY_IS_ENABLED, false) && isPinSet
-        val failedAttempts = prefs.getInt(KEY_FAILED_ATTEMPTS, 0)
+        val failedAttempts = try { prefs.getInt(KEY_FAILED_ATTEMPTS, 0) } catch (_: ClassCastException) { 0 }
 
         // Use monotonic time for lockout check to prevent bypass
-        val lockoutElapsedRealtime = prefs.getLong(KEY_LOCKOUT_ELAPSED_REALTIME, 0)
+        val lockoutElapsedRealtime = try { prefs.getLong(KEY_LOCKOUT_ELAPSED_REALTIME, 0) } catch (_: ClassCastException) { 0L }
         val currentElapsedRealtime = SystemClock.elapsedRealtime()
         val isLockedOut = if (lockoutElapsedRealtime > 0) {
             (currentElapsedRealtime - lockoutElapsedRealtime) < LOCKOUT_DURATION_MS
@@ -349,17 +358,17 @@ object ParentalControlsSettings {
 
         // Time restrictions
         val bedtimeEnabled = prefs.getBoolean(KEY_BEDTIME_ENABLED, false)
-        val bedtimeStartHour = prefs.getInt(KEY_BEDTIME_START_HOUR, 21)
-        val bedtimeStartMinute = prefs.getInt(KEY_BEDTIME_START_MINUTE, 0)
-        val bedtimeEndHour = prefs.getInt(KEY_BEDTIME_END_HOUR, 7)
-        val bedtimeEndMinute = prefs.getInt(KEY_BEDTIME_END_MINUTE, 0)
+        val bedtimeStartHour = try { prefs.getInt(KEY_BEDTIME_START_HOUR, 21) } catch (_: ClassCastException) { 21 }
+        val bedtimeStartMinute = try { prefs.getInt(KEY_BEDTIME_START_MINUTE, 0) } catch (_: ClassCastException) { 0 }
+        val bedtimeEndHour = try { prefs.getInt(KEY_BEDTIME_END_HOUR, 7) } catch (_: ClassCastException) { 7 }
+        val bedtimeEndMinute = try { prefs.getInt(KEY_BEDTIME_END_MINUTE, 0) } catch (_: ClassCastException) { 0 }
 
         // Usage limits
-        val maxDailyMinutes = prefs.getInt(KEY_MAX_DAILY_MINUTES, 0)
+        val maxDailyMinutes = try { prefs.getInt(KEY_MAX_DAILY_MINUTES, 0) } catch (_: ClassCastException) { 0 }
         val usageDate = prefs.getString(KEY_USAGE_DATE, null)
         val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
         val dailyUsageMinutes = if (usageDate == today) {
-            prefs.getInt(KEY_DAILY_USAGE_MINUTES, 0)
+            try { prefs.getInt(KEY_DAILY_USAGE_MINUTES, 0) } catch (_: ClassCastException) { 0 }
         } else {
             0 // Reset for new day
         }

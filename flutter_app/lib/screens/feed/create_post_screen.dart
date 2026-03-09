@@ -228,7 +228,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                     borderSide: BorderSide.none,
                   ),
                   filled: true,
-                  fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                  fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -375,7 +375,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                  color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(

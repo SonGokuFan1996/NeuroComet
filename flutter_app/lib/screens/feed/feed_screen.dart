@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -89,6 +90,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
   @override
   Widget build(BuildContext context) {
     final feedState = ref.watch(feedProvider);
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -96,7 +98,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
       body: SafeArea(
         bottom: false,
         child: feedState.when(
-          loading: () => const NeuroLoading(message: 'Loading your feed...'),
+          loading: () => NeuroLoading(message: l10n.get('loadingYourFeed')),
           error: (error, stack) => _buildErrorState(error.toString()),
           data: (posts) => _buildFeedContent(posts),
         ),
@@ -105,6 +107,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
   }
 
   Widget _buildFeedContent(List<Post> posts) {
+    final filteredPosts = _filterPosts(posts);
+    final abVariant = ref.watch(devOptionsProvider).abTestVariant;
+    final isLiquidGlass = abVariant == ABTestVariant.liquidGlass;
 
     return RefreshIndicator(
       onRefresh: _onRefresh,
@@ -119,11 +124,17 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
           SliverToBoxAdapter(
             child: FadeTransition(
               opacity: _headerFadeAnimation,
-              child: _FeedHeader(
-                onCreatePost: () => _showCreatePost(context),
-                onSettings: () => context.push('/settings'),
-                isScrolling: _isScrolling,
-              ),
+              child: isLiquidGlass
+                  ? _LiquidGlassHeader(
+                      onCreatePost: () => _showCreatePost(context),
+                      onSettings: () => context.push('/settings'),
+                      isScrolling: _isScrolling,
+                    )
+                  : _FeedHeader(
+                      onCreatePost: () => _showCreatePost(context),
+                      onSettings: () => context.push('/settings'),
+                      isScrolling: _isScrolling,
+                    ),
             ),
           ),
 
@@ -148,15 +159,15 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
           SliverToBoxAdapter(
             child: _FeedFilterChips(
               selectedFilter: _selectedFilter,
+              isLiquidGlass: isLiquidGlass,
               onFilterChanged: (filter) {
-                HapticFeedback.selectionClick();
                 setState(() => _selectedFilter = filter);
               },
             ),
           ),
 
           // Content
-          if (posts.isEmpty)
+          if (filteredPosts.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
               child: _EmptyFeedState(
@@ -171,7 +182,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    if (index == posts.length) {
+                    if (index == filteredPosts.length) {
                       return _LoadingMoreIndicator();
                     }
 
@@ -183,17 +194,18 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
                           _FeedSectionHeader(
                             title: _getSectionTitle(),
                             icon: _getSectionIcon(),
-                            count: posts.length,
+                            count: filteredPosts.length,
                           ),
                           _AnimatedPostCard(
-                            post: posts[index],
+                            post: filteredPosts[index],
                             animationDelay: index * 50,
-                            onLike: () => _handleLike(posts[index]),
-                            onComment: () => _showComments(posts[index]),
-                            onShare: () => _handleShare(posts[index]),
-                            onProfileTap: () => _navigateToProfile(posts[index].authorId),
-                            onReport: () => _handleReport(posts[index]),
-                            onDelete: () => _handleDelete(posts[index]),
+                            isLiquidGlass: isLiquidGlass,
+                            onLike: () => _handleLike(filteredPosts[index]),
+                            onComment: () => _showComments(filteredPosts[index]),
+                            onShare: () => _handleShare(filteredPosts[index]),
+                            onProfileTap: () => _navigateToProfile(filteredPosts[index].authorId),
+                            onReport: () => _handleReport(filteredPosts[index]),
+                            onDelete: () => _handleDelete(filteredPosts[index]),
                             onMentionTap: (username) => _navigateToProfile(username),
                             onHashtagTap: (hashtag) => _exploreHashtag(hashtag),
                           ),
@@ -202,19 +214,20 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
                     }
 
                     return _AnimatedPostCard(
-                      post: posts[index],
+                      post: filteredPosts[index],
                       animationDelay: index * 50,
-                      onLike: () => _handleLike(posts[index]),
-                      onComment: () => _showComments(posts[index]),
-                      onShare: () => _handleShare(posts[index]),
-                      onProfileTap: () => _navigateToProfile(posts[index].authorId),
-                      onReport: () => _handleReport(posts[index]),
-                      onDelete: () => _handleDelete(posts[index]),
+                      isLiquidGlass: isLiquidGlass,
+                      onLike: () => _handleLike(filteredPosts[index]),
+                      onComment: () => _showComments(filteredPosts[index]),
+                      onShare: () => _handleShare(filteredPosts[index]),
+                      onProfileTap: () => _navigateToProfile(filteredPosts[index].authorId),
+                      onReport: () => _handleReport(filteredPosts[index]),
+                      onDelete: () => _handleDelete(filteredPosts[index]),
                       onMentionTap: (username) => _navigateToProfile(username),
                       onHashtagTap: (hashtag) => _exploreHashtag(hashtag),
                     );
                   },
-                  childCount: posts.length + 1,
+                  childCount: filteredPosts.length + 1,
                 ),
               ),
             ),
@@ -223,18 +236,55 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
     );
   }
 
-  String _getSectionTitle() {
+  /// Filter posts based on selected feed filter pill
+  List<Post> _filterPosts(List<Post> posts) {
     switch (_selectedFilter) {
       case FeedFilter.forYou:
-        return 'For You';
+        return posts; // Show all (default/algorithmic)
       case FeedFilter.following:
-        return 'Following';
+        final followingPosts = posts.where((p) =>
+            p.category == 'following' ||
+            p.tags?.contains('following') == true).toList();
+        return followingPosts.isNotEmpty ? followingPosts : posts.take(5).toList();
       case FeedFilter.trending:
-        return 'Trending';
+        final sorted = List<Post>.from(posts)
+          ..sort((a, b) => (b.likeCount + b.commentCount)
+              .compareTo(a.likeCount + a.commentCount));
+        return sorted;
       case FeedFilter.support:
-        return 'Support';
+        final supportPosts = posts.where((p) =>
+            p.category == 'support' ||
+            p.tags?.contains('support') == true ||
+            p.content.toLowerCase().contains('support') ||
+            p.content.toLowerCase().contains('help') ||
+            p.content.toLowerCase().contains('reminder')).toList();
+        return supportPosts.isNotEmpty ? supportPosts : [];
       case FeedFilter.wins:
-        return 'Wins & Celebrations';
+        final winsPosts = posts.where((p) =>
+            p.category == 'wins' ||
+            p.tags?.contains('wins') == true ||
+            p.content.toLowerCase().contains('win') ||
+            p.content.toLowerCase().contains('celebration') ||
+            p.content.toLowerCase().contains('achievement') ||
+            p.content.contains('🎉') ||
+            p.content.contains('✨')).toList();
+        return winsPosts.isNotEmpty ? winsPosts : [];
+    }
+  }
+
+  String _getSectionTitle() {
+    final l10n = context.l10n;
+    switch (_selectedFilter) {
+      case FeedFilter.forYou:
+        return l10n.forYou;
+      case FeedFilter.following:
+        return l10n.following;
+      case FeedFilter.trending:
+        return l10n.trending;
+      case FeedFilter.support:
+        return l10n.support;
+      case FeedFilter.wins:
+        return l10n.get('winsAndCelebrations');
     }
   }
 
@@ -269,8 +319,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    theme.colorScheme.errorContainer.withOpacity(0.3),
-                    theme.colorScheme.errorContainer.withOpacity(0.1),
+                    theme.colorScheme.errorContainer.withValues(alpha: 0.3),
+                    theme.colorScheme.errorContainer.withValues(alpha: 0.1),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -285,14 +335,14 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
             ),
             const SizedBox(height: 24),
             Text(
-              'Connection Issue',
+              l10n.get('connectionIssue'),
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 12),
             Text(
-              'We couldn\'t load your feed.\nCheck your connection and try again.',
+              l10n.get('feedLoadFailed'),
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -337,14 +387,15 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
   }
 
   void _handleReport(Post post) {
+    final l10n = context.l10n;
     HapticFeedback.lightImpact();
     showReportPostDialog(
       context,
       postId: post.id,
       onReport: (reason) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Report submitted. Thank you!'),
+          SnackBar(
+            content: Text(l10n.reportSubmitted),
             duration: Duration(seconds: 2),
           ),
         );
@@ -353,24 +404,25 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
   }
 
   void _handleDelete(Post post) {
+    final l10n = context.l10n;
     HapticFeedback.lightImpact();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Post'),
-        content: const Text('Are you sure you want to delete this post? This action cannot be undone.'),
+        title: Text(l10n.deletePost),
+        content: Text(l10n.deletePostConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
               Navigator.pop(context);
               ref.read(feedProvider.notifier).deletePost(post.id);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Post deleted'),
+                SnackBar(
+                  content: Text(l10n.postDeleted),
                   duration: Duration(seconds: 1),
                 ),
               );
@@ -378,7 +430,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -391,6 +443,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
   }
 
   void _exploreHashtag(String hashtag) {
+    final l10n = context.l10n;
     HapticFeedback.lightImpact();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -398,7 +451,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
           children: [
             const Icon(Icons.tag, color: Colors.white, size: 20),
             const SizedBox(width: 8),
-            Text('Exploring #$hashtag...'),
+            Text(l10n.get('exploringHashtag').replaceAll('{hashtag}', hashtag)),
           ],
         ),
         behavior: SnackBarBehavior.floating,
@@ -445,7 +498,7 @@ class _FeedHeader extends StatelessWidget {
         color: theme.scaffoldBackgroundColor,
         border: Border(
           bottom: BorderSide(
-            color: theme.dividerColor.withOpacity(0.1),
+            color: theme.dividerColor.withValues(alpha: 0.1),
           ),
         ),
       ),
@@ -468,7 +521,123 @@ class _FeedHeader extends StatelessWidget {
             onPressed: onSettings,
             tooltip: l10n.settingsTitle,
           ),
-        ],
+         ],
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// Liquid Glass Header (A/B Test Variant)
+// ============================================================================
+
+class _LiquidGlassHeader extends StatelessWidget {
+  final VoidCallback onCreatePost;
+  final VoidCallback onSettings;
+  final bool isScrolling;
+
+  const _LiquidGlassHeader({
+    required this.onCreatePost,
+    required this.onSettings,
+    required this.isScrolling,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white.withValues(alpha: 0.18),
+                Colors.white.withValues(alpha: 0.08),
+                AppColors.primaryPurple.withValues(alpha: 0.05),
+              ],
+            ),
+            border: Border(
+              bottom: BorderSide(
+                color: Colors.white.withValues(alpha: 0.15),
+              ),
+            ),
+          ),
+          child: Row(
+            children: [
+              // Logo with glass tint
+              NeuroCometBrandLogo(
+                animated: !isScrolling,
+                symbolSize: 40,
+              ),
+              const Spacer(),
+              // Glass-style icon buttons
+              _GlassIconButton(
+                icon: Icons.add_box_outlined,
+                onPressed: onCreatePost,
+                tooltip: l10n.createPost,
+              ),
+              _GlassIconButton(
+                icon: Icons.settings_outlined,
+                onPressed: onSettings,
+                tooltip: l10n.settingsTitle,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassIconButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+  final String tooltip;
+
+  const _GlassIconButton({
+    required this.icon,
+    required this.onPressed,
+    required this.tooltip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.transparent,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            onPressed();
+          },
+          customBorder: const CircleBorder(),
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.12),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.2),
+                width: 1,
+              ),
+            ),
+            child: Icon(
+              icon,
+              color: theme.colorScheme.onSurfaceVariant,
+              size: 24,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -501,8 +670,8 @@ class _HeaderIconButton extends StatelessWidget {
             onPressed();
           },
           customBorder: const CircleBorder(),
-          splashColor: theme.colorScheme.primary.withOpacity(0.12),
-          highlightColor: theme.colorScheme.primary.withOpacity(0.08),
+          splashColor: theme.colorScheme.primary.withValues(alpha: 0.12),
+          highlightColor: theme.colorScheme.primary.withValues(alpha: 0.08),
           child: Padding(
             padding: const EdgeInsets.all(10),
             child: Icon(
@@ -541,7 +710,7 @@ class _EnhancedStoriesSection extends ConsumerWidget {
         gradient: LinearGradient(
           colors: [
             theme.scaffoldBackgroundColor,
-            theme.colorScheme.primaryContainer.withOpacity(0.05),
+            theme.colorScheme.primaryContainer.withValues(alpha: 0.05),
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -571,7 +740,7 @@ class _EnhancedStoriesSection extends ConsumerWidget {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  'Stories',
+                  l10n.get('stories'),
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -580,11 +749,11 @@ class _EnhancedStoriesSection extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryPurple.withOpacity(0.1),
+                    color: AppColors.primaryPurple.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    'NEW',
+                    l10n.get('newBadge'),
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: AppColors.primaryPurple,
                       fontWeight: FontWeight.bold,
@@ -620,7 +789,7 @@ class _EnhancedStoriesSection extends ConsumerWidget {
                     Icon(Icons.cloud_off, color: theme.colorScheme.outline),
                     const SizedBox(height: 8),
                     Text(
-                      'Could not load stories',
+                      l10n.get('couldNotLoadStories'),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.outline,
                       ),
@@ -710,6 +879,7 @@ class _QuickActionsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     return Container(
@@ -726,10 +896,10 @@ class _QuickActionsRow extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(28),
                   border: Border.all(
-                    color: theme.dividerColor.withOpacity(0.1),
+                    color: theme.dividerColor.withValues(alpha: 0.1),
                   ),
                 ),
                 child: Row(
@@ -752,7 +922,7 @@ class _QuickActionsRow extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'What\'s on your mind?',
+                        l10n.get('whatsOnYourMind'),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -804,7 +974,7 @@ class _QuickActionButton extends StatelessWidget {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
+          color: color.withValues(alpha: 0.15),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: color, size: 24),
@@ -814,101 +984,78 @@ class _QuickActionButton extends StatelessWidget {
 }
 
 // ============================================================================
-// Feed Filter Chips
+// Feed Filter Chips — matches Explore & Messages pill style
 // ============================================================================
 
 class _FeedFilterChips extends StatelessWidget {
   final FeedFilter selectedFilter;
+  final bool isLiquidGlass;
   final ValueChanged<FeedFilter> onFilterChanged;
 
   const _FeedFilterChips({
     required this.selectedFilter,
+    this.isLiquidGlass = false,
     required this.onFilterChanged,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final filters = [
+      (FeedFilter.forYou, l10n.forYou, Icons.auto_awesome),
+      (FeedFilter.following, l10n.following, Icons.people_alt_rounded),
+      (FeedFilter.trending, l10n.trending, Icons.trending_up_rounded),
+      (FeedFilter.support, l10n.support, Icons.favorite_rounded),
+      (FeedFilter.wins, l10n.get('wins'), Icons.celebration_rounded),
+    ];
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: theme.dividerColor.withOpacity(0.1),
-          ),
-        ),
-      ),
-      child: SingleChildScrollView(
+      height: 56,
+      margin: const EdgeInsets.only(top: 4),
+      child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: FeedFilter.values.map((filter) {
-            final isSelected = selectedFilter == filter;
-            return Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: _FilterPill(
-                label: _getFilterLabel(filter),
-                icon: _getFilterIcon(filter),
-                isSelected: isSelected,
-                onTap: () => onFilterChanged(filter),
-              ),
-            );
-          }).toList(),
-        ),
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        itemCount: filters.length,
+        itemBuilder: (context, index) {
+          final (filter, label, icon) = filters[index];
+          final isSelected = selectedFilter == filter;
+
+          return _FeedFilterPill(
+            label: label,
+            icon: icon,
+            isSelected: isSelected,
+            isLiquidGlass: isLiquidGlass,
+            onTap: () => onFilterChanged(filter),
+          );
+        },
       ),
     );
   }
-
-  String _getFilterLabel(FeedFilter filter) {
-    switch (filter) {
-      case FeedFilter.forYou:
-        return 'For You';
-      case FeedFilter.following:
-        return 'Following';
-      case FeedFilter.trending:
-        return 'Trending';
-      case FeedFilter.support:
-        return 'Support';
-      case FeedFilter.wins:
-        return 'Wins';
-    }
-  }
-
-  IconData _getFilterIcon(FeedFilter filter) {
-    switch (filter) {
-      case FeedFilter.forYou:
-        return Icons.auto_awesome;
-      case FeedFilter.following:
-        return Icons.people_alt_rounded;
-      case FeedFilter.trending:
-        return Icons.trending_up_rounded;
-      case FeedFilter.support:
-        return Icons.favorite_rounded;
-      case FeedFilter.wins:
-        return Icons.celebration_rounded;
-    }
-  }
 }
 
-class _FilterPill extends StatefulWidget {
+/// Individual filter pill with scale animation, haptic feedback & glow
+/// — matches Notifications & Messages pill style.
+class _FeedFilterPill extends StatefulWidget {
   final String label;
   final IconData icon;
   final bool isSelected;
+  final bool isLiquidGlass;
   final VoidCallback onTap;
 
-  const _FilterPill({
+  const _FeedFilterPill({
     required this.label,
     required this.icon,
     required this.isSelected,
+    this.isLiquidGlass = false,
     required this.onTap,
   });
 
   @override
-  State<_FilterPill> createState() => _FilterPillState();
+  State<_FeedFilterPill> createState() => _FeedFilterPillState();
 }
 
-class _FilterPillState extends State<_FilterPill>
+class _FeedFilterPillState extends State<_FeedFilterPill>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
@@ -934,11 +1081,78 @@ class _FilterPillState extends State<_FilterPill>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
 
+    // Liquid Glass variant for selected pill
+    if (widget.isLiquidGlass && widget.isSelected) {
+      return GestureDetector(
+        onTapDown: (_) => _controller.forward(),
+        onTapUp: (_) {
+          _controller.reverse();
+          HapticFeedback.selectionClick();
+          widget.onTap();
+        },
+        onTapCancel: () => _controller.reverse(),
+        child: AnimatedBuilder(
+          animation: _scaleAnimation,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _scaleAnimation.value,
+              child: child,
+            );
+          },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withValues(alpha: 0.15),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.check, size: 16, color: primaryColor),
+                    const SizedBox(width: 6),
+                    Icon(widget.icon, size: 16, color: primaryColor),
+                    const SizedBox(width: 6),
+                    Text(
+                      widget.label,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Standard variant — matches Notifications/Messages pill style
     return GestureDetector(
       onTapDown: (_) => _controller.forward(),
       onTapUp: (_) {
         _controller.reverse();
+        HapticFeedback.selectionClick();
         widget.onTap();
       },
       onTapCancel: () => _controller.reverse(),
@@ -952,21 +1166,26 @@ class _FilterPillState extends State<_FilterPill>
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          curve: Curves.easeOutCubic,
+          padding: EdgeInsets.symmetric(
+            horizontal: widget.isSelected ? 16 : 14,
+            vertical: 10,
+          ),
           decoration: BoxDecoration(
-            gradient: widget.isSelected
-                ? LinearGradient(
-                    colors: [AppColors.primaryPurple, AppColors.secondaryTeal],
+            color: widget.isSelected
+                ? primaryColor.withValues(alpha: 0.15)
+                : theme.colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(20),
+            border: widget.isSelected
+                ? Border.all(
+                    color: primaryColor.withValues(alpha: 0.4),
+                    width: 1.5,
                   )
                 : null,
-            color: widget.isSelected
-                ? null
-                : theme.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(24),
             boxShadow: widget.isSelected
                 ? [
                     BoxShadow(
-                      color: AppColors.primaryPurple.withOpacity(0.3),
+                      color: primaryColor.withValues(alpha: 0.15),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -978,9 +1197,9 @@ class _FilterPillState extends State<_FilterPill>
             children: [
               Icon(
                 widget.icon,
-                size: 18,
+                size: 16,
                 color: widget.isSelected
-                    ? Colors.white
+                    ? primaryColor
                     : theme.colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 6),
@@ -988,16 +1207,15 @@ class _FilterPillState extends State<_FilterPill>
                 widget.label,
                 style: theme.textTheme.labelLarge?.copyWith(
                   color: widget.isSelected
-                      ? Colors.white
-                      : theme.colorScheme.onSurfaceVariant,
-                  fontWeight: widget.isSelected ? FontWeight.bold : FontWeight.w500,
+                      ? primaryColor
+                      : theme.colorScheme.onSurface,
+                  fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.w500,
                 ),
               ),
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }
 
@@ -1018,6 +1236,7 @@ class _FeedSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     return Padding(
@@ -1057,7 +1276,7 @@ class _FeedSectionHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              '$count posts',
+              l10n.get('postsCount').replaceAll('{count}', count.toString()),
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w500,
@@ -1077,6 +1296,7 @@ class _FeedSectionHeader extends StatelessWidget {
 class _AnimatedPostCard extends StatefulWidget {
   final Post post;
   final int animationDelay;
+  final bool isLiquidGlass;
   final VoidCallback? onLike;
   final VoidCallback? onComment;
   final VoidCallback? onShare;
@@ -1089,6 +1309,7 @@ class _AnimatedPostCard extends StatefulWidget {
   const _AnimatedPostCard({
     required this.post,
     required this.animationDelay,
+    this.isLiquidGlass = false,
     this.onLike,
     this.onComment,
     this.onShare,
@@ -1141,21 +1362,61 @@ class _AnimatedPostCardState extends State<_AnimatedPostCard>
 
   @override
   Widget build(BuildContext context) {
+    final card = PostCard(
+      post: widget.post,
+      onLike: widget.onLike,
+      onComment: widget.onComment,
+      onShare: widget.onShare,
+      onProfileTap: widget.onProfileTap,
+      onReport: widget.onReport,
+      onDelete: widget.onDelete,
+      onMentionTap: widget.onMentionTap,
+      onHashtagTap: widget.onHashtagTap,
+    );
+
+    Widget content = card;
+    if (widget.isLiquidGlass) {
+      content = Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.white.withValues(alpha: 0.15),
+                    Colors.white.withValues(alpha: 0.05),
+                  ],
+                ),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryPurple.withValues(alpha: 0.08),
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: card,
+            ),
+          ),
+        ),
+      );
+    }
+
     return FadeTransition(
       opacity: _fadeAnimation,
       child: SlideTransition(
         position: _slideAnimation,
-        child: PostCard(
-          post: widget.post,
-          onLike: widget.onLike,
-          onComment: widget.onComment,
-          onShare: widget.onShare,
-          onProfileTap: widget.onProfileTap,
-          onReport: widget.onReport,
-          onDelete: widget.onDelete,
-          onMentionTap: widget.onMentionTap,
-          onHashtagTap: widget.onHashtagTap,
-        ),
+        child: content,
       ),
     );
   }
@@ -1178,6 +1439,7 @@ class _EmptyFeedState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     return Padding(
@@ -1199,8 +1461,8 @@ class _EmptyFeedState extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppColors.primaryPurple.withOpacity(0.2),
-                    AppColors.secondaryTeal.withOpacity(0.1),
+                    AppColors.primaryPurple.withValues(alpha: 0.2),
+                    AppColors.secondaryTeal.withValues(alpha: 0.1),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -1241,7 +1503,7 @@ class _EmptyFeedState extends StatelessWidget {
                   onCreatePost();
                 },
                 icon: const Icon(Icons.add_rounded),
-                label: const Text('Create Post'),
+                label: Text(l10n.createPost),
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 ),
@@ -1253,7 +1515,7 @@ class _EmptyFeedState extends StatelessWidget {
                   onRefresh();
                 },
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Refresh'),
+                label: Text(l10n.get('refresh')),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 ),
@@ -1281,32 +1543,34 @@ class _EmptyFeedState extends StatelessWidget {
   }
 
   String _getTitle() {
+    final l10n = AppLocalizations.of(context)!;
     switch (filter) {
       case FeedFilter.forYou:
-        return 'Your Feed Awaits!';
+        return l10n.get('feedEmptyForYouTitle');
       case FeedFilter.following:
-        return 'Follow Some Friends';
+        return l10n.get('feedEmptyFollowingTitle');
       case FeedFilter.trending:
-        return 'Nothing Trending Yet';
+        return l10n.get('feedEmptyTrendingTitle');
       case FeedFilter.support:
-        return 'Support Community';
+        return l10n.get('feedEmptySupportTitle');
       case FeedFilter.wins:
-        return 'Share Your Wins!';
+        return l10n.get('feedEmptyWinsTitle');
     }
   }
 
   String _getSubtitle() {
+    final l10n = AppLocalizations.of(context)!;
     switch (filter) {
       case FeedFilter.forYou:
-        return 'Be the first to share something with the community!';
+        return l10n.get('feedEmptyForYouSubtitle');
       case FeedFilter.following:
-        return 'Follow people to see their posts here.';
+        return l10n.get('feedEmptyFollowingSubtitle');
       case FeedFilter.trending:
-        return 'Check back later for trending content.';
+        return l10n.get('feedEmptyTrendingSubtitle');
       case FeedFilter.support:
-        return 'Share or request support from the community.';
+        return l10n.get('feedEmptySupportSubtitle');
       case FeedFilter.wins:
-        return 'Celebrate your achievements, big or small!';
+        return l10n.get('feedEmptyWinsSubtitle');
     }
   }
 }
@@ -1318,6 +1582,7 @@ class _EmptyFeedState extends StatelessWidget {
 class _LoadingMoreIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     return Padding(
@@ -1336,7 +1601,7 @@ class _LoadingMoreIndicator extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              'Loading more...',
+              l10n.get('loadingMore'),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -1656,6 +1921,7 @@ class CommentsSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     return DraggableScrollableSheet(
@@ -1684,7 +1950,7 @@ class CommentsSheet extends ConsumerWidget {
                 child: Row(
                   children: [
                     Text(
-                      'Comments',
+                      l10n.get('comments'),
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -1714,14 +1980,14 @@ class CommentsSheet extends ConsumerWidget {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'No comments yet',
+                            l10n.get('noComments'),
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Be the first to share your thoughts!',
+                            l10n.get('beFirstToComment'),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
@@ -1741,6 +2007,7 @@ class CommentsSheet extends ConsumerWidget {
   }
 
   Widget _buildCommentInput(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
 
     return Container(
@@ -1753,7 +2020,7 @@ class CommentsSheet extends ConsumerWidget {
       decoration: BoxDecoration(
         color: theme.cardColor,
         border: Border(
-          top: BorderSide(color: theme.dividerColor.withOpacity(0.1)),
+          top: BorderSide(color: theme.dividerColor.withValues(alpha: 0.1)),
         ),
       ),
       child: Row(
@@ -1766,7 +2033,7 @@ class CommentsSheet extends ConsumerWidget {
               ),
               child: TextField(
                 decoration: InputDecoration(
-                  hintText: 'Write a comment...',
+                  hintText: l10n.get('writeAComment'),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,

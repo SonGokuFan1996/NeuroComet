@@ -298,7 +298,7 @@ class _GameCardState extends State<_GameCard> with SingleTickerProviderStateMixi
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          widget.game.color.withOpacity(_isHovered ? 0.9 : 0.8),
+                          widget.game.color.withValues(alpha: _isHovered ? 0.9 : 0.8),
                           widget.game.color,
                         ],
                       ),
@@ -306,14 +306,14 @@ class _GameCardState extends State<_GameCard> with SingleTickerProviderStateMixi
                 boxShadow: _isHovered && !widget.locked
                     ? [
                         BoxShadow(
-                          color: widget.game.color.withOpacity(0.4),
+                          color: widget.game.color.withValues(alpha: 0.4),
                           blurRadius: 16,
                           offset: const Offset(0, 8),
                         ),
                       ]
                     : [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
@@ -335,8 +335,8 @@ class _GameCardState extends State<_GameCard> with SingleTickerProviderStateMixi
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: widget.locked
-                                  ? theme.colorScheme.outline.withOpacity(0.2)
-                                  : Colors.white.withOpacity(_isHovered ? 0.3 : 0.2),
+                                  ? theme.colorScheme.outline.withValues(alpha: 0.2)
+                                  : Colors.white.withValues(alpha: _isHovered ? 0.3 : 0.2),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
@@ -358,8 +358,8 @@ class _GameCardState extends State<_GameCard> with SingleTickerProviderStateMixi
                             widget.game.description,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: widget.locked
-                                  ? theme.colorScheme.outline.withOpacity(0.7)
-                                  : Colors.white.withOpacity(0.8),
+                                  ? theme.colorScheme.outline.withValues(alpha: 0.7)
+                                  : Colors.white.withValues(alpha: 0.8),
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -374,7 +374,7 @@ class _GameCardState extends State<_GameCard> with SingleTickerProviderStateMixi
                         child: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.outline.withOpacity(0.2),
+                            color: theme.colorScheme.outline.withValues(alpha: 0.2),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -511,7 +511,7 @@ class _AchievementTile extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: isUnlocked
-                    ? Colors.amber.withOpacity(0.2)
+                    ? Colors.amber.withValues(alpha: 0.2)
                     : theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),

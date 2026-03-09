@@ -147,6 +147,15 @@ import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Celebration
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.AddBox
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 // Feed filter options - uses MaterialTheme.colorScheme for dynamic colors
 enum class FeedFilter(val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
@@ -568,11 +577,7 @@ private fun isSpecialNDCelebration(holiday: HolidayType): Boolean {
  * Keep animations smooth and calming, even for special celebrations
  */
 private fun getHolidayAnimationSpeed(holiday: HolidayType): Float {
-    return when {
-        isSpecialNDCelebration(holiday) -> 1.0f  // Normal speed for celebrations (was too fast at 1.3f)
-        holiday != HolidayType.NONE -> 1.0f      // Normal holiday speed
-        else -> 1.0f                              // Default speed
-    }
+    return 1.0f
 }
 
 /**
@@ -597,22 +602,10 @@ private fun NeuroCometLogo(
     val shouldAnimate = animateLogos && isHoliday
 
     // Single animation values - only created when holiday is active
-    val bounceScale: Float
     val glowAlpha: Float
 
     if (shouldAnimate) {
         val infiniteTransition = rememberInfiniteTransition(label = "holiday-decorations")
-
-        val animatedBounce by infiniteTransition.animateFloat(
-            initialValue = 1f,
-            targetValue = if (isSpecialCelebration) 1.08f else 1.05f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(2000, easing = FastOutSlowInEasing),
-                repeatMode = RepeatMode.Reverse
-            ),
-            label = "bounce"
-        )
-        bounceScale = animatedBounce
 
         val animatedGlow by infiniteTransition.animateFloat(
             initialValue = if (isSpecialCelebration) 0.15f else 0.1f,
@@ -625,7 +618,6 @@ private fun NeuroCometLogo(
         )
         glowAlpha = animatedGlow
     } else {
-        bounceScale = 1f
         glowAlpha = 0.1f
     }
 
@@ -1001,7 +993,8 @@ fun FeedScreen(
     modifier: Modifier = Modifier,
     safetyState: SafetyState = SafetyState(),
     enableNewFeedLayout: Boolean = false,
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    onHashtagClick: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     val parentalState = remember { ParentalControlsSettings.getState(context) }
@@ -1012,6 +1005,36 @@ fun FeedScreen(
     var showCreateStoryDialog by remember { mutableStateOf(false) }
     var showPostingBlockedMessage by remember { mutableStateOf(false) }
     var selectedFilter by remember { mutableStateOf(FeedFilter.FOR_YOU) }
+
+    // Filter posts based on selected pill — matches Flutter _filterPosts logic
+    val filteredPosts = remember(posts, selectedFilter) {
+        when (selectedFilter) {
+            FeedFilter.FOR_YOU -> posts
+            FeedFilter.FOLLOWING -> {
+                // No category/tag fields on Android Post model yet, show first 5 as fallback
+                posts.take(5)
+            }
+            FeedFilter.TRENDING -> {
+                posts.sortedByDescending { it.likes + it.comments }
+            }
+            FeedFilter.SUPPORT -> {
+                val supportPosts = posts.filter { post ->
+                    val lower = post.content.lowercase()
+                    lower.contains("support") || lower.contains("help") || lower.contains("reminder")
+                }
+                supportPosts.ifEmpty { emptyList() }
+            }
+            FeedFilter.WINS -> {
+                val winsPosts = posts.filter { post ->
+                    val lower = post.content.lowercase()
+                    lower.contains("win") || lower.contains("celebration") ||
+                        lower.contains("achievement") || post.content.contains("🎉") ||
+                        post.content.contains("✨")
+                }
+                winsPosts.ifEmpty { emptyList() }
+            }
+        }
+    }
 
     // Animation flags
     val animateLogos = animationSettings.shouldAnimate(AnimationType.LOGO)
@@ -1114,9 +1137,13 @@ fun FeedScreen(
 
                 // Filter Pills
                 item(key = "filter_pills") {
+                    val haptic = LocalHapticFeedback.current
                     FeedFilterPills(
                         selectedFilter = selectedFilter,
-                        onFilterSelected = { selectedFilter = it },
+                        onFilterSelected = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            selectedFilter = it
+                        },
                         isDark = isDark
                     )
                 }
@@ -1126,7 +1153,7 @@ fun FeedScreen(
                     FeedSectionHeader(
                         title = selectedFilter.label,
                         icon = selectedFilter.icon,
-                        count = posts.size,
+                        count = filteredPosts.size,
                         isDark = isDark
                     )
                 }
@@ -1135,13 +1162,16 @@ fun FeedScreen(
                 val showAds = GoogleAdsManager.shouldShowAds()
 
                 itemsIndexed(
-                    items = posts,
+                    items = filteredPosts,
                     key = { _, post -> post.id ?: post.hashCode() }
                 ) { index, post ->
                     // Show banner ad after post at index 4, 9, 14, etc. (every 5 posts)
                     if (showAds && index > 0 && index % 5 == 4) {
                         BannerAd(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            modifier = Modifier.padding(
+                                horizontal = if (enableNewFeedLayout) 8.dp else 12.dp,
+                                vertical = if (enableNewFeedLayout) 4.dp else 8.dp
+                            ),
                             adKey = "feed_banner_$index"
                         )
                     }
@@ -1154,7 +1184,9 @@ fun FeedScreen(
                         onShare = onSharePost,
                         isMockInterfaceEnabled = isMockInterfaceEnabled,
                         safetyState = safetyState,
-                        onProfileClick = onProfileClick
+                        onProfileClick = onProfileClick,
+                        onHashtagClick = onHashtagClick,
+                        compactMode = enableNewFeedLayout
                     )
                 }
             }
@@ -1446,50 +1478,54 @@ private fun FeedFilterPill(
     onClick: () -> Unit,
     @Suppress("unused") isDark: Boolean
 ) {
-    // Selected pill uses a vivid gradient background instead of a flat primary
-    // which can appear washed-out in pastel-dominant themes.
-    val selectedBackground = Brush.linearGradient(
-        colors = listOf(
-            Color(0xFF6C63FF), // Vivid indigo
-            Color(0xFF7C4DFF)  // Deep purple
-        )
-    )
+    val primaryColor = MaterialTheme.colorScheme.primary
+
+    // Scale animation on press — matches Notifications/Messages style
+    val scale = remember { Animatable(1f) }
+    val coroutineScope = rememberCoroutineScope()
 
     Surface(
         modifier = Modifier
-            .clip(RoundedCornerShape(24.dp))
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(24.dp),
+            .graphicsLayer { scaleX = scale.value; scaleY = scale.value }
+            .clip(RoundedCornerShape(20.dp))
+            .clickable {
+                coroutineScope.launch {
+                    scale.animateTo(0.95f, animationSpec = spring(stiffness = Spring.StiffnessMedium))
+                    scale.animateTo(1f, animationSpec = spring(stiffness = Spring.StiffnessMedium))
+                }
+                onClick()
+            },
+        shape = RoundedCornerShape(20.dp),
         color = if (isSelected) {
-            Color.Transparent
+            primaryColor.copy(alpha = 0.15f)
         } else {
             MaterialTheme.colorScheme.surfaceContainerHighest
         },
-        border = if (!isSelected) {
-            BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-        } else null
+        border = if (isSelected) {
+            BorderStroke(1.5.dp, primaryColor.copy(alpha = 0.4f))
+        } else null,
+        shadowElevation = if (isSelected) 4.dp else 0.dp,
+        tonalElevation = if (isSelected) 2.dp else 0.dp
     ) {
         Row(
-            modifier = Modifier
-                .then(
-                    if (isSelected) Modifier.background(selectedBackground, RoundedCornerShape(24.dp))
-                    else Modifier
-                )
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+            modifier = Modifier.padding(
+                horizontal = if (isSelected) 16.dp else 14.dp,
+                vertical = 10.dp
+            ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Icon(
                 imageVector = filter.icon,
                 contentDescription = null,
-                modifier = Modifier.size(18.dp),
-                tint = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                modifier = Modifier.size(16.dp),
+                tint = if (isSelected) primaryColor else MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = filter.label,
                 style = MaterialTheme.typography.labelLarge,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+                color = if (isSelected) primaryColor else MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -1622,7 +1658,9 @@ fun BubblyPostCard(
     isMockInterfaceEnabled: Boolean,
     safetyState: SafetyState = SafetyState(),
     currentUserId: String = "",
-    onProfileClick: (String) -> Unit = {}
+    onProfileClick: (String) -> Unit = {},
+    onHashtagClick: (String) -> Unit = {},
+    compactMode: Boolean = false
 ) {
     var showMenu by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
@@ -1656,8 +1694,11 @@ fun BubblyPostCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        shape = RoundedCornerShape(20.dp),
+            .padding(
+                horizontal = if (compactMode) 8.dp else 12.dp,
+                vertical = if (compactMode) 4.dp else 6.dp
+            ),
+        shape = RoundedCornerShape(if (compactMode) 16.dp else 20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
@@ -1670,7 +1711,7 @@ fun BubblyPostCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(if (compactMode) 12.dp else 16.dp)
         ) {
             // ============ HEADER ROW ============
             Row(
@@ -1686,7 +1727,7 @@ fun BubblyPostCard(
 
                 Box(
                             modifier = Modifier
-                                .size(50.dp)
+                                .size(if (compactMode) 42.dp else 50.dp)
                                 .background(
                                     brush = Brush.linearGradient(
                                         colors = listOf(
@@ -1728,7 +1769,7 @@ fun BubblyPostCard(
                             }
                         }
 
-                        Spacer(Modifier.width(12.dp))
+                        Spacer(Modifier.width(if (compactMode) 10.dp else 12.dp))
 
                         // User info
                         Column(modifier = Modifier.weight(1f)) {
@@ -1994,9 +2035,10 @@ fun BubblyPostCard(
                                 onProfileClick(username)
                             }
                             com.kyilmaz.neurocomet.ui.components.LinkType.HASHTAG -> {
-                                Toast.makeText(context, "Exploring ${link.text}...", Toast.LENGTH_SHORT).show()
+                                val hashtag = link.text.removePrefix("#")
+                                onHashtagClick(hashtag)
                             }
-                            else -> null
+                            else -> Unit
                         }
                     }
                 )
@@ -2419,8 +2461,7 @@ private fun formatMomentTime(itemCount: Int): String {
         itemCount <= 1 -> "Just now"
         itemCount == 2 -> "2h"
         itemCount == 3 -> "5h"
-        itemCount >= 4 -> "12h"
-        else -> ""
+        else -> "12h"
     }
 }
 
@@ -2942,3 +2983,4 @@ fun VideoPlayerView(videoUrl: String, modifier: Modifier = Modifier) {
         }
     )
 }
+

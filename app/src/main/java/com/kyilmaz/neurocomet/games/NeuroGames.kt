@@ -92,12 +92,16 @@ object GameUnlockManager {
 
     fun getAchievementCount(context: Context): Int {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        return prefs.getInt(KEY_ACHIEVEMENTS, 0)
+        return try { prefs.getInt(KEY_ACHIEVEMENTS, 0) } catch (_: ClassCastException) {
+            try { prefs.getLong(KEY_ACHIEVEMENTS, 0).toInt() } catch (_: Exception) { 0 }
+        }
     }
 
     fun addAchievement(context: Context, count: Int = 1) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val current = prefs.getInt(KEY_ACHIEVEMENTS, 0)
+        val current = try { prefs.getInt(KEY_ACHIEVEMENTS, 0) } catch (_: ClassCastException) {
+            try { prefs.getLong(KEY_ACHIEVEMENTS, 0).toInt() } catch (_: Exception) { 0 }
+        }
         prefs.edit().putInt(KEY_ACHIEVEMENTS, current + count).apply()
     }
 

@@ -10,7 +10,6 @@ import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Build
 import android.provider.ContactsContract
-import android.provider.ContactsPickerSessionContract
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
@@ -312,9 +311,6 @@ object AttachmentHelper {
 
     /**
      * Check if contacts permission is granted.
-     * On CinnamonBun+ the [ContactsPickerSessionContract] path does NOT require
-     * READ_CONTACTS, but the legacy fallback still does. This always checks
-     * the real permission state so callers can decide whether to request it.
      */
     fun hasContactsPermission(context: Context): Boolean {
         return ContextCompat.checkSelfPermission(
@@ -326,22 +322,14 @@ object AttachmentHelper {
 
     /**
      * Whether the device supports the privacy-preserving system contacts picker
-     * introduced in Android 17 (CinnamonBun / API 37).
-     * Uses [android.provider.ContactsPickerSessionContract].
+     * introduced in Android 17 (API 37). Returns false on API 36 and below.
      */
     fun supportsContactsPicker(): Boolean =
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN
+        Build.VERSION.SDK_INT >= 37
 
     /**
-     * Build the [Intent] to pass to [ContactsPickerSessionContract] for
-     * launching the Android 17 system contacts picker.
-     *
-     * Per the API reference the intent action must be
-     * [ContactsPickerSessionContract.ACTION_PICK_CONTACTS] and requested data
-     * field MIME types are supplied via
-     * [ContactsPickerSessionContract.EXTRA_PICK_CONTACTS_REQUESTED_DATA_FIELDS].
-     *
-     * @param allowMultiple whether the user may select more than one contact.
+     * Build the [Intent] for the API 37 system contacts picker.
+     * Only call this when [supportsContactsPicker] returns true.
      */
     @Suppress("NewApi")
     fun buildContactsPickerIntent(allowMultiple: Boolean = false): Intent {
@@ -349,9 +337,9 @@ object AttachmentHelper {
             ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
             ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE
         )
-        return Intent(ContactsPickerSessionContract.ACTION_PICK_CONTACTS).apply {
+        return Intent(android.provider.ContactsPickerSessionContract.ACTION_PICK_CONTACTS).apply {
             putStringArrayListExtra(
-                ContactsPickerSessionContract.EXTRA_PICK_CONTACTS_REQUESTED_DATA_FIELDS,
+                android.provider.ContactsPickerSessionContract.EXTRA_PICK_CONTACTS_REQUESTED_DATA_FIELDS,
                 dataFields
             )
             putExtra(Intent.EXTRA_ALLOW_MULTIPLE, allowMultiple)
@@ -359,11 +347,7 @@ object AttachmentHelper {
     }
 
     /**
-     * Query the session URI returned by [ContactsPickerSessionContract].
-     *
-     * The picker delivers a session-scoped `content://` URI.  Querying it
-     * yields rows with the columns `display_name`, `mimetype` and `data1`
-     * (same layout as [ContactsContract.Data]).
+     * Query the session URI returned by the API 37 contacts picker.
      */
     fun queryContactPickerSession(
         contentResolver: ContentResolver,
@@ -383,7 +367,6 @@ object AttachmentHelper {
                     val name = if (nameIdx >= 0) cursor.getString(nameIdx) ?: "Contact" else "Contact"
                     val mime = if (mimeIdx >= 0) cursor.getString(mimeIdx) else null
                     val data = if (dataIdx >= 0) cursor.getString(dataIdx) else null
-
                     val entry = contactsMap.getOrPut(name) { mutableMapOf("name" to name) }
                     when (mime) {
                         ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE ->
@@ -407,18 +390,18 @@ object AttachmentHelper {
 
     /**
      * Check if local network permission is granted.
-     * On Android 17 (CinnamonBun / API 37+) this is a runtime permission required
-     * for local device discovery, LAN connections, and WebRTC ICE candidate gathering.
-     * On older APIs the permission does not exist, so we return true.
+     * On API 37+ this is a runtime permission. On API 36 and below it does
+     * not exist, so we return true.
      */
+    @Suppress("NewApi")
     fun hasLocalNetworkPermission(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
+        return if (Build.VERSION.SDK_INT >= 37) {
             ContextCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_LOCAL_NETWORK
             ) == PackageManager.PERMISSION_GRANTED
         } else {
-            true // Permission not required pre-CinnamonBun
+            true
         }
     }
 
@@ -551,12 +534,8 @@ fun rememberAttachmentState(
     }
 
     // ── Contact picker ─────────────────────────────────────────
-    // Android 17 (CinnamonBun): ContactsPickerSessionContract is an
-    // ActivityResultContract<Intent, Uri?>.  We register it with
-    // rememberLauncherForActivityResult and launch with an Intent built via
-    // ACTION_PICK_CONTACTS + EXTRA_PICK_CONTACTS_REQUESTED_DATA_FIELDS.
-    // No READ_CONTACTS permission is needed.
-    // Pre-CinnamonBun: Fall back to ActivityResultContracts.PickContact().
+    // API 37+: uses ContactsPickerSessionContract (no READ_CONTACTS needed).
+    // API 36 and below: uses legacy PickContact() (READ_CONTACTS needed).
 
     /** Helper: resolve a contact name from the returned URI (legacy path). */
     fun resolveContactName(uri: Uri): String {
@@ -576,7 +555,7 @@ fun rememberAttachmentState(
         return "Contact"
     }
 
-    // Legacy picker (pre-CinnamonBun)
+    // Legacy picker (all API levels)
     val legacyContactPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickContact()
     ) { uri ->
@@ -591,11 +570,8 @@ fun rememberAttachmentState(
         }
     }
 
-    // Android 17+ system contacts picker via ContactsPickerSessionContract.
-    // ContactsPickerSessionContract is an ActivityResultContract<Intent, Uri?>
-    // that takes the ACTION_PICK_CONTACTS intent and returns a session URI.
-    @Suppress("NewApi")
-    val cinnamonBunContactPickerLauncher = rememberLauncherForActivityResult(
+    // API 37+ session-based picker launcher
+    val api37ContactPickerLauncher = rememberLauncherForActivityResult(
         contract = object : androidx.activity.result.contract.ActivityResultContract<Intent, Uri?>() {
             override fun createIntent(context: Context, input: Intent): Intent = input
             override fun parseResult(resultCode: Int, intent: Intent?): Uri? {
@@ -604,7 +580,6 @@ fun rememberAttachmentState(
         }
     ) { sessionUri: Uri? ->
         if (sessionUri != null) {
-            // Query the session URI to get the privacy-scoped contact data
             val contacts = AttachmentHelper.queryContactPickerSession(
                 context.contentResolver, sessionUri
             )
@@ -635,12 +610,11 @@ fun rememberAttachmentState(
     /** Launch the correct contacts picker depending on API level. */
     fun launchContactsPicker() {
         if (AttachmentHelper.supportsContactsPicker()) {
-            // Android 17+ (CinnamonBun) — ContactsPickerSessionContract
             try {
                 val intent = AttachmentHelper.buildContactsPickerIntent(allowMultiple = false)
-                cinnamonBunContactPickerLauncher.launch(intent)
+                api37ContactPickerLauncher.launch(intent)
             } catch (e: Exception) {
-                Log.e(TAG, "CinnamonBun contacts picker failed, falling back", e)
+                Log.e(TAG, "API 37 contacts picker failed, falling back", e)
                 legacyContactPickerLauncher.launch(null)
             }
         } else {
@@ -775,7 +749,7 @@ fun rememberAttachmentState(
             },
             onPickContact = {
                 if (AttachmentHelper.supportsContactsPicker()) {
-                    // Android 17+ (CinnamonBun) — no permission needed, launch system picker directly
+                    // API 37+ — no permission needed, launch system picker directly
                     launchContactsPicker()
                 } else if (AttachmentHelper.hasContactsPermission(context)) {
                     launchContactsPicker()

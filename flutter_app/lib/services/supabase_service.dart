@@ -34,6 +34,69 @@ class SupabaseService {
   /// Returns true if user is authenticated OR if dev mode skip is enabled
   static bool get isAuthenticated => currentUser != null || devModeSkipAuth;
 
+  static Map<String, dynamic> _row(dynamic value) =>
+      Map<String, dynamic>.from(value as Map);
+
+  static String? _string(dynamic value) {
+    final text = value?.toString();
+    if (text == null || text.isEmpty || text == 'null') return null;
+    return text;
+  }
+
+  static DateTime? _dateTime(dynamic value) {
+    final text = _string(value);
+    if (text == null) return null;
+    return DateTime.tryParse(text);
+  }
+
+  static bool _bool(dynamic value) {
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    final text = _string(value)?.toLowerCase();
+    return text == 'true' || text == '1';
+  }
+
+  static MessageType _messageType(dynamic value) {
+    switch (_string(value)) {
+      case 'image':
+        return MessageType.image;
+      case 'video':
+        return MessageType.video;
+      case 'audio':
+        return MessageType.audio;
+      case 'file':
+        return MessageType.file;
+      case 'sticker':
+        return MessageType.sticker;
+      default:
+        return MessageType.text;
+    }
+  }
+
+  static String _profileName(Map<String, dynamic>? profile, String fallback) {
+    final displayName = _string(profile?['display_name']);
+    if (displayName != null) return displayName;
+    final username = _string(profile?['username']);
+    if (username != null) return username;
+    return fallback;
+  }
+
+  static Message _mapMessageRow(Map<String, dynamic> row) {
+    final readAt = _dateTime(row['read_at']);
+    final isRead = _bool(row['is_read']) || readAt != null;
+    return Message(
+      id: _string(row['id']) ?? '',
+      conversationId: _string(row['conversation_id']) ?? '',
+      senderId: _string(row['sender_id']) ?? '',
+      content: _string(row['content']) ?? '',
+      type: _messageType(row['type']),
+      mediaUrl: _string(row['media_url']),
+      status: isRead ? MessageStatus.read : MessageStatus.sent,
+      createdAt: _dateTime(row['created_at']),
+      readAt: readAt,
+    );
+  }
+
   // ============ Authentication ============
 
   static Future<AuthResponse> signInWithEmail({
@@ -248,31 +311,120 @@ class SupabaseService {
   // ============ Conversations & Messages ============
 
   static Future<List<Conversation>> getConversations() async {
-    final response = await client
+    final uid = currentUser?.id;
+    if (uid == null) return [];
+
+    final participationResponse = await client
+        .from('conversation_participants')
+        .select('conversation_id')
+        .eq('user_id', uid);
+
+    final conversationIds = (participationResponse as List)
+        .map(_row)
+        .map((row) => _string(row['conversation_id']))
+        .whereType<String>()
+        .toSet()
+        .toList();
+
+    if (conversationIds.isEmpty) return [];
+
+    final conversationsResponse = await client
         .from('conversations')
-        .select('''
-          *,
-          participants:conversation_participants(
-            user:users(id, display_name, avatar_url)
-          ),
-          last_message:messages(content, created_at)
-        ''')
+        .select()
+        .inFilter('id', conversationIds)
         .order('updated_at', ascending: false);
 
-    return (response as List).map((json) => Conversation.fromJson(json)).toList();
+    final participantResponse = await client
+        .from('conversation_participants')
+        .select('conversation_id, user_id')
+        .inFilter('conversation_id', conversationIds);
+
+    final messageResponse = await client
+        .from('dm_messages')
+        .select('id, conversation_id, sender_id, content, type, media_url, is_read, created_at, read_at')
+        .inFilter('conversation_id', conversationIds)
+        .order('created_at', ascending: false);
+
+    final participantRows = (participantResponse as List).map(_row).toList();
+    final messageRows = (messageResponse as List).map(_row).toList();
+
+    final participantsByConversation = <String, List<String>>{};
+    final participantIds = <String>{};
+    for (final row in participantRows) {
+      final conversationId = _string(row['conversation_id']);
+      final userId = _string(row['user_id']);
+      if (conversationId == null || userId == null) continue;
+      participantsByConversation.putIfAbsent(conversationId, () => []).add(userId);
+      participantIds.add(userId);
+    }
+
+    final profilesById = <String, Map<String, dynamic>>{};
+    if (participantIds.isNotEmpty) {
+      final profilesResponse = await client
+          .from('profiles')
+          .select('id, display_name, username, avatar_url, is_verified')
+          .inFilter('id', participantIds.toList());
+      for (final row in profilesResponse as List) {
+        final mapped = _row(row);
+        final id = _string(mapped['id']);
+        if (id != null) {
+          profilesById[id] = mapped;
+        }
+      }
+    }
+
+    final messagesByConversation = <String, List<Map<String, dynamic>>>{};
+    for (final row in messageRows) {
+      final conversationId = _string(row['conversation_id']);
+      if (conversationId == null) continue;
+      messagesByConversation.putIfAbsent(conversationId, () => []).add(row);
+    }
+
+    return (conversationsResponse as List).map(_row).map((conversationRow) {
+      final conversationId = _string(conversationRow['id']) ?? '';
+      final conversationParticipants =
+          participantsByConversation[conversationId] ?? const <String>[];
+      final otherParticipantId = conversationParticipants.cast<String?>().firstWhere(
+            (id) => id != null && id != uid,
+            orElse: () => conversationParticipants.isNotEmpty ? conversationParticipants.first : null,
+          );
+      final otherProfile = otherParticipantId == null ? null : profilesById[otherParticipantId];
+      final conversationMessages =
+          messagesByConversation[conversationId] ?? const <Map<String, dynamic>>[];
+      final lastMessageRow = conversationMessages.isNotEmpty ? conversationMessages.first : null;
+      final unreadCount = conversationMessages.where((message) {
+        return _string(message['sender_id']) != uid && !_bool(message['is_read']);
+      }).length;
+      final isGroup = _bool(conversationRow['is_group']);
+      final groupName = _string(conversationRow['group_name']);
+
+      return Conversation(
+        id: conversationId,
+        displayName: isGroup
+            ? (groupName ?? 'Group chat')
+            : _profileName(otherProfile, 'Conversation'),
+        avatarUrl: _string(otherProfile?['avatar_url']),
+        lastMessage: _string(lastMessageRow?['content']),
+        lastMessageAt:
+            _dateTime(lastMessageRow?['created_at']) ?? _dateTime(conversationRow['updated_at']),
+        unreadCount: unreadCount,
+        isGroup: isGroup,
+        participantId: otherParticipantId,
+        participantIds: conversationParticipants,
+        createdAt: _dateTime(conversationRow['created_at']),
+        isVerified: _bool(otherProfile?['is_verified']),
+      );
+    }).toList();
   }
 
   static Future<List<Message>> getMessages(String conversationId) async {
     final response = await client
-        .from('messages')
-        .select('''
-          *,
-          sender:users!sender_id(id, display_name, avatar_url)
-        ''')
+        .from('dm_messages')
+        .select('id, conversation_id, sender_id, content, type, media_url, is_read, created_at, read_at')
         .eq('conversation_id', conversationId)
         .order('created_at', ascending: true);
 
-    return (response as List).map((json) => Message.fromJson(json)).toList();
+    return (response as List).map(_row).map(_mapMessageRow).toList();
   }
 
   static Future<Message> sendMessage({
@@ -283,7 +435,7 @@ class SupabaseService {
   }) async {
     final uid = currentUser?.id;
     if (uid == null) throw Exception('Not logged in');
-    final response = await client.from('messages').insert({
+    final response = await client.from('dm_messages').insert({
       'conversation_id': conversationId,
       'sender_id': uid,
       'content': content,
@@ -291,7 +443,7 @@ class SupabaseService {
       'media_url': mediaUrl,
     }).select().single();
 
-    return Message.fromJson(response);
+    return _mapMessageRow(_row(response));
   }
 
   // ============ Notifications ============
@@ -410,12 +562,14 @@ class SupabaseService {
     await tryDeleteEq('post_likes', 'user_id', userId);
     await tryDeleteEq('post_comments', 'user_id', userId);
     await tryDeleteEq('bookmarks', 'user_id', userId.toString());
-    await tryDeleteEq('messages', 'sender_id', userId);
+    await tryDeleteEq('dm_messages', 'sender_id', userId);
+    await tryDeleteEq('conversation_participants', 'user_id', userId);
     await tryDeleteEq('notifications', 'user_id', userId);
     await tryDelete('follows', 'follower_id.eq.$userId,following_id.eq.$userId');
     await tryDelete('blocked_users', 'blocker_id.eq.$userId,blocked_id.eq.$userId');
     await tryDeleteEq('reports', 'reporter_id', userId);
     await tryDeleteEq('posts', 'user_id', userId);
+    await tryDeleteEq('profiles', 'id', userId);
     await tryDeleteEq('users', 'id', userId);
   }
 
@@ -800,7 +954,7 @@ class SupabaseService {
         .onPostgresChanges(
           event: PostgresChangeEvent.insert,
           schema: 'public',
-          table: 'messages',
+          table: 'dm_messages',
           filter: PostgresChangeFilter(
             type: PostgresChangeFilterType.eq,
             column: 'conversation_id',
@@ -1054,12 +1208,13 @@ Created at: ${now.toIso8601String()}
       final tablesToCheck = [
         'posts',
         'users',
+        'profiles',
         'post_likes',
         'post_comments',
         'stories',
         'conversations',
         'conversation_participants',
-        'messages',
+        'dm_messages',
         'message_reactions',
         'notifications',
         'follows',

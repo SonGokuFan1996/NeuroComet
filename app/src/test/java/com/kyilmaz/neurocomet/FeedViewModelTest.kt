@@ -1,5 +1,6 @@
 package com.kyilmaz.neurocomet
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
@@ -8,10 +9,11 @@ import org.junit.Ignore // Add Ignore import
 
 class FeedViewModelTest {
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     @Ignore("Test fails in pure JVM environment due to model resolution issues with mock data. Temporarily ignoring to unblock development.")
     fun createViewDismissDeleteStory_flowUpdatesAccordingly() = runTest {
-        val vm = FeedViewModel()
+        val vm = FeedViewModel(android.app.Application())
 
         // Let initial mock loads complete (fetchPosts uses delay).
         advanceUntilIdle()

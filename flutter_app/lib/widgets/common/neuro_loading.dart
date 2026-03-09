@@ -165,7 +165,7 @@ class _NeuroShimmerState extends State<NeuroShimmer>
               end: Alignment(-1.0 + 2 * _controller.value + 1, 0),
               colors: [
                 theme.colorScheme.surfaceContainerHighest,
-                theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 theme.colorScheme.surfaceContainerHighest,
               ],
             ),

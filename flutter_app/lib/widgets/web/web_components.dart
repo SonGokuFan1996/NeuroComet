@@ -72,7 +72,7 @@ class WebCard extends StatefulWidget {
       elevation: 0,
       hoverElevation: 2,
       border: Border.all(
-        color: borderColor ?? Colors.grey.withOpacity(0.3),
+        color: borderColor ?? Colors.grey.withValues(alpha: 0.3),
         width: 1,
       ),
       child: child,
@@ -390,27 +390,27 @@ class _WebButtonState extends State<WebButton> {
 
     if (widget.isPrimary) {
       backgroundColor = isDisabled
-          ? theme.colorScheme.primary.withOpacity(0.5)
+          ? theme.colorScheme.primary.withValues(alpha: 0.5)
           : _isPressed
-              ? theme.colorScheme.primary.withOpacity(0.8)
+              ? theme.colorScheme.primary.withValues(alpha: 0.8)
               : _isHovered
-                  ? theme.colorScheme.primary.withOpacity(0.9)
+                  ? theme.colorScheme.primary.withValues(alpha: 0.9)
                   : theme.colorScheme.primary;
       foregroundColor = theme.colorScheme.onPrimary;
     } else if (widget.isOutlined) {
       backgroundColor = _isHovered
-          ? theme.colorScheme.primary.withOpacity(0.1)
+          ? theme.colorScheme.primary.withValues(alpha: 0.1)
           : Colors.transparent;
       foregroundColor = theme.colorScheme.primary;
       border = Border.all(
         color: isDisabled
-            ? theme.colorScheme.primary.withOpacity(0.5)
+            ? theme.colorScheme.primary.withValues(alpha: 0.5)
             : theme.colorScheme.primary,
         width: 1.5,
       );
     } else {
       backgroundColor = _isHovered
-          ? theme.colorScheme.primary.withOpacity(0.1)
+          ? theme.colorScheme.primary.withValues(alpha: 0.1)
           : Colors.transparent;
       foregroundColor = theme.colorScheme.primary;
     }

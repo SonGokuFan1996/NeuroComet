@@ -253,7 +253,7 @@ class _SearchBarExpanded extends StatelessWidget {
         color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: theme.colorScheme.primary.withOpacity(0.3),
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
           width: 2,
         ),
       ),
@@ -392,19 +392,19 @@ class _FilterPillState extends State<_FilterPill>
           ),
           decoration: BoxDecoration(
             color: widget.isSelected
-                ? primaryColor.withOpacity(0.15)
+                ? primaryColor.withValues(alpha: 0.15)
                 : theme.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(20),
             border: widget.isSelected
                 ? Border.all(
-                    color: primaryColor.withOpacity(0.4),
+                    color: primaryColor.withValues(alpha: 0.4),
                     width: 1.5,
                   )
                 : null,
             boxShadow: widget.isSelected
                 ? [
                     BoxShadow(
-                      color: primaryColor.withOpacity(0.15),
+                      color: primaryColor.withValues(alpha: 0.15),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -491,7 +491,7 @@ class _PersonResultCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: theme.dividerColor.withOpacity(0.1))),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: theme.dividerColor.withValues(alpha: 0.1))),
       child: InkWell(
         onTap: () => HapticFeedback.lightImpact(),
         borderRadius: BorderRadius.circular(16),
@@ -533,7 +533,7 @@ class _TopicChip extends StatelessWidget {
       onTap: () => HapticFeedback.selectionClick(),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(color: primaryColor.withOpacity(0.1), borderRadius: BorderRadius.circular(20), border: Border.all(color: primaryColor.withOpacity(0.3))),
+        decoration: BoxDecoration(color: primaryColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20), border: Border.all(color: primaryColor.withValues(alpha: 0.3))),
         child: Text(label, style: theme.textTheme.labelLarge?.copyWith(color: primaryColor, fontWeight: FontWeight.w600)),
       ),
     );
@@ -680,21 +680,21 @@ class _TopicCardState extends State<_TopicCard> with SingleTickerProviderStateMi
       child: ScaleTransition(
         scale: _scaleAnimation,
         child: Material(
-          color: widget.topic.color.withOpacity(0.1),
+          color: widget.topic.color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
           child: InkWell(
             onTap: widget.onTap,
             borderRadius: BorderRadius.circular(16),
             child: Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), border: Border.all(color: widget.topic.color.withOpacity(0.3))),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), border: Border.all(color: widget.topic.color.withValues(alpha: 0.3))),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(children: [
-                    Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: widget.topic.color.withOpacity(0.2), borderRadius: BorderRadius.circular(8)), child: Icon(widget.topic.icon, color: widget.topic.color, size: 18)),
+                    Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: widget.topic.color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)), child: Icon(widget.topic.icon, color: widget.topic.color, size: 18)),
                     const Spacer(),
-                    Icon(Icons.arrow_forward_ios_rounded, size: 12, color: widget.topic.color.withOpacity(0.5)),
+                    Icon(Icons.arrow_forward_ios_rounded, size: 12, color: widget.topic.color.withValues(alpha: 0.5)),
                   ]),
                   const Spacer(),
                   Text(widget.topic.name, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: widget.topic.color)),
@@ -732,7 +732,7 @@ class _TrendingList extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Material(
-              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(12),
               child: InkWell(
                 onTap: () { HapticFeedback.selectionClick(); searchController.text = item.$1; },
@@ -740,7 +740,7 @@ class _TrendingList extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: Row(children: [
-                    Container(width: 40, height: 40, decoration: BoxDecoration(gradient: LinearGradient(colors: [primaryColor.withOpacity(0.2), tertiaryColor.withOpacity(0.2)]), borderRadius: BorderRadius.circular(10)), child: Center(child: Text('#${i + 1}', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: primaryColor)))),
+                    Container(width: 40, height: 40, decoration: BoxDecoration(gradient: LinearGradient(colors: [primaryColor.withValues(alpha: 0.2), tertiaryColor.withValues(alpha: 0.2)]), borderRadius: BorderRadius.circular(10)), child: Center(child: Text('#${i + 1}', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: primaryColor)))),
                     const SizedBox(width: 12),
                     Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(item.$1, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)), Text(item.$2, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant))])),
                     Icon(item.$3, color: primaryColor, size: 20),
@@ -1492,7 +1492,7 @@ class _QuickAccessChips extends StatelessWidget {
                 color: theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: color.withOpacity(0.4),
+                  color: color.withValues(alpha: 0.4),
                 ),
               ),
               child: Text(
@@ -1591,7 +1591,7 @@ class _ExplorePostCardState extends State<_ExplorePostCard> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFF6B35).withOpacity(0.15),
+                      color: const Color(0xFFFF6B35).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -1823,7 +1823,7 @@ class _FeaturedCreatorCard extends StatelessWidget {
       width: 280,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -2028,7 +2028,7 @@ class _FeaturedTopicCard extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: topic.gradient),
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [BoxShadow(color: topic.gradient.first.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4))],
+          boxShadow: [BoxShadow(color: topic.gradient.first.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
         ),
         child: Stack(
           children: [
@@ -2036,7 +2036,7 @@ class _FeaturedTopicCard extends StatelessWidget {
             Positioned(
               top: -10,
               right: -10,
-              child: Text(topic.emoji, style: TextStyle(fontSize: 64, color: Colors.white.withOpacity(0.25))),
+              child: Text(topic.emoji, style: TextStyle(fontSize: 64, color: Colors.white.withValues(alpha: 0.25))),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2047,14 +2047,14 @@ class _FeaturedTopicCard extends StatelessWidget {
                     if (topic.isHot)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
                         child: const Text('🔥 Hot', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                       ),
                     if (topic.isHot && topic.isJoined) const SizedBox(width: 6),
                     if (topic.isJoined)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
                         child: const Text('✓ Joined', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                       ),
                   ],
@@ -2068,13 +2068,13 @@ class _FeaturedTopicCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(topic.description, style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(topic.description, style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Text('${topic.memberCount} members', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
+                    Text('${topic.memberCount} members', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12)),
                     const SizedBox(width: 16),
-                    Text('${topic.postsToday} posts today', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
+                    Text('${topic.postsToday} posts today', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12)),
                   ],
                 ),
               ],
@@ -2112,7 +2112,7 @@ class _TopicCategoryCard extends StatelessWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(color: category.color.withOpacity(0.15), borderRadius: BorderRadius.circular(10)),
+                  decoration: BoxDecoration(color: category.color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10)),
                   child: Icon(category.icon, color: category.color, size: 22),
                 ),
                 const SizedBox(width: 12),

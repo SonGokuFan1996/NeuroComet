@@ -3,7 +3,7 @@
 
 # Supabase
 SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your-anon-key
+SUPABASE_KEY=your-client-safe-supabase-key  # publishable key on Pro, anon key on legacy setups
 
 # Gemini AI
 GEMINI_API_KEY=your-gemini-key
@@ -19,3 +19,6 @@ ADMOB_REWARDED_ID=ca-app-pub-XXXXXXXXXX/XXXXXXXXXX
 
 # Developer
 DEVELOPER_DEVICE_HASH=your-hash
+
+# Obfuscation key (used by SecurityUtils to de-obfuscate BuildConfig values)
+OBFUSCATION_KEY=your-obfuscation-key

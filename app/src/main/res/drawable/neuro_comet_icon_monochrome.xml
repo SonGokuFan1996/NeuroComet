@@ -4,54 +4,31 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Neural connection line 1 (top-left) -->
     <path
         android:fillColor="#000000"
-        android:pathData="M19,19 L29,29 Q44,44 54,54 L49,59 Q39,49 24,24 Z" />
-
-    <!-- Neural connection line 2 (top-right) -->
-    <path
-        android:fillColor="#000000"
-        android:pathData="M89,19 L79,29 Q64,44 54,54 L59,59 Q69,49 84,24 Z" />
-
-    <!-- Neural connection line 3 (bottom) -->
-    <path
-        android:fillColor="#000000"
-        android:pathData="M54,94 L54,64 Q54,54 54,54 L59,54 Q59,54 59,64 L59,94 Z" />
-
-    <!-- Comet tail glow effect -->
-    <path
-        android:fillColor="#000000"
-        android:fillAlpha="0.3"
-        android:pathData="M14,14 Q34,34 54,54 Q34,34 24,24 Q14,14 14,14 Z" />
+        android:pathData="M21,19 C28,24 36,32 43,41 L49,47 C51,49 53,51 54,54 L48,60 C45,57 42,54 39,51 L33,45 C26,38 20,30 15,23 Z" />
 
     <path
         android:fillColor="#000000"
-        android:fillAlpha="0.3"
-        android:pathData="M94,14 Q74,34 54,54 Q74,34 84,24 Q94,14 94,14 Z" />
-
-    <!-- Center circle - the "comet" core -->
-    <path
-        android:fillColor="#000000"
-        android:pathData="M54,54 m-20,0 a20,20 0 1,1 40,0 a20,20 0 1,1 -40,0" />
-
-    <!-- Inner highlight circle -->
-    <path
-        android:fillColor="#000000"
-        android:fillAlpha="0.5"
-        android:pathData="M54,48 m-8,0 a8,8 0 1,1 16,0 a8,8 0 1,1 -16,0" />
-
-    <!-- Small orbiting dots representing neural diversity -->
-    <path
-        android:fillColor="#000000"
-        android:pathData="M30,54 m-4,0 a4,4 0 1,1 8,0 a4,4 0 1,1 -8,0" />
+        android:pathData="M87,19 L93,23 C88,30 82,38 75,45 L69,51 C66,54 63,57 60,60 L54,54 C55,51 57,49 59,47 L65,41 C72,32 80,24 87,19 Z" />
 
     <path
         android:fillColor="#000000"
-        android:pathData="M78,54 m-4,0 a4,4 0 1,1 8,0 a4,4 0 1,1 -8,0" />
+        android:pathData="M51,54 C51,51 53,49 54,47 C55,49 57,51 57,54 L57,69 C57,78 57,87 57,95 L51,95 C51,87 51,78 51,69 Z" />
 
     <path
         android:fillColor="#000000"
-        android:pathData="M54,30 m-4,0 a4,4 0 1,1 8,0 a4,4 0 1,1 -8,0" />
+        android:pathData="M54,54 m-23,0 a23,23 0 1,1 46,0 a23,23 0 1,1 -46,0" />
+
+    <path
+        android:fillColor="#000000"
+        android:pathData="M19,19 m-5.5,0 a5.5,5.5 0 1,1 11,0 a5.5,5.5 0 1,1 -11,0" />
+
+    <path
+        android:fillColor="#000000"
+        android:pathData="M89,19 m-5.5,0 a5.5,5.5 0 1,1 11,0 a5.5,5.5 0 1,1 -11,0" />
+
+    <path
+        android:fillColor="#000000"
+        android:pathData="M54,95 m-5.5,0 a5.5,5.5 0 1,1 11,0 a5.5,5.5 0 1,1 -11,0" />
 </vector>
-

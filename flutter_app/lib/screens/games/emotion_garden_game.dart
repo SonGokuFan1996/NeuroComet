@@ -171,7 +171,7 @@ class _EmotionGardenGameState extends State<EmotionGardenGame>
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withOpacity(0.3),
+                    Colors.black.withValues(alpha: 0.3),
                   ],
                 ),
               ),
@@ -208,8 +208,8 @@ class _EmotionGardenGameState extends State<EmotionGardenGame>
                                 ),
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                      ? emotion.color.withOpacity(0.9)
-                                      : Colors.white.withOpacity(0.2),
+                                      ? emotion.color.withValues(alpha: 0.9)
+                                      : Colors.white.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
                                     color: isSelected
@@ -435,7 +435,7 @@ class GardenPainter extends CustomPainter {
                 width: layerSize * 0.5,
                 height: layerSize * 0.6,
               ),
-              petalPaint..color = flower.emotion.color.withOpacity(0.9 - layer * 0.2),
+              petalPaint..color = flower.emotion.color.withValues(alpha: 0.9 - layer * 0.2),
             );
             canvas.restore();
           }

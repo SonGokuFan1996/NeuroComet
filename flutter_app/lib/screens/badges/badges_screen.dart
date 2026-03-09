@@ -112,7 +112,7 @@ class BadgesScreen extends ConsumerWidget {
                   child: LinearProgressIndicator(
                     value: totalBadges > 0 ? unlockedBadges / totalBadges : 0,
                     minHeight: 8,
-                    backgroundColor: theme.colorScheme.surface.withOpacity(0.5),
+                    backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.5),
                   ),
                 ),
               ],
@@ -233,13 +233,13 @@ class _BadgeCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
           color: isUnlocked
-              ? badge.rarity.color.withOpacity(0.1)
+              ? badge.rarity.color.withValues(alpha: 0.1)
               : theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isUnlocked
-                ? badge.rarity.color.withOpacity(0.3)
-                : theme.colorScheme.outline.withOpacity(0.1),
+                ? badge.rarity.color.withValues(alpha: 0.3)
+                : theme.colorScheme.outline.withValues(alpha: 0.1),
             width: isUnlocked ? 2 : 1,
           ),
         ),
@@ -279,7 +279,7 @@ class _BadgeCard extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: progress.currentProgress / badge.maxProgress,
                   backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                  color: badge.rarity.color.withOpacity(0.5),
+                  color: badge.rarity.color.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(2),
                   minHeight: 3,
                 ),

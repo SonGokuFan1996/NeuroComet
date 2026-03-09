@@ -157,10 +157,10 @@ val APP_PERMISSIONS = listOf(
     PermissionInfo(
         Manifest.permission.READ_CONTACTS,
         "Read Contacts",
-        "Find friends in your contacts (not needed on Android 17+ — ContactsPickerSessionContract)",
+        "Find friends in your contacts (not needed on API 37+ — ContactsPickerSessionContract)",
         Icons.Filled.Contacts,
         PermissionCategory.CONTACTS,
-        maxSdk = 36 // Android 17 (CinnamonBun / API 37) uses ContactsPickerSessionContract — READ_CONTACTS not needed on 37+
+        maxSdk = 36
     ),
 
     // Notifications
@@ -191,13 +191,14 @@ val APP_PERMISSIONS = listOf(
     ),
 
     // Network
+    @Suppress("NewApi")
     PermissionInfo(
         Manifest.permission.ACCESS_LOCAL_NETWORK,
         "Local Network",
-        "Access local network for calls, device discovery, and WebRTC ICE gathering",
+        "Access local network for calls, device discovery, and WebRTC ICE gathering (API 37+)",
         Icons.Filled.Wifi,
         PermissionCategory.NETWORK,
-        minSdk = Build.VERSION_CODES.CINNAMON_BUN
+        minSdk = 37
     )
 )
 

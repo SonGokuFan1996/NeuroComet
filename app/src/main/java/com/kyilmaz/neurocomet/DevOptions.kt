@@ -37,7 +37,7 @@ data class DevOptions(
 
     // ── Feature Flags ───────────────────────────────────────
     val enableNewFeedLayout: Boolean = false,
-    val enableVideoChat: Boolean = false,
+    val enableVideoChat: Boolean = true,
     val enableStoryReactions: Boolean = false,
     val enableAdvancedSearch: Boolean = false,
     val enableAiSuggestions: Boolean = false,

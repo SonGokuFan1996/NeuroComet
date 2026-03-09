@@ -11,22 +11,33 @@
         android:translateX="54"
         android:translateY="54">
 
-        <!-- Outer glow ring - soft gold -->
+        <path
+            android:fillColor="#0F1420"
+            android:fillAlpha="0.08"
+            android:pathData="M 0,0 m -41,0 a 41,41 0 1,1 82,0 a 41,41 0 1,1 -82,0" />
         <path
             android:fillColor="#FFC107"
-            android:fillAlpha="0.15"
+            android:fillAlpha="0.16"
             android:pathData="M 0,0 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" />
-
-        <!-- Middle glow ring - soft gold -->
         <path
             android:fillColor="#FFC107"
-            android:fillAlpha="0.25"
+            android:fillAlpha="0.28"
             android:pathData="M 0,0 m -32,0 a 32,32 0 1,1 64,0 a 32,32 0 1,1 -64,0" />
+        <path
+            android:strokeColor="#FFFFFF"
+            android:strokeAlpha="0.14"
+            android:strokeWidth="2"
+            android:pathData="M 0,0 m -29,0 a 29,29 0 1,1 58,0 a 29,29 0 1,1 -58,0" />
 
-        <!-- Neural connection line 1 (top-left) - PINK with glow -->
+        <path
+            android:strokeColor="#101622"
+            android:strokeAlpha="0.14"
+            android:strokeWidth="12"
+            android:strokeLineCap="round"
+            android:pathData="M -33,-32 Q -8,3 2,3" />
         <path
             android:strokeColor="#E91E63"
-            android:strokeAlpha="0.3"
+            android:strokeAlpha="0.34"
             android:strokeWidth="10"
             android:strokeLineCap="round"
             android:pathData="M -35,-35 Q -10,0 0,0" />
@@ -35,11 +46,22 @@
             android:strokeWidth="5"
             android:strokeLineCap="round"
             android:pathData="M -35,-35 Q -10,0 0,0" />
+        <path
+            android:strokeColor="#FFFFFF"
+            android:strokeAlpha="0.18"
+            android:strokeWidth="1.6"
+            android:strokeLineCap="round"
+            android:pathData="M -35,-35 Q -10,0 0,0" />
 
-        <!-- Neural connection line 2 (top-right) - BLUE with glow -->
+        <path
+            android:strokeColor="#101622"
+            android:strokeAlpha="0.14"
+            android:strokeWidth="12"
+            android:strokeLineCap="round"
+            android:pathData="M 37,-32 Q 12,3 2,3" />
         <path
             android:strokeColor="#03A9F4"
-            android:strokeAlpha="0.3"
+            android:strokeAlpha="0.34"
             android:strokeWidth="10"
             android:strokeLineCap="round"
             android:pathData="M 35,-35 Q 10,0 0,0" />
@@ -48,11 +70,22 @@
             android:strokeWidth="5"
             android:strokeLineCap="round"
             android:pathData="M 35,-35 Q 10,0 0,0" />
+        <path
+            android:strokeColor="#FFFFFF"
+            android:strokeAlpha="0.18"
+            android:strokeWidth="1.6"
+            android:strokeLineCap="round"
+            android:pathData="M 35,-35 Q 10,0 0,0" />
 
-        <!-- Neural connection line 3 (bottom) - GREEN with glow -->
+        <path
+            android:strokeColor="#101622"
+            android:strokeAlpha="0.14"
+            android:strokeWidth="12"
+            android:strokeLineCap="round"
+            android:pathData="M 2,43 Q 2,13 2,3" />
         <path
             android:strokeColor="#4CAF50"
-            android:strokeAlpha="0.3"
+            android:strokeAlpha="0.34"
             android:strokeWidth="10"
             android:strokeLineCap="round"
             android:pathData="M 0,40 Q 0,10 0,0" />
@@ -61,31 +94,68 @@
             android:strokeWidth="5"
             android:strokeLineCap="round"
             android:pathData="M 0,40 Q 0,10 0,0" />
+        <path
+            android:strokeColor="#FFFFFF"
+            android:strokeAlpha="0.18"
+            android:strokeWidth="1.6"
+            android:strokeLineCap="round"
+            android:pathData="M 0,40 Q 0,10 0,0" />
 
-        <!-- Small node at end of connection 1 - PINK -->
+        <path
+            android:fillColor="#101622"
+            android:fillAlpha="0.16"
+            android:pathData="M -33,-32 m -5.5,0 a 5.5,5.5 0 1,1 11,0 a 5.5,5.5 0 1,1 -11,0" />
         <path
             android:fillColor="#E91E63"
             android:pathData="M -35,-35 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:fillAlpha="0.34"
+            android:pathData="M -36.5,-36.5 m -2,0 a 2,2 0 1,1 4,0 a 2,2 0 1,1 -4,0" />
 
-        <!-- Small node at end of connection 2 - BLUE -->
+        <path
+            android:fillColor="#101622"
+            android:fillAlpha="0.16"
+            android:pathData="M 37,-32 m -5.5,0 a 5.5,5.5 0 1,1 11,0 a 5.5,5.5 0 1,1 -11,0" />
         <path
             android:fillColor="#03A9F4"
             android:pathData="M 35,-35 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:fillAlpha="0.34"
+            android:pathData="M 33.8,-36.5 m -2,0 a 2,2 0 1,1 4,0 a 2,2 0 1,1 -4,0" />
 
-        <!-- Small node at end of connection 3 - GREEN -->
+        <path
+            android:fillColor="#101622"
+            android:fillAlpha="0.16"
+            android:pathData="M 2,43 m -5.5,0 a 5.5,5.5 0 1,1 11,0 a 5.5,5.5 0 1,1 -11,0" />
         <path
             android:fillColor="#4CAF50"
             android:pathData="M 0,40 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+        <path
+            android:fillColor="#FFFFFF"
+            android:fillAlpha="0.32"
+            android:pathData="M -1.2,38.5 m -2,0 a 2,2 0 1,1 4,0 a 2,2 0 1,1 -4,0" />
 
-        <!-- Center circle - GOLD (neurodivergent symbol color) -->
+        <path
+            android:fillColor="#101622"
+            android:fillAlpha="0.18"
+            android:pathData="M 3,4 m -27,0 a 27,27 0 1,1 54,0 a 27,27 0 1,1 -54,0" />
         <path
             android:fillColor="#FFC107"
             android:pathData="M 0,0 m -25,0 a 25,25 0 1,1 50,0 a 25,25 0 1,1 -50,0" />
-
-        <!-- Inner highlight on center node -->
+        <path
+            android:fillColor="#FFE082"
+            android:fillAlpha="0.24"
+            android:pathData="M -2,-1 m -16,0 a 16,16 0 1,1 32,0 a 16,16 0 1,1 -32,0" />
+        <path
+            android:strokeColor="#FFFFFF"
+            android:strokeAlpha="0.18"
+            android:strokeWidth="2"
+            android:pathData="M 0,0 m -24,0 a 24,24 0 1,1 48,0 a 24,24 0 1,1 -48,0" />
         <path
             android:fillColor="#FFECB3"
-            android:fillAlpha="0.7"
+            android:fillAlpha="0.78"
             android:pathData="M -8,-8 m -8,0 a 8,8 0 1,1 16,0 a 8,8 0 1,1 -16,0" />
     </group>
 </vector>

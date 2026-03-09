@@ -257,7 +257,8 @@ fun ExploreScreen(
                         onLikeClick = onLikePost,
                         onCommentClick = onCommentPost,
                         onShareClick = onSharePost,
-                        onProfileClick = onProfileClick
+                        onProfileClick = onProfileClick,
+                        onTopicClick = onTopicClick
                     )
                     1 -> TrendingTab(
                         onLikeClick = onLikePost,
@@ -855,7 +856,8 @@ private fun ForYouTab(
     onLikeClick: (Long) -> Unit = {},
     onCommentClick: (Post) -> Unit = {},
     onShareClick: (Context, Post) -> Unit = { _, _ -> },
-    onProfileClick: (String) -> Unit = {}
+    onProfileClick: (String) -> Unit = {},
+    onTopicClick: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     var selectedChip by remember { mutableStateOf<String?>(null) }
@@ -1131,12 +1133,19 @@ private fun ForYouTab(
                     hapticFeedback(context)
                     onLikeClick(post.id.toLong())
                 },
-                onCommentClick = { hapticFeedback(context) },
-                onShareClick = { hapticFeedback(context) },
+                onCommentClick = {
+                    hapticFeedback(context)
+                    onCommentClick(post.toPost())
+                },
+                onShareClick = {
+                    hapticFeedback(context)
+                    onShareClick(context, post.toPost())
+                },
                 onProfileClick = {
                     hapticFeedback(context)
                     onProfileClick(post.username)
-                }
+                },
+                onTagClick = { tag -> onTopicClick(tag) }
             )
         }
 
@@ -1281,12 +1290,19 @@ private fun TrendingTab(
                     hapticFeedback(context)
                     onLikeClick(post.id.toLong())
                 },
-                onCommentClick = { hapticFeedback(context) },
-                onShareClick = { hapticFeedback(context) },
+                onCommentClick = {
+                    hapticFeedback(context)
+                    onCommentClick(post.toPost())
+                },
+                onShareClick = {
+                    hapticFeedback(context)
+                    onShareClick(context, post.toPost())
+                },
                 onProfileClick = {
                     hapticFeedback(context)
                     onProfileClick(post.username)
                 },
+                onTagClick = { tag -> onTopicClick(tag) },
                 showTrendingBadge = true
             )
         }
@@ -2681,7 +2697,21 @@ private data class ExploreMockPost(
     val imageUrl: String? = null,
     val tags: List<String> = emptyList(),
     val category: String = ""
-)
+) {
+    /** Convert to a [Post] for sharing/commenting callbacks. */
+    fun toPost(): Post = Post(
+        id = id.toLong(),
+        userId = username,
+        userAvatar = avatar,
+        content = content,
+        likes = likes,
+        comments = comments,
+        shares = shares,
+        imageUrl = imageUrl,
+        createdAt = java.time.Instant.now().toString(),
+        isLikedByMe = isLiked
+    )
+}
 
 private data class TrendingHashtag(
     val tag: String,
@@ -2922,12 +2952,14 @@ private fun ExplorePostCard(
     onCommentClick: () -> Unit,
     onShareClick: () -> Unit,
     onProfileClick: () -> Unit,
+    onTagClick: (String) -> Unit = {},
     modifier: Modifier = Modifier,
     showTrendingBadge: Boolean = false
 ) {
     var visible by remember { mutableStateOf(false) }
     var isLiked by remember { mutableStateOf(post.isLiked) }
     var likeCount by remember { mutableIntStateOf(post.likes) }
+    var isBookmarked by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -3098,7 +3130,11 @@ private fun ExplorePostCard(
                                 text = "#$tag",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .clickable { onTagClick(tag) }
+                                    .padding(horizontal = 2.dp)
                             )
                         }
                     }
@@ -3197,12 +3233,19 @@ private fun ExplorePostCard(
 
                     // Bookmark button
                     Icon(
-                        imageVector = Icons.Outlined.BookmarkBorder,
-                        contentDescription = "Bookmark",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                        contentDescription = if (isBookmarked) "Remove bookmark" else "Bookmark",
+                        tint = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
                             .size(22.dp)
-                            .clickable { }
+                            .clickable {
+                                isBookmarked = !isBookmarked
+                                android.widget.Toast.makeText(
+                                    context,
+                                    if (isBookmarked) "Bookmarked" else "Removed bookmark",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                            }
                     )
                 }
             }

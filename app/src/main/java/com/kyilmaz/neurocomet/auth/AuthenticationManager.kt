@@ -7,15 +7,17 @@ import android.util.Base64
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.fragment.app.FragmentActivity
+import com.kyilmaz.neurocomet.BuildConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.security.MessageDigest
 import java.security.SecureRandom
+import java.util.Locale
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
-import kotlin.math.floor
 
 /**
  * Authentication Method types supported by the app
@@ -107,6 +109,8 @@ class AuthenticationManager(private val context: Context) {
     private val _backupCodesRemaining = MutableStateFlow(getBackupCodes().size)
     val backupCodesRemaining: StateFlow<Int> = _backupCodesRemaining.asStateFlow()
 
+    private val allowsSimulatedSetup = BuildConfig.DEBUG
+
     // ==================== BIOMETRIC AUTHENTICATION ====================
 
     /**
@@ -176,7 +180,9 @@ class AuthenticationManager(private val context: Context) {
      * Enable/disable biometric authentication
      */
     fun setBiometricEnabled(enabled: Boolean) {
-        prefs.edit().putBoolean(KEY_BIOMETRIC_ENABLED, enabled).apply()
+        prefs.edit {
+            putBoolean(KEY_BIOMETRIC_ENABLED, enabled)
+        }
         _biometricEnabled.value = enabled
     }
 
@@ -207,16 +213,21 @@ class AuthenticationManager(private val context: Context) {
                     lastUsed = parts.getOrElse(5) { "0" }.toLongOrNull() ?: 0L
                 )
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyList()
         }
     }
 
     /**
-     * Register a new FIDO2 credential (simulated for demo)
-     * In production, this would use the Credentials API
+     * Register a new FIDO2 credential in debug/demo mode only.
+     * Release builds return NotAvailable until a real Credentials API flow exists.
      */
     fun registerFido2Credential(displayName: String, onResult: (AuthResult) -> Unit) {
+        if (!allowsSimulatedSetup) {
+            onResult(AuthResult.NotAvailable)
+            return
+        }
+
         // Generate a mock credential ID and public key
         val random = SecureRandom()
         val credentialIdBytes = ByteArray(32)
@@ -244,22 +255,28 @@ class AuthenticationManager(private val context: Context) {
             "${cred.credentialId},${cred.publicKey},${cred.userId},${cred.displayName},${cred.createdAt},${cred.lastUsed}"
         }
 
-        prefs.edit()
-            .putString(KEY_FIDO2_CREDENTIALS, credentialsString)
-            .putBoolean(KEY_FIDO2_ENABLED, true)
-            .apply()
+        prefs.edit {
+            putString(KEY_FIDO2_CREDENTIALS, credentialsString)
+            putBoolean(KEY_FIDO2_ENABLED, true)
+        }
 
         _fido2Enabled.value = true
         onResult(AuthResult.Success)
     }
 
     /**
-     * Authenticate with FIDO2 (simulated for demo)
+     * Authenticate with FIDO2 in debug/demo mode only.
+     * Release builds return NotAvailable until a real passkey flow is wired.
      */
     fun authenticateWithFido2(
         activity: FragmentActivity,
         onResult: (AuthResult) -> Unit
     ) {
+        if (!allowsSimulatedSetup) {
+            onResult(AuthResult.NotAvailable)
+            return
+        }
+
         val credentials = getFido2Credentials()
         if (credentials.isEmpty()) {
             onResult(AuthResult.RequiresSetup)
@@ -282,7 +299,9 @@ class AuthenticationManager(private val context: Context) {
                 val credentialsString = updatedCredentials.joinToString("|") { cred ->
                     "${cred.credentialId},${cred.publicKey},${cred.userId},${cred.displayName},${cred.createdAt},${cred.lastUsed}"
                 }
-                prefs.edit().putString(KEY_FIDO2_CREDENTIALS, credentialsString).apply()
+                prefs.edit {
+                    putString(KEY_FIDO2_CREDENTIALS, credentialsString)
+                }
             }
             onResult(result)
         }
@@ -296,10 +315,10 @@ class AuthenticationManager(private val context: Context) {
         val credentialsString = credentials.joinToString("|") { cred ->
             "${cred.credentialId},${cred.publicKey},${cred.userId},${cred.displayName},${cred.createdAt},${cred.lastUsed}"
         }
-        prefs.edit()
-            .putString(KEY_FIDO2_CREDENTIALS, credentialsString)
-            .putBoolean(KEY_FIDO2_ENABLED, credentials.isNotEmpty())
-            .apply()
+        prefs.edit {
+            putString(KEY_FIDO2_CREDENTIALS, credentialsString)
+            putBoolean(KEY_FIDO2_ENABLED, credentials.isNotEmpty())
+        }
         _fido2Enabled.value = credentials.isNotEmpty()
     }
 
@@ -324,11 +343,11 @@ class AuthenticationManager(private val context: Context) {
      * Store TOTP secret
      */
     fun storeTotpSecret(secret: TotpSecret) {
-        prefs.edit()
-            .putString(KEY_TOTP_SECRET, secret.secret)
-            .putString(KEY_TOTP_ACCOUNT, secret.accountName)
-            .putBoolean(KEY_TOTP_ENABLED, true)
-            .apply()
+        prefs.edit {
+            putString(KEY_TOTP_SECRET, secret.secret)
+            putString(KEY_TOTP_ACCOUNT, secret.accountName)
+            putBoolean(KEY_TOTP_ENABLED, true)
+        }
         _totpEnabled.value = true
     }
 
@@ -371,11 +390,11 @@ class AuthenticationManager(private val context: Context) {
      * Disable TOTP
      */
     fun disableTotp() {
-        prefs.edit()
-            .remove(KEY_TOTP_SECRET)
-            .remove(KEY_TOTP_ACCOUNT)
-            .putBoolean(KEY_TOTP_ENABLED, false)
-            .apply()
+        prefs.edit {
+            remove(KEY_TOTP_SECRET)
+            remove(KEY_TOTP_ACCOUNT)
+            putBoolean(KEY_TOTP_ENABLED, false)
+        }
         _totpEnabled.value = false
     }
 
@@ -385,22 +404,37 @@ class AuthenticationManager(private val context: Context) {
     private var pendingEmailExpiry: Long = 0
 
     /**
-     * Send email verification code (simulated)
+     * Queue a simulated email verification code in debug/demo mode only.
+     * Release builds return NotAvailable until a real delivery flow exists.
      */
-    fun sendEmailVerificationCode(email: String): String {
+    fun sendEmailVerificationCode(email: String): AuthResult {
+        if (email.isBlank()) {
+            pendingEmailCode = null
+            pendingEmailExpiry = 0L
+            return AuthResult.Error("Email is required")
+        }
+        if (!allowsSimulatedSetup) {
+            pendingEmailCode = null
+            pendingEmailExpiry = 0L
+            return AuthResult.NotAvailable
+        }
+
         val random = SecureRandom()
-        val code = String.format("%06d", random.nextInt(1000000))
+        val code = String.format(Locale.getDefault(), "%06d", random.nextInt(1000000))
         pendingEmailCode = code
         pendingEmailExpiry = System.currentTimeMillis() + (5 * 60 * 1000) // 5 minutes
 
         // In production, this would actually send an email
-        return code
+        return AuthResult.Success
     }
 
     /**
      * Verify email code
      */
     fun verifyEmailCode(code: String): AuthResult {
+        if (!allowsSimulatedSetup) {
+            return AuthResult.NotAvailable
+        }
         if (pendingEmailCode == null) {
             return AuthResult.Error("No verification code pending")
         }
@@ -413,7 +447,9 @@ class AuthenticationManager(private val context: Context) {
         }
 
         pendingEmailCode = null
-        prefs.edit().putBoolean(KEY_EMAIL_ENABLED, true).apply()
+        prefs.edit {
+            putBoolean(KEY_EMAIL_ENABLED, true)
+        }
         _emailVerificationEnabled.value = true
         return AuthResult.Success
     }
@@ -429,15 +465,15 @@ class AuthenticationManager(private val context: Context) {
             val bytes = ByteArray(4)
             random.nextBytes(bytes)
             bytes.joinToString("") { byte ->
-                String.format("%02x", byte.toInt() and 0xff)
-            }.uppercase()
+                String.format(Locale.getDefault(), "%02x", byte.toInt() and 0xff)
+            }.uppercase(Locale.getDefault())
         }
 
         // Hash and store the codes
         val hashedCodes = codes.map { hashCode(it) }
-        prefs.edit()
-            .putStringSet(KEY_BACKUP_CODES, hashedCodes.toSet())
-            .apply()
+        prefs.edit {
+            putStringSet(KEY_BACKUP_CODES, hashedCodes.toSet())
+        }
         _backupCodesRemaining.value = codes.size
 
         return codes
@@ -459,7 +495,9 @@ class AuthenticationManager(private val context: Context) {
 
         if (storedCodes.contains(hashedInput)) {
             storedCodes.remove(hashedInput)
-            prefs.edit().putStringSet(KEY_BACKUP_CODES, storedCodes).apply()
+            prefs.edit {
+                putStringSet(KEY_BACKUP_CODES, storedCodes)
+            }
             _backupCodesRemaining.value = storedCodes.size
             return AuthResult.Success
         }
@@ -495,8 +533,8 @@ class AuthenticationManager(private val context: Context) {
                     (hash[offset + 3].toInt() and 0xff)
 
             val otp = truncatedHash % Math.pow(10.0, digits.toDouble()).toInt()
-            return String.format("%0${digits}d", otp)
-        } catch (e: Exception) {
+            return String.format(Locale.getDefault(), "%0${digits}d", otp)
+        } catch (_: Exception) {
             return "000000"
         }
     }
@@ -564,14 +602,8 @@ class AuthenticationManager(private val context: Context) {
         private const val KEY_BACKUP_CODES = "backup_codes"
         private const val KEY_USER_ID = "user_id"
 
-        @Volatile
-        private var instance: AuthenticationManager? = null
-
         fun getInstance(context: Context): AuthenticationManager {
-            return instance ?: synchronized(this) {
-                instance ?: AuthenticationManager(context.applicationContext).also { instance = it }
-            }
+            return AuthenticationManager(context.applicationContext)
         }
     }
 }
-

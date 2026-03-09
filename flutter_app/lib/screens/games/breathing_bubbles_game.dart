@@ -191,14 +191,14 @@ class _BreathingBubblesGameState extends State<BreathingBubblesGame>
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
                           colors: [
-                            color.withOpacity(0.4),
-                            color.withOpacity(0.6),
-                            color.withOpacity(0.8),
+                            color.withValues(alpha: 0.4),
+                            color.withValues(alpha: 0.6),
+                            color.withValues(alpha: 0.8),
                           ],
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: color.withOpacity(0.3),
+                            color: color.withValues(alpha: 0.3),
                             blurRadius: 30,
                             spreadRadius: 10,
                           ),
@@ -227,7 +227,7 @@ class _BreathingBubblesGameState extends State<BreathingBubblesGame>
                                     : _currentPhase == BreathingPhase.exhale
                                         ? Icons.arrow_downward
                                         : Icons.pause,
-                                color: Colors.white.withOpacity(0.8),
+                                color: Colors.white.withValues(alpha: 0.8),
                                 size: 32,
                               ),
                             ],
@@ -367,7 +367,7 @@ class _PhaseIndicator extends StatelessWidget {
             '${seconds}s',
             style: theme.textTheme.bodySmall?.copyWith(
               color: isActive
-                  ? theme.colorScheme.onPrimary.withOpacity(0.8)
+                  ? theme.colorScheme.onPrimary.withValues(alpha: 0.8)
                   : theme.colorScheme.outline,
             ),
           ),

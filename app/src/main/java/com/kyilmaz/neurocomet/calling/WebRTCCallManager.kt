@@ -250,8 +250,7 @@ class WebRTCCallManager private constructor() {
         supabaseClient = supabase
         currentUserId = userId
 
-        // Android 17+ (CinnamonBun) requires ACCESS_LOCAL_NETWORK for
-        // WebRTC ICE candidate gathering on the local network.
+        // API 37+ requires ACCESS_LOCAL_NETWORK for WebRTC local ICE candidates
         if (!AttachmentHelper.hasLocalNetworkPermission(context)) {
             Log.w(TAG, "ACCESS_LOCAL_NETWORK not granted — WebRTC local ICE candidates may be unavailable")
             localNetworkPermissionNeeded = true

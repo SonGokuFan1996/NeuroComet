@@ -11,15 +11,17 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -110,6 +112,7 @@ fun NeuroSplashScreen(
     val secondaryColor = MaterialTheme.colorScheme.secondary
     val tertiaryColor = MaterialTheme.colorScheme.tertiary
     val backgroundColor = MaterialTheme.colorScheme.background
+    val depthProfile = remember(config.animationStyle) { config.animationStyle.depthProfile() }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -144,26 +147,66 @@ fun NeuroSplashScreen(
             ) {
                 // Logo container
                 Box(
-                    modifier = Modifier
-                        .scale(logoScale.value)
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .background(
-                            Brush.linearGradient(
-                                colors = listOf(
-                                    primaryColor.copy(alpha = 0.2f),
-                                    secondaryColor.copy(alpha = 0.15f)
-                                )
-                            )
-                        ),
+                    modifier = Modifier.scale(logoScale.value),
                     contentAlignment = Alignment.Center
                 ) {
-                    SplashIcon(
-                        style = config.animationStyle,
-                        primaryColor = primaryColor,
-                        secondaryColor = secondaryColor,
-                        modifier = Modifier.size(80.dp)
+                    Box(
+                        modifier = Modifier
+                            .size(156.dp)
+                            .background(
+                                Brush.radialGradient(
+                                    colors = listOf(
+                                        primaryColor.copy(alpha = depthProfile.ambientHaloAlpha),
+                                        secondaryColor.copy(alpha = depthProfile.ambientHaloAlpha * 0.65f),
+                                        Color.Transparent
+                                    )
+                                ),
+                                shape = CircleShape
+                            )
                     )
+
+                    Box(
+                        modifier = Modifier
+                            .size(124.dp)
+                            .clip(CircleShape)
+                            .background(
+                                Brush.radialGradient(
+                                    colors = listOf(
+                                        MaterialTheme.colorScheme.surface.copy(alpha = 0.98f),
+                                        primaryColor.copy(alpha = 0.12f),
+                                        backgroundColor.copy(alpha = 0.88f)
+                                    )
+                                )
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = Color.White.copy(alpha = depthProfile.rimAlpha),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.linearGradient(
+                                        colors = listOf(
+                                            Color.White.copy(alpha = depthProfile.shellHighlightAlpha),
+                                            Color.Transparent,
+                                            Color.Black.copy(alpha = depthProfile.shellShadowAlpha)
+                                        )
+                                    )
+                                )
+                        )
+
+                        SplashIcon(
+                            style = config.animationStyle,
+                            primaryColor = primaryColor,
+                            secondaryColor = secondaryColor,
+                            depthProfile = depthProfile,
+                            modifier = Modifier.size(80.dp)
+                        )
+                    }
                 }
 
                 Spacer(Modifier.height(32.dp))
@@ -174,6 +217,21 @@ fun NeuroSplashScreen(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
+
+                Spacer(Modifier.height(10.dp))
+
+                Surface(
+                    shape = RoundedCornerShape(999.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    contentColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Text(
+                        text = stringResource(R.string.splash_beta_badge),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+                    )
+                }
 
                 Spacer(Modifier.height(8.dp))
 
@@ -442,7 +500,6 @@ private fun CalmWavesBackground(primaryColor: Color, secondaryColor: Color) {
     Canvas(modifier = Modifier.fillMaxSize()) {
         val width = size.width
         val height = size.height
-        val center = Offset(width / 2, height / 2)
 
         // Draw soft, layered ocean-like waves from bottom
         for (layer in 0..4) {
@@ -460,7 +517,7 @@ private fun CalmWavesBackground(primaryColor: Color, secondaryColor: Color) {
             var x = -50f
             while (x <= width + 50) {
                 val primary = sin(Math.toRadians((x * frequency * 100 + phaseOffset).toDouble())).toFloat()
-                val secondary = sin(Math.toRadians((x * frequency * 50 + phaseOffset * 0.7).toDouble())).toFloat() * 0.3f
+                val secondary = sin(Math.toRadians(x * frequency * 50 + phaseOffset * 0.7)).toFloat() * 0.3f
                 val y = baseY + (primary + secondary) * waveHeight
                 path.lineTo(x, y)
                 x += 3f
@@ -480,7 +537,7 @@ private fun CalmWavesBackground(primaryColor: Color, secondaryColor: Color) {
         for (i in 0..2) {
             val orbPhase = (phase * 0.3f + i * 120) % 360
             val orbX = width * (0.2f + i * 0.3f) + sin(Math.toRadians(orbPhase.toDouble())).toFloat() * 15
-            val orbY = height * 0.35f + cos(Math.toRadians((orbPhase * 0.5).toDouble())).toFloat() * 20
+            val orbY = height * 0.35f + cos(Math.toRadians(orbPhase * 0.5)).toFloat() * 20
 
             drawCircle(
                 color = primaryColor.copy(alpha = 0.04f),
@@ -572,7 +629,6 @@ private fun RoutineGridBackground(primaryColor: Color, secondaryColor: Color) {
         val gridSize = 48.dp.toPx()
         val cols = (size.width / gridSize).toInt() + 2
         val rows = (size.height / gridSize).toInt() + 2
-        val totalDots = cols * rows
         val wavePosition = wave * (cols + rows) // Wave moves diagonally
 
         for (row in 0 until rows) {
@@ -857,7 +913,7 @@ private fun CreativeSwirlBackground(primaryColor: Color, secondaryColor: Color, 
 
         // Floating creative orbs at varying distances
         for (i in 0..5) {
-            val orbitAngle = Math.toRadians((rotation * 0.5 + i * 60).toDouble())
+            val orbitAngle = Math.toRadians(rotation * 0.5 + i * 60)
             val orbitRadius = size.minDimension * (0.15f + (i % 3) * 0.08f)
             val x = center.x + (cos(orbitAngle) * orbitRadius).toFloat()
             val y = center.y + (sin(orbitAngle) * orbitRadius).toFloat()
@@ -894,7 +950,6 @@ private fun GentleFloatBackground(primaryColor: Color, secondaryColor: Color) {
     Canvas(modifier = Modifier.fillMaxSize()) {
         val width = size.width
         val height = size.height
-        val center = Offset(width / 2, height / 2)
 
         // Multiple gently floating bubbles at different depths
         val bubbles = listOf(
@@ -913,7 +968,7 @@ private fun GentleFloatBackground(primaryColor: Color, secondaryColor: Color) {
 
             // Calculate gentle floating motion
             val xOffset = sin(Math.toRadians((phase + phaseOffset).toDouble())).toFloat() * floatAmount * 0.5f
-            val yOffset = sin(Math.toRadians((phase * 0.7 + phaseOffset * 1.3).toDouble())).toFloat() * floatAmount
+            val yOffset = sin(Math.toRadians(phase * 0.7 + phaseOffset * 1.3)).toFloat() * floatAmount
 
             val x = width * xRatio + xOffset
             val y = height * yRatio + yOffset
@@ -944,7 +999,7 @@ private fun GentleFloatBackground(primaryColor: Color, secondaryColor: Color) {
         // Very subtle connecting wisps between some bubbles
         val path = Path().apply {
             moveTo(width * 0.3f, height * 0.3f)
-            quadraticBezierTo(width * 0.5f, height * 0.35f, width * 0.5f, height * 0.45f)
+            quadraticTo(width * 0.5f, height * 0.35f, width * 0.5f, height * 0.45f)
         }
         drawPath(
             path = path,
@@ -1064,6 +1119,7 @@ private fun SplashIcon(
     style: SplashAnimationStyle,
     primaryColor: Color,
     secondaryColor: Color,
+    depthProfile: SplashDepthProfile,
     modifier: Modifier = Modifier
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "iconAnim")
@@ -1077,27 +1133,37 @@ private fun SplashIcon(
         label = "iconPulse"
     )
 
-    // Define the neural network logo colors based on style
     val (nodeColor, connection1Color, connection2Color, connection3Color) = when (style) {
-        SplashAnimationStyle.RAINBOW_SPARKLE -> {
-            listOf(
-                Color(0xFFFFEB3B), // Yellow center
-                Color(0xFFE91E63), // Pink
-                Color(0xFF2196F3), // Blue
-                Color(0xFF4CAF50)  // Green
-            )
-        }
-        else -> {
-            listOf(
-                primaryColor,
-                secondaryColor,
-                primaryColor.copy(alpha = 0.7f),
-                secondaryColor.copy(alpha = 0.7f)
-            )
-        }
+        SplashAnimationStyle.RAINBOW_SPARKLE -> listOf(
+            Color(0xFFFFEB3B),
+            Color(0xFFE91E63),
+            Color(0xFF2196F3),
+            Color(0xFF4CAF50)
+        )
+        else -> listOf(
+            primaryColor,
+            secondaryColor,
+            primaryColor.copy(alpha = 0.7f),
+            secondaryColor.copy(alpha = 0.7f)
+        )
     }
 
     Canvas(modifier = modifier) {
+        val iconCenter = Offset(size.width / 2f, size.height / 2f)
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    primaryColor.copy(alpha = depthProfile.ambientHaloAlpha * 0.7f),
+                    secondaryColor.copy(alpha = depthProfile.ambientHaloAlpha * 0.45f),
+                    Color.Transparent
+                ),
+                center = iconCenter,
+                radius = size.minDimension * 0.58f
+            ),
+            radius = size.minDimension * 0.58f,
+            center = iconCenter
+        )
+
         drawNeuroCometLogo(
             centerX = size.width / 2,
             centerY = size.height / 2,
@@ -1105,7 +1171,8 @@ private fun SplashIcon(
             nodeColor = nodeColor,
             connection1Color = connection1Color,
             connection2Color = connection2Color,
-            connection3Color = connection3Color
+            connection3Color = connection3Color,
+            depthProfile = depthProfile
         )
     }
 }
@@ -1124,110 +1191,175 @@ private fun DrawScope.drawNeuroCometLogo(
     nodeColor: Color,
     connection1Color: Color,
     connection2Color: Color,
-    connection3Color: Color
+    connection3Color: Color,
+    depthProfile: SplashDepthProfile
 ) {
-    // Outer glow ring
+    val shadowDx = 2.5f * scale
+    val shadowDy = 3.5f * scale
+
     drawCircle(
-        color = nodeColor.copy(alpha = 0.15f),
-        radius = 38f * scale,
+        color = nodeColor.copy(alpha = depthProfile.ambientHaloAlpha * 0.85f),
+        radius = 42f * scale,
+        center = Offset(centerX, centerY)
+    )
+    drawCircle(
+        color = nodeColor.copy(alpha = depthProfile.connectionGlowAlpha),
+        radius = 35f * scale,
         center = Offset(centerX, centerY)
     )
 
-    // Middle glow ring
-    drawCircle(
-        color = nodeColor.copy(alpha = 0.25f),
-        radius = 32f * scale,
-        center = Offset(centerX, centerY)
-    )
-
-    // Neural connection 1 (top-left) with glow
     val connection1End = Offset(centerX - 35f * scale, centerY - 35f * scale)
+    val connection1ShadowPath = Path().apply {
+        moveTo(connection1End.x + shadowDx, connection1End.y + shadowDy)
+        quadraticTo(centerX - 10f * scale + shadowDx, centerY + shadowDy, centerX + shadowDx, centerY + shadowDy)
+    }
     val connection1Path = Path().apply {
         moveTo(connection1End.x, connection1End.y)
-        quadraticBezierTo(centerX - 10f * scale, centerY, centerX, centerY)
+        quadraticTo(centerX - 10f * scale, centerY, centerX, centerY)
     }
-    // Glow
+    drawPath(
+        path = connection1ShadowPath,
+        color = Color.Black.copy(alpha = depthProfile.connectionShadowAlpha),
+        style = Stroke(width = 11f * scale, cap = StrokeCap.Round)
+    )
     drawPath(
         path = connection1Path,
-        color = connection1Color.copy(alpha = 0.3f),
+        color = connection1Color.copy(alpha = depthProfile.connectionGlowAlpha),
         style = Stroke(width = 10f * scale, cap = StrokeCap.Round)
     )
-    // Main line
     drawPath(
         path = connection1Path,
         color = connection1Color,
         style = Stroke(width = 5f * scale, cap = StrokeCap.Round)
     )
+    drawPath(
+        path = connection1Path,
+        color = Color.White.copy(alpha = depthProfile.rimAlpha * 0.45f),
+        style = Stroke(width = 1.6f * scale, cap = StrokeCap.Round)
+    )
 
-    // Neural connection 2 (top-right) with glow
     val connection2End = Offset(centerX + 35f * scale, centerY - 35f * scale)
+    val connection2ShadowPath = Path().apply {
+        moveTo(connection2End.x + shadowDx, connection2End.y + shadowDy)
+        quadraticTo(centerX + 10f * scale + shadowDx, centerY + shadowDy, centerX + shadowDx, centerY + shadowDy)
+    }
     val connection2Path = Path().apply {
         moveTo(connection2End.x, connection2End.y)
-        quadraticBezierTo(centerX + 10f * scale, centerY, centerX, centerY)
+        quadraticTo(centerX + 10f * scale, centerY, centerX, centerY)
     }
-    // Glow
+    drawPath(
+        path = connection2ShadowPath,
+        color = Color.Black.copy(alpha = depthProfile.connectionShadowAlpha),
+        style = Stroke(width = 11f * scale, cap = StrokeCap.Round)
+    )
     drawPath(
         path = connection2Path,
-        color = connection2Color.copy(alpha = 0.3f),
+        color = connection2Color.copy(alpha = depthProfile.connectionGlowAlpha),
         style = Stroke(width = 10f * scale, cap = StrokeCap.Round)
     )
-    // Main line
     drawPath(
         path = connection2Path,
         color = connection2Color,
         style = Stroke(width = 5f * scale, cap = StrokeCap.Round)
     )
+    drawPath(
+        path = connection2Path,
+        color = Color.White.copy(alpha = depthProfile.rimAlpha * 0.45f),
+        style = Stroke(width = 1.6f * scale, cap = StrokeCap.Round)
+    )
 
-    // Neural connection 3 (bottom) with glow
     val connection3End = Offset(centerX, centerY + 40f * scale)
+    val connection3ShadowPath = Path().apply {
+        moveTo(connection3End.x + shadowDx, connection3End.y + shadowDy)
+        quadraticTo(centerX + shadowDx, centerY + 10f * scale + shadowDy, centerX + shadowDx, centerY + shadowDy)
+    }
     val connection3Path = Path().apply {
         moveTo(connection3End.x, connection3End.y)
-        quadraticBezierTo(centerX, centerY + 10f * scale, centerX, centerY)
+        quadraticTo(centerX, centerY + 10f * scale, centerX, centerY)
     }
-    // Glow
+    drawPath(
+        path = connection3ShadowPath,
+        color = Color.Black.copy(alpha = depthProfile.connectionShadowAlpha),
+        style = Stroke(width = 11f * scale, cap = StrokeCap.Round)
+    )
     drawPath(
         path = connection3Path,
-        color = connection3Color.copy(alpha = 0.3f),
+        color = connection3Color.copy(alpha = depthProfile.connectionGlowAlpha),
         style = Stroke(width = 10f * scale, cap = StrokeCap.Round)
     )
-    // Main line
     drawPath(
         path = connection3Path,
         color = connection3Color,
         style = Stroke(width = 5f * scale, cap = StrokeCap.Round)
     )
-
-    // Small node at end of connection 1
-    drawCircle(
-        color = connection1Color,
-        radius = 5f * scale,
-        center = connection1End
+    drawPath(
+        path = connection3Path,
+        color = Color.White.copy(alpha = depthProfile.rimAlpha * 0.45f),
+        style = Stroke(width = 1.6f * scale, cap = StrokeCap.Round)
     )
 
-    // Small node at end of connection 2
     drawCircle(
-        color = connection2Color,
-        radius = 5f * scale,
-        center = connection2End
+        color = Color.Black.copy(alpha = depthProfile.nodeShadowAlpha),
+        radius = 6f * scale,
+        center = connection1End.copy(x = connection1End.x + shadowDx * 0.6f, y = connection1End.y + shadowDy * 0.6f)
+    )
+    drawCircle(color = connection1Color, radius = 5f * scale, center = connection1End)
+    drawCircle(
+        color = Color.White.copy(alpha = depthProfile.rimAlpha * 0.6f),
+        radius = 2.2f * scale,
+        center = connection1End.copy(x = connection1End.x - 1.5f * scale, y = connection1End.y - 1.5f * scale)
     )
 
-    // Small node at end of connection 3
     drawCircle(
-        color = connection3Color,
-        radius = 5f * scale,
-        center = connection3End
+        color = Color.Black.copy(alpha = depthProfile.nodeShadowAlpha),
+        radius = 6f * scale,
+        center = connection2End.copy(x = connection2End.x + shadowDx * 0.6f, y = connection2End.y + shadowDy * 0.6f)
+    )
+    drawCircle(color = connection2Color, radius = 5f * scale, center = connection2End)
+    drawCircle(
+        color = Color.White.copy(alpha = depthProfile.rimAlpha * 0.6f),
+        radius = 2.2f * scale,
+        center = connection2End.copy(x = connection2End.x - 1.2f * scale, y = connection2End.y - 1.5f * scale)
     )
 
-    // Center circle - main node
     drawCircle(
-        color = nodeColor,
+        color = Color.Black.copy(alpha = depthProfile.nodeShadowAlpha),
+        radius = 6f * scale,
+        center = connection3End.copy(x = connection3End.x + shadowDx * 0.5f, y = connection3End.y + shadowDy * 0.5f)
+    )
+    drawCircle(color = connection3Color, radius = 5f * scale, center = connection3End)
+    drawCircle(
+        color = Color.White.copy(alpha = depthProfile.rimAlpha * 0.55f),
+        radius = 2.2f * scale,
+        center = connection3End.copy(x = connection3End.x - 1.2f * scale, y = connection3End.y - 1.8f * scale)
+    )
+
+    drawCircle(
+        color = Color.Black.copy(alpha = depthProfile.nodeShadowAlpha),
+        radius = 28f * scale,
+        center = Offset(centerX + shadowDx, centerY + shadowDy)
+    )
+    drawCircle(
+        brush = Brush.radialGradient(
+            colors = listOf(
+                Color.White.copy(alpha = depthProfile.shellHighlightAlpha),
+                nodeColor,
+                nodeColor.copy(alpha = 0.84f)
+            ),
+            center = Offset(centerX - 10f * scale, centerY - 12f * scale),
+            radius = 34f * scale
+        ),
         radius = 25f * scale,
         center = Offset(centerX, centerY)
     )
-
-    // Inner highlight on center node
     drawCircle(
-        color = nodeColor.copy(alpha = 0.7f),
+        color = Color.White.copy(alpha = depthProfile.rimAlpha),
+        radius = 25f * scale,
+        center = Offset(centerX, centerY),
+        style = Stroke(width = 1.8f * scale)
+    )
+    drawCircle(
+        color = Color.White.copy(alpha = depthProfile.shellHighlightAlpha * 1.2f),
         radius = 8f * scale,
         center = Offset(centerX - 8f * scale, centerY - 8f * scale)
     )
@@ -1305,10 +1437,6 @@ private fun SequentialBlocksIndicator(color: Color, modifier: Modifier = Modifie
 // COLORBLIND-FRIENDLY ANIMATIONS
 // ============================================================================
 
-/**
- * High contrast concentric rings animation for colorblind users.
- * Uses distinct ring patterns rather than color differentiation.
- */
 @Composable
 private fun ContrastRingsBackground(primaryColor: Color, secondaryColor: Color) {
     val infiniteTransition = rememberInfiniteTransition(label = "rings")
@@ -1335,7 +1463,6 @@ private fun ContrastRingsBackground(primaryColor: Color, secondaryColor: Color) 
         val center = Offset(size.width / 2, size.height / 2)
         val maxRadius = size.minDimension * 0.42f
 
-        // Draw multiple concentric rings with varying patterns
         for (i in 7 downTo 1) {
             val radius = maxRadius * (i / 7f) * expansion
             val isDashed = i % 2 == 0
@@ -1344,7 +1471,6 @@ private fun ContrastRingsBackground(primaryColor: Color, secondaryColor: Color) 
             val color = if (i % 2 == 0) primaryColor else secondaryColor
 
             if (isDashed) {
-                // Create dashed ring effect using segments
                 val segments = 24
                 for (seg in 0 until segments step 2) {
                     val startAngle = (seg * (360f / segments) + rotation * 0.5f) % 360f
@@ -1359,7 +1485,6 @@ private fun ContrastRingsBackground(primaryColor: Color, secondaryColor: Color) 
                         center.y + (sin(startRad) * radius).toFloat()
                     )
 
-                    // Draw arc segment
                     for (step in 0..10) {
                         val angle = startRad + (endRad - startRad) * (step / 10.0)
                         path.lineTo(
@@ -1375,7 +1500,6 @@ private fun ContrastRingsBackground(primaryColor: Color, secondaryColor: Color) 
                     )
                 }
             } else {
-                // Solid ring
                 drawCircle(
                     color = color.copy(alpha = alpha),
                     radius = radius,
@@ -1385,7 +1509,6 @@ private fun ContrastRingsBackground(primaryColor: Color, secondaryColor: Color) 
             }
         }
 
-        // Central focal point with high contrast
         drawCircle(
             color = primaryColor.copy(alpha = 0.08f),
             radius = maxRadius * 0.12f * expansion,
@@ -1399,10 +1522,6 @@ private fun ContrastRingsBackground(primaryColor: Color, secondaryColor: Color) 
     }
 }
 
-/**
- * Geometric pattern animation for monochromacy/achromatopsia.
- * Uses shapes and patterns instead of colors for differentiation.
- */
 @Composable
 private fun PatternShapesBackground(primaryColor: Color, secondaryColor: Color) {
     val infiniteTransition = rememberInfiniteTransition(label = "shapes")
@@ -1428,7 +1547,6 @@ private fun PatternShapesBackground(primaryColor: Color, secondaryColor: Color) 
     Canvas(modifier = Modifier.fillMaxSize()) {
         val center = Offset(size.width / 2, size.height / 2)
 
-        // Draw outer ring of shapes (larger, slower)
         val outerCount = 8
         val outerDistance = size.minDimension * 0.35f * breathe
         val outerSize = size.minDimension * 0.06f
@@ -1439,40 +1557,32 @@ private fun PatternShapesBackground(primaryColor: Color, secondaryColor: Color) 
             val y = center.y + (sin(angle) * outerDistance).toFloat()
 
             when (i % 4) {
-                0 -> {
-                    // Square (solid fill)
-                    drawRect(
-                        color = primaryColor.copy(alpha = 0.06f),
-                        topLeft = Offset(x - outerSize/2, y - outerSize/2),
-                        size = androidx.compose.ui.geometry.Size(outerSize, outerSize)
-                    )
-                }
-                1 -> {
-                    // Circle (outline only - pattern differentiation)
-                    drawCircle(
-                        color = secondaryColor.copy(alpha = 0.08f),
-                        radius = outerSize / 2,
-                        center = Offset(x, y),
-                        style = Stroke(width = 2f)
-                    )
-                }
+                0 -> drawRect(
+                    color = primaryColor.copy(alpha = 0.06f),
+                    topLeft = Offset(x - outerSize / 2, y - outerSize / 2),
+                    size = androidx.compose.ui.geometry.Size(outerSize, outerSize)
+                )
+                1 -> drawCircle(
+                    color = secondaryColor.copy(alpha = 0.08f),
+                    radius = outerSize / 2,
+                    center = Offset(x, y),
+                    style = Stroke(width = 2f)
+                )
                 2 -> {
-                    // Triangle (solid fill)
                     val path = Path().apply {
-                        moveTo(x, y - outerSize/2)
-                        lineTo(x + outerSize/2, y + outerSize/2)
-                        lineTo(x - outerSize/2, y + outerSize/2)
+                        moveTo(x, y - outerSize / 2)
+                        lineTo(x + outerSize / 2, y + outerSize / 2)
+                        lineTo(x - outerSize / 2, y + outerSize / 2)
                         close()
                     }
                     drawPath(path, primaryColor.copy(alpha = 0.07f))
                 }
                 3 -> {
-                    // Diamond (outline only)
                     val path = Path().apply {
-                        moveTo(x, y - outerSize/2)
-                        lineTo(x + outerSize/2, y)
-                        lineTo(x, y + outerSize/2)
-                        lineTo(x - outerSize/2, y)
+                        moveTo(x, y - outerSize / 2)
+                        lineTo(x + outerSize / 2, y)
+                        lineTo(x, y + outerSize / 2)
+                        lineTo(x - outerSize / 2, y)
                         close()
                     }
                     drawPath(path, secondaryColor.copy(alpha = 0.07f), style = Stroke(width = 2f))
@@ -1480,7 +1590,6 @@ private fun PatternShapesBackground(primaryColor: Color, secondaryColor: Color) 
             }
         }
 
-        // Draw inner ring of shapes (smaller, opposite rotation)
         val innerCount = 6
         val innerDistance = size.minDimension * 0.18f * breathe
         val innerSize = size.minDimension * 0.04f
@@ -1491,24 +1600,17 @@ private fun PatternShapesBackground(primaryColor: Color, secondaryColor: Color) 
             val y = center.y + (sin(angle) * innerDistance).toFloat()
 
             when (i % 3) {
-                0 -> {
-                    // Filled square
-                    drawRect(
-                        color = primaryColor.copy(alpha = 0.05f),
-                        topLeft = Offset(x - innerSize/2, y - innerSize/2),
-                        size = androidx.compose.ui.geometry.Size(innerSize, innerSize)
-                    )
-                }
-                1 -> {
-                    // Filled circle
-                    drawCircle(
-                        color = secondaryColor.copy(alpha = 0.05f),
-                        radius = innerSize / 2,
-                        center = Offset(x, y)
-                    )
-                }
+                0 -> drawRect(
+                    color = primaryColor.copy(alpha = 0.05f),
+                    topLeft = Offset(x - innerSize / 2, y - innerSize / 2),
+                    size = androidx.compose.ui.geometry.Size(innerSize, innerSize)
+                )
+                1 -> drawCircle(
+                    color = secondaryColor.copy(alpha = 0.05f),
+                    radius = innerSize / 2,
+                    center = Offset(x, y)
+                )
                 2 -> {
-                    // Cross/plus pattern
                     val halfSize = innerSize / 2
                     drawLine(
                         color = primaryColor.copy(alpha = 0.06f),
@@ -1528,7 +1630,6 @@ private fun PatternShapesBackground(primaryColor: Color, secondaryColor: Color) 
             }
         }
 
-        // Central element - hexagon
         val centerSize = size.minDimension * 0.05f * breathe
         val hexPath = Path().apply {
             for (i in 0..5) {
@@ -1543,10 +1644,6 @@ private fun PatternShapesBackground(primaryColor: Color, secondaryColor: Color) 
     }
 }
 
-/**
- * Alternating rings loading indicator for colorblind modes.
- * Uses both color and pattern differentiation.
- */
 @Composable
 private fun ContrastRingsIndicator(primaryColor: Color, secondaryColor: Color, modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition(label = "ringsIndicator")
@@ -1570,14 +1667,12 @@ private fun ContrastRingsIndicator(primaryColor: Color, secondaryColor: Color, m
             val x = startX + i * spacing
             val radius = 6.dp.toPx() * (if (i == 1) scale else 1f)
 
-            // Outer ring
             drawCircle(
                 color = if (i % 2 == 0) primaryColor else secondaryColor,
                 radius = radius,
                 center = Offset(x, centerY),
                 style = Stroke(width = 2f)
             )
-            // Inner dot
             drawCircle(
                 color = if (i % 2 == 0) secondaryColor else primaryColor,
                 radius = radius * 0.4f,
@@ -1591,11 +1686,6 @@ private fun ContrastRingsIndicator(primaryColor: Color, secondaryColor: Color, m
 // SECRET THEME: RAINBOW BRAIN ANIMATION
 // ============================================================================
 
-/**
- * Magical rainbow sparkle animation for the secret Rainbow Brain theme.
- * Celebrates neurodiversity with vibrant, joyful colors.
- * Uses smooth, calming animation speeds consistent with the app.
- */
 @Composable
 private fun RainbowSparkleBackground() {
     val infiniteTransition = rememberInfiniteTransition(label = "rainbowSparkle")
@@ -1637,16 +1727,15 @@ private fun RainbowSparkleBackground() {
         val maxRadius = size.minDimension * 0.42f
 
         val rainbowColors = listOf(
-            Color(0xFFE040FB), // Vibrant Purple (neurodiversity symbol)
-            Color(0xFFFF4081), // Pink
-            Color(0xFFFF6E40), // Deep Orange
-            Color(0xFFFFD740), // Amber/Yellow
-            Color(0xFF69F0AE), // Green
-            Color(0xFF40C4FF), // Light Blue
-            Color(0xFF7C4DFF)  // Deep Purple/Violet
+            Color(0xFFE040FB),
+            Color(0xFFFF4081),
+            Color(0xFFFF6E40),
+            Color(0xFFFFD740),
+            Color(0xFF69F0AE),
+            Color(0xFF40C4FF),
+            Color(0xFF7C4DFF)
         )
 
-        // Soft radial glow at center
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
@@ -1661,13 +1750,11 @@ private fun RainbowSparkleBackground() {
             center = center
         )
 
-        // Draw flowing rainbow arcs with glow
         rainbowColors.forEachIndexed { i, color ->
             val arcRadius = maxRadius * (0.4f + i * 0.08f) * pulse
             val startAngle = rotation + i * 15f
             val sweepAngle = 120f + (i % 3) * 20f
 
-            // Arc glow (wider)
             val glowPath = Path()
             for (step in 0..20) {
                 val angle = Math.toRadians((startAngle + sweepAngle * step / 20f).toDouble())
@@ -1680,8 +1767,6 @@ private fun RainbowSparkleBackground() {
                 color = color.copy(alpha = 0.04f),
                 style = Stroke(width = 16f, cap = StrokeCap.Round)
             )
-
-            // Main arc
             drawPath(
                 path = glowPath,
                 color = color.copy(alpha = 0.12f),
@@ -1689,7 +1774,6 @@ private fun RainbowSparkleBackground() {
             )
         }
 
-        // Floating sparkle orbs at various distances
         val sparklePositions = listOf(
             Triple(0.15f, 0.25f, 0), Triple(0.85f, 0.2f, 1), Triple(0.1f, 0.7f, 2),
             Triple(0.9f, 0.75f, 3), Triple(0.3f, 0.15f, 4), Triple(0.7f, 0.85f, 5),
@@ -1702,13 +1786,11 @@ private fun RainbowSparkleBackground() {
             val y = height * yRatio + cos((shimmer + yRatio) * Math.PI * 2).toFloat() * 8f
             val sparkleAlpha = 0.1f + sin((shimmer + xRatio + yRatio) * Math.PI * 2).toFloat() * 0.08f
 
-            // Outer glow
             drawCircle(
                 color = rainbowColors[colorIndex].copy(alpha = sparkleAlpha * 0.3f),
                 radius = 18f,
                 center = Offset(x, y)
             )
-            // Core
             drawCircle(
                 color = rainbowColors[colorIndex].copy(alpha = sparkleAlpha),
                 radius = 6f,
@@ -1716,7 +1798,6 @@ private fun RainbowSparkleBackground() {
             )
         }
 
-        // Pulsing center with rainbow gradient
         for (ring in 3 downTo 1) {
             val ringRadius = maxRadius * 0.12f * ring * pulse
             val colorIndex = ring % rainbowColors.size
@@ -1727,7 +1808,6 @@ private fun RainbowSparkleBackground() {
             )
         }
 
-        // Central neurodiversity infinity symbol suggestion (simplified as overlapping circles)
         val symbolSize = size.minDimension * 0.06f * pulse
         drawCircle(
             color = Color(0xFFE040FB).copy(alpha = 0.08f),
@@ -1741,5 +1821,3 @@ private fun RainbowSparkleBackground() {
         )
     }
 }
-
-

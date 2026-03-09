@@ -436,7 +436,7 @@ object CredentialStorage {
                 kotlinx.coroutines.delay(100)
             }
 
-            result!!
+            checkNotNull(result) { "Authentication cancelled" }
         } catch (e: Exception) {
             BiometricResult.Error(-1, e.message ?: "Unknown error")
         }
@@ -531,4 +531,3 @@ object SessionManager {
         return context.getSharedPreferences("neurocomet_secure_prefs", Context.MODE_PRIVATE)
     }
 }
-

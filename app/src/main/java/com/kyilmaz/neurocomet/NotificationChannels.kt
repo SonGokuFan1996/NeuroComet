@@ -523,6 +523,30 @@ object NotificationChannels {
 object NotificationHelper {
 
     /**
+     * Create a PendingIntent that opens the app (MainActivity) when the notification is tapped.
+     * Optionally routes to a specific screen via extras.
+     */
+    private fun launchIntent(
+        context: Context,
+        targetRoute: String? = null,
+        extraKey: String? = null,
+        extraValue: String? = null
+    ): android.app.PendingIntent {
+        val intent = android.content.Intent(context, MainActivity::class.java).apply {
+            flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or
+                    android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
+            targetRoute?.let { putExtra("targetRoute", it) }
+            if (extraKey != null && extraValue != null) putExtra(extraKey, extraValue)
+        }
+        return android.app.PendingIntent.getActivity(
+            context,
+            System.currentTimeMillis().toInt(),
+            intent,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
+    /**
      * Create a notification builder with the appropriate channel
      */
     fun createNotificationBuilder(
@@ -532,11 +556,12 @@ object NotificationHelper {
         content: String
     ): NotificationCompat.Builder {
         return NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // Use app icon
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(title)
             .setContentText(content)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
+            .setContentIntent(launchIntent(context))
     }
 
     /**
@@ -555,6 +580,7 @@ object NotificationHelper {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
             .setAutoCancel(true)
+            .setContentIntent(launchIntent(context, "messages"))
     }
 
     /**
@@ -579,6 +605,7 @@ object NotificationHelper {
                 }
             )
             .setAutoCancel(true)
+            .setContentIntent(launchIntent(context, "notifications"))
     }
 
     /**
@@ -596,6 +623,7 @@ object NotificationHelper {
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setAutoCancel(true)
+            .setContentIntent(launchIntent(context, "settings"))
     }
 
     /**
@@ -617,6 +645,7 @@ object NotificationHelper {
             .setContentText(content)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
+            .setContentIntent(launchIntent(context))
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
 
         // Apply custom views if provided
@@ -693,8 +722,9 @@ object NotificationHelper {
     }
 
     /**
-     * Create a notification using the custom XML layout files.
-     * Uses DecoratedCustomViewStyle for proper system integration.
+     * Create a release-safe rich notification without custom RemoteViews.
+     * Custom XML layouts are avoided here because RemoteViews only supports a
+     * small subset of views and lint flagged the existing layouts as invalid.
      */
     fun createCustomLayoutNotification(
         context: Context,
@@ -704,28 +734,27 @@ object NotificationHelper {
         timestamp: String? = null,
         category: String? = null
     ): NotificationCompat.Builder {
-        // Create collapsed view with neurodivergent-friendly design
-        val collapsedView = RemoteViews(context.packageName, R.layout.notification_custom)
-        collapsedView.setTextViewText(R.id.notification_title, title)
-        collapsedView.setTextViewText(R.id.notification_content, content)
-        timestamp?.let { collapsedView.setTextViewText(R.id.notification_time, it) }
-
-        // Create expanded view with full neurodivergent-friendly design
-        val expandedView = RemoteViews(context.packageName, R.layout.notification_custom_big)
-        expandedView.setTextViewText(R.id.notification_title, title)
-        expandedView.setTextViewText(R.id.notification_content, content)
-        timestamp?.let { expandedView.setTextViewText(R.id.notification_timestamp, it) }
-        category?.let { expandedView.setTextViewText(R.id.notification_category, it) }
+        val richText = buildString {
+            append(content)
+            if (!category.isNullOrBlank()) {
+                append("\n")
+                append(category)
+            }
+            if (!timestamp.isNullOrBlank()) {
+                append(" • ")
+                append(timestamp)
+            }
+        }
 
         return NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setContentTitle(title)
             .setContentText(content)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-            .setCustomContentView(collapsedView)
-            .setCustomBigContentView(expandedView)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(richText))
+            .setSubText(category)
             .setAutoCancel(true)
+            .setContentIntent(launchIntent(context))
     }
 
     /**
@@ -746,6 +775,7 @@ object NotificationHelper {
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
             .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setAutoCancel(true)
+            .setContentIntent(launchIntent(context))
             // Heads-up notifications require high importance channel + priority
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
     }
@@ -1075,4 +1105,3 @@ enum class NotificationTestCategory(val displayName: String, val emoji: String) 
     APP("App Updates", "🎉"),
     WELLNESS("Wellness", "🧘")
 }
-

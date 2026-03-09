@@ -1,13 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
-   See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Backup rules for NeuroComet.
+   Exclude secure credential storage from cloud backup to prevent auth token leakage.
    See https://developer.android.com/about/versions/12/backup-restore
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <exclude domain="sharedpref" path="neurocomet_secure_prefs.xml" />
+    <exclude domain="sharedpref" path="neurocomet_credential_store.xml" />
 </full-backup-content>

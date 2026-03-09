@@ -24,7 +24,7 @@ class AccessibilitySettingsScreen extends ConsumerWidget {
           const SizedBox(height: 24),
 
           // Motion & Animation
-          _buildSectionHeader(context, 'Motion & Animation'),
+          _buildSectionHeader(context, l10n.get('accessibilityMotionAndAnimation')),
           _SettingsCard(
             child: Column(
               children: [
@@ -37,7 +37,7 @@ class AccessibilitySettingsScreen extends ConsumerWidget {
           const SizedBox(height: 24),
 
           // Visual
-          _buildSectionHeader(context, 'Visual'),
+          _buildSectionHeader(context, l10n.get('accessibilityVisual')),
           _SettingsCard(
             child: Column(
               children: [
@@ -52,7 +52,7 @@ class AccessibilitySettingsScreen extends ConsumerWidget {
           const SizedBox(height: 24),
 
           // Reading & Content
-          _buildSectionHeader(context, 'Reading & Content'),
+          _buildSectionHeader(context, l10n.get('accessibilityReadingAndContent')),
           _SettingsCard(
             child: Column(
               children: [
@@ -68,7 +68,7 @@ class AccessibilitySettingsScreen extends ConsumerWidget {
           Center(
             child: TextButton(
               onPressed: () => _showResetDialog(context, ref),
-              child: const Text('Reset to Defaults'),
+              child: Text(l10n.get('accessibilityResetToDefaults')),
             ),
           ),
           const SizedBox(height: 16),
@@ -78,6 +78,7 @@ class AccessibilitySettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildInfoCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
@@ -103,14 +104,14 @@ class AccessibilitySettingsScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Your comfort matters',
+                  l10n.get('accessibilityComfortMatters'),
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Customize these settings to make NeuroComet work best for you.',
+                  l10n.get('accessibilityCustomizeDescription'),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -137,17 +138,16 @@ class AccessibilitySettingsScreen extends ConsumerWidget {
   }
 
   void _showResetDialog(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Reset Settings?'),
-        content: const Text(
-          'This will reset all accessibility settings to their default values.',
-        ),
+        title: Text(l10n.get('accessibilityResetSettingsTitle')),
+        content: Text(l10n.get('accessibilityResetSettingsMessage')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
@@ -156,13 +156,13 @@ class AccessibilitySettingsScreen extends ConsumerWidget {
               ref.read(fontSettingsProvider.notifier).updateSettings(const FontSettings());
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Settings reset to defaults'),
+                SnackBar(
+                  content: Text(l10n.get('accessibilityResetSettingsSuccess')),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
             },
-            child: const Text('Reset'),
+            child: Text(l10n.get('reset')),
           ),
         ],
       ),
@@ -193,11 +193,12 @@ class _SettingsCard extends StatelessWidget {
 class _ReducedMotionTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(animationSettingsProvider);
 
     return SwitchListTile(
-      title: const Text('Reduced Motion'),
-      subtitle: const Text('Minimize animations and transitions'),
+      title: Text(l10n.reducedMotion),
+      subtitle: Text(l10n.get('minimizeAnimationsAndTransitions')),
       secondary: const Icon(Icons.animation),
       value: settings.disableAll,
       onChanged: (value) {
@@ -210,17 +211,18 @@ class _ReducedMotionTile extends ConsumerWidget {
 class _AnimationTogglesTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     return ExpansionTile(
-      title: const Text('Customize Animations'),
-      subtitle: const Text('Choose which animations to disable'),
+      title: Text(l10n.get('customizeAnimations')),
+      subtitle: Text(l10n.get('chooseAnimationsToDisable')),
       leading: const Icon(Icons.motion_photos_on),
       children: [
-        _buildToggle(context, ref, 'Logo Animations', AnimationType.logo),
-        _buildToggle(context, ref, 'Story Spinning', AnimationType.story),
-        _buildToggle(context, ref, 'Feed Transitions', AnimationType.feed),
-        _buildToggle(context, ref, 'Screen Transitions', AnimationType.transition),
-        _buildToggle(context, ref, 'Button Effects', AnimationType.button),
-        _buildToggle(context, ref, 'Loading Spinners', AnimationType.loading),
+        _buildToggle(context, ref, l10n.get('logoAnimations'), AnimationType.logo),
+        _buildToggle(context, ref, l10n.get('storySpinning'), AnimationType.story),
+        _buildToggle(context, ref, l10n.get('feedTransitions'), AnimationType.feed),
+        _buildToggle(context, ref, l10n.get('screenTransitions'), AnimationType.transition),
+        _buildToggle(context, ref, l10n.get('buttonEffects'), AnimationType.button),
+        _buildToggle(context, ref, l10n.get('loadingSpinners'), AnimationType.loading),
       ],
     );
   }
@@ -270,11 +272,12 @@ class _AnimationTogglesTile extends ConsumerWidget {
 class _HighContrastTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final highContrast = ref.watch(highContrastProvider);
 
     return SwitchListTile(
-      title: const Text('High Contrast'),
-      subtitle: const Text('Increase color contrast for better visibility'),
+      title: Text(l10n.highContrast),
+      subtitle: Text(l10n.get('increaseColorContrast')),
       secondary: const Icon(Icons.contrast),
       value: highContrast,
       onChanged: (value) {
@@ -287,11 +290,12 @@ class _HighContrastTile extends ConsumerWidget {
 class _DyslexicFontTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final fontSettings = ref.watch(fontSettingsProvider);
 
     return SwitchListTile(
-      title: const Text('Dyslexic-Friendly Font'),
-      subtitle: const Text('Use OpenDyslexic font throughout the app'),
+      title: Text(l10n.dyslexicFont),
+      subtitle: Text(l10n.get('useOpenDyslexicFont')),
       secondary: const Icon(Icons.font_download),
       value: fontSettings.useDyslexicFont,
       onChanged: (value) {
@@ -304,12 +308,13 @@ class _DyslexicFontTile extends ConsumerWidget {
 class _FontSizeTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final fontSettings = ref.watch(fontSettingsProvider);
     final scale = fontSettings.scale;
 
     return ListTile(
       leading: const Icon(Icons.text_fields),
-      title: const Text('Text Size'),
+      title: Text(l10n.fontSize),
       subtitle: Slider(
         value: scale,
         min: 0.8,
@@ -328,12 +333,13 @@ class _FontSizeTile extends ConsumerWidget {
 class _TextSpacingTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final fontSettings = ref.watch(fontSettingsProvider);
     final spacing = fontSettings.letterSpacing;
 
     return ListTile(
       leading: const Icon(Icons.space_bar),
-      title: const Text('Letter Spacing'),
+      title: Text(l10n.get('letterSpacing')),
       subtitle: Slider(
         value: spacing,
         min: 0.0,
@@ -355,12 +361,13 @@ class _TextSpacingTile extends ConsumerWidget {
 class _LineHeightTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final fontSettings = ref.watch(fontSettingsProvider);
     final height = fontSettings.lineHeight;
 
     return ListTile(
       leading: const Icon(Icons.format_line_spacing),
-      title: const Text('Line Height'),
+      title: Text(l10n.get('lineHeight')),
       subtitle: Slider(
         value: height,
         min: 1.0,

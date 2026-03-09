@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.ContactsContract
-import android.provider.ContactsPickerSessionContract
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -23,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -44,6 +45,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.os.LocaleListCompat
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kyilmaz.neurocomet.ads.GoogleAdsManager
 import com.kyilmaz.neurocomet.auth.AuthResult
 import com.kyilmaz.neurocomet.utils.StressTester
@@ -1377,13 +1379,24 @@ fun AppInfoDevSection() {
     }
 
     DevSectionCard(title = "App Info & Diagnostics", icon = Icons.Filled.Info) {
+        val deviceHash = remember { DeviceAuthority.computeDeviceHash(context) }
+        val isAuthorized = remember { DeviceAuthority.isAuthorizedDevice(context) }
+        val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+
+        val buildCode = if (Build.VERSION.SDK_INT >= 28) {
+            packageInfo?.longVersionCode?.toString()
+        } else {
+            @Suppress("DEPRECATION")
+            packageInfo?.versionCode?.toString()
+        } ?: "—"
+
         val infoRows = listOf(
             "Package" to context.packageName,
             "Version" to (packageInfo?.versionName ?: "—"),
-            "Build" to (if (android.os.Build.VERSION.SDK_INT >= 28) packageInfo?.longVersionCode?.toString() else @Suppress("DEPRECATION") packageInfo?.versionCode?.toString() ?: "—"),
+            "Build" to buildCode,
             "Build Type" to if (BuildConfig.DEBUG) "DEBUG" else "RELEASE",
-            "Device" to "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}",
-            "OS" to "Android ${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT})",
+            "Device" to "${Build.MANUFACTURER} ${Build.MODEL}",
+            "OS" to "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})",
             "Heap Used" to "${memoryInfo.first - memoryInfo.second} MB / ${memoryInfo.third} MB max"
         )
 
@@ -1394,6 +1407,63 @@ fun AppInfoDevSection() {
             ) {
                 Text(label, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
                 Text(value, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        // ── Device Authority Hash ─────────────────────────────
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = if (isAuthorized) Color(0xFF1B5E20).copy(alpha = 0.12f)
+                else MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f)
+            ),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Column(Modifier.padding(12.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        if (isAuthorized) Icons.Filled.VerifiedUser else Icons.Filled.GppBad,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = if (isAuthorized) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        if (isAuthorized) "Authorized Developer Device" else "Unauthorized Device",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isAuthorized) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "Device Hash:",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    deviceHash,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 10.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2
+                )
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = {
+                        clipboardManager.setPrimaryClip(android.content.ClipData.newPlainText("Device Hash", deviceHash))
+                        Toast.makeText(context, "Device hash copied to clipboard", Toast.LENGTH_SHORT).show()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Filled.ContentCopy, null, Modifier.size(14.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Copy Device Hash", fontSize = 12.sp)
+                }
             }
         }
 
@@ -1558,13 +1628,13 @@ fun FeatureFlagsDevSection(devOptionsViewModel: DevOptionsViewModel) {
         )
     }
 
-    // Cross-Device section (API 37+ only)
+    // Cross-Device section (API 37+ features, graceful on API 36)
     DevSectionCard(title = "Cross-Device", icon = Icons.Filled.Devices) {
         Text(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN)
+            if (Build.VERSION.SDK_INT >= 37)
                 "Android 17 cross-device handoff allows seamless activity transfer to nearby devices."
             else
-                "Requires Android 17 (CinnamonBun). Not available on this device.",
+                "Requires Android 17 (API 37). Not available on this device (API ${Build.VERSION.SDK_INT}).",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -1648,19 +1718,16 @@ fun RenderingNetworkDevSection(devOptionsViewModel: DevOptionsViewModel) {
     }
 }
 
-// ─── Contact Picker (Android 17 / CinnamonBun) ──────────────────
+// ─── Contact Picker (API 37 + Legacy) ──────────────────
 
 /**
- * Developer-options section that exercises the Android 17 (CinnamonBun / API 37)
- * ContactsPickerSessionContract as well as the legacy PickContact() fallback.
- *
- * Displays device info, allows toggling between API 37+ and legacy paths, and
- * shows the parsed result so QA can verify both code paths work correctly.
+ * Developer-options section that exercises the API 37 ContactsPickerSessionContract
+ * as well as the legacy PickContact() fallback — with runtime API checks.
  */
 @Composable
 fun ContactPickerDevSection() {
     val context = LocalContext.current
-    val isApi37Plus = Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN
+    val isApi37Plus = Build.VERSION.SDK_INT >= 37
 
     // ── State ───────────────────────────────────────────────
     var forceLegacy by remember { mutableStateOf(false) }
@@ -1718,19 +1785,13 @@ fun ContactPickerDevSection() {
                     appendLine("⚠️ $it")
                 }
             }
-            // Don't clear errorLog if we set a warning above about force legacy
-            if (resolveWarning != null && errorLog == null) {
-                errorLog = resolveWarning
-            }
+            if (resolveWarning != null && errorLog == null) errorLog = resolveWarning
         } else {
             resultLog = "Picker cancelled (no URI returned)"
         }
     }
 
     // ── API 37+ session-based picker launcher ───────────────
-    // ContactsPickerSessionContract is an ActivityResultContract<Intent, Uri?>
-    // that returns the session URI directly (no ActivityResult wrapper).
-    @Suppress("NewApi")
     val api37PickerLauncher = rememberLauncherForActivityResult(
         contract = object : androidx.activity.result.contract.ActivityResultContract<Intent, Uri?>() {
             override fun createIntent(context: Context, input: Intent): Intent = input
@@ -1748,7 +1809,7 @@ fun ContactPickerDevSection() {
                 pickCount++
                 if (contacts.isNotEmpty()) {
                     resultLog = buildString {
-                        appendLine("✅ Android 17 picker result #$pickCount (${contacts.size} contact${if (contacts.size != 1) "s" else ""})")
+                        appendLine("✅ API 37 picker result #$pickCount (${contacts.size} contact${if (contacts.size != 1) "s" else ""})")
                         appendLine()
                         contacts.forEachIndexed { idx, c ->
                             appendLine("── Contact ${idx + 1} ──")
@@ -1787,25 +1848,18 @@ fun ContactPickerDevSection() {
         errorLog = null
         resultLog = null
         if (isApi37Plus && !forceLegacy) {
-            // API 37+ — ContactsPickerSessionContract
             try {
                 val intent = AttachmentHelper.buildContactsPickerIntent(allowMultiple = allowMultiple)
                 isLoading = true
                 api37PickerLauncher.launch(intent)
             } catch (e: Exception) {
-                errorLog = "API 37 ContactsPickerSessionContract failed: ${e.message}\nFalling back to legacy…"
+                errorLog = "API 37 picker failed: ${e.message}\nFalling back to legacy…"
                 isLoading = true
                 legacyPickerLauncher.launch(null)
             }
         } else {
-            // Legacy path — PickContact() launches the system contacts UI which
-            // doesn't need READ_CONTACTS permission. However, resolving contact
-            // details from the returned URI does. On CinnamonBun+ with Force
-            // Legacy, we request READ_CONTACTS if not already granted.
             if (isApi37Plus) {
-                // Force legacy on CinnamonBun+: warn but still launch
-                errorLog = "⚠️ Force Legacy on CinnamonBun+: using legacy picker " +
-                        "instead of ContactsPickerSessionContract. READ_CONTACTS may be needed."
+                errorLog = "⚠️ Force Legacy on API 37+: using legacy picker. READ_CONTACTS may be needed."
             }
             isLoading = true
             legacyPickerLauncher.launch(null)
@@ -1813,7 +1867,7 @@ fun ContactPickerDevSection() {
     }
 
     // ── UI ──────────────────────────────────────────────────
-    DevSectionCard(title = "Contact Picker (API 37+)", icon = Icons.Filled.Contacts) {
+    DevSectionCard(title = "Contact Picker (API 37 + Legacy)", icon = Icons.Filled.Contacts) {
         Text(
             "Test the Android 17 privacy-preserving Contact Picker and the legacy fallback.",
             style = MaterialTheme.typography.bodySmall,
@@ -1971,3 +2025,559 @@ fun ContactPickerDevSection() {
         }
     }
 }
+
+// ════════════════════════════════════════════════════════════════════
+// A/B Testing Dev Section
+// ════════════════════════════════════════════════════════════════════
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ABTestingDevSection() {
+    val context = LocalContext.current
+    val isAuthorized = remember { DeviceAuthority.isAuthorizedDevice(context) }
+
+    // Refresh experiment state on first composition
+    LaunchedEffect(Unit) {
+        if (isAuthorized) ABTestManager.refreshState(context)
+    }
+
+    val experimentsMap by ABTestManager.experiments.collectAsState()
+    val experiments = experimentsMap.values.toList().sortedBy { it.experiment.displayName }
+
+    DevSectionCard(title = "A/B Testing", icon = Icons.Filled.Science) {
+        if (!isAuthorized) {
+            Text(
+                "⚠️ A/B testing is restricted to authorized developer devices.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
+            return@DevSectionCard
+        }
+
+        Text(
+            "Manage experiment variants for this device. Overrides are device-local and persist across restarts.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(8.dp))
+
+        // ── Summary chips ──────────────────────────────────────
+        val totalExperiments = experiments.size
+        val overriddenCount = experiments.count { it.isOverridden }
+        val nonControlCount = experiments.count { it.activeVariant != it.experiment.variants.first() }
+
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            AssistChip(
+                onClick = {},
+                label = { Text("$totalExperiments experiments") },
+                leadingIcon = { Icon(Icons.Filled.Science, null, Modifier.size(16.dp)) }
+            )
+            if (overriddenCount > 0) {
+                AssistChip(
+                    onClick = {},
+                    label = { Text("$overriddenCount overridden") },
+                    leadingIcon = { Icon(Icons.Filled.Edit, null, Modifier.size(16.dp)) },
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        labelColor = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                )
+            }
+            if (nonControlCount > 0) {
+                AssistChip(
+                    onClick = {},
+                    label = { Text("$nonControlCount non-control") },
+                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.TrendingUp, null, Modifier.size(16.dp)) },
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        labelColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                )
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        // ── Quick actions ──────────────────────────────────────
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                onClick = {
+                    ABTestManager.clearAllOverrides(context)
+                    Toast.makeText(context, "All overrides cleared", Toast.LENGTH_SHORT).show()
+                },
+                modifier = Modifier.weight(1f),
+                enabled = overriddenCount > 0
+            ) {
+                Icon(Icons.Filled.RestartAlt, null, Modifier.size(16.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("Clear All", fontSize = 12.sp)
+            }
+            OutlinedButton(
+                onClick = {
+                    ABTestManager.rerollAllAssignments(context)
+                    Toast.makeText(context, "Re-rolled all assignments", Toast.LENGTH_SHORT).show()
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(Icons.Filled.Casino, null, Modifier.size(16.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("Re-roll", fontSize = 12.sp)
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+        HorizontalDivider()
+        Spacer(Modifier.height(12.dp))
+
+        // ── Per-experiment controls ────────────────────────────
+        experiments.forEach { state ->
+            ABExperimentRow(state, context)
+            Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ABExperimentRow(state: ExperimentState, context: Context) {
+    val exp = state.experiment
+    var expanded by remember { mutableStateOf(false) }
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+
+    // Hard-coded dev-tool palette that stays legible in any theme
+    val overriddenCardBg = if (isDark) Color(0xFF2D1F4E) else Color(0xFFEDE7F6)
+    val defaultCardBg = if (isDark) Color(0xFF2A2A2E) else Color(0xFFF0F0F4)
+    val badgeControlBg = if (isDark) Color(0xFF555560) else Color(0xFFBDBDC7)
+    val badgeControlText = if (isDark) Color(0xFFE8E8EC) else Color(0xFF2A2A2E)
+    val badgeActiveBg = if (isDark) Color(0xFF7C4DFF) else Color(0xFF5C35CC)
+    val badgeActiveText = Color.White
+    val titleColor = if (isDark) Color(0xFFF0F0F4) else Color(0xFF1A1A24)
+    val descColor = if (isDark) Color(0xFFB0B0BC) else Color(0xFF5A5A6A)
+    val metaColor = if (isDark) Color(0xFF9898A8) else Color(0xFF6E6E7E)
+    val metaIconColor = if (isDark) Color(0xFF8888A0) else Color(0xFF7A7A8E)
+    val overriddenLabelColor = if (isDark) Color(0xFFCE93D8) else Color(0xFF8E24AA)
+    val dividerColor = if (isDark) Color(0xFF444450) else Color(0xFFD0D0DA)
+
+    // Chip palette — fully opaque, high contrast
+    val chipAutoSelectedBg = if (isDark) Color(0xFF4CAF50) else Color(0xFF2E7D32)
+    val chipAutoSelectedText = Color.White
+    val chipVariantSelectedBg = if (isDark) Color(0xFF7C4DFF) else Color(0xFF5C35CC)
+    val chipVariantSelectedText = Color.White
+    val chipUnselectedBg = if (isDark) Color(0xFF3A3A42) else Color(0xFFE4E4EC)
+    val chipUnselectedText = if (isDark) Color(0xFFCCCCD6) else Color(0xFF3A3A4A)
+    val chipUnselectedBorder = if (isDark) Color(0xFF555562) else Color(0xFFC0C0CC)
+
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = if (state.isOverridden) overriddenCardBg else defaultCardBg
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            // Title row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expanded = !expanded },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        exp.displayName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = titleColor
+                    )
+                    Text(
+                        exp.description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = descColor,
+                        maxLines = if (expanded) Int.MAX_VALUE else 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+
+                // Active variant badge — solid background, no alpha
+                val isControl = state.activeVariant == exp.variants.first()
+                Surface(
+                    color = if (isControl) badgeControlBg else badgeActiveBg,
+                    shape = RoundedCornerShape(6.dp)
+                ) {
+                    Text(
+                        state.activeVariant.replace("_", " "),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isControl) badgeControlText else badgeActiveText
+                    )
+                }
+
+                Spacer(Modifier.width(4.dp))
+
+                Icon(
+                    if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    contentDescription = "Toggle details",
+                    modifier = Modifier.size(20.dp),
+                    tint = metaIconColor
+                )
+            }
+
+            // Expanded: variant selector
+            if (expanded) {
+                Spacer(Modifier.height(8.dp))
+                HorizontalDivider(color = dividerColor)
+                Spacer(Modifier.height(8.dp))
+
+                // Assigned info
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.Tag, null, Modifier.size(14.dp), tint = metaIconColor)
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        "Assigned: ${state.assignedVariant}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = metaColor
+                    )
+                    if (state.isOverridden) {
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "→ overridden",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = overriddenLabelColor
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                // Traffic split info
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.PieChart, null, Modifier.size(14.dp), tint = metaIconColor)
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        "Split: ${exp.variants.zip(exp.trafficSplit).joinToString(" · ") { (v, p) -> "$v ${p}%" }}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = metaColor
+                    )
+                }
+
+                Spacer(Modifier.height(10.dp))
+
+                // Variant buttons
+                Text(
+                    "Select variant:",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = titleColor
+                )
+                Spacer(Modifier.height(6.dp))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    // "Auto" button (clears override)
+                    val isAuto = !state.isOverridden
+                    FilterChip(
+                        selected = isAuto,
+                        onClick = {
+                            ABTestManager.setOverride(context, exp, null)
+                        },
+                        label = {
+                            Text(
+                                "Auto",
+                                fontSize = 11.sp,
+                                fontWeight = if (isAuto) FontWeight.Bold else FontWeight.Normal,
+                                color = if (isAuto) chipAutoSelectedText else chipUnselectedText
+                            )
+                        },
+                        leadingIcon = if (isAuto) {
+                            { Icon(Icons.Filled.Check, null, Modifier.size(14.dp), tint = chipAutoSelectedText) }
+                        } else null,
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = chipAutoSelectedBg,
+                            selectedLabelColor = chipAutoSelectedText,
+                            selectedLeadingIconColor = chipAutoSelectedText,
+                            containerColor = chipUnselectedBg,
+                            labelColor = chipUnselectedText
+                        ),
+                        border = if (!isAuto) FilterChipDefaults.filterChipBorder(
+                            enabled = true,
+                            selected = false,
+                            borderColor = chipUnselectedBorder
+                        ) else null
+                    )
+
+                    // One chip per variant
+                    exp.variants.forEach { variant ->
+                        val isSelected = state.isOverridden && state.overrideVariant == variant
+                        FilterChip(
+                            selected = isSelected,
+                            onClick = {
+                                ABTestManager.setOverride(context, exp, variant)
+                            },
+                            label = {
+                                Text(
+                                    variant.replace("_", " "),
+                                    fontSize = 11.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (isSelected) chipVariantSelectedText else chipUnselectedText
+                                )
+                            },
+                            leadingIcon = if (isSelected) {
+                                { Icon(Icons.Filled.Check, null, Modifier.size(14.dp), tint = chipVariantSelectedText) }
+                            } else null,
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = chipVariantSelectedBg,
+                                selectedLabelColor = chipVariantSelectedText,
+                                selectedLeadingIconColor = chipVariantSelectedText,
+                                containerColor = chipUnselectedBg,
+                                labelColor = chipUnselectedText
+                            ),
+                            border = if (!isSelected) FilterChipDefaults.filterChipBorder(
+                                enabled = true,
+                                selected = false,
+                                borderColor = chipUnselectedBorder
+                            ) else null
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// BACKUP & RESTORE — DEV TESTING SECTION
+// ═══════════════════════════════════════════════════════════════════════════════
+
+@Composable
+fun BackupDevTestSection(onNavigateToBackup: () -> Unit) {
+    val context = LocalContext.current
+    val isAuthorized = remember { DeviceAuthority.isAuthorizedDevice(context) }
+
+    DevSectionCard(title = "Backup & Restore Testing", icon = Icons.Filled.CloudUpload) {
+        if (!isAuthorized) {
+            Text(
+                "⛔ This device is not authorized for backup testing.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error
+            )
+        } else {
+            Text(
+                "Test backup creation, restore, and local storage on this whitelisted device.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(12.dp))
+
+            Button(
+                onClick = onNavigateToBackup,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Filled.CloudUpload, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Open Backup Settings")
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            val backupViewModel: BackupViewModel = viewModel()
+            val backupState by backupViewModel.state.collectAsState()
+
+            OutlinedButton(
+                onClick = { backupViewModel.createBackup() },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !backupState.isBackingUp && !backupState.isRestoring
+            ) {
+                if (backupState.isBackingUp) {
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                    Spacer(Modifier.width(8.dp))
+                    Text(backupState.progress.stage)
+                } else {
+                    Icon(Icons.Filled.Backup, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Quick Backup (All Data)")
+                }
+            }
+
+            Spacer(Modifier.height(4.dp))
+
+            // ── Test suite button ──────────────────────────
+            OutlinedButton(
+                onClick = { backupViewModel.createTestBackups() },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !backupState.isBackingUp && !backupState.isRestoring
+            ) {
+                if (backupState.isBackingUp) {
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                    Spacer(Modifier.width(8.dp))
+                    Text(backupState.progress.stage)
+                } else {
+                    Icon(Icons.Filled.Science, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Create 4 Test Backups")
+                }
+            }
+
+            // ── Status messages ─────────────────────────────
+            backupState.errorMessage?.let { error ->
+                Spacer(Modifier.height(8.dp))
+                Surface(
+                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Filled.Error, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.error)
+                        Spacer(Modifier.width(8.dp))
+                        Text(error, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                    }
+                }
+            }
+
+            backupState.successMessage?.let { success ->
+                Spacer(Modifier.height(8.dp))
+                Surface(
+                    color = Color(0xFF1B5E20).copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(Modifier.padding(12.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Filled.CheckCircle, null, Modifier.size(16.dp), tint = Color(0xFF4CAF50))
+                            Spacer(Modifier.width(8.dp))
+                            Text("Result", style = MaterialTheme.typography.labelMedium, color = Color(0xFF2E7D32))
+                        }
+                        Spacer(Modifier.height(4.dp))
+                        Text(success, style = MaterialTheme.typography.bodySmall, color = Color(0xFF2E7D32))
+                    }
+                }
+            }
+
+            if (backupState.localBackups.isNotEmpty()) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "${backupState.localBackups.size} local backup(s) stored",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                // Show each backup with validate + restore buttons
+                backupState.localBackups.take(6).forEach { backup ->
+                    val scopeLabel = buildString {
+                        if (backup.scope.includeProfile) append("P")
+                        if (backup.scope.includeMessages) append("M")
+                        if (backup.scope.includePosts) append("T")
+                        if (backup.scope.includeBookmarks) append("B")
+                        if (backup.scope.includeFollows) append("F")
+                        if (backup.scope.includeSettings) append("S")
+                        if (backup.scope.includeNotifications) append("N")
+                    }.ifEmpty { "?" }
+
+                    val scopeCount = listOf(
+                        backup.scope.includeProfile, backup.scope.includeMessages,
+                        backup.scope.includePosts, backup.scope.includeBookmarks,
+                        backup.scope.includeFollows, backup.scope.includeSettings,
+                        backup.scope.includeNotifications
+                    ).count { it }
+
+                    val scopeColor = when {
+                        scopeCount == 7 -> Color(0xFF4CAF50)   // Full — green
+                        scopeCount >= 4 -> Color(0xFF2196F3)   // Most — blue
+                        scopeCount >= 2 -> Color(0xFFFF9800)   // Partial — orange
+                        scopeCount == 1 -> Color(0xFFE91E63)   // Single — pink
+                        else -> MaterialTheme.colorScheme.outline
+                    }
+
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                        border = BorderStroke(1.dp, scopeColor.copy(alpha = 0.3f))
+                    ) {
+                        Column(Modifier.padding(8.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                // Scope indicator dot
+                                Box(
+                                    Modifier.size(8.dp)
+                                        .background(scopeColor, shape = CircleShape)
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Column(Modifier.weight(1f)) {
+                                    // Show label if present (test backups)
+                                    if (backup.label != null) {
+                                        Text(
+                                            backup.label,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = scopeColor
+                                        )
+                                    }
+                                    Text(
+                                        backup.formattedDate,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        "${backup.formattedSize} | Scope: $scopeLabel ($scopeCount/7) | ${backup.storageLocation}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                TextButton(
+                                    onClick = { backupViewModel.validateBackup(backup.backupId) },
+                                    modifier = Modifier.height(32.dp),
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                                ) {
+                                    Text("Validate", style = MaterialTheme.typography.labelSmall)
+                                }
+                                TextButton(
+                                    onClick = { backupViewModel.restoreBackup(backup.backupId) },
+                                    modifier = Modifier.height(32.dp),
+                                    enabled = !backupState.isRestoring,
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                                ) {
+                                    Text("Restore", style = MaterialTheme.typography.labelSmall)
+                                }
+                                TextButton(
+                                    onClick = { backupViewModel.deleteBackup(backup.backupId) },
+                                    modifier = Modifier.height(32.dp),
+                                    colors = ButtonDefaults.textButtonColors(
+                                        contentColor = MaterialTheme.colorScheme.error
+                                    ),
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                                ) {
+                                    Text("Delete", style = MaterialTheme.typography.labelSmall)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (backupState.localBackups.size > 6) {
+                    Text(
+                        "+${backupState.localBackups.size - 6} more — open Backup Settings to see all",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+                    )
+                }
+
+                Spacer(Modifier.height(4.dp))
+                TextButton(
+                    onClick = { backupViewModel.deleteAllBackups() },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Icon(Icons.Filled.DeleteSweep, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Delete All Backups")
+                }
+            }
+        }
+    }
+}
+

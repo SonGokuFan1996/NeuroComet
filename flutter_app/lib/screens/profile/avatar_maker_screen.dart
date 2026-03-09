@@ -164,7 +164,7 @@ class _AvatarMakerScreenState extends ConsumerState<AvatarMakerScreen>
                 color: theme.colorScheme.surfaceContainerHighest,
                 border: Border(
                   bottom: BorderSide(
-                    color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+                    color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
                   ),
                 ),
               ),
@@ -203,7 +203,7 @@ class _AvatarMakerScreenState extends ConsumerState<AvatarMakerScreen>
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            theme.colorScheme.primaryContainer.withOpacity(0.3),
+            theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
             theme.colorScheme.surface,
           ],
         ),
@@ -222,7 +222,7 @@ class _AvatarMakerScreenState extends ConsumerState<AvatarMakerScreen>
             color: _avatar.backgroundColor.toColor(),
             boxShadow: [
               BoxShadow(
-                color: _avatar.backgroundColor.toColor().withOpacity(0.4),
+                color: _avatar.backgroundColor.toColor().withValues(alpha: 0.4),
                 blurRadius: 24,
                 spreadRadius: 4,
               ),
@@ -673,7 +673,7 @@ class _AvatarMakerScreenState extends ConsumerState<AvatarMakerScreen>
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.4),
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
                         blurRadius: 8,
                         spreadRadius: 2,
                       ),
@@ -739,11 +739,11 @@ class _OptionCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           color: isSelected
               ? theme.colorScheme.primaryContainer
-              : theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           border: Border.all(
             color: isSelected
                 ? theme.colorScheme.primary
-                : theme.colorScheme.outlineVariant.withOpacity(0.5),
+                : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -1084,7 +1084,7 @@ class _SimpleAvatarPainter extends CustomPainter {
           ..strokeWidth = 2;
         final glassFillPaint = Paint()
           ..color = avatar.eyeStyle == AvatarEyeStyle.sunglasses
-              ? Colors.black.withOpacity(0.7)
+              ? Colors.black.withValues(alpha: 0.7)
               : Colors.transparent
           ..style = PaintingStyle.fill;
 
@@ -1301,7 +1301,7 @@ class _SimpleAvatarPainter extends CustomPainter {
       case AvatarFacialHair.stubble:
         // Draw dots for stubble
         final stubblePaint = Paint()
-          ..color = facialHairPaint.color.withOpacity(0.5)
+          ..color = facialHairPaint.color.withValues(alpha: 0.5)
           ..style = PaintingStyle.fill;
         for (int i = 0; i < 20; i++) {
           final x = center.dx + (i % 5 - 2) * faceRadius * 0.15;
@@ -1453,7 +1453,7 @@ class _SimpleAvatarPainter extends CustomPainter {
             ),
             const Radius.circular(4),
           ),
-          Paint()..color = beaniePaint.color.withOpacity(0.7),
+          Paint()..color = beaniePaint.color.withValues(alpha: 0.7),
         );
         // Pom pom
         canvas.drawCircle(

@@ -319,7 +319,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
         color: theme.scaffoldBackgroundColor,
         border: Border(
           bottom: BorderSide(
-            color: theme.dividerColor.withOpacity(0.1),
+            color: theme.dividerColor.withValues(alpha: 0.1),
           ),
         ),
       ),
@@ -416,7 +416,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: selectedBg.colors.first.withOpacity(0.3),
+                  color: selectedBg.colors.first.withValues(alpha: 0.3),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -430,7 +430,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
                     borderRadius: BorderRadius.circular(24),
                     child: CustomPaint(
                       painter: _PatternPainter(
-                        color: Colors.white.withOpacity(0.05),
+                        color: Colors.white.withValues(alpha: 0.05),
                       ),
                     ),
                   ),
@@ -453,13 +453,13 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
                       decoration: InputDecoration(
                         hintText: 'Share your thoughts...',
                         hintStyle: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                         ),
                         border: InputBorder.none,
                         counterStyle: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                         ),
                       ),
                       onChanged: (_) => setState(() {}),
@@ -473,7 +473,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -552,7 +552,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
-                                color: bg.colors.first.withOpacity(0.5),
+                                color: bg.colors.first.withValues(alpha: 0.5),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
@@ -587,7 +587,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withValues(alpha: 0.3),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -626,7 +626,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
                             end: Alignment.bottomCenter,
                             colors: [
                               Colors.transparent,
-                              Colors.black.withOpacity(0.8),
+                              Colors.black.withValues(alpha: 0.8),
                             ],
                           ),
                         ),
@@ -637,9 +637,9 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
                           maxLength: 150,
                           decoration: InputDecoration(
                             hintText: 'Add a caption...',
-                            hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+                            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
                             border: InputBorder.none,
-                            counterStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                            counterStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                           ),
                         ),
                       ),
@@ -653,7 +653,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5),
+                          color: Colors.black.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
@@ -699,7 +699,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -712,7 +712,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
             Text(
               'Video ready to share',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 16,
               ),
             ),
@@ -720,7 +720,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
             Text(
               'Up to 30 seconds',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withValues(alpha: 0.5),
                 fontSize: 14,
               ),
             ),
@@ -740,7 +740,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
             end: Alignment.bottomRight,
             colors: [
               theme.colorScheme.surfaceContainerHighest,
-              theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             ],
           ),
         ),
@@ -751,7 +751,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withOpacity(0.1),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -866,7 +866,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
         color: theme.scaffoldBackgroundColor,
         border: Border(
           top: BorderSide(
-            color: theme.dividerColor.withOpacity(0.1),
+            color: theme.dividerColor.withValues(alpha: 0.1),
           ),
         ),
       ),
@@ -1104,7 +1104,7 @@ class _MediaPickerSheet extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: theme.colorScheme.outline.withOpacity(0.3),
+              color: theme.colorScheme.outline.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -1185,7 +1185,7 @@ class _MediaOption extends StatelessWidget {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Icon(icon, color: color, size: 28),
@@ -1278,7 +1278,7 @@ class _AddMediaButton extends StatelessWidget {
       label: const Text('Add Photo or Video'),
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(double.infinity, 48),
-        side: BorderSide(color: theme.colorScheme.outline.withOpacity(0.3)),
+        side: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
       ),
     );
   }

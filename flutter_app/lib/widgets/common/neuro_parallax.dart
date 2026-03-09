@@ -121,7 +121,7 @@ class NeuroParallaxHeader extends StatelessWidget {
     final overlayColors = gradientOverlayColors ??
         [
           Colors.transparent,
-          theme.colorScheme.surface.withOpacity(0.8),
+          theme.colorScheme.surface.withValues(alpha: 0.8),
           theme.colorScheme.surface,
         ];
 

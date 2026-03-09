@@ -42,6 +42,54 @@ enum class SplashAnimationStyle {
     RAINBOW_SPARKLE  // Magical rainbow celebration - for secret Rainbow Brain theme
 }
 
+internal data class SplashDepthProfile(
+    val ambientHaloAlpha: Float,
+    val shellHighlightAlpha: Float,
+    val shellShadowAlpha: Float,
+    val rimAlpha: Float,
+    val connectionGlowAlpha: Float,
+    val connectionShadowAlpha: Float,
+    val nodeShadowAlpha: Float
+)
+
+internal fun SplashAnimationStyle.depthProfile(): SplashDepthProfile = when (this) {
+    SplashAnimationStyle.CALM_WAVES,
+    SplashAnimationStyle.GROUNDING_EARTH,
+    SplashAnimationStyle.GENTLE_FLOAT -> SplashDepthProfile(
+        ambientHaloAlpha = 0.18f,
+        shellHighlightAlpha = 0.16f,
+        shellShadowAlpha = 0.14f,
+        rimAlpha = 0.18f,
+        connectionGlowAlpha = 0.28f,
+        connectionShadowAlpha = 0.10f,
+        nodeShadowAlpha = 0.12f
+    )
+    SplashAnimationStyle.FOCUS_PULSE,
+    SplashAnimationStyle.ROUTINE_GRID,
+    SplashAnimationStyle.CONTRAST_RINGS,
+    SplashAnimationStyle.PATTERN_SHAPES -> SplashDepthProfile(
+        ambientHaloAlpha = 0.14f,
+        shellHighlightAlpha = 0.12f,
+        shellShadowAlpha = 0.18f,
+        rimAlpha = 0.24f,
+        connectionGlowAlpha = 0.24f,
+        connectionShadowAlpha = 0.14f,
+        nodeShadowAlpha = 0.16f
+    )
+    SplashAnimationStyle.ENERGY_BURST,
+    SplashAnimationStyle.CREATIVE_SWIRL,
+    SplashAnimationStyle.SENSORY_SPARKLE,
+    SplashAnimationStyle.RAINBOW_SPARKLE -> SplashDepthProfile(
+        ambientHaloAlpha = 0.24f,
+        shellHighlightAlpha = 0.18f,
+        shellShadowAlpha = 0.16f,
+        rimAlpha = 0.22f,
+        connectionGlowAlpha = 0.34f,
+        connectionShadowAlpha = 0.12f,
+        nodeShadowAlpha = 0.14f
+    )
+}
+
 /**
  * Get the appropriate splash configuration based on the user's selected NeuroState.
  */

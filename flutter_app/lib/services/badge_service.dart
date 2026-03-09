@@ -450,13 +450,13 @@ class BadgeChip extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             color: isUnlocked
-                ? badge.rarity.color.withOpacity(0.15)
+                ? badge.rarity.color.withValues(alpha: 0.15)
                 : theme.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isUnlocked
-                  ? badge.rarity.color.withOpacity(0.4)
-                  : theme.colorScheme.outline.withOpacity(0.2),
+                  ? badge.rarity.color.withValues(alpha: 0.4)
+                  : theme.colorScheme.outline.withValues(alpha: 0.2),
               width: isUnlocked ? 2 : 1,
             ),
           ),
@@ -517,7 +517,7 @@ class BadgeDetailDialog extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: progress.isUnlocked
-                    ? badge.rarity.color.withOpacity(0.2)
+                    ? badge.rarity.color.withValues(alpha: 0.2)
                     : theme.colorScheme.surfaceContainerHighest,
                 border: Border.all(
                   color: progress.isUnlocked
@@ -539,7 +539,7 @@ class BadgeDetailDialog extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: badge.rarity.color.withOpacity(0.15),
+                color: badge.rarity.color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(

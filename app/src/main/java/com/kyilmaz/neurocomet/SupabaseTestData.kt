@@ -52,6 +52,18 @@ object SupabaseTestData {
     )
 
     @Serializable
+    data class TestProfile(
+        val id: String,
+        val display_name: String,
+        val username: String,
+        val avatar_url: String? = null,
+        val bio: String? = null,
+        val is_verified: Boolean = false,
+        val created_at: String,
+        val updated_at: String
+    )
+
+    @Serializable
     data class TestPostLike(
         val post_id: Long,
         val user_id: String,
@@ -127,25 +139,55 @@ object SupabaseTestData {
             ?: return@withContext Result.failure(Exception("Supabase not configured"))
 
         try {
-            val randomId = (1000..9999).random()
+            val timestamp = System.currentTimeMillis()
             val now = nowTimestamp()
-            val userData = buildJsonObject {
-                put("email", "testuser$randomId@NeuroComet.dev")
-                put("username", "testuser$randomId")
-                put("display_name", "Test User $randomId")
-                put("avatar_url", avatarUrl("testuser$randomId"))
-                put("bio", "\uD83E\uDDEA Test user created from DevOptions")
+            val username = "testuser_$timestamp"
+            val email = "$username@NeuroComet.dev"
+
+            val testUserData = buildJsonObject {
+                put("email", email)
+                put("username", username)
+                put("display_name", "Test User $timestamp")
+                put("avatar_url", avatarUrl(username))
+                put("bio", "Android test user")
                 put("created_at", now)
                 put("updated_at", now)
             }
 
-            client.safeInsert("users", userData)
+            client.safeInsert("users", testUserData)
 
-            Log.d(TAG, "Test user sent successfully: testuser$randomId")
-            Result.success("Test user 'testuser$randomId' created!")
-        } catch (e: Exception) {
-            Log.e(TAG, "âŒ Failed to send test user", e)
-            Result.failure(e)
+            // Keep profiles in sync when that table exists.
+            try {
+                val userRow = client.from("users")
+                    .select(columns = io.github.jan.supabase.postgrest.query.Columns.list("id")) {
+                        filter { eq("email", email) }
+                        limit(1)
+                    }
+                    .decodeList<Map<String, String>>()
+                    .firstOrNull()
+
+                val userId = userRow?.get("id")
+                if (userId != null) {
+                    val profileData = buildJsonObject {
+                        put("id", userId)
+                        put("display_name", "Test User $timestamp")
+                        put("username", username)
+                        put("avatar_url", avatarUrl(username))
+                        put("bio", "Android test user")
+                        put("is_verified", false)
+                        put("created_at", now)
+                        put("updated_at", now)
+                    }
+                    client.from("profiles").upsert(profileData)
+                }
+            } catch (e: Exception) {
+                Log.d(TAG, "Profiles table not available while creating test user", e)
+            }
+
+            Result.success("Test user sent successfully!")
+        } catch (e: Throwable) {
+            Log.e(TAG, "❌ Failed to send test user: ${e.javaClass.simpleName}: ${e.message}", e)
+            Result.failure(Exception("Send failed: ${e.message}", e))
         }
     }
 
@@ -255,7 +297,31 @@ object SupabaseTestData {
                                 like("email", "%@NeuroComet.dev")
                             }
                         }
-                    Log.d(TAG, "âœ… Deleted test users")
+                    Log.d(TAG, "✅ Deleted test users")
+                }
+                "profiles" -> {
+                    client.from("profiles")
+                        .delete {
+                            filter {
+                                or {
+                                    like("username", "testuser_%")
+                                    like("username", "bulk_test_%")
+                                }
+                            }
+                        }
+                    Log.d(TAG, "✅ Deleted test profiles")
+                }
+                "dm_messages" -> {
+                    client.from("dm_messages")
+                        .delete {
+                            filter {
+                                or {
+                                    like("sender_id", "test_%")
+                                    like("content", "%NeuroComet DevOptions%")
+                                }
+                            }
+                        }
+                    Log.d(TAG, "✅ Deleted test direct messages")
                 }
                 "post_likes" -> {
                     // Delete likes from test users

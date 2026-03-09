@@ -199,7 +199,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: theme.colorScheme.errorContainer.withOpacity(0.3),
+                color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -444,7 +444,7 @@ class _UnreadBadgeState extends State<_UnreadBadge>
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF7C4DFF).withOpacity(0.3),
+              color: const Color(0xFF7C4DFF).withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -474,7 +474,7 @@ class _MarkAllReadButton extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Material(
-      color: theme.colorScheme.primaryContainer.withOpacity(0.5),
+      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onPressed,
@@ -625,19 +625,19 @@ class _FilterPillState extends State<_FilterPill>
           ),
           decoration: BoxDecoration(
             color: widget.isSelected
-                ? primaryColor.withOpacity(0.15)
+                ? primaryColor.withValues(alpha: 0.15)
                 : theme.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(20),
             border: widget.isSelected
                 ? Border.all(
-                    color: primaryColor.withOpacity(0.4),
+                    color: primaryColor.withValues(alpha: 0.4),
                     width: 1.5,
                   )
                 : null,
             boxShadow: widget.isSelected
                 ? [
                     BoxShadow(
-                      color: primaryColor.withOpacity(0.15),
+                      color: primaryColor.withValues(alpha: 0.15),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -669,7 +669,7 @@ class _FilterPillState extends State<_FilterPill>
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.2),
+                    color: primaryColor.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -903,8 +903,8 @@ class _EmptyStateCardState extends State<_EmptyStateCard>
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          color.withOpacity(0.2),
-                          color.withOpacity(0),
+                          color.withValues(alpha: 0.2),
+                          color.withValues(alpha: 0),
                         ],
                       ),
                     ),
@@ -916,10 +916,10 @@ class _EmptyStateCardState extends State<_EmptyStateCard>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: isDark
-                          ? color.withOpacity(0.15)
-                          : color.withOpacity(0.1),
+                          ? color.withValues(alpha: 0.15)
+                          : color.withValues(alpha: 0.1),
                       border: Border.all(
-                        color: color.withOpacity(0.3),
+                        color: color.withValues(alpha: 0.3),
                         width: 2,
                       ),
                     ),
@@ -1036,14 +1036,14 @@ class _EnhancedNotificationTileState extends State<_EnhancedNotificationTile>
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: Material(
             color: notification.isRead
-                ? (isDark ? Colors.white.withOpacity(0.03) : Colors.white)
+                ? (isDark ? Colors.white.withValues(alpha: 0.03) : Colors.white)
                 : (isDark
-                    ? theme.colorScheme.primaryContainer.withOpacity(0.15)
-                    : theme.colorScheme.primaryContainer.withOpacity(0.3)),
+                    ? theme.colorScheme.primaryContainer.withValues(alpha: 0.15)
+                    : theme.colorScheme.primaryContainer.withValues(alpha: 0.3)),
             borderRadius: BorderRadius.circular(16),
             clipBehavior: Clip.antiAlias,
             elevation: notification.isRead ? 0 : 1,
-            shadowColor: theme.colorScheme.primary.withOpacity(0.1),
+            shadowColor: theme.colorScheme.primary.withValues(alpha: 0.1),
             child: InkWell(
               onTap: widget.onTap,
               borderRadius: BorderRadius.circular(16),
@@ -1053,8 +1053,8 @@ class _EnhancedNotificationTileState extends State<_EnhancedNotificationTile>
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: notification.isRead
-                        ? (isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.04))
-                        : theme.colorScheme.primary.withOpacity(0.2),
+                        ? (isDark ? Colors.white.withValues(alpha: 0.06) : Colors.black.withValues(alpha: 0.04))
+                        : theme.colorScheme.primary.withValues(alpha: 0.2),
                   ),
                 ),
                 child: Row(
@@ -1116,13 +1116,13 @@ class _EnhancedNotificationTileState extends State<_EnhancedNotificationTile>
                                   Icon(
                                     Icons.touch_app_rounded,
                                     size: 14,
-                                    color: theme.colorScheme.primary.withOpacity(0.7),
+                                    color: theme.colorScheme.primary.withValues(alpha: 0.7),
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
                                     'Tap to view',
                                     style: theme.textTheme.labelSmall?.copyWith(
-                                      color: theme.colorScheme.primary.withOpacity(0.7),
+                                      color: theme.colorScheme.primary.withValues(alpha: 0.7),
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
@@ -1145,7 +1145,7 @@ class _EnhancedNotificationTileState extends State<_EnhancedNotificationTile>
                         icon: Icon(
                           Icons.close_rounded,
                           size: 18,
-                          color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                          color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                         ),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
@@ -1255,7 +1255,7 @@ class _TimeChip extends StatelessWidget {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF7C4DFF).withOpacity(0.4),
+                  color: const Color(0xFF7C4DFF).withValues(alpha: 0.4),
                   blurRadius: 4,
                 ),
               ],
@@ -1332,7 +1332,7 @@ class _NotificationAvatarEnhanced extends StatelessWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: color.withOpacity(0.4),
+                      color: color.withValues(alpha: 0.4),
                       blurRadius: 6,
                     ),
                   ],
@@ -1358,13 +1358,13 @@ class _NotificationAvatarEnhanced extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            color.withOpacity(0.2),
-            gradient.last.withOpacity(0.1),
+            color.withValues(alpha: 0.2),
+            gradient.last.withValues(alpha: 0.1),
           ],
         ),
         shape: BoxShape.circle,
         border: Border.all(
-          color: color.withOpacity(0.3),
+          color: color.withValues(alpha: 0.3),
           width: 1.5,
         ),
       ),

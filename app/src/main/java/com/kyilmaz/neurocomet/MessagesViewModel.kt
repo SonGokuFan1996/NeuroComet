@@ -198,7 +198,16 @@ class MessagesViewModel : ViewModel() {
                 messages = state.activeConversation.messages + optimisticMessage,
                 lastMessageTimestamp = optimisticMessage.timestamp
             )
-            state.copy(activeConversation = updatedConv)
+            // Also update the conversations list so the UI sees the new message immediately
+            val updatedConversations = state.conversations.map { conv ->
+                if (conv.id == activeConv.id) {
+                    conv.copy(
+                        messages = conv.messages + optimisticMessage,
+                        lastMessageTimestamp = optimisticMessage.timestamp
+                    )
+                } else conv
+            }
+            state.copy(activeConversation = updatedConv, conversations = updatedConversations)
         }
 
         viewModelScope.launch {
@@ -206,46 +215,41 @@ class MessagesViewModel : ViewModel() {
                 // Real mode: send via Supabase
                 val sent = MessagesRepository.sendMessage(activeConv.id, userId, content)
                 if (sent != null) {
-                    // Replace optimistic message with real one
-                    _state.update { state ->
-                        val updatedMessages = state.activeConversation?.messages?.map { msg ->
-                            if (msg.id == optimisticMessage.id) {
-                                sent.copy(deliveryStatus = MessageDeliveryStatus.SENT)
-                            } else msg
-                        } ?: emptyList()
-                        state.copy(
-                            activeConversation = state.activeConversation?.copy(messages = updatedMessages)
-                        )
+                    updateMessageInState(activeConv.id, optimisticMessage.id) {
+                        sent.copy(deliveryStatus = MessageDeliveryStatus.SENT)
                     }
                 } else {
-                    // Mark as failed
-                    _state.update { state ->
-                        val updatedMessages = state.activeConversation?.messages?.map { msg ->
-                            if (msg.id == optimisticMessage.id) {
-                                msg.copy(deliveryStatus = MessageDeliveryStatus.FAILED)
-                            } else msg
-                        } ?: emptyList()
-                        state.copy(
-                            activeConversation = state.activeConversation?.copy(messages = updatedMessages)
-                        )
+                    updateMessageInState(activeConv.id, optimisticMessage.id) {
+                        it.copy(deliveryStatus = MessageDeliveryStatus.FAILED)
                     }
                 }
             } else {
                 // Mock mode: just mark as sent
-                _state.update { state ->
-                    val updatedMessages = state.activeConversation?.messages?.map { msg ->
-                        if (msg.id == optimisticMessage.id) {
-                            msg.copy(deliveryStatus = MessageDeliveryStatus.SENT)
-                        } else msg
-                    } ?: emptyList()
-                    state.copy(
-                        activeConversation = state.activeConversation?.copy(messages = updatedMessages)
-                    )
+                updateMessageInState(activeConv.id, optimisticMessage.id) {
+                    it.copy(deliveryStatus = MessageDeliveryStatus.SENT)
                 }
             }
 
             // Refresh conversation list
             refreshConversations()
+        }
+    }
+
+    /**
+     * Helper: update a specific message in both activeConversation and conversations list.
+     */
+    private fun updateMessageInState(convId: String, messageId: String, transform: (DirectMessage) -> DirectMessage) {
+        _state.update { state ->
+            val mapMessages = { messages: List<DirectMessage> ->
+                messages.map { msg -> if (msg.id == messageId) transform(msg) else msg }
+            }
+            val updatedActive = state.activeConversation?.let { ac ->
+                if (ac.id == convId) ac.copy(messages = mapMessages(ac.messages)) else ac
+            }
+            val updatedConversations = state.conversations.map { conv ->
+                if (conv.id == convId) conv.copy(messages = mapMessages(conv.messages)) else conv
+            }
+            state.copy(activeConversation = updatedActive, conversations = updatedConversations)
         }
     }
 
@@ -299,8 +303,8 @@ class MessagesViewModel : ViewModel() {
     fun reactToMessage(conversationId: String, messageId: String, emoji: String) {
         val userId = _state.value.currentUserId
         _state.update { state ->
-            val updatedConv = state.activeConversation?.copy(
-                messages = state.activeConversation.messages.map { msg ->
+            val updatedMessages: (List<DirectMessage>) -> List<DirectMessage> = { messages ->
+                messages.map { msg ->
                     if (msg.id == messageId) {
                         val currentReactions = msg.reactions.toMutableList()
                         val existing = currentReactions.find { it.userId == userId && it.emoji == emoji }
@@ -314,8 +318,20 @@ class MessagesViewModel : ViewModel() {
                         msg.copy(reactions = currentReactions)
                     } else msg
                 }
+            }
+
+            val updatedConv = state.activeConversation?.let {
+                if (it.id == conversationId) it.copy(messages = updatedMessages(it.messages)) else it
+            }
+
+            val updatedConversations = state.conversations.map { conv ->
+                if (conv.id == conversationId) conv.copy(messages = updatedMessages(conv.messages)) else conv
+            }
+
+            state.copy(
+                activeConversation = updatedConv,
+                conversations = updatedConversations
             )
-            state.copy(activeConversation = updatedConv)
         }
     }
 
@@ -386,14 +402,62 @@ class MessagesViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Receive a mock reply (for simulated incoming messages in mock mode).
+     */
+    fun receiveMockReply(conversationId: String, senderId: String, content: String) {
+        if (_state.value.currentUserId != "me") return
+
+        val incomingMessage = DirectMessage(
+            id = "mock-${System.currentTimeMillis()}",
+            senderId = senderId,
+            recipientId = _state.value.currentUserId,
+            content = content,
+            timestamp = Instant.now().toString(),
+            deliveryStatus = MessageDeliveryStatus.SENT,
+            moderationStatus = ModerationStatus.CLEAN
+        )
+
+        _state.update { state ->
+            val isActiveConversation = state.activeConversation?.id == conversationId
+            val updatedConversations = state.conversations
+                .map { conv ->
+                    if (conv.id == conversationId) {
+                        conv.copy(
+                            messages = conv.messages + incomingMessage,
+                            lastMessageTimestamp = incomingMessage.timestamp,
+                            unreadCount = if (isActiveConversation) 0 else conv.unreadCount + 1
+                        )
+                    } else conv
+                }
+                .sortedByDescending { Instant.parse(it.lastMessageTimestamp) }
+
+            val updatedActiveConversation = state.activeConversation?.let { active ->
+                if (active.id == conversationId) {
+                    active.copy(
+                        messages = active.messages + incomingMessage,
+                        lastMessageTimestamp = incomingMessage.timestamp,
+                        unreadCount = 0
+                    )
+                } else active
+            }
+
+            state.copy(
+                conversations = updatedConversations,
+                activeConversation = updatedActiveConversation
+            )
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         realtimeJob?.cancel()
         viewModelScope.launch {
             try {
                 realtimeChannel?.unsubscribe()
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                Log.w(TAG, "Error unsubscribing realtime channel on clear", e)
+            }
         }
     }
 }
-

@@ -10,91 +10,47 @@
         android:translateX="54"
         android:translateY="54">
 
-        <!-- Outer glow ring - deep purple -->
-        <path
-            android:fillColor="#7C4DFF"
-            android:fillAlpha="0.12"
-            android:pathData="M 0,0 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" />
+        <path android:fillColor="#090D18" android:fillAlpha="0.10" android:pathData="M 0,0 m -40,0 a 40,40 0 1,1 80,0 a 40,40 0 1,1 -80,0" />
+        <path android:fillColor="#7C4DFF" android:fillAlpha="0.14" android:pathData="M 0,0 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" />
+        <path android:fillColor="#00BFA5" android:fillAlpha="0.22" android:pathData="M 0,0 m -32,0 a 32,32 0 1,1 64,0 a 32,32 0 1,1 -64,0" />
 
-        <!-- Middle glow ring - teal accent -->
-        <path
-            android:fillColor="#00BFA5"
-            android:fillAlpha="0.2"
-            android:pathData="M 0,0 m -32,0 a 32,32 0 1,1 64,0 a 32,32 0 1,1 -64,0" />
+        <path android:strokeColor="#090D18" android:strokeAlpha="0.16" android:strokeWidth="10" android:strokeLineCap="round" android:pathData="M 2,-35 L 2,3" />
+        <path android:strokeColor="#651FFF" android:strokeAlpha="0.34" android:strokeWidth="8" android:strokeLineCap="round" android:pathData="M 0,-38 L 0,0" />
+        <path android:strokeColor="#7C4DFF" android:strokeWidth="4" android:strokeLineCap="round" android:pathData="M 0,-38 L 0,0" />
+        <path android:strokeColor="#FFFFFF" android:strokeAlpha="0.20" android:strokeWidth="1.4" android:strokeLineCap="round" android:pathData="M 0,-38 L 0,0" />
 
-        <!-- Focused line 1 (top) - Deep Purple -->
-        <path
-            android:strokeColor="#651FFF"
-            android:strokeAlpha="0.3"
-            android:strokeWidth="8"
-            android:strokeLineCap="round"
-            android:pathData="M 0,-38 L 0,0" />
-        <path
-            android:strokeColor="#7C4DFF"
-            android:strokeWidth="4"
-            android:strokeLineCap="round"
-            android:pathData="M 0,-38 L 0,0" />
+        <path android:strokeColor="#090D18" android:strokeAlpha="0.16" android:strokeWidth="10" android:strokeLineCap="round" android:pathData="M -31,22 L 2,3" />
+        <path android:strokeColor="#1DE9B6" android:strokeAlpha="0.34" android:strokeWidth="8" android:strokeLineCap="round" android:pathData="M -33,19 L 0,0" />
+        <path android:strokeColor="#00BFA5" android:strokeWidth="4" android:strokeLineCap="round" android:pathData="M -33,19 L 0,0" />
+        <path android:strokeColor="#FFFFFF" android:strokeAlpha="0.18" android:strokeWidth="1.4" android:strokeLineCap="round" android:pathData="M -33,19 L 0,0" />
 
-        <!-- Focused line 2 (bottom-left) - Teal -->
-        <path
-            android:strokeColor="#1DE9B6"
-            android:strokeAlpha="0.3"
-            android:strokeWidth="8"
-            android:strokeLineCap="round"
-            android:pathData="M -33,19 L 0,0" />
-        <path
-            android:strokeColor="#00BFA5"
-            android:strokeWidth="4"
-            android:strokeLineCap="round"
-            android:pathData="M -33,19 L 0,0" />
+        <path android:strokeColor="#090D18" android:strokeAlpha="0.16" android:strokeWidth="10" android:strokeLineCap="round" android:pathData="M 35,22 L 2,3" />
+        <path android:strokeColor="#536DFE" android:strokeAlpha="0.34" android:strokeWidth="8" android:strokeLineCap="round" android:pathData="M 33,19 L 0,0" />
+        <path android:strokeColor="#3D5AFE" android:strokeWidth="4" android:strokeLineCap="round" android:pathData="M 33,19 L 0,0" />
+        <path android:strokeColor="#FFFFFF" android:strokeAlpha="0.18" android:strokeWidth="1.4" android:strokeLineCap="round" android:pathData="M 33,19 L 0,0" />
 
-        <!-- Focused line 3 (bottom-right) - Indigo -->
-        <path
-            android:strokeColor="#536DFE"
-            android:strokeAlpha="0.3"
-            android:strokeWidth="8"
-            android:strokeLineCap="round"
-            android:pathData="M 33,19 L 0,0" />
-        <path
-            android:strokeColor="#3D5AFE"
-            android:strokeWidth="4"
-            android:strokeLineCap="round"
-            android:pathData="M 33,19 L 0,0" />
+        <path android:fillColor="#090D18" android:fillAlpha="0.18" android:pathData="M 2,-35 m -4.8,0 a 4.8,4.8 0 1,1 9.6,0 a 4.8,4.8 0 1,1 -9.6,0" />
+        <path android:fillColor="#7C4DFF" android:pathData="M 0,-38 m -4,0 a 4,4 0 1,1 8,0 a 4,4 0 1,1 -8,0" />
+        <path android:fillColor="#FFFFFF" android:fillAlpha="0.34" android:pathData="M -1.2,-39.2 m -1.6,0 a 1.6,1.6 0 1,1 3.2,0 a 1.6,1.6 0 1,1 -3.2,0" />
 
-        <!-- Focus point nodes -->
-        <path
-            android:fillColor="#7C4DFF"
-            android:pathData="M 0,-38 m -4,0 a 4,4 0 1,1 8,0 a 4,4 0 1,1 -8,0" />
+        <path android:fillColor="#090D18" android:fillAlpha="0.18" android:pathData="M -31,22 m -4.8,0 a 4.8,4.8 0 1,1 9.6,0 a 4.8,4.8 0 1,1 -9.6,0" />
+        <path android:fillColor="#00BFA5" android:pathData="M -33,19 m -4,0 a 4,4 0 1,1 8,0 a 4,4 0 1,1 -8,0" />
+        <path android:fillColor="#FFFFFF" android:fillAlpha="0.30" android:pathData="M -34.2,17.9 m -1.6,0 a 1.6,1.6 0 1,1 3.2,0 a 1.6,1.6 0 1,1 -3.2,0" />
 
-        <path
-            android:fillColor="#00BFA5"
-            android:pathData="M -33,19 m -4,0 a 4,4 0 1,1 8,0 a 4,4 0 1,1 -8,0" />
+        <path android:fillColor="#090D18" android:fillAlpha="0.18" android:pathData="M 35,22 m -4.8,0 a 4.8,4.8 0 1,1 9.6,0 a 4.8,4.8 0 1,1 -9.6,0" />
+        <path android:fillColor="#3D5AFE" android:pathData="M 33,19 m -4,0 a 4,4 0 1,1 8,0 a 4,4 0 1,1 -8,0" />
+        <path android:fillColor="#FFFFFF" android:fillAlpha="0.30" android:pathData="M 31.8,17.9 m -1.6,0 a 1.6,1.6 0 1,1 3.2,0 a 1.6,1.6 0 1,1 -3.2,0" />
 
-        <path
-            android:fillColor="#3D5AFE"
-            android:pathData="M 33,19 m -4,0 a 4,4 0 1,1 8,0 a 4,4 0 1,1 -8,0" />
+        <path android:strokeColor="#FFFFFF" android:strokeWidth="2" android:strokeAlpha="0.18" android:pathData="M 0,0 m -30,0 a 30,30 0 1,1 60,0 a 30,30 0 1,1 -60,0" />
+        <path android:strokeColor="#B388FF" android:strokeWidth="2" android:strokeAlpha="0.5" android:pathData="M 0,0 m -30,0 a 30,30 0 1,1 60,0 a 30,30 0 1,1 -60,0" />
 
-        <!-- Outer focus ring -->
-        <path
-            android:strokeColor="#B388FF"
-            android:strokeWidth="2"
-            android:strokeAlpha="0.5"
-            android:pathData="M 0,0 m -30,0 a 30,30 0 1,1 60,0 a 30,30 0 1,1 -60,0" />
-
-        <!-- Center circle - Deep violet core -->
-        <path
-            android:fillColor="#651FFF"
-            android:pathData="M 0,0 m -22,0 a 22,22 0 1,1 44,0 a 22,22 0 1,1 -44,0" />
-
-        <!-- Inner target circle -->
-        <path
-            android:fillColor="#7C4DFF"
-            android:pathData="M 0,0 m -12,0 a 12,12 0 1,1 24,0 a 12,12 0 1,1 -24,0" />
-
-        <!-- Center dot - bright focus point -->
-        <path
-            android:fillColor="#B388FF"
-            android:pathData="M 0,0 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
+        <path android:fillColor="#090D18" android:fillAlpha="0.20" android:pathData="M 3,4 m -24,0 a 24,24 0 1,1 48,0 a 24,24 0 1,1 -48,0" />
+        <path android:fillColor="#651FFF" android:pathData="M 0,0 m -22,0 a 22,22 0 1,1 44,0 a 22,22 0 1,1 -44,0" />
+        <path android:fillColor="#8F7CFF" android:fillAlpha="0.18" android:pathData="M -1,-1 m -14,0 a 14,14 0 1,1 28,0 a 14,14 0 1,1 -28,0" />
+        <path android:strokeColor="#F3EEFF" android:strokeWidth="1.8" android:strokeAlpha="0.16" android:pathData="M 0,0 m -21,0 a 21,21 0 1,1 42,0 a 21,21 0 1,1 -42,0" />
+        <path android:fillColor="#7C4DFF" android:pathData="M 0,0 m -12,0 a 12,12 0 1,1 24,0 a 12,12 0 1,1 -24,0" />
+        <path android:fillColor="#D9CCFF" android:fillAlpha="0.24" android:pathData="M -1,-1 m -7,0 a 7,7 0 1,1 14,0 a 7,7 0 1,1 -14,0" />
+        <path android:fillColor="#B388FF" android:pathData="M 0,0 m -5,0 a 5,5 0 1,1 10,0 a 5,5 0 1,1 -10,0" />
     </group>
 </vector>
 

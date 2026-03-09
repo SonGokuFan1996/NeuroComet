@@ -333,7 +333,7 @@ sdk.dir=C:\\Users\\YourUsername\\AppData\\Local\\Android\\Sdk
 
 # Supabase Configuration (Required)
 SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your_anon_public_key
+SUPABASE_KEY=your_client_safe_supabase_key
 
 # Developer Options (Optional)
 DEVELOPER_DEVICE_HASH=your_device_hash
@@ -343,8 +343,10 @@ DEVELOPER_DEVICE_HASH=your_device_hash
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
 2. Create a new project or select existing
-3. Add Android app with package: `com.kyilmaz.neuronetworkingtitle`
-4. Download `google-services.json` and place in `app/` directory
+3. Add Android apps with packages:
+   - `com.kyilmaz.neurocomet`
+   - `com.kyilmaz.neurocomet.debug`
+4. Download `google-services.json` and place it in `app/`, or use `app/src/debug/google-services.json` for the debug package if you keep separate Firebase configs
 
 ### 4. Set Up Supabase
 
@@ -360,6 +362,23 @@ DEVELOPER_DEVICE_HASH=your_device_hash
 ```
 
 Or use Android Studio: **Run > Run 'app'**
+
+### Native debug automation (Windows PowerShell)
+
+The repo includes a helper script at `tools/run-native-debug.ps1` that:
+- builds the native `app` debug APK
+- skips Google Services automatically for local/debug builds when `google-services.json` is missing
+- finds a connected device and installs the APK when possible
+- otherwise leaves you with a ready-to-install debug APK
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\run-native-debug.ps1
+```
+
+Optional flags:
+- `-SkipInstall` to build only
+- `-SkipBuild` to reuse the latest APK
+- `-DeviceId <serial>` to target a specific device
 
 ---
 
@@ -424,7 +443,7 @@ app/src/main/
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `SUPABASE_URL` | Supabase project URL | ✅ Yes |
-| `SUPABASE_KEY` | Supabase anon/public key | ✅ Yes |
+| `SUPABASE_KEY` | Supabase client-safe key (publishable on Pro, anon on legacy setups) | ✅ Yes |
 | `DEVELOPER_DEVICE_HASH` | SHA256 hash for dev options | ❌ No |
 
 ### RevenueCat Products

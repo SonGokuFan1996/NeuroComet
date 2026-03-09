@@ -365,7 +365,7 @@ class _GameTutorialDialogState extends State<GameTutorialDialog> {
                     shape: BoxShape.circle,
                     color: index == _currentStep
                         ? theme.colorScheme.primary
-                        : theme.colorScheme.outline.withOpacity(0.3),
+                        : theme.colorScheme.outline.withValues(alpha: 0.3),
                   ),
                 );
               }),

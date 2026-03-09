@@ -106,7 +106,7 @@ class _ContentSettingsScreenState extends ConsumerState<ContentSettingsScreen> {
           // Info Card
           Card(
             elevation: 0,
-            color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),

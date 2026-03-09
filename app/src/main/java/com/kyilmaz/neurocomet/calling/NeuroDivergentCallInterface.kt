@@ -44,11 +44,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.kyilmaz.neurocomet.avatarUrl
-import com.kyilmaz.neurocomet.CallType
-import com.kyilmaz.neurocomet.CallState
-import com.kyilmaz.neurocomet.CallOutcome
-import com.kyilmaz.neurocomet.CallHistoryEntry
-import com.kyilmaz.neurocomet.MockCallManager
 import kotlinx.coroutines.delay
 import java.time.Instant
 
@@ -573,8 +568,8 @@ fun NeuroDivergentCallHistoryScreen(
     onOpenPracticeCallSelection: () -> Unit = {}
 ) {
     // Safely observe call history with proper null handling
-    val callHistory by remember {
-        derivedStateOf { MockCallManager.callHistory }
+    val callHistory: List<CallHistoryEntry> by remember {
+        derivedStateOf { WebRTCCallManager.getInstance().callHistory }
     }
 
     Scaffold(
@@ -604,7 +599,7 @@ fun NeuroDivergentCallHistoryScreen(
                     // Clear history button (only shown when there's history)
                     if (callHistory.isNotEmpty()) {
                         IconButton(
-                            onClick = { MockCallManager.clearCallHistory() },
+                            onClick = { WebRTCCallManager.getInstance().clearCallHistory() },
                             modifier = Modifier.semantics {
                                 contentDescription = "Clear all call history"
                             }
@@ -648,7 +643,7 @@ fun NeuroDivergentCallHistoryScreen(
                                 entry.recipientId,
                                 entry.recipientName,
                                 entry.recipientAvatar,
-                                entry.callType
+                                entry.callTypeEnum
                             )
                         }
                     )
@@ -755,31 +750,36 @@ private fun NeuroDivergentCallHistoryItem(
 ) {
     val haptic = LocalHapticFeedback.current
 
-    val callIcon = when (entry.callType) {
+    val callTypeEnum = entry.callTypeEnum
+    val outcomeEnum = entry.outcomeEnum
+
+    val callIcon = when (callTypeEnum) {
         CallType.VOICE -> Icons.Filled.Phone
         CallType.VIDEO -> Icons.Filled.Videocam
     }
 
     val directionIcon = when {
-        entry.outcome == CallOutcome.MISSED -> Icons.AutoMirrored.Filled.CallMissed
+        outcomeEnum == CallOutcome.MISSED -> Icons.AutoMirrored.Filled.CallMissed
         entry.isOutgoing -> Icons.AutoMirrored.Filled.CallMade
         else -> Icons.AutoMirrored.Filled.CallReceived
     }
 
-    val outcomeColor = when (entry.outcome) {
+    val outcomeColor = when (outcomeEnum) {
         CallOutcome.MISSED -> MaterialTheme.colorScheme.error
         CallOutcome.DECLINED -> MaterialTheme.colorScheme.error
         CallOutcome.NO_ANSWER -> MaterialTheme.colorScheme.onSurfaceVariant
         CallOutcome.CANCELLED -> MaterialTheme.colorScheme.onSurfaceVariant
         CallOutcome.COMPLETED -> MaterialTheme.colorScheme.primary
+        CallOutcome.FAILED -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
-    val outcomeText = when (entry.outcome) {
+    val outcomeText = when (outcomeEnum) {
         CallOutcome.COMPLETED -> if (entry.formattedDuration.isNotEmpty()) entry.formattedDuration else "Connected"
         CallOutcome.MISSED -> "Missed"
         CallOutcome.DECLINED -> "Declined"
         CallOutcome.NO_ANSWER -> "No answer"
         CallOutcome.CANCELLED -> "Cancelled"
+        CallOutcome.FAILED -> "Failed"
     }
 
     Row(
@@ -793,7 +793,7 @@ private fun NeuroDivergentCallHistoryItem(
             }
             .padding(horizontal = 16.dp, vertical = 14.dp)
             .semantics {
-                contentDescription = "${entry.recipientName}, ${entry.callType.name} call, $outcomeText, ${entry.formattedTime}"
+                contentDescription = "${entry.recipientName}, ${callTypeEnum.name} call, $outcomeText, ${entry.formattedTime}"
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -842,7 +842,7 @@ private fun NeuroDivergentCallHistoryItem(
                     entry.recipientName,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
-                    color = if (entry.outcome == CallOutcome.MISSED)
+                    color = if (outcomeEnum == CallOutcome.MISSED)
                         MaterialTheme.colorScheme.error
                     else
                         MaterialTheme.colorScheme.onSurface
@@ -850,7 +850,7 @@ private fun NeuroDivergentCallHistoryItem(
                 Spacer(modifier = Modifier.width(6.dp))
                 Icon(
                     callIcon,
-                    contentDescription = "${entry.callType.name} call",
+                    contentDescription = "${callTypeEnum.name} call",
                     modifier = Modifier.size(14.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )

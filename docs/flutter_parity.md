@@ -2,7 +2,7 @@
 
 This document tracks the parity status between the Flutter Android implementation and the original Kotlin Compose implementation.
 
-## Last Updated: February 26, 2026
+## Last Updated: March 3, 2026
 
 ---
 
@@ -183,8 +183,16 @@ This document tracks the parity status between the Flutter Android implementatio
 | Attachment options | ✅ | ✅ | Photo/Camera/File picker |
 | Read receipts | ✅ | ✅ | Blue checkmarks for read |
 | Typing indicators | ✅ | 🔄 | Partially implemented |
-| Adaptive layout for tablets | ✅ | 🔄 | Needs tablet testing |
-| Moderation status badges | ✅ | 🔄 | Needs implementation |
+| Adaptive layout for tablets | ✅ | ✅ | Two-pane layout |
+| Moderation status badges | ✅ | ✅ | Badge overlays on avatars |
+| Filter pills (All, Primary, Calls, Requests) | ✅ | ✅ | With haptic feedback |
+| Voice/video call buttons in header | ✅ | ✅ | Videocam + phone icons |
+| Voice/video call shortcuts on conversation tiles | ✅ | ✅ | Inline phone/videocam |
+| Inline Call History view (Calls tab) | ✅ | ✅ | Contacts + call history |
+| Contacts permission prompt in Calls tab | ✅ | ✅ | Permission card with Allow |
+| CallableContactRow with avatar & phone | ✅ | ✅ | App-user badge indicator |
+| Call history rows with outcome | ✅ | ✅ | Missed/completed/etc |
+| WebRTC voice/video calling from chat | ✅ | ✅ | Full ActiveCallScreen |
 
 ### Settings Screen
 **Status:** MOSTLY COMPLETE ✅

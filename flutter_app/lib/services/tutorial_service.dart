@@ -196,7 +196,7 @@ class _AppTutorialOverlayState extends State<AppTutorialOverlay>
     final theme = Theme.of(context);
 
     return Material(
-      color: Colors.black.withOpacity(0.85),
+      color: Colors.black.withValues(alpha: 0.85),
       child: SafeArea(
         child: AnimatedBuilder(
           animation: _animationController,
@@ -234,7 +234,7 @@ class _AppTutorialOverlayState extends State<AppTutorialOverlay>
                   height: 120,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: _currentStep.accentColor.withOpacity(0.2),
+                    color: _currentStep.accentColor.withValues(alpha: 0.2),
                     border: Border.all(
                       color: _currentStep.accentColor,
                       width: 3,

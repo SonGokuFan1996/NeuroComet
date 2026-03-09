@@ -111,7 +111,7 @@ class _ZenSandGameState extends State<ZenSandGame> {
           // Stone palette
           Container(
             height: 80,
-            color: const Color(0xFF8B7355).withOpacity(0.9),
+            color: const Color(0xFF8B7355).withValues(alpha: 0.9),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -197,7 +197,7 @@ class _ZenSandGameState extends State<ZenSandGame> {
 
           // Instructions
           Container(
-            color: const Color(0xFF8B7355).withOpacity(0.9),
+            color: const Color(0xFF8B7355).withValues(alpha: 0.9),
             padding: const EdgeInsets.all(12),
             child: SafeArea(
               top: false,

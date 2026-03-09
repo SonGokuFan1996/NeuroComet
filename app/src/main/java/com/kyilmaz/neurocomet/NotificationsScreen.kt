@@ -1,7 +1,5 @@
 package com.kyilmaz.neurocomet
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -35,13 +33,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Shield
@@ -57,7 +52,6 @@ import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -85,10 +79,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -113,7 +103,8 @@ fun NotificationsScreen(
     onNotificationClick: ((NotificationItem) -> Unit)? = null,
     onMarkAsRead: ((String) -> Unit)? = null,
     onMarkAllAsRead: (() -> Unit)? = null,
-    onDismissNotification: ((String) -> Unit)? = null
+    onDismissNotification: ((String) -> Unit)? = null,
+    enableGrouping: Boolean = true
 ) {
     val safeList = notifications ?: emptyList()
     var selectedFilter by remember { mutableStateOf(NotificationFilter.ALL) }
@@ -194,12 +185,12 @@ fun NotificationsScreen(
                             isDark = isDark
                         )
                     }
-                } else {
-                    groupedNotifications.forEach { (groupTitle, items) ->
+                } else if (enableGrouping) {
+                    groupedNotifications.forEach { (groupKey, items) ->
                         // Section header
-                        item(key = "header_$groupTitle") {
+                        item(key = "header_${groupKey.name}") {
                             AnimatedSectionHeader(
-                                title = groupTitle,
+                                title = stringResource(groupKey.labelRes),
                                 count = items.size,
                                 isDark = isDark
                             )
@@ -226,6 +217,26 @@ fun NotificationsScreen(
                             )
                         }
                     }
+                } else {
+                    itemsIndexed(
+                        items = filteredNotifications,
+                        key = { _, item -> item.id }
+                    ) { index, notification ->
+                        EnhancedNotificationTile(
+                            notification = notification,
+                            onClick = {
+                                if (!notification.isRead) {
+                                    onMarkAsRead?.invoke(notification.id)
+                                }
+                                onNotificationClick?.invoke(notification)
+                            },
+                            onDismiss = {
+                                onDismissNotification?.invoke(notification.id)
+                            },
+                            isDark = isDark,
+                            animationDelay = index * 50
+                        )
+                    }
                 }
             }
         }
@@ -242,10 +253,7 @@ private fun NotificationsHeader(
     onMarkAllAsRead: (() -> Unit)?,
     isDark: Boolean
 ) {
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val secondaryColor = MaterialTheme.colorScheme.tertiary
-
-    Column(
+     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
@@ -274,9 +282,10 @@ private fun NotificationsHeader(
                 Spacer(Modifier.height(4.dp))
                 Text(
                     text = if (unreadCount > 0) {
-                        "You have $unreadCount new ${if (unreadCount == 1) "notification" else "notifications"}"
+                        if (unreadCount == 1) stringResource(R.string.notifications_subtitle_new_one)
+                        else stringResource(R.string.notifications_subtitle_new_many, unreadCount)
                     } else {
-                        "You're all caught up! ✨"
+                        stringResource(R.string.notifications_subtitle_caught_up)
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -335,6 +344,7 @@ private fun AnimatedUnreadBadge(count: Int) {
 /**
  * Mark all read button - uses dynamic colors
  */
+@Suppress("UNUSED_PARAMETER")
 @Composable
 private fun MarkAllReadButton(
     onClick: () -> Unit,
@@ -361,7 +371,7 @@ private fun MarkAllReadButton(
                 tint = primaryColor
             )
             Text(
-                text = "Mark all read",
+                text = stringResource(R.string.notifications_mark_all_read_short),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = primaryColor
@@ -483,6 +493,7 @@ private fun FilterPill(
 // SECTION HEADER - Matching Flutter design with gradient accent
 // ============================================================================
 
+@Suppress("UNUSED_PARAMETER")
 @Composable
 private fun AnimatedSectionHeader(
     title: String,
@@ -555,6 +566,7 @@ private fun AnimatedSectionHeader(
 // ENHANCED NOTIFICATION TILE - Matching Flutter design
 // ============================================================================
 
+@Suppress("UNUSED_PARAMETER")
 @Composable
 private fun EnhancedNotificationTile(
     notification: NotificationItem,
@@ -600,23 +612,18 @@ private fun EnhancedNotificationTile(
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Avatar with type badge
             Box {
                 if (hasUnread) {
-                    // Gradient ring for unread
                     Box(
                         modifier = Modifier
                             .size(54.dp)
                             .background(
-                                brush = Brush.linearGradient(
-                                    colors = listOf(primaryColor, tertiaryColor)
-                                ),
+                                brush = Brush.linearGradient(colors = listOf(primaryColor, tertiaryColor)),
                                 shape = CircleShape
                             )
                     )
                 }
 
-                // Avatar or icon container
                 Box(
                     modifier = Modifier
                         .padding(if (hasUnread) 2.dp else 0.dp)
@@ -635,7 +642,6 @@ private fun EnhancedNotificationTile(
                                 .size(50.dp)
                                 .clip(CircleShape)
                         )
-                        // Type badge overlay
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomEnd)
@@ -652,7 +658,6 @@ private fun EnhancedNotificationTile(
                             )
                         }
                     } else {
-                        // Icon only
                         Box(
                             modifier = Modifier
                                 .size(50.dp)
@@ -732,7 +737,7 @@ private fun EnhancedNotificationTile(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Remove notification",
+                        contentDescription = stringResource(R.string.notifications_remove),
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                     )
@@ -759,36 +764,36 @@ private fun NotificationsEmptyState(
         NotificationFilter.ALL -> listOf(
             Icons.Outlined.Notifications,
             "🌟",
-            "Your notification center",
-            "When someone interacts with your posts or follows you, you'll see it here.",
+            stringResource(R.string.notifications_empty_all_title),
+            stringResource(R.string.notifications_empty_all_message),
             primaryColor
         )
         NotificationFilter.UNREAD -> listOf(
             Icons.Default.CheckCircle,
             "✨",
-            "All caught up!",
-            "You've read all your notifications. Great job staying on top of things!",
+            stringResource(R.string.notifications_empty_unread_title),
+            stringResource(R.string.notifications_empty_unread_message),
             successColor
         )
         NotificationFilter.MENTIONS -> listOf(
             Icons.Outlined.AlternateEmail,
             "💬",
-            "No mentions yet",
-            "When someone mentions you in a post or comment, you'll find it here.",
+            stringResource(R.string.notifications_empty_mentions_title),
+            stringResource(R.string.notifications_empty_mentions_message),
             MaterialTheme.colorScheme.secondary
         )
         NotificationFilter.LIKES -> listOf(
             Icons.Default.Favorite,
             "💜",
-            "No likes yet",
-            "When someone appreciates your content with a like, it'll show up here.",
+            stringResource(R.string.notifications_empty_likes_title),
+            stringResource(R.string.notifications_empty_likes_message),
             Color(0xFFE91E63)
         )
         NotificationFilter.FOLLOWS -> listOf(
             Icons.Default.PersonAdd,
             "🤝",
-            "No new followers",
-            "When someone new follows you to join your journey, they'll appear here.",
+            stringResource(R.string.notifications_empty_follows_title),
+            stringResource(R.string.notifications_empty_follows_message),
             MaterialTheme.colorScheme.tertiary
         )
     }
@@ -850,7 +855,7 @@ private fun NotificationsEmptyState(
             if (onRefresh != null && filter == NotificationFilter.ALL) {
                 Spacer(Modifier.height(24.dp))
                 Button(onClick = onRefresh) {
-                    Text("Refresh")
+                    Text(stringResource(R.string.notifications_refresh))
                 }
             }
         }
@@ -875,7 +880,14 @@ private fun getNotificationStyle(type: NotificationType): Pair<ImageVector, Colo
     }
 }
 
-private fun groupNotificationsByTime(notifications: List<NotificationItem>): LinkedHashMap<String, List<NotificationItem>> {
+enum class NotificationTimeGroup(val labelRes: Int) {
+    TODAY(R.string.notifications_group_today),
+    YESTERDAY(R.string.notifications_group_yesterday),
+    THIS_WEEK(R.string.notifications_group_this_week),
+    EARLIER(R.string.notifications_group_earlier)
+}
+
+private fun groupNotificationsByTime(notifications: List<NotificationItem>): LinkedHashMap<NotificationTimeGroup, List<NotificationItem>> {
     val today = mutableListOf<NotificationItem>()
     val yesterday = mutableListOf<NotificationItem>()
     val thisWeek = mutableListOf<NotificationItem>()
@@ -907,11 +919,11 @@ private fun groupNotificationsByTime(notifications: List<NotificationItem>): Lin
         }
     }
 
-    return linkedMapOf<String, List<NotificationItem>>().apply {
-        if (today.isNotEmpty()) put("Today", today)
-        if (yesterday.isNotEmpty()) put("Yesterday", yesterday)
-        if (thisWeek.isNotEmpty()) put("This Week", thisWeek)
-        if (earlier.isNotEmpty()) put("Earlier", earlier)
+    return linkedMapOf<NotificationTimeGroup, List<NotificationItem>>().apply {
+        if (today.isNotEmpty()) put(NotificationTimeGroup.TODAY, today)
+        if (yesterday.isNotEmpty()) put(NotificationTimeGroup.YESTERDAY, yesterday)
+        if (thisWeek.isNotEmpty()) put(NotificationTimeGroup.THIS_WEEK, thisWeek)
+        if (earlier.isNotEmpty()) put(NotificationTimeGroup.EARLIER, earlier)
     }
 }
 
@@ -988,3 +1000,4 @@ private fun NotificationsEmptyPreview() {
         )
     }
 }
+

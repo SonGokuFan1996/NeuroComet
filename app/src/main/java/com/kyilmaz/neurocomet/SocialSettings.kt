@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.edit
+import kotlinx.coroutines.launch
 
 /**
  * Social media settings that fit the neurodivergent-friendly vibe of NeuroComet.
@@ -122,6 +123,7 @@ data class AccessibilitySettings(
     val reduceMotion: Boolean = false,
     val largerText: Boolean = false,
     val screenReaderOptimized: Boolean = false,
+    val brailleDisplayOptimized: Boolean = false,
     val simplifiedUI: Boolean = false,
     val focusMode: Boolean = false,
     val extendedTimeouts: Boolean = true,
@@ -192,6 +194,7 @@ object SocialSettingsManager {
     private const val KEY_REDUCE_MOTION = "reduce_motion"
     private const val KEY_LARGER_TEXT = "larger_text"
     private const val KEY_SCREEN_READER = "screen_reader"
+    private const val KEY_BRAILLE_DISPLAY = "braille_display"
     private const val KEY_SIMPLIFIED_UI = "simplified_ui"
     private const val KEY_FOCUS_MODE = "focus_mode"
     private const val KEY_EXTENDED_TIMEOUTS = "extended_timeouts"
@@ -306,6 +309,7 @@ object SocialSettingsManager {
             reduceMotion = prefs.getBoolean(KEY_REDUCE_MOTION, false),
             largerText = prefs.getBoolean(KEY_LARGER_TEXT, false),
             screenReaderOptimized = prefs.getBoolean(KEY_SCREEN_READER, false),
+            brailleDisplayOptimized = prefs.getBoolean(KEY_BRAILLE_DISPLAY, false),
             simplifiedUI = prefs.getBoolean(KEY_SIMPLIFIED_UI, false),
             focusMode = prefs.getBoolean(KEY_FOCUS_MODE, false),
             extendedTimeouts = prefs.getBoolean(KEY_EXTENDED_TIMEOUTS, true),
@@ -320,6 +324,7 @@ object SocialSettingsManager {
             putBoolean(KEY_REDUCE_MOTION, settings.reduceMotion)
             putBoolean(KEY_LARGER_TEXT, settings.largerText)
             putBoolean(KEY_SCREEN_READER, settings.screenReaderOptimized)
+            putBoolean(KEY_BRAILLE_DISPLAY, settings.brailleDisplayOptimized)
             putBoolean(KEY_SIMPLIFIED_UI, settings.simplifiedUI)
             putBoolean(KEY_FOCUS_MODE, settings.focusMode)
             putBoolean(KEY_EXTENDED_TIMEOUTS, settings.extendedTimeouts)
@@ -327,6 +332,11 @@ object SocialSettingsManager {
             putBoolean(KEY_DYSLEXIA_FONT, settings.dyslexiaFont)
             putBoolean(KEY_HIGH_CONTRAST_ICONS, settings.highContrastIcons)
         }
+    }
+
+    fun isBrailleOptimized(context: Context): Boolean {
+        val settings = getAccessibilitySettings(context)
+        return settings.screenReaderOptimized || settings.brailleDisplayOptimized
     }
 
     fun getWellbeingSettings(context: Context): WellbeingSettings {
@@ -517,6 +527,29 @@ fun PrivacySettingsScreen(
                 )
             }
 
+            // Contacts & Friends Section
+            item { Spacer(Modifier.height(8.dp)) }
+            item {
+                SettingsSectionHeader(
+                    title = "Contacts & Friends",
+                    icon = Icons.Default.Contacts,
+                    subtitle = "Find friends from your device contacts"
+                )
+            }
+
+            item {
+                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text("Contact sync helps you find people you already know.", style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            "This build keeps contact import local until you opt into a real backend sync.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
             // Blocked & Muted Section
             item { Spacer(Modifier.height(8.dp)) }
             item {
@@ -528,7 +561,16 @@ fun PrivacySettingsScreen(
             }
 
             item {
-                BlockedMutedSection(context = context)
+                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text("Blocked and muted account management is available in the conversation and profile flows.", style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            "This screen is a summary surface for that data.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
 
             // Muted Words Section
@@ -542,7 +584,18 @@ fun PrivacySettingsScreen(
             }
 
             item {
-                MutedWordsSection(context = context)
+                val contentPrefs = SocialSettingsManager.getContentPreferences(context)
+                val mutedWordsSummary = contentPrefs.muteWords.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "No muted words yet."
+                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(mutedWordsSummary, style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            "Muted word editing will be expanded in a later pass.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
 
             // Data & History Section
@@ -556,7 +609,16 @@ fun PrivacySettingsScreen(
             }
 
             item {
-                DataManagementSection(context = context)
+                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text("Your local preferences and mock data stay on this device.", style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            "Use Backup & Restore in Settings for export and recovery tools.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
         }
     }
@@ -806,6 +868,34 @@ fun NotificationSettingsScreen(
                 )
             }
 
+            if (showQuietHoursSection) {
+                item {
+                    // Start Time Picker
+                    TimePickerSetting(
+                        title = "Quiet Hours Start",
+                        time = settings.quietHoursStart,
+                        onTimeChange = { newTime: Int ->
+                            settings = settings.copy(quietHoursStart = newTime)
+                            SocialSettingsManager.saveNotificationSettings(context, settings)
+                        },
+                        icon = Icons.Default.Alarm
+                    )
+                }
+
+                item {
+                    // End Time Picker
+                    TimePickerSetting(
+                        title = "Quiet Hours End",
+                        time = settings.quietHoursEnd,
+                        onTimeChange = { newTime: Int ->
+                            settings = settings.copy(quietHoursEnd = newTime)
+                            SocialSettingsManager.saveNotificationSettings(context, settings)
+                        },
+                        icon = Icons.Default.AlarmOff
+                    )
+                }
+            }
+
             // Delivery Settings
             item { Spacer(Modifier.height(8.dp)) }
             item {
@@ -871,173 +961,6 @@ fun NotificationSettingsScreen(
 }
 
 /**
- * Wellbeing Settings Screen (Unique to NeuroComet!)
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun WellbeingSettingsScreen(
-    onBack: () -> Unit
-) {
-    val context = LocalContext.current
-    var settings by remember { mutableStateOf(SocialSettingsManager.getWellbeingSettings(context)) }
-
-    Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        topBar = {
-            TopAppBar(
-                title = { Text("NeuroBalance 🧠✨", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // Introduction card
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            "Your wellbeing matters 💜",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            "These tools help you maintain a healthy relationship with social media. Take breaks, set boundaries, and remember: it's okay to step away.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
-                        )
-                    }
-                }
-            }
-
-            // Break Reminders
-            item { Spacer(Modifier.height(8.dp)) }
-            item {
-                SettingsSectionHeader(
-                    title = "Mindful Breaks",
-                    icon = Icons.Default.Timer,
-                    subtitle = "Gentle reminders to take a breather"
-                )
-            }
-
-            item {
-                SocialSettingsToggle(
-                    title = "Break Reminders",
-                    description = "Get gentle reminders to take breaks",
-                    icon = Icons.Default.Pause,
-                    isChecked = settings.breakRemindersEnabled,
-                    onCheckedChange = {
-                        settings = settings.copy(breakRemindersEnabled = it)
-                        SocialSettingsManager.saveWellbeingSettings(context, settings)
-                    }
-                )
-            }
-
-            item {
-                SocialSettingsToggle(
-                    title = "Daily Usage Reminder",
-                    description = "See how long you've been on the app",
-                    icon = Icons.Default.AccessTime,
-                    isChecked = settings.dailyReminderEnabled,
-                    onCheckedChange = {
-                        settings = settings.copy(dailyReminderEnabled = it)
-                        SocialSettingsManager.saveWellbeingSettings(context, settings)
-                    }
-                )
-            }
-
-            item {
-                SocialSettingsToggle(
-                    title = "Show Usage Stats",
-                    description = "Display time spent in the app",
-                    icon = Icons.Default.BarChart,
-                    isChecked = settings.showUsageStats,
-                    onCheckedChange = {
-                        settings = settings.copy(showUsageStats = it)
-                        SocialSettingsManager.saveWellbeingSettings(context, settings)
-                    }
-                )
-            }
-
-            // Calm Mode
-            item { Spacer(Modifier.height(8.dp)) }
-            item {
-                SettingsSectionHeader(
-                    title = "Calm Mode 🌊",
-                    icon = Icons.Default.Spa,
-                    subtitle = "For when you need extra peace"
-                )
-            }
-
-            item {
-                SocialSettingsToggle(
-                    title = "Auto-Enable Calm Mode",
-                    description = "Automatically reduce stimulation at night",
-                    icon = Icons.Default.DarkMode,
-                    isChecked = settings.calmModeAutoEnable,
-                    onCheckedChange = {
-                        settings = settings.copy(calmModeAutoEnable = it)
-                        SocialSettingsManager.saveWellbeingSettings(context, settings)
-                    }
-                )
-            }
-
-            item {
-                SocialSettingsToggle(
-                    title = "Bedtime Mode",
-                    description = "Limit features and reduce brightness at bedtime",
-                    icon = Icons.Default.Nightlight,
-                    isChecked = settings.bedtimeModeEnabled,
-                    onCheckedChange = {
-                        settings = settings.copy(bedtimeModeEnabled = it)
-                        SocialSettingsManager.saveWellbeingSettings(context, settings)
-                    }
-                )
-            }
-
-            // Positivity
-            item { Spacer(Modifier.height(8.dp)) }
-            item {
-                SettingsSectionHeader(
-                    title = "Positivity",
-                    icon = Icons.Default.Favorite,
-                    subtitle = "Little boosts throughout the day"
-                )
-            }
-
-            item {
-                SocialSettingsToggle(
-                    title = "Positivity Boost",
-                    description = "Show encouraging messages and affirmations",
-                    icon = Icons.Default.Favorite,
-                    isChecked = settings.positivityBoostEnabled,
-                    onCheckedChange = {
-                        settings = settings.copy(positivityBoostEnabled = it)
-                        SocialSettingsManager.saveWellbeingSettings(context, settings)
-                    }
-                )
-            }
-        }
-    }
-}
-
-/**
  * Content Preferences Screen
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1047,8 +970,6 @@ fun ContentPreferencesScreen(
 ) {
     val context = LocalContext.current
     var settings by remember { mutableStateOf(SocialSettingsManager.getContentPreferences(context)) }
-    var showAutoplayDialog by remember { mutableStateOf(false) }
-    var showVisibilityDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -1057,7 +978,7 @@ fun ContentPreferencesScreen(
                 title = { Text("Content & Media", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -1070,27 +991,17 @@ fun ContentPreferencesScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Media Settings
             item {
                 SettingsSectionHeader(
                     title = "Media",
-                    icon = Icons.Default.PlayCircle
+                    icon = Icons.Default.PlayCircle,
+                    subtitle = "Tune playback and content intensity"
                 )
             }
-
-            item {
-                SocialSettingsSelector(
-                    title = "Autoplay Videos",
-                    currentValue = settings.autoplayVideos.displayName,
-                    icon = Icons.Default.PlayArrow,
-                    onClick = { showAutoplayDialog = true }
-                )
-            }
-
             item {
                 SocialSettingsToggle(
                     title = "Data Saver Mode",
-                    description = "Reduce image quality to save data",
+                    description = "Reduce media quality and network usage",
                     icon = Icons.Default.SaveAlt,
                     isChecked = settings.dataSaverMode,
                     onCheckedChange = {
@@ -1099,39 +1010,36 @@ fun ContentPreferencesScreen(
                     }
                 )
             }
-
-            // Posting Defaults
-            item { Spacer(Modifier.height(8.dp)) }
-            item {
-                SettingsSectionHeader(
-                    title = "Posting",
-                    icon = Icons.Default.Create
-                )
-            }
-
             item {
                 SocialSettingsSelector(
-                    title = "Default Post Visibility",
-                    currentValue = settings.defaultPostVisibility.displayName,
-                    icon = settings.defaultPostVisibility.icon,
-                    onClick = { showVisibilityDialog = true }
+                    title = "Autoplay Videos",
+                    currentValue = settings.autoplayVideos.displayName,
+                    icon = Icons.Default.PlayArrow,
+                    description = "Tap to cycle autoplay preferences",
+                    onClick = {
+                        val next = when (settings.autoplayVideos) {
+                            AutoplayOption.ALWAYS -> AutoplayOption.WIFI_ONLY
+                            AutoplayOption.WIFI_ONLY -> AutoplayOption.NEVER
+                            AutoplayOption.NEVER -> AutoplayOption.ALWAYS
+                        }
+                        settings = settings.copy(autoplayVideos = next)
+                        SocialSettingsManager.saveContentPreferences(context, settings)
+                    }
                 )
             }
 
-            // Feed Preferences
             item { Spacer(Modifier.height(8.dp)) }
             item {
                 SettingsSectionHeader(
                     title = "Feed Preferences",
                     icon = Icons.Default.Tune,
-                    subtitle = "Control what you see"
+                    subtitle = "Control counts and sensitive content"
                 )
             }
-
             item {
                 SocialSettingsToggle(
                     title = "Hide View Counts",
-                    description = "Don't show view counts on posts",
+                    description = "Remove view counts from posts",
                     icon = Icons.Default.VisibilityOff,
                     isChecked = settings.hideViewCounts,
                     onCheckedChange = {
@@ -1140,11 +1048,10 @@ fun ContentPreferencesScreen(
                     }
                 )
             }
-
             item {
                 SocialSettingsToggle(
                     title = "Hide Like Counts",
-                    description = "Don't show like counts on posts",
+                    description = "Remove like counts from posts",
                     icon = Icons.Default.FavoriteBorder,
                     isChecked = settings.hideLikeCounts,
                     onCheckedChange = {
@@ -1153,11 +1060,10 @@ fun ContentPreferencesScreen(
                     }
                 )
             }
-
             item {
                 SocialSettingsToggle(
                     title = "Show Sensitive Content",
-                    description = "Display content that may be sensitive",
+                    description = "Allow content that may require extra care",
                     icon = Icons.Default.Warning,
                     isChecked = settings.showSensitiveContent,
                     onCheckedChange = {
@@ -1166,88 +1072,30 @@ fun ContentPreferencesScreen(
                     }
                 )
             }
+            item {
+                SocialSettingsSelector(
+                    title = "Default Post Visibility",
+                    currentValue = settings.defaultPostVisibility.displayName,
+                    icon = settings.defaultPostVisibility.icon,
+                    description = "Tap to cycle post visibility presets",
+                    onClick = {
+                        val next = when (settings.defaultPostVisibility) {
+                            PostVisibility.PUBLIC -> PostVisibility.FOLLOWERS
+                            PostVisibility.FOLLOWERS -> PostVisibility.CLOSE_FRIENDS
+                            PostVisibility.CLOSE_FRIENDS -> PostVisibility.PRIVATE
+                            PostVisibility.PRIVATE -> PostVisibility.PUBLIC
+                        }
+                        settings = settings.copy(defaultPostVisibility = next)
+                        SocialSettingsManager.saveContentPreferences(context, settings)
+                    }
+                )
+            }
         }
-    }
-
-    // Autoplay Dialog
-    if (showAutoplayDialog) {
-        AlertDialog(
-            onDismissRequest = { showAutoplayDialog = false },
-            title = { Text("Autoplay Videos") },
-            text = {
-                Column {
-                    AutoplayOption.entries.forEach { option ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    settings = settings.copy(autoplayVideos = option)
-                                    SocialSettingsManager.saveContentPreferences(context, settings)
-                                    showAutoplayDialog = false
-                                }
-                                .padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = settings.autoplayVideos == option,
-                                onClick = null
-                            )
-                            Spacer(Modifier.width(12.dp))
-                            Text(option.displayName)
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showAutoplayDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-
-    // Visibility Dialog
-    if (showVisibilityDialog) {
-        AlertDialog(
-            onDismissRequest = { showVisibilityDialog = false },
-            title = { Text("Default Post Visibility") },
-            text = {
-                Column {
-                    PostVisibility.entries.forEach { option ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    settings = settings.copy(defaultPostVisibility = option)
-                                    SocialSettingsManager.saveContentPreferences(context, settings)
-                                    showVisibilityDialog = false
-                                }
-                                .padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            RadioButton(
-                                selected = settings.defaultPostVisibility == option,
-                                onClick = null
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Icon(option.icon, null, modifier = Modifier.size(20.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text(option.displayName)
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showVisibilityDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
     }
 }
 
 /**
- * Accessibility Settings Screen (Neurodivergent-focused!)
+ * Accessibility Settings Screen
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1264,7 +1112,7 @@ fun AccessibilitySettingsScreen(
                 title = { Text("Accessibility", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -1277,20 +1125,18 @@ fun AccessibilitySettingsScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Motion & Animation
             item {
                 SettingsSectionHeader(
-                    title = "Motion & Animation",
-                    icon = Icons.Default.Animation,
-                    subtitle = "For sensory sensitivities"
+                    title = "Reading & Motion",
+                    icon = Icons.Default.Accessibility,
+                    subtitle = "Reduce sensory load and improve readability"
                 )
             }
-
             item {
                 SocialSettingsToggle(
                     title = "Reduce Motion",
-                    description = "Minimize animations and movement",
-                    icon = Icons.Default.Speed,
+                    description = "Minimize animation and movement",
+                    icon = Icons.Default.MotionPhotosOff,
                     isChecked = settings.reduceMotion,
                     onCheckedChange = {
                         settings = settings.copy(reduceMotion = it)
@@ -1298,30 +1144,6 @@ fun AccessibilitySettingsScreen(
                     }
                 )
             }
-
-            item {
-                SocialSettingsToggle(
-                    title = "Haptic Feedback",
-                    description = "Feel vibrations for interactions",
-                    icon = Icons.Default.Vibration,
-                    isChecked = settings.hapticFeedback,
-                    onCheckedChange = {
-                        settings = settings.copy(hapticFeedback = it)
-                        SocialSettingsManager.saveAccessibilitySettings(context, settings)
-                    }
-                )
-            }
-
-            // Display
-            item { Spacer(Modifier.height(8.dp)) }
-            item {
-                SettingsSectionHeader(
-                    title = "Display",
-                    icon = Icons.Default.Visibility,
-                    subtitle = "Visual adjustments"
-                )
-            }
-
             item {
                 SocialSettingsToggle(
                     title = "Larger Text",
@@ -1334,12 +1156,11 @@ fun AccessibilitySettingsScreen(
                     }
                 )
             }
-
             item {
                 SocialSettingsToggle(
                     title = "Dyslexia-Friendly Font",
-                    description = "Use a font designed for easier reading",
-                    icon = Icons.Default.TextFormat,
+                    description = "Use the accessibility reading font",
+                    icon = Icons.Default.TextFields,
                     isChecked = settings.dyslexiaFont,
                     onCheckedChange = {
                         settings = settings.copy(dyslexiaFont = it)
@@ -1347,11 +1168,10 @@ fun AccessibilitySettingsScreen(
                     }
                 )
             }
-
             item {
                 SocialSettingsToggle(
                     title = "High Contrast Icons",
-                    description = "Make icons more visible",
+                    description = "Increase icon contrast and clarity",
                     icon = Icons.Default.Contrast,
                     isChecked = settings.highContrastIcons,
                     onCheckedChange = {
@@ -1361,21 +1181,43 @@ fun AccessibilitySettingsScreen(
                 )
             }
 
-            // Cognitive Support
             item { Spacer(Modifier.height(8.dp)) }
             item {
                 SettingsSectionHeader(
-                    title = "Cognitive Support",
-                    icon = Icons.Default.Lightbulb,
-                    subtitle = "Reduce cognitive load"
+                    title = "Assistive Tech",
+                    icon = Icons.Default.RecordVoiceOver,
+                    subtitle = "Support screen readers and braille displays"
                 )
             }
-
+            item {
+                SocialSettingsToggle(
+                    title = "Screen Reader Optimized",
+                    description = "Improve labels, grouping, and navigation cues",
+                    icon = Icons.Default.RecordVoiceOver,
+                    isChecked = settings.screenReaderOptimized,
+                    onCheckedChange = {
+                        settings = settings.copy(screenReaderOptimized = it)
+                        SocialSettingsManager.saveAccessibilitySettings(context, settings)
+                    }
+                )
+            }
+            item {
+                SocialSettingsToggle(
+                    title = "Braille Display Optimized",
+                    description = "Prefer text-first labels and explicit state summaries",
+                    icon = Icons.Default.TouchApp,
+                    isChecked = settings.brailleDisplayOptimized,
+                    onCheckedChange = {
+                        settings = settings.copy(brailleDisplayOptimized = it)
+                        SocialSettingsManager.saveAccessibilitySettings(context, settings)
+                    }
+                )
+            }
             item {
                 SocialSettingsToggle(
                     title = "Simplified UI",
-                    description = "Hide non-essential elements",
-                    icon = Icons.Default.Settings,
+                    description = "Reduce non-essential controls and clutter",
+                    icon = Icons.Default.FilterAlt,
                     isChecked = settings.simplifiedUI,
                     onCheckedChange = {
                         settings = settings.copy(simplifiedUI = it)
@@ -1383,12 +1225,11 @@ fun AccessibilitySettingsScreen(
                     }
                 )
             }
-
             item {
                 SocialSettingsToggle(
                     title = "Focus Mode",
-                    description = "Reduce distractions in the feed",
-                    icon = Icons.Default.FilterList,
+                    description = "Reduce visual distractions in key flows",
+                    icon = Icons.Default.CenterFocusStrong,
                     isChecked = settings.focusMode,
                     onCheckedChange = {
                         settings = settings.copy(focusMode = it)
@@ -1396,11 +1237,10 @@ fun AccessibilitySettingsScreen(
                     }
                 )
             }
-
             item {
                 SocialSettingsToggle(
                     title = "Extended Timeouts",
-                    description = "More time to read and respond",
+                    description = "Allow more time to read and respond",
                     icon = Icons.Default.Timer,
                     isChecked = settings.extendedTimeouts,
                     onCheckedChange = {
@@ -1409,24 +1249,14 @@ fun AccessibilitySettingsScreen(
                     }
                 )
             }
-
-            // Screen Reader
-            item { Spacer(Modifier.height(8.dp)) }
-            item {
-                SettingsSectionHeader(
-                    title = "Screen Reader",
-                    icon = Icons.AutoMirrored.Filled.VolumeUp
-                )
-            }
-
             item {
                 SocialSettingsToggle(
-                    title = "Screen Reader Optimized",
-                    description = "Optimize layout for screen readers",
-                    icon = Icons.Default.Accessibility,
-                    isChecked = settings.screenReaderOptimized,
+                    title = "Haptic Feedback",
+                    description = "Keep tactile feedback for app interactions",
+                    icon = Icons.Default.Vibration,
+                    isChecked = settings.hapticFeedback,
                     onCheckedChange = {
-                        settings = settings.copy(screenReaderOptimized = it)
+                        settings = settings.copy(hapticFeedback = it)
                         SocialSettingsManager.saveAccessibilitySettings(context, settings)
                     }
                 )
@@ -1435,13 +1265,328 @@ fun AccessibilitySettingsScreen(
     }
 }
 
-// ============================================================================
-// HELPER COMPONENTS
-// ============================================================================
+/**
+ * Wellbeing Settings Screen
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun WellbeingSettingsScreen(
+    onBack: () -> Unit
+) {
+    val context = LocalContext.current
+    var settings by remember { mutableStateOf(SocialSettingsManager.getWellbeingSettings(context)) }
+
+    Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        topBar = {
+            TopAppBar(
+                title = { Text("NeuroBalance 🧠✨", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            item {
+                SettingsSectionHeader(
+                    title = "Daily Reminder",
+                    icon = Icons.Default.Alarm
+                )
+            }
+            item {
+                SocialSettingsToggle(
+                    title = "Enable Daily Reminder",
+                    description = "Get reminded to check in with yourself",
+                    icon = Icons.Default.Notifications,
+                    isChecked = settings.dailyReminderEnabled,
+                    onCheckedChange = {
+                        settings = settings.copy(dailyReminderEnabled = it)
+                        SocialSettingsManager.saveWellbeingSettings(context, settings)
+                    }
+                )
+            }
+            if (settings.dailyReminderEnabled) {
+                item {
+                    TimePickerSetting(
+                        title = "Reminder Time",
+                        time = settings.dailyLimitMinutes,
+                        onTimeChange = { newTime: Int ->
+                            settings = settings.copy(dailyLimitMinutes = newTime)
+                            SocialSettingsManager.saveWellbeingSettings(context, settings)
+                        },
+                        icon = Icons.Default.Alarm
+                    )
+                }
+            }
+
+            item { Spacer(Modifier.height(8.dp)) }
+            item {
+                SettingsSectionHeader(
+                    title = "Usage Limit",
+                    icon = Icons.Default.Timer
+                )
+            }
+            item {
+                SocialSettingsToggle(
+                    title = "Enable Usage Limit",
+                    description = "Limit app usage to reduce burnout",
+                    icon = Icons.Default.HourglassTop,
+                    isChecked = settings.dailyLimitMinutes > 0,
+                    onCheckedChange = { enabled ->
+                        settings = settings.copy(dailyLimitMinutes = if (enabled) 60 else 0)
+                        SocialSettingsManager.saveWellbeingSettings(context, settings)
+                    }
+                )
+            }
+            if (settings.dailyLimitMinutes > 0) {
+                item {
+                    SliderSetting(
+                        title = "Daily Limit (minutes)",
+                        value = settings.dailyLimitMinutes.toFloat(),
+                        onValueChange = { newValue: Float ->
+                            settings = settings.copy(dailyLimitMinutes = newValue.toInt())
+                            SocialSettingsManager.saveWellbeingSettings(context, settings)
+                        },
+                        valueRange = 0f..180f,
+                        icon = Icons.Default.Timer
+                    )
+                }
+            }
+
+            item { Spacer(Modifier.height(8.dp)) }
+            item {
+                SettingsSectionHeader(
+                    title = "Break Reminders",
+                    icon = Icons.Default.BreakfastDining
+                )
+            }
+            item {
+                SocialSettingsToggle(
+                    title = "Enable Break Reminders",
+                    description = "Get reminded to take breaks and stretch",
+                    icon = Icons.Default.Notifications,
+                    isChecked = settings.breakRemindersEnabled,
+                    onCheckedChange = {
+                        settings = settings.copy(breakRemindersEnabled = it)
+                        SocialSettingsManager.saveWellbeingSettings(context, settings)
+                    }
+                )
+            }
+            if (settings.breakRemindersEnabled) {
+                item {
+                    SliderSetting(
+                        title = "Break Interval (minutes)",
+                        value = settings.breakIntervalMinutes.toFloat(),
+                        onValueChange = { newValue: Float ->
+                            settings = settings.copy(breakIntervalMinutes = newValue.toInt())
+                            SocialSettingsManager.saveWellbeingSettings(context, settings)
+                        },
+                        valueRange = 5f..60f,
+                        icon = Icons.Default.BreakfastDining
+                    )
+                }
+            }
+
+            item { Spacer(Modifier.height(8.dp)) }
+            item {
+                SettingsSectionHeader(
+                    title = "Calm Mode",
+                    icon = Icons.Default.Spa
+                )
+            }
+            item {
+                SocialSettingsToggle(
+                    title = "Auto-enable Calm Mode",
+                    description = "Enable during quiet hours or based on usage",
+                    icon = Icons.Default.Schedule,
+                    isChecked = settings.calmModeAutoEnable,
+                    onCheckedChange = {
+                        settings = settings.copy(calmModeAutoEnable = it)
+                        SocialSettingsManager.saveWellbeingSettings(context, settings)
+                    }
+                )
+            }
+            item {
+                SocialSettingsToggle(
+                    title = "Bedtime Mode",
+                    description = "Reduce notifications and screen time at night",
+                    icon = Icons.Default.Bedtime,
+                    isChecked = settings.bedtimeModeEnabled,
+                    onCheckedChange = {
+                        settings = settings.copy(bedtimeModeEnabled = it)
+                        SocialSettingsManager.saveWellbeingSettings(context, settings)
+                    }
+                )
+            }
+            if (settings.bedtimeModeEnabled) {
+                item {
+                    TimePickerSetting(
+                        title = "Bedtime Start",
+                        time = settings.bedtimeStart,
+                        onTimeChange = { newTime: Int ->
+                            settings = settings.copy(bedtimeStart = newTime)
+                            SocialSettingsManager.saveWellbeingSettings(context, settings)
+                        },
+                        icon = Icons.Default.Bedtime
+                    )
+                }
+                item {
+                    TimePickerSetting(
+                        title = "Bedtime End",
+                        time = settings.bedtimeEnd,
+                        onTimeChange = { newTime: Int ->
+                            settings = settings.copy(bedtimeEnd = newTime)
+                            SocialSettingsManager.saveWellbeingSettings(context, settings)
+                        },
+                        icon = Icons.Default.Bedtime
+                    )
+                }
+            }
+
+            item { Spacer(Modifier.height(8.dp)) }
+            item {
+                SettingsSectionHeader(
+                    title = "Positivity Boost",
+                    icon = Icons.Default.EmojiEmotions
+                )
+            }
+            item {
+                SocialSettingsToggle(
+                    title = "Enable Positivity Boost",
+                    description = "Receive encouraging messages and content",
+                    icon = Icons.Default.Star,
+                    isChecked = settings.positivityBoostEnabled,
+                    onCheckedChange = {
+                        settings = settings.copy(positivityBoostEnabled = it)
+                        SocialSettingsManager.saveWellbeingSettings(context, settings)
+                    }
+                )
+            }
+        }
+    }
+}
 
 /**
- * Modern section header with icon background matching the Flutter design.
+ * Animation Settings Screen
  */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AnimationSettingsScreen(
+    onBack: () -> Unit,
+    themeViewModel: ThemeViewModel
+) {
+    val themeState by themeViewModel.themeState.collectAsState()
+    val animSettings = themeState.animationSettings
+
+    Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        topBar = {
+            TopAppBar(
+                title = { Text("Animation Settings", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            item {
+                SettingsSectionHeader(
+                    title = "Animation Controls",
+                    icon = Icons.Default.Animation,
+                    subtitle = "Dial motion down to match your sensory comfort"
+                )
+            }
+            item {
+                SocialSettingsToggle(
+                    title = "Disable All Animations",
+                    description = "Turn off app motion wherever possible",
+                    icon = Icons.Default.MotionPhotosOff,
+                    isChecked = animSettings.disableAllAnimations,
+                    onCheckedChange = { themeViewModel.setDisableAllAnimations(it) }
+                )
+            }
+            item {
+                SocialSettingsToggle(
+                    title = "Logo Animations",
+                    description = "Splash and decorative logo motion",
+                    icon = Icons.Default.AutoAwesome,
+                    isChecked = !animSettings.disableAllAnimations && !animSettings.disableLogoAnimations,
+                    enabled = !animSettings.disableAllAnimations,
+                    onCheckedChange = { themeViewModel.setDisableLogoAnimations(!it) }
+                )
+            }
+            item {
+                SocialSettingsToggle(
+                    title = "Story Animations",
+                    description = "Story progress and motion effects",
+                    icon = Icons.Default.Timelapse,
+                    isChecked = !animSettings.disableAllAnimations && !animSettings.disableStoryAnimations,
+                    enabled = !animSettings.disableAllAnimations,
+                    onCheckedChange = { themeViewModel.setDisableStoryAnimations(!it) }
+                )
+            }
+            item {
+                SocialSettingsToggle(
+                    title = "Feed Animations",
+                    description = "Feed entry, expand, and content transitions",
+                    icon = Icons.Default.ViewStream,
+                    isChecked = !animSettings.disableAllAnimations && !animSettings.disableFeedAnimations,
+                    enabled = !animSettings.disableAllAnimations,
+                    onCheckedChange = { themeViewModel.setDisableFeedAnimations(!it) }
+                )
+            }
+            item {
+                SocialSettingsToggle(
+                    title = "Screen Transitions",
+                    description = "Navigation and route transitions",
+                    icon = Icons.Default.SwapHoriz,
+                    isChecked = !animSettings.disableAllAnimations && !animSettings.disableTransitionAnimations,
+                    enabled = !animSettings.disableAllAnimations,
+                    onCheckedChange = { themeViewModel.setDisableTransitionAnimations(!it) }
+                )
+            }
+            item {
+                SocialSettingsToggle(
+                    title = "Button Animations",
+                    description = "Pressed, hover, and state-change feedback",
+                    icon = Icons.Default.SmartButton,
+                    isChecked = !animSettings.disableAllAnimations && !animSettings.disableButtonAnimations,
+                    enabled = !animSettings.disableAllAnimations,
+                    onCheckedChange = { themeViewModel.setDisableButtonAnimations(!it) }
+                )
+            }
+            item {
+                SocialSettingsToggle(
+                    title = "Loading Animations",
+                    description = "Progress indicators and shimmer effects",
+                    icon = Icons.Default.HourglassTop,
+                    isChecked = !animSettings.disableAllAnimations && !animSettings.disableLoadingAnimations,
+                    enabled = !animSettings.disableAllAnimations,
+                    onCheckedChange = { themeViewModel.setDisableLoadingAnimations(!it) }
+                )
+            }
+        }
+    }
+}
+
 @Composable
 fun SettingsSectionHeader(
     title: String,
@@ -1454,7 +1599,6 @@ fun SettingsSectionHeader(
             .padding(vertical = 8.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Modern icon container with colored background
         Box(
             modifier = Modifier
                 .size(32.dp)
@@ -1501,7 +1645,6 @@ fun SocialSettingsToggle(
     onCheckedChange: (Boolean) -> Unit
 ) {
     val alpha = if (enabled) 1f else 0.5f
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1516,9 +1659,7 @@ fun SocialSettingsToggle(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            modifier = Modifier
-                .size(24.dp)
-                .alpha(alpha),
+            modifier = Modifier.alpha(alpha).size(24.dp),
             tint = if (isChecked && enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.width(16.dp))
@@ -1534,11 +1675,7 @@ fun SocialSettingsToggle(
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha)
             )
         }
-        Switch(
-            checked = isChecked,
-            onCheckedChange = null,
-            enabled = enabled
-        )
+        Switch(checked = isChecked, onCheckedChange = null, enabled = enabled)
     }
 }
 
@@ -1592,722 +1729,45 @@ fun SocialSettingsSelector(
     }
 }
 
+@Composable
+fun TimePickerSetting(
+    title: String,
+    time: Int,
+    onTimeChange: (Int) -> Unit,
+    icon: ImageVector
+) {
+    SocialSettingsSelector(
+        title = title,
+        currentValue = String.format(java.util.Locale.US, "%02d:00", time.coerceIn(0, 23)),
+        icon = icon,
+        description = "Tap to cycle through hours",
+        onClick = { onTimeChange((time + 1) % 24) }
+    )
+}
+
+@Composable
+fun SliderSetting(
+    title: String,
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    icon: ImageVector
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SocialSettingsSelector(
+            title = title,
+            currentValue = value.toInt().toString(),
+            icon = icon,
+            description = "Adjust with the slider below",
+            onClick = {}
+        )
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = valueRange
+        )
+    }
+}
+
 private fun Modifier.alpha(alphaValue: Float): Modifier =
     this.graphicsLayer { alpha = alphaValue }
-
-// ============================================================================
-// ANIMATION SETTINGS SCREEN
-// ============================================================================
-
-/**
- * Animation Settings Screen
- * Allows users to disable animations for sensory sensitivities.
- * Includes a master toggle that grays out individual settings.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AnimationSettingsScreen(
-    onBack: () -> Unit,
-    themeViewModel: ThemeViewModel
-) {
-    val themeState by themeViewModel.themeState.collectAsState()
-    val animSettings = themeState.animationSettings
-    val allDisabled = animSettings.disableAllAnimations
-
-    Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        topBar = {
-            TopAppBar(
-                title = { Text("Animation Settings", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // Introduction card
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Default.Animation,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                "Motion & Animation",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
-                        Spacer(Modifier.height(8.dp))
-                        Text(
-                            "Some people are sensitive to motion and animations. " +
-                            "Use these settings to reduce or disable animations throughout the app.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
-                        )
-                    }
-                }
-            }
-
-            // Master Toggle
-            item { Spacer(Modifier.height(8.dp)) }
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (allDisabled)
-                            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
-                        else
-                            MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { themeViewModel.setDisableAllAnimations(!allDisabled) },
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    "Disable All Animations",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (allDisabled) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    if (allDisabled)
-                                        "All animations are currently disabled"
-                                    else
-                                        "Turn off all motion and animations",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            Switch(
-                                checked = allDisabled,
-                                onCheckedChange = { themeViewModel.setDisableAllAnimations(it) }
-                            )
-                        }
-
-                        if (allDisabled) {
-                            Spacer(Modifier.height(8.dp))
-                            Text(
-                                "💡 Individual settings below are disabled when this is on",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Individual Animation Toggles
-            item { Spacer(Modifier.height(8.dp)) }
-            item {
-                SettingsSectionHeader(
-                    title = "Individual Controls",
-                    icon = Icons.Default.Tune,
-                    subtitle = if (allDisabled) "Disabled (master toggle is on)" else "Fine-tune specific animations"
-                )
-            }
-
-            // Logo Animations
-            item {
-                AnimationToggleItem(
-                    title = "Logo Animations",
-                    description = "Rainbow infinity symbol, shimmer text effects",
-                    icon = Icons.Default.AutoAwesome,
-                    isDisabled = animSettings.disableLogoAnimations,
-                    isGrayedOut = allDisabled,
-                    onToggle = { themeViewModel.setDisableLogoAnimations(it) }
-                )
-            }
-
-            // Story Animations
-            item {
-                AnimationToggleItem(
-                    title = "Story Circle Animations",
-                    description = "Spinning rainbow borders on unviewed stories",
-                    icon = Icons.Default.Circle,
-                    isDisabled = animSettings.disableStoryAnimations,
-                    isGrayedOut = allDisabled,
-                    onToggle = { themeViewModel.setDisableStoryAnimations(it) }
-                )
-            }
-
-            // Feed Animations
-            item {
-                AnimationToggleItem(
-                    title = "Feed Animations",
-                    description = "Post card transitions, like heart effects",
-                    icon = Icons.Default.ViewStream,
-                    isDisabled = animSettings.disableFeedAnimations,
-                    isGrayedOut = allDisabled,
-                    onToggle = { themeViewModel.setDisableFeedAnimations(it) }
-                )
-            }
-
-            // Transition Animations
-            item {
-                AnimationToggleItem(
-                    title = "Screen Transitions",
-                    description = "Animations when navigating between screens",
-                    icon = Icons.Default.SwapHoriz,
-                    isDisabled = animSettings.disableTransitionAnimations,
-                    isGrayedOut = allDisabled,
-                    onToggle = { themeViewModel.setDisableTransitionAnimations(it) }
-                )
-            }
-
-            // Button Animations
-            item {
-                AnimationToggleItem(
-                    title = "Button Animations",
-                    description = "Press effects and ripples on buttons",
-                    icon = Icons.Default.TouchApp,
-                    isDisabled = animSettings.disableButtonAnimations,
-                    isGrayedOut = allDisabled,
-                    onToggle = { themeViewModel.setDisableButtonAnimations(it) }
-                )
-            }
-
-            // Loading Animations
-            item {
-                AnimationToggleItem(
-                    title = "Loading Animations",
-                    description = "Spinning loaders and skeleton screens",
-                    icon = Icons.Default.Refresh,
-                    isDisabled = animSettings.disableLoadingAnimations,
-                    isGrayedOut = allDisabled,
-                    onToggle = { themeViewModel.setDisableLoadingAnimations(it) }
-                )
-            }
-
-            // Reset button
-            item { Spacer(Modifier.height(16.dp)) }
-            item {
-                OutlinedButton(
-                    onClick = {
-                        themeViewModel.setDisableAllAnimations(false)
-                        themeViewModel.setDisableLogoAnimations(false)
-                        themeViewModel.setDisableStoryAnimations(false)
-                        themeViewModel.setDisableFeedAnimations(false)
-                        themeViewModel.setDisableTransitionAnimations(false)
-                        themeViewModel.setDisableButtonAnimations(false)
-                        themeViewModel.setDisableLoadingAnimations(false)
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(Icons.Default.Restore, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Reset to Defaults (All Animations On)")
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun AnimationToggleItem(
-    title: String,
-    description: String,
-    icon: ImageVector,
-    isDisabled: Boolean,
-    isGrayedOut: Boolean,
-    onToggle: (Boolean) -> Unit
-) {
-    val alpha = if (isGrayedOut) 0.4f else 1f
-    val effectiveDisabled = isGrayedOut || isDisabled
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .alpha(alpha)
-            .clickable(enabled = !isGrayedOut) { onToggle(!isDisabled) }
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(24.dp),
-            tint = if (effectiveDisabled)
-                MaterialTheme.colorScheme.error.copy(alpha = alpha)
-            else
-                MaterialTheme.colorScheme.primary.copy(alpha = alpha)
-        )
-        Spacer(Modifier.width(16.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha)
-            )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = alpha)
-            )
-        }
-        Switch(
-            checked = isDisabled,
-            onCheckedChange = { if (!isGrayedOut) onToggle(it) },
-            enabled = !isGrayedOut
-        )
-    }
-}
-
-// ============================================================================
-// PRIVACY MANAGEMENT COMPONENTS
-// ============================================================================
-
-/**
- * Section for managing blocked and muted users
- */
-@Composable
-private fun BlockedMutedSection(context: android.content.Context) {
-    var blockedUsers by remember { mutableStateOf(PrivacyManager.getBlockedUsers(context)) }
-    var mutedUsers by remember { mutableStateOf(PrivacyManager.getMutedUsers(context)) }
-    var showBlockedDialog by remember { mutableStateOf(false) }
-    var showMutedDialog by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        // Blocked Users
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { showBlockedDialog = true },
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            )
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Block,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Column {
-                        Text(
-                            "Blocked Users",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            "${blockedUsers.size} users blocked",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                )
-            }
-        }
-
-        // Muted Users
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { showMutedDialog = true },
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            )
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.VolumeOff,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Column {
-                        Text(
-                            "Muted Users",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            "${mutedUsers.size} users muted",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                )
-            }
-        }
-    }
-
-    // Blocked Users Dialog
-    if (showBlockedDialog) {
-        AlertDialog(
-            onDismissRequest = { showBlockedDialog = false },
-            title = { Text("Blocked Users") },
-            text = {
-                if (blockedUsers.isEmpty()) {
-                    Text(
-                        "You haven't blocked anyone yet.\n\nBlocked users can't see your posts or message you.",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.heightIn(max = 300.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(blockedUsers.toList()) { userId ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(userId, style = MaterialTheme.typography.bodyMedium)
-                                TextButton(
-                                    onClick = {
-                                        PrivacyManager.unblockUser(context, userId)
-                                        blockedUsers = PrivacyManager.getBlockedUsers(context)
-                                    }
-                                ) {
-                                    Text("Unblock", color = MaterialTheme.colorScheme.primary)
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showBlockedDialog = false }) {
-                    Text("Close")
-                }
-            }
-        )
-    }
-
-    // Muted Users Dialog
-    if (showMutedDialog) {
-        AlertDialog(
-            onDismissRequest = { showMutedDialog = false },
-            title = { Text("Muted Users") },
-            text = {
-                if (mutedUsers.isEmpty()) {
-                    Text(
-                        "You haven't muted anyone yet.\n\nMuted users' posts won't appear in your feed, but they can still follow you.",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.heightIn(max = 300.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(mutedUsers.toList()) { userId ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(userId, style = MaterialTheme.typography.bodyMedium)
-                                TextButton(
-                                    onClick = {
-                                        PrivacyManager.unmuteUser(context, userId)
-                                        mutedUsers = PrivacyManager.getMutedUsers(context)
-                                    }
-                                ) {
-                                    Text("Unmute", color = MaterialTheme.colorScheme.primary)
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showMutedDialog = false }) {
-                    Text("Close")
-                }
-            }
-        )
-    }
-}
-
-/**
- * Section for managing muted words
- */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun MutedWordsSection(context: android.content.Context) {
-    var mutedWords by remember { mutableStateOf(PrivacyManager.getMutedWords(context)) }
-    var newWord by remember { mutableStateOf("") }
-    var showAddDialog by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        // Current muted words count
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            )
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "${mutedWords.size} words muted",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Button(
-                        onClick = { showAddDialog = true }
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text("Add Word")
-                    }
-                }
-
-                if (mutedWords.isNotEmpty()) {
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        "Posts containing these words will be hidden:",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(8.dp))
-
-                    // Display muted words as chips
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        mutedWords.forEach { word ->
-                            InputChip(
-                                selected = false,
-                                onClick = {
-                                    PrivacyManager.removeMutedWord(context, word)
-                                    mutedWords = PrivacyManager.getMutedWords(context)
-                                },
-                                label = { Text(word) },
-                                trailingIcon = {
-                                    Icon(
-                                        Icons.Default.Close,
-                                        contentDescription = "Remove",
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // Add Word Dialog
-    if (showAddDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                showAddDialog = false
-                newWord = ""
-            },
-            title = { Text("Add Muted Word") },
-            text = {
-                Column {
-                    Text(
-                        "Posts containing this word will be hidden from your feed.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = newWord,
-                        onValueChange = { newWord = it },
-                        label = { Text(stringResource(R.string.privacy_muted_word_label)) },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (newWord.isNotBlank()) {
-                            PrivacyManager.addMutedWord(context, newWord)
-                            mutedWords = PrivacyManager.getMutedWords(context)
-                        }
-                        showAddDialog = false
-                        newWord = ""
-                    },
-                    enabled = newWord.isNotBlank()
-                ) {
-                    Text("Add")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    showAddDialog = false
-                    newWord = ""
-                }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-}
-
-/**
- * Section for managing data and clearing history
- */
-@Composable
-private fun DataManagementSection(context: android.content.Context) {
-    var showClearSearchDialog by remember { mutableStateOf(false) }
-    var showClearAllDialog by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        // Clear Search History
-        OutlinedButton(
-            onClick = { showClearSearchDialog = true },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(Icons.Default.History, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("Clear Search History")
-        }
-
-        // Download Data
-        OutlinedButton(
-            onClick = {
-                android.widget.Toast.makeText(context, "Data download requested. You'll receive an email when ready.", android.widget.Toast.LENGTH_LONG).show()
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(Icons.Default.Download, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("Download Your Data")
-        }
-
-        // Clear All Privacy Data (dangerous)
-        OutlinedButton(
-            onClick = { showClearAllDialog = true },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colorScheme.error
-            )
-        ) {
-            Icon(Icons.Default.DeleteForever, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("Reset All Privacy Settings")
-        }
-    }
-
-    // Clear Search History Dialog
-    if (showClearSearchDialog) {
-        AlertDialog(
-            onDismissRequest = { showClearSearchDialog = false },
-            title = { Text("Clear Search History?") },
-            text = {
-                Text("This will delete all your search history. This cannot be undone.")
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        ContentManager.clearSearchHistory(context)
-                        showClearSearchDialog = false
-                        android.widget.Toast.makeText(context, "Search history cleared", android.widget.Toast.LENGTH_SHORT).show()
-                    }
-                ) {
-                    Text("Clear", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showClearSearchDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-
-    // Clear All Data Dialog
-    if (showClearAllDialog) {
-        AlertDialog(
-            onDismissRequest = { showClearAllDialog = false },
-            title = { Text("Reset All Privacy Settings?") },
-            text = {
-                Text("This will:\n• Unblock all users\n• Unmute all users\n• Clear muted words\n• Clear hidden posts\n\nThis cannot be undone.")
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        PrivacyManager.resetAll(context)
-                        showClearAllDialog = false
-                        android.widget.Toast.makeText(context, "Privacy settings reset", android.widget.Toast.LENGTH_SHORT).show()
-                    }
-                ) {
-                    Text("Reset", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showClearAllDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-}

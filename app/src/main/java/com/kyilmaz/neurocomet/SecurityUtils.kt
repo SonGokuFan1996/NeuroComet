@@ -11,8 +11,17 @@ object SecurityUtils {
 
     private const val TAG = "SecurityUtils"
 
-    // Simple XOR key - MUST match the one in build.gradle.kts
-    private const val XOR_KEY = "neurocomet_internal_security_key_2025"
+    // XOR key loaded from BuildConfig — never hardcoded in source.
+    // The value is injected at build time from local.properties / env.
+    private val XOR_KEY: String by lazy {
+        try {
+            val field = BuildConfig::class.java.getField("OBFUSCATION_KEY")
+            field.get(null) as? String ?: ""
+        } catch (_: Exception) {
+            // Fallback: BuildConfig field not yet generated (pre-sync)
+            ""
+        }
+    }
 
     /**
      * De-obfuscates a string that was obfuscated with XOR and Hex encoded.

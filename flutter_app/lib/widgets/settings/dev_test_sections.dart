@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../screens/settings/dev_options_screen.dart';
 import '../../services/supabase_service.dart';
 import '../../utils/stress_test_utils.dart';
 import '../../providers/theme_provider.dart';
+import '../../core/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DevSectionHeader extends StatelessWidget {
@@ -304,6 +306,13 @@ class LocaleDevSection extends ConsumerWidget {
             return FilterChip(
               label: Text(lang['name']!),
               selected: isSelected,
+              selectedColor: AppColors.primaryPurple,
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              ),
+              checkmarkColor: Colors.white,
               onSelected: (selected) {
                 if (selected) {
                   notifier.setLocale(Locale(lang['code']!));
@@ -581,6 +590,13 @@ class _DmDebugDevSectionState extends ConsumerState<DmDebugDevSection> {
             return FilterChip(
               label: Text(override.name),
               selected: options.moderationOverride == override,
+              selectedColor: AppColors.primaryPurple,
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              labelStyle: TextStyle(
+                color: options.moderationOverride == override ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                fontWeight: options.moderationOverride == override ? FontWeight.bold : FontWeight.w500,
+              ),
+              checkmarkColor: Colors.white,
               onSelected: (_) => notifier.setModerationOverride(override),
             );
           }).toList(),
@@ -971,9 +987,17 @@ class EnvironmentPickerDevSection extends ConsumerWidget {
         Wrap(
           spacing: 8,
           children: DevEnvironmentTarget.values.map((env) {
+            final isSelected = options.environment == env;
             return ChoiceChip(
               label: Text(env.name.toUpperCase()),
-              selected: options.environment == env,
+              selected: isSelected,
+              selectedColor: AppColors.primaryPurple,
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              ),
+              checkmarkColor: Colors.white,
               onSelected: (selected) {
                 if (selected && options.environment != env) {
                   showDialog(
@@ -1003,7 +1027,7 @@ class EnvironmentPickerDevSection extends ConsumerWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
@@ -1072,5 +1096,111 @@ class _FlagItem {
   final bool value;
   final void Function(bool) onChanged;
   const _FlagItem(this.label, this.subtitle, this.value, this.onChanged);
+}
+
+class ABTestingDevSection extends ConsumerWidget {
+  const ABTestingDevSection({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final options = ref.watch(devOptionsProvider);
+    final notifier = ref.read(devOptionsProvider.notifier);
+    final theme = Theme.of(context);
+
+    final variants = [
+      (ABTestVariant.control, 'Control', Icons.science_outlined, 'Default production UI'),
+      (ABTestVariant.liquidGlass, 'Liquid Glass', Icons.blur_on_rounded, 'Frosted glass translucent UI'),
+      (ABTestVariant.compactCards, 'Compact Cards', Icons.view_agenda_rounded, 'Smaller, denser card layout'),
+      (ABTestVariant.boldTypography, 'Bold Type', Icons.format_bold_rounded, 'Larger, high-contrast text'),
+    ];
+
+    return DevTestCard(
+      title: 'A/B Test Variants',
+      icon: Icons.science,
+      children: [
+        const Text(
+          'Switch between experimental UI variants. Affects feed, explore, and messages.',
+          style: TextStyle(fontSize: 12),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: variants.map((variant) {
+            final (value, label, icon, description) = variant;
+            final isSelected = options.abTestVariant == value;
+            return ChoiceChip(
+              avatar: Icon(
+                icon,
+                size: 18,
+                color: isSelected ? Colors.white : theme.colorScheme.onSurface,
+              ),
+              label: Text(label),
+              selected: isSelected,
+              selectedColor: AppColors.primaryPurple,
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.white : theme.colorScheme.onSurface,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              ),
+              checkmarkColor: Colors.white,
+              onSelected: (selected) {
+                if (selected) {
+                  HapticFeedback.selectionClick();
+                  notifier.setAbTestVariant(value);
+                }
+              },
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: options.abTestVariant != ABTestVariant.control
+                  ? AppColors.primaryPurple.withValues(alpha: 0.5)
+                  : theme.colorScheme.outlineVariant,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    variants.firstWhere((v) => v.$1 == options.abTestVariant).$3,
+                    size: 18,
+                    color: options.abTestVariant != ABTestVariant.control
+                        ? AppColors.primaryPurple
+                        : theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Active: ${variants.firstWhere((v) => v.$1 == options.abTestVariant).$2}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: options.abTestVariant != ABTestVariant.control
+                          ? AppColors.primaryPurple
+                          : null,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                variants.firstWhere((v) => v.$1 == options.abTestVariant).$4,
+                style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }
 

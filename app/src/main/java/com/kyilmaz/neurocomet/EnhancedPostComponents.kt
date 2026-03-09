@@ -35,6 +35,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -74,6 +79,8 @@ fun EnhancedPostCard(
     safetyState: SafetyState = SafetyState(),
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val brailleOptimized = SocialSettingsManager.isBrailleOptimized(context)
     var showComments by remember { mutableStateOf(false) }
     var showShareSheet by remember { mutableStateOf(false) }
     var showReportDialog by remember { mutableStateOf(false) }
@@ -83,8 +90,6 @@ fun EnhancedPostCard(
     var liked by remember { mutableStateOf(post.isLikedByMe) }
     var likeCount by remember { mutableIntStateOf(post.likes) }
     var saved by remember { mutableStateOf(isSaved) }
-
-    val context = LocalContext.current
 
     // Get user info
     val user = MOCK_USERS.find { it.id == post.userId }
@@ -384,7 +389,12 @@ fun EnhancedPostCard(
                             value = commentText,
                             onValueChange = { commentText = it },
                             placeholder = { Text(stringResource(R.string.comments_add_comment_placeholder)) },
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier
+                                .weight(1f)
+                                .semantics {
+                                    contentDescription = if (brailleOptimized) "Inline comment input" else "Add a comment"
+                                    stateDescription = if (commentText.isBlank()) "Empty" else "${commentText.length} characters entered"
+                                },
                             shape = RoundedCornerShape(24.dp),
                             maxLines = 3,
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
@@ -405,7 +415,10 @@ fun EnhancedPostCard(
                                     commentText = ""
                                 }
                             },
-                            enabled = commentText.isNotBlank()
+                            enabled = commentText.isNotBlank(),
+                            modifier = Modifier.semantics {
+                                contentDescription = if (commentText.isBlank()) "Send comment disabled" else "Send comment"
+                            },
                         ) {
                             Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send comment")
                         }
@@ -493,8 +506,19 @@ private fun PostActionButton(
     activeColor: Color = MaterialTheme.colorScheme.primary,
     onClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val brailleOptimized = SocialSettingsManager.isBrailleOptimized(context)
     TextButton(
         onClick = onClick,
+        modifier = Modifier.semantics(mergeDescendants = true) {
+            role = Role.Button
+            contentDescription = label
+            stateDescription = if (isActive) {
+                if (brailleOptimized) "On" else "Selected"
+            } else {
+                if (brailleOptimized) "Off" else "Not selected"
+            }
+        },
         colors = ButtonDefaults.textButtonColors(
             contentColor = if (isActive) activeColor else MaterialTheme.colorScheme.onSurfaceVariant
         )

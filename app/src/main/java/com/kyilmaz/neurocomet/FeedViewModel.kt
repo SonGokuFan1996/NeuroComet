@@ -41,6 +41,19 @@ private const val CURRENT_USER_ID_MOCK = "me"
 private const val DINO_USER_ID = "DinoLover99"
 private const val THERAPY_USER_ID = "Therapy_Bot"
 
+/**
+ * All post IDs used by mock/localized data.
+ * These MUST NOT be persisted to Supabase, because they collide with
+ * auto-incremented IDs in the real `posts` table and cause data corruption.
+ */
+private val MOCK_POST_IDS: Set<Long> = setOf(
+    1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 15L, 16L, 17L,
+    101L, 102L, 103L, 104L, 105L, 106L
+)
+
+/** Returns true if [postId] belongs to mock/local-only data. */
+private fun isMockPostId(postId: Long): Boolean = postId in MOCK_POST_IDS
+
 // --- SCREENSHOT-WORTHY MOCK DATA ---
 // These are additional posts shown alongside localized mock data
 // IDs start at 100 to avoid conflicts with localized posts (IDs 1-17)
@@ -128,6 +141,8 @@ data class FeedUiState(
     val isFakePremiumEnabled: Boolean = false,
     val activePostId: Long? = null,
     val activePostComments: List<Comment> = emptyList(),
+    val commentDraftsByPostId: Map<Long, String> = emptyMap(),
+    val commentsByPostId: Map<Long, List<Comment>> = emptyMap(),
     val isCommentSheetVisible: Boolean = false,
     val activeStory: Story? = null,
     val conversations: List<Conversation> = emptyList(),
@@ -314,7 +329,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
             id = newConversationId,
             participants = listOf(CURRENT_USER_ID_MOCK, userId),
             messages = emptyList(),
-            lastMessageTimestamp = java.time.Instant.now().toString(),
+            lastMessageTimestamp = Instant.now().toString(),
             unreadCount = 0
         )
 
@@ -624,7 +639,12 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
                     posts = MockDataProvider.getLocalizedFeedPosts(getApplication()) + MOCK_FEED_POSTS,
                     notifications = MockDataProvider.getLocalizedNotifications(getApplication()),
                     conversations = MockDataProvider.getLocalizedConversations(getApplication()),
-                    stories = emptyList(),
+                    stories = MOCK_STORIES,
+                    activeStory = null,
+                    activePostId = null,
+                    activePostComments = emptyList(),
+                    commentDraftsByPostId = emptyMap(),
+                    commentsByPostId = emptyMap(),
                     isLoading = false,
                     isDinoBanned = false
                 )
@@ -634,7 +654,14 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun fetchStories() {
         val allStories = MOCK_STORIES + _userStories.value
-        _uiState.update { it.copy(stories = allStories) }
+        _uiState.update { state ->
+            state.copy(
+                stories = allStories,
+                activeStory = state.activeStory?.let { active ->
+                    allStories.firstOrNull { it.id == active.id }
+                }
+            )
+        }
     }
 
     // --- Post actions ---
@@ -696,6 +723,28 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { it.copy(activeStory = null) }
     }
 
+    /** Advance to the next unviewed story, or dismiss if none remain. */
+    fun advanceToNextStory() {
+        val current = _uiState.value.activeStory ?: run {
+            dismissStory()
+            return
+        }
+        // Mark current as viewed
+        markStoryAsViewed(current.id)
+        // Find the next story in the list after the current one
+        val stories = _uiState.value.stories
+        val currentIndex = stories.indexOfFirst { it.id == current.id }
+        val nextStory = if (currentIndex >= 0) {
+            stories.drop(currentIndex + 1).firstOrNull { !it.isViewed }
+                ?: stories.drop(currentIndex + 1).firstOrNull()
+        } else null
+        if (nextStory != null) {
+            _uiState.update { it.copy(activeStory = nextStory) }
+        } else {
+            dismissStory()
+        }
+    }
+
     fun markStoryAsViewed(storyId: String) {
         _uiState.update { state ->
             val updatedStories = state.stories.map { story ->
@@ -748,6 +797,14 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
             return // Don't attempt network call if UI update failed
         }
 
+        // Skip Supabase persistence for mock/local-only posts.
+        // Mock posts use small hard-coded IDs (1-17, 101-106) that collide with
+        // real auto-incremented IDs in the database, causing data corruption.
+        if (isMockPostId(postId)) {
+            android.util.Log.d("NeuroComet", "⏭️ Skipping Supabase persist for mock post #$postId")
+            return
+        }
+
         // Persist to Supabase in background
         viewModelScope.launch {
             try {
@@ -767,17 +824,31 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     // --- Comments bottom sheet ---
 
     fun openCommentSheet(post: Post) {
-        _uiState.update {
-            it.copy(
-                activePostId = post.id,
-                activePostComments = emptyList(),
+        val postId = post.id
+        _uiState.update { state ->
+            state.copy(
+                activePostId = postId,
+                activePostComments = postId?.let { state.commentsByPostId[it] }.orEmpty(),
                 isCommentSheetVisible = true
             )
         }
     }
 
     fun dismissCommentSheet() {
-        _uiState.update { it.copy(isCommentSheetVisible = false, activePostId = null) }
+        _uiState.update {
+            it.copy(
+                isCommentSheetVisible = false,
+                activePostId = null,
+                activePostComments = emptyList()
+            )
+        }
+    }
+
+    fun updateActiveCommentDraft(content: String) {
+        val postId = _uiState.value.activePostId ?: return
+        _uiState.update { state ->
+            state.copy(commentDraftsByPostId = state.commentDraftsByPostId + (postId to content))
+        }
     }
 
     fun addComment(content: String) {
@@ -791,8 +862,9 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
             timestamp = Instant.now().toString()
         )
 
-        // Add comment to the active post comments list
+        // Add comment to the active post comments list (optimistic)
         _uiState.update { state ->
+            val existingComments = state.commentsByPostId[postId].orEmpty()
             // Also update the comment count on the post
             val updatedPosts = state.posts.map { post ->
                 if (post.id == postId) {
@@ -800,9 +872,25 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
                 } else post
             }
             state.copy(
-                activePostComments = state.activePostComments + newComment,
+                activePostComments = existingComments + newComment,
+                commentsByPostId = state.commentsByPostId + (postId to (existingComments + newComment)),
+                commentDraftsByPostId = state.commentDraftsByPostId - postId,
                 posts = updatedPosts
             )
+        }
+
+        // Persist to Supabase if configured
+        viewModelScope.launch {
+            try {
+                val client = AppSupabaseClient.client ?: return@launch
+                client.safeInsert("post_comments", kotlinx.serialization.json.buildJsonObject {
+                    put("post_id", kotlinx.serialization.json.JsonPrimitive(postId))
+                    put("user_id", kotlinx.serialization.json.JsonPrimitive(CURRENT_USER_ID_MOCK))
+                    put("content", kotlinx.serialization.json.JsonPrimitive(content))
+                })
+            } catch (e: Exception) {
+                android.util.Log.w("FeedVM", "Failed to persist comment to Supabase", e)
+            }
         }
     }
 
@@ -1055,7 +1143,7 @@ val MOCK_CONVERSATIONS = listOf(
             DirectMessage("msg25", CURRENT_USER_ID_MOCK, "Alex_Stims", "Ooooh which switches did you get?", Instant.now().minusSeconds(431000).toString()),
             DirectMessage("msg26", "Alex_Stims", CURRENT_USER_ID_MOCK, "Cherry MX Blues! The tactile feedback is *chef's kiss* for my stimming needs.", Instant.now().minusSeconds(430000).toString()),
             DirectMessage("msg27", CURRENT_USER_ID_MOCK, "Alex_Stims", "I've been eyeing those! Do they help you focus while coding?", Instant.now().minusSeconds(429000).toString()),
-            DirectMessage("msg28", "Alex_Stims", CURRENT_USER_ID_MOCK, "Absolutely! The rhythmic clicking is like a built-in focus soundtrack. Highly recommend!", Instant.now().minusSeconds(428000).toString()),
+            DirectMessage("msg28", CURRENT_USER_ID_MOCK, "Alex_Stims", "Absolutely! The rhythmic clicking is like a built-in focus soundtrack. Highly recommend!", Instant.now().minusSeconds(428000).toString()),
             DirectMessage("msg29", CURRENT_USER_ID_MOCK, "Alex_Stims", "Adding to cart right now 😂", Instant.now().minusSeconds(427000).toString())
         ),
         lastMessageTimestamp = Instant.now().minusSeconds(427000).toString(),

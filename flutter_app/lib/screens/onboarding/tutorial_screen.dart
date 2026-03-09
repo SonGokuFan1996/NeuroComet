@@ -232,7 +232,7 @@ class _TutorialPageContent extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: step.color.withOpacity(0.2),
+              color: step.color.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(

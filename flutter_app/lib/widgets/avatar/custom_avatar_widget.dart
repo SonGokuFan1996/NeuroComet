@@ -295,7 +295,7 @@ class CustomAvatarBasePainter extends CustomPainter {
 
   void _drawBuzzHair(Canvas canvas, Offset center, double width, Paint paint) {
     final adjustedPaint = Paint()
-      ..color = paint.color.withOpacity(0.7)
+      ..color = paint.color.withValues(alpha: 0.7)
       ..style = PaintingStyle.fill;
     canvas.drawArc(
       Rect.fromCenter(center: center, width: width * 0.95, height: width * 0.7),

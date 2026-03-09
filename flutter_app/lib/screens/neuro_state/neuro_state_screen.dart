@@ -26,12 +26,12 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.get('neuroState')),
+        title: Text(l10n.neuroState),
         actions: [
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () => _showMoodHistory(context),
-            tooltip: l10n.get('moodHistory'),
+            tooltip: l10n.moodHistory,
           ),
         ],
       ),
@@ -45,17 +45,17 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
             const SizedBox(height: 24),
 
             // Neuro State Selector
-            _buildSectionHeader(context, 'Choose Your State'),
+            _buildSectionHeader(context, l10n.get('chooseYourState')),
             _buildNeuroStateGrid(context),
             const SizedBox(height: 24),
 
             // Energy level
-            _buildSectionHeader(context, l10n.get('energyLevel')),
+            _buildSectionHeader(context, l10n.energyLevel),
             _buildSliderCard(
               context,
               value: _energyLevel,
-              lowLabel: l10n.get('low'),
-              highLabel: l10n.get('high'),
+              lowLabel: l10n.low,
+              highLabel: l10n.high,
               color: AppColors.accentOrange,
               icon: Icons.bolt,
               onChanged: (value) {
@@ -66,12 +66,12 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
             const SizedBox(height: 16),
 
             // Stress level
-            _buildSectionHeader(context, l10n.get('stressLevel')),
+            _buildSectionHeader(context, l10n.stressLevel),
             _buildSliderCard(
               context,
               value: _stressLevel,
-              lowLabel: l10n.get('calm'),
-              highLabel: l10n.get('stressed'),
+              lowLabel: l10n.calm,
+              highLabel: l10n.stressed,
               color: AppColors.categoryAnxiety,
               icon: Icons.psychology,
               onChanged: (value) {
@@ -82,12 +82,12 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
             const SizedBox(height: 16),
 
             // Sensory load
-            _buildSectionHeader(context, l10n.get('sensoryLoad')),
+            _buildSectionHeader(context, l10n.sensoryLoad),
             _buildSliderCard(
               context,
               value: _sensoryLoad,
-              lowLabel: l10n.get('understimulated'),
-              highLabel: l10n.get('overstimulated'),
+              lowLabel: l10n.understimulated,
+              highLabel: l10n.overstimulated,
               color: AppColors.secondaryTeal,
               icon: Icons.hearing,
               onChanged: (value) {
@@ -102,16 +102,17 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
   }
 
   Widget _buildThemePreviewCard(BuildContext context, NeuroState state) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withOpacity(0.3),
+        color: colorScheme.primaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: colorScheme.primary.withOpacity(0.5),
+          color: colorScheme.primary.withValues(alpha: 0.5),
           width: 2,
         ),
       ),
@@ -123,7 +124,7 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withOpacity(0.2),
+                  color: colorScheme.primary.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: Text(
@@ -137,7 +138,7 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Active Theme',
+                      l10n.get('activeTheme'),
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -158,18 +159,18 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
           // Color swatches row
           Row(
             children: [
-              _buildColorSwatch('Primary', colorScheme.primary),
+              _buildColorSwatch(l10n.primary, colorScheme.primary),
               const SizedBox(width: 8),
-              _buildColorSwatch('Secondary', colorScheme.secondary),
+              _buildColorSwatch(l10n.get('secondary'), colorScheme.secondary),
               const SizedBox(width: 8),
-              _buildColorSwatch('Tertiary', colorScheme.tertiary),
+              _buildColorSwatch(l10n.get('tertiary'), colorScheme.tertiary),
               const SizedBox(width: 8),
-              _buildColorSwatch('Surface', colorScheme.surface),
+              _buildColorSwatch(l10n.get('surface'), colorScheme.surface),
             ],
           ),
           const SizedBox(height: 12),
           Text(
-            'Theme colors are carefully designed for this neuro state.',
+            l10n.get('themePreviewDescription'),
             style: theme.textTheme.bodySmall?.copyWith(
               color: colorScheme.onSurfaceVariant,
             ),
@@ -219,48 +220,49 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
   }
 
   Widget _buildNeuroStateGrid(BuildContext context) {
+    final l10n = context.l10n;
     // Group states by category - matching the Android version's comprehensive themes
     final categories = {
-      '✨ Basic': [
+      '✨ ${l10n.get('neuroCategoryBasic')}': [
         NeuroState.defaultState,
         NeuroState.hyperfocus,
         NeuroState.overload,
         NeuroState.calm,
       ],
-      '⚡ ADHD': [
+      '⚡ ${l10n.get('neuroCategoryAdhd')}': [
         NeuroState.adhdEnergized,
         NeuroState.adhdLowDopamine,
         NeuroState.adhdTaskMode,
       ],
-      '🧩 Autism': [
+      '🧩 ${l10n.get('neuroCategoryAutism')}': [
         NeuroState.autismRoutine,
         NeuroState.autismSensorySeek,
         NeuroState.autismLowStim,
       ],
-      '💭 Anxiety & OCD': [
+      '💭 ${l10n.get('neuroCategoryAnxiety')}': [
         NeuroState.anxietySoothe,
         NeuroState.anxietyGrounding,
       ],
-      '😊 Mood': [
+      '😊 ${l10n.get('neuroCategoryMood')}': [
         NeuroState.moodHappy,
         NeuroState.moodAnxious,
         NeuroState.moodTired,
         NeuroState.moodOverwhelmed,
         NeuroState.moodCreative,
       ],
-      '👁️ Vision Accessibility': [
+      '👁️ ${l10n.get('neuroCategoryAccessibility')}': [
         NeuroState.dyslexiaFriendly,
         NeuroState.colorblindDeuter,
         NeuroState.colorblindProtan,
         NeuroState.colorblindTritan,
         NeuroState.colorblindMono,
       ],
-      '🔊 Low Vision / Blind': [
+      '🔊 ${l10n.get('neuroCategoryBlind')}': [
         NeuroState.blindScreenReader,
         NeuroState.blindHighContrast,
         NeuroState.blindLargeText,
       ],
-      '🌟 Special': [
+      '🌟 ${l10n.get('neuroCategorySpecial')}': [
         NeuroState.cinnamonBun,
         NeuroState.rainbowBrain,
       ],
@@ -320,7 +322,7 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
                     data: SliderThemeData(
                       activeTrackColor: color,
                       thumbColor: color,
-                      inactiveTrackColor: color.withOpacity(0.2),
+                      inactiveTrackColor: color.withValues(alpha: 0.2),
                       trackHeight: 4,
                     ),
                     child: Slider(
@@ -368,6 +370,7 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
   }
 
   void _showMoodHistory(BuildContext context) {
+    final l10n = context.l10n;
     final theme = Theme.of(context);
     final now = DateTime.now();
 
@@ -401,7 +404,7 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
               child: Container(
                 width: 40, height: 4,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.4),
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -412,9 +415,12 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
                 children: [
                   Icon(Icons.history, color: theme.colorScheme.primary),
                   const SizedBox(width: 12),
-                  Text('Mood History', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(l10n.moodHistory, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                   const Spacer(),
-                  Text('${history.length} entries', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                  Text(
+                    l10n.get('entriesCount').replaceAll('{count}', history.length.toString()),
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  ),
                 ],
               ),
             ),
@@ -427,7 +433,7 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final entry = history[index];
-                  final timeAgo = _formatTimeAgo(now.difference(entry.timestamp));
+                  final timeAgo = _formatTimeAgo(l10n, now.difference(entry.timestamp));
                   return Card(
                     elevation: 0,
                     color: theme.colorScheme.surfaceContainer,
@@ -442,7 +448,7 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: entry.state.color.withOpacity(0.2),
+                                  color: entry.state.color.withValues(alpha: 0.2),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Text(entry.state.emoji, style: const TextStyle(fontSize: 20)),
@@ -462,11 +468,11 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
                           const SizedBox(height: 12),
                           Row(
                             children: [
-                              _buildMiniStat(theme, Icons.bolt, 'Energy', entry.energy, AppColors.accentOrange),
+                              _buildMiniStat(theme, Icons.bolt, entry.energy, AppColors.accentOrange),
                               const SizedBox(width: 12),
-                              _buildMiniStat(theme, Icons.psychology, 'Stress', entry.stress, AppColors.categoryAnxiety),
+                              _buildMiniStat(theme, Icons.psychology, entry.stress, AppColors.categoryAnxiety),
                               const SizedBox(width: 12),
-                              _buildMiniStat(theme, Icons.hearing, 'Sensory', entry.sensory, AppColors.secondaryTeal),
+                              _buildMiniStat(theme, Icons.hearing, entry.sensory, AppColors.secondaryTeal),
                             ],
                           ),
                         ],
@@ -482,7 +488,7 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
     );
   }
 
-  Widget _buildMiniStat(ThemeData theme, IconData icon, String label, int value, Color color) {
+  Widget _buildMiniStat(ThemeData theme, IconData icon, int value, Color color) {
     return Expanded(
       child: Row(
         children: [
@@ -494,11 +500,11 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
     );
   }
 
-  String _formatTimeAgo(Duration diff) {
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays == 1) return 'Yesterday';
-    return '${diff.inDays} days ago';
+  String _formatTimeAgo(AppLocalizations l10n, Duration diff) {
+    if (diff.inMinutes < 60) return l10n.get('minutesAgo').replaceAll('{n}', diff.inMinutes.toString());
+    if (diff.inHours < 24) return l10n.get('hoursAgo').replaceAll('{n}', diff.inHours.toString());
+    if (diff.inDays == 1) return l10n.get('yesterday');
+    return l10n.get('daysAgo').replaceAll('{n}', diff.inDays.toString());
   }
 }
 
@@ -538,7 +544,7 @@ class _NeuroStateChip extends ConsumerWidget {
           ref.read(neuroStateProvider.notifier).setNeuroState(state);
         }
       },
-      selectedColor: state.color.withOpacity(0.2),
+      selectedColor: state.color.withValues(alpha: 0.2),
       checkmarkColor: state.color,
       side: isSelected ? BorderSide(color: state.color) : null,
     );

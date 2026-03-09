@@ -32,6 +32,7 @@ object MessagesRepository {
         val type: String = "text",
         val media_url: String? = null,
         val is_read: Boolean = false,
+        val read_at: String? = null,
         val created_at: String
     )
 
@@ -103,7 +104,6 @@ object MessagesRepository {
                     }
                     .decodeList<DbProfile>()
             } else emptyList()
-            val profileMap = profiles.associateBy { it.id }
 
             // 5. Fetch last message for each conversation
             val result = conversations.map { conv ->
@@ -381,13 +381,14 @@ object MessagesRepository {
 
     private fun DbMessage.toDirectMessage(participants: List<String>, currentUserId: String): DirectMessage {
         val recipientId = participants.firstOrNull { it != sender_id } ?: currentUserId
+        val read = is_read || !read_at.isNullOrBlank()
         return DirectMessage(
             id = id,
             senderId = sender_id,
             recipientId = recipientId,
             content = content,
             timestamp = created_at,
-            isRead = is_read,
+            isRead = read,
             deliveryStatus = MessageDeliveryStatus.SENT,
             moderationStatus = ModerationStatus.CLEAN
         )

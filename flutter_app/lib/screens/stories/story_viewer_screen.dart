@@ -276,7 +276,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                         child: Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.5),
+                            color: Colors.black.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
@@ -298,7 +298,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
 
   Widget _buildEmptyStoryPage(StoryGroup group) {
     return Container(
-      color: AppColors.primaryPurple.withOpacity(0.3),
+      color: AppColors.primaryPurple.withValues(alpha: 0.3),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -363,7 +363,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
       try {
         final hex = story.backgroundColor!.replaceAll('#', '');
         final color = Color(int.parse('FF$hex', radix: 16));
-        gradientColors = [color, color.withOpacity(0.7)];
+        gradientColors = [color, color.withValues(alpha: 0.7)];
       } catch (_) {
         // Use defaults
       }
@@ -441,7 +441,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -454,7 +454,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
             Text(
               'Video Story',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 16,
               ),
             ),
@@ -471,10 +471,10 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Colors.black.withOpacity(0.6),
+            Colors.black.withValues(alpha: 0.6),
             Colors.transparent,
             Colors.transparent,
-            Colors.black.withOpacity(0.6),
+            Colors.black.withValues(alpha: 0.6),
           ],
           stops: const [0, 0.2, 0.8, 1],
         ),
@@ -520,7 +520,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
 
             return LinearProgressIndicator(
               value: progress,
-              backgroundColor: Colors.white.withOpacity(0.3),
+              backgroundColor: Colors.white.withValues(alpha: 0.3),
               valueColor: const AlwaysStoppedAnimation(Colors.white),
             );
           },
@@ -570,7 +570,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                 Text(
                   story.timeAgo,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 12,
                   ),
                 ),
@@ -598,7 +598,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.4),
+          color: Colors.black.withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
@@ -627,15 +627,15 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
             child: Container(
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.white.withOpacity(0.3)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
               ),
               child: TextField(
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: 'Send a message...',
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 ),
@@ -667,9 +667,9 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withOpacity(0.3)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
               ),
               child: const Icon(
                 Icons.favorite_border,
@@ -687,9 +687,9 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withOpacity(0.3)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
               ),
               child: const Icon(
                 Icons.send_outlined,
@@ -710,7 +710,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
           _progressController.forward();
         },
         child: Container(
-          color: Colors.black.withOpacity(0.5),
+          color: Colors.black.withValues(alpha: 0.5),
           child: Center(
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 32),

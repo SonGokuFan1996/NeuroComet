@@ -21,9 +21,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
@@ -47,6 +48,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -77,6 +79,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -127,6 +130,15 @@ fun DmConversationScreenV2(
     var showMenu by remember { mutableStateOf(false) }
     var showSearch by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
+    var showWallpaperPicker by remember { mutableStateOf(false) }
+    var activeWallpaperKey by remember {
+        mutableStateOf(
+            SettingsManager.getConversationWallpaper(conversation.id)
+                ?: SettingsManager.globalWallpaper
+        )
+    }
+    val activeWallpaper = ConversationWallpaper.fromKey(activeWallpaperKey)
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
 
     // Auto-hide emoji panel when the keyboard appears.
     // Keep this in sync with how the rest of the app detects IME visibility.
@@ -231,6 +243,14 @@ fun DmConversationScreenV2(
                                 leadingIcon = { Icon(Icons.Filled.Search, null) }
                             )
                             DropdownMenuItem(
+                                text = { Text("Wallpaper") },
+                                onClick = {
+                                    showMenu = false
+                                    showWallpaperPicker = true
+                                },
+                                leadingIcon = { Icon(Icons.Filled.Wallpaper, null) }
+                            )
+                            DropdownMenuItem(
                                 text = { Text(stringResource(if (isUserMuted) R.string.menu_unmute_notifications else R.string.menu_mute_notifications)) },
                                 onClick = {
                                     showMenu = false
@@ -272,20 +292,17 @@ fun DmConversationScreenV2(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
-            // IME padding on the wrapper, navbar padding inside content for seamless blend
-            val bottomBarModifier = Modifier
-                .fillMaxWidth()
-                .imePadding()
+            // Use the larger of nav-bar and IME insets for the composer so the
+            // conversation body stays put when the keyboard opens.
+            val bottomBarPadding = WindowInsets.navigationBars.union(WindowInsets.ime)
 
             if (isUserBlocked) {
                 Surface(
-                    modifier = bottomBarModifier,
+                    modifier = Modifier.fillMaxWidth().windowInsetsPadding(bottomBarPadding),
                     color = MaterialTheme.colorScheme.errorContainer
                 ) {
                     Column(
-                        modifier = Modifier
-                            .navigationBarsPadding()
-                            .padding(16.dp),
+                        modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
@@ -302,12 +319,12 @@ fun DmConversationScreenV2(
                 }
             } else {
                 Surface(
-                    modifier = bottomBarModifier,
+                    modifier = Modifier.fillMaxWidth().windowInsetsPadding(bottomBarPadding),
                     color = MaterialTheme.colorScheme.surface,
                     tonalElevation = 2.dp
                 ) {
                     Column(
-                        modifier = Modifier.navigationBarsPadding()
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         AnimatedVisibility(
                             visible = showEmojiPicker,
@@ -353,6 +370,12 @@ fun DmConversationScreenV2(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .conversationWallpaper(
+                    wallpaper = activeWallpaper,
+                    isDark = isDark,
+                    reducedMotion = SettingsManager.reducedMotion,
+                    dataSaver = SettingsManager.dataSaver
+                )
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 // Search bar
@@ -415,7 +438,7 @@ fun DmConversationScreenV2(
                         start = 12.dp,
                         end = 12.dp,
                         top = 12.dp,
-                        bottom = 96.dp // keep list clear of composer/navigation
+                        bottom = 16.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
@@ -456,6 +479,25 @@ fun DmConversationScreenV2(
             }
         }
     }
+
+    // Wallpaper picker bottom sheet
+    if (showWallpaperPicker) {
+        WallpaperPickerSheet(
+            currentWallpaper = activeWallpaper,
+            conversationId = conversation.id,
+            onSelect = { wallpaper, perConversationOnly ->
+                if (perConversationOnly) {
+                    SettingsManager.setConversationWallpaper(conversation.id, wallpaper.name)
+                } else {
+                    SettingsManager.setGlobalWallpaper(wallpaper.name)
+                    SettingsManager.setConversationWallpaper(conversation.id, null)
+                }
+                activeWallpaperKey = wallpaper.name
+                showWallpaperPicker = false
+            },
+            onDismiss = { showWallpaperPicker = false }
+        )
+    }
 }
 
 @Composable
@@ -473,9 +515,9 @@ private fun DmComposerV2(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp),
+                .padding(horizontal = 8.dp, vertical = 6.dp),
             verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             IconButton(
                 onClick = onToggleEmoji,

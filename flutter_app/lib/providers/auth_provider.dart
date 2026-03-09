@@ -5,6 +5,12 @@ import '../services/supabase_service.dart';
 
 /// Auth state provider
 final authStateProvider = StreamProvider<AuthState>((ref) {
+  if (!SupabaseService.isInitialized) {
+    return Stream.value(
+      AuthState(AuthChangeEvent.initialSession, null),
+    );
+  }
+
   return Supabase.instance.client.auth.onAuthStateChange;
 });
 

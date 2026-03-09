@@ -117,23 +117,21 @@ Future<void> _initializeFirebase() async {
 /// Initialize Supabase without blocking app startup
 Future<void> _initializeSupabase() async {
   try {
-    // Try to get from environment variables first (for CI/CD builds)
+    // Read compile-time config only; do not ship checked-in fallback credentials.
     final envUrl = const String.fromEnvironment('SUPABASE_URL');
     final envKey = const String.fromEnvironment('SUPABASE_ANON_KEY');
 
-    // Use environment variables if provided, otherwise use development defaults
-    // These are the actual Supabase credentials from secrets.properties
-    String url;
-    String key;
+    final url = SecurityUtils.decrypt(envUrl).ifEmpty(() => envUrl).trim();
+    final key = SecurityUtils.decrypt(envKey).ifEmpty(() => envKey).trim();
 
-    if (envUrl.isNotEmpty && !envUrl.contains('your-project')) {
-      // Environment variables provided (possibly obfuscated)
-      url = SecurityUtils.decrypt(envUrl).ifEmpty(() => envUrl);
-      key = SecurityUtils.decrypt(envKey).ifEmpty(() => envKey);
-    } else {
-      // Use development defaults from secrets.properties
-      url = 'https://cdaeimusmufwfixdpoep.supabase.co';
-      key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkYWVpbXVzbXVmd2ZpeGRwb2VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MjIyMTEsImV4cCI6MjA4MTQ5ODIxMX0.56u9RpNMNi1hu1ntAoGFwuq_Q-tXDHJw7RHM2p1yNCU';
+    final hasValidUrl = url.isNotEmpty && !url.contains('your-project');
+    final hasValidKey = key.isNotEmpty && !key.contains('your-key');
+
+    if (!hasValidUrl || !hasValidKey) {
+      debugPrint(
+        'Supabase not initialized: missing SUPABASE_URL and/or SUPABASE_ANON_KEY dart-define values.',
+      );
+      return;
     }
 
     await Supabase.initialize(

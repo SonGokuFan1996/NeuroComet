@@ -2,7 +2,6 @@
 <!-- Energy Burst Icon - Vibrant pink/purple gradient for motivation -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@drawable/icon_energy_background"/>
-    <foreground android:drawable="@drawable/icon_energy_foreground"/>
-    <monochrome android:drawable="@mipmap/neuro_comet_icon_monochrome"/>
+    <foreground android:drawable="@drawable/icon_energy_foreground_padded"/>
+    <monochrome android:drawable="@drawable/neuro_comet_icon_monochrome"/>
 </adaptive-icon>
-

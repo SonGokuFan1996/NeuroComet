@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -39,7 +38,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -62,12 +65,15 @@ fun CommentBottomSheet(
     comments: List<Comment>,
     onDismiss: () -> Unit,
     onAddComment: (String) -> Unit,
-    postAuthor: String? = null
+    postAuthor: String? = null,
+    draftText: String = "",
+    onDraftChange: (String) -> Unit = {}
 ) {
     if (!isVisible) return
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var commentText by remember { mutableStateOf("") }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val brailleOptimized = SocialSettingsManager.isBrailleOptimized(context)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -94,7 +100,6 @@ fun CommentBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.7f)
-                .imePadding()
         ) {
             // Header
             Row(
@@ -180,15 +185,20 @@ fun CommentBottomSheet(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(
-                    value = commentText,
-                    onValueChange = { commentText = it },
+                    value = draftText,
+                    onValueChange = onDraftChange,
                     placeholder = {
                         Text(
                             stringResource(R.string.comments_add_comment_placeholder),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .semantics {
+                            contentDescription = if (brailleOptimized) "Comment input" else "Add a comment"
+                            stateDescription = if (draftText.isBlank()) "Empty" else "${draftText.length} characters entered"
+                        },
                     shape = RoundedCornerShape(24.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -197,18 +207,22 @@ fun CommentBottomSheet(
                     singleLine = true
                 )
                 IconButton(
+                    modifier = Modifier.semantics {
+                        contentDescription = if (draftText.isBlank()) "Send comment disabled" else "Send comment"
+                    },
                     onClick = {
-                        if (commentText.isNotBlank()) {
-                            onAddComment(commentText.trim())
-                            commentText = ""
+                        val trimmedComment = draftText.trim()
+                        if (trimmedComment.isNotEmpty()) {
+                            onAddComment(trimmedComment)
+                            onDraftChange("")
                         }
                     },
-                    enabled = commentText.isNotBlank()
+                    enabled = draftText.isNotBlank()
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Send,
                         contentDescription = stringResource(R.string.comments_send_comment),
-                        tint = if (commentText.isNotBlank())
+                        tint = if (draftText.isNotBlank())
                             MaterialTheme.colorScheme.primary
                         else
                             MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
@@ -244,7 +258,11 @@ private fun CommentItem(comment: Comment) {
     }
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {
+                contentDescription = "${comment.userId}, ${comment.content}, $timeAgo"
+            },
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         AsyncImage(
@@ -280,4 +298,3 @@ private fun CommentItem(comment: Comment) {
         }
     }
 }
-

@@ -298,7 +298,7 @@ object GeminiCallSimulator {
                 throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to generate response", e)
-                _state.value = SimulatorState.Error("Error: ${e.message}")
+                _state.value = SimulatorState.Error("Something went wrong. Please try again.")
             }
         }
     }
@@ -308,7 +308,9 @@ object GeminiCallSimulator {
      */
     private fun callGeminiApi(history: List<Pair<String, String>>): String? {
         val apiKey = SecurityUtils.decrypt(BuildConfig.GEMINI_API_KEY)
-        val url = "$GEMINI_API_BASE?key=$apiKey"
+        // API key sent via header, NOT as a query parameter, to prevent
+        // leakage through URL logging, crash reporters, or proxy tools.
+        val url = GEMINI_API_BASE
 
         // Build the request body
         val contents = JSONArray()
@@ -331,6 +333,7 @@ object GeminiCallSimulator {
 
         val request = Request.Builder()
             .url(url)
+            .addHeader("x-goog-api-key", apiKey)
             .post(requestBody.toString().toRequestBody("application/json".toMediaType()))
             .build()
 

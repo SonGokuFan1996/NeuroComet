@@ -28,7 +28,7 @@ class NeuroNavigationBar extends StatelessWidget {
         color: theme.colorScheme.surface,
         border: Border(
           top: BorderSide(
-            color: theme.dividerColor.withOpacity(0.2),
+            color: theme.dividerColor.withValues(alpha: 0.2),
             width: 0.5,
           ),
         ),
@@ -103,7 +103,7 @@ class _NeuroNavigationDestination extends StatelessWidget {
 
     // Use a reliable indicator color - primary with opacity as fallback
     final indicatorColor = theme.colorScheme.primaryContainer.opacity < 0.1
-        ? theme.colorScheme.primary.withOpacity(0.15)
+        ? theme.colorScheme.primary.withValues(alpha: 0.15)
         : theme.colorScheme.primaryContainer;
 
     return InkWell(

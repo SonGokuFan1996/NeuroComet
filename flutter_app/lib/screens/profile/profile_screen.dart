@@ -11,15 +11,14 @@ import '../../l10n/app_localizations.dart';
 
 /// Profile tab options matching Kotlin version
 enum ProfileTab {
-  posts('Posts', Icons.grid_view_outlined),
-  about('About', Icons.person_outline),
-  interests('Interests', Icons.favorite_outline),
-  badges('Badges', Icons.emoji_events_outlined);
+  posts(Icons.grid_view_outlined),
+  about(Icons.person_outline),
+  interests(Icons.favorite_outline),
+  badges(Icons.emoji_events_outlined);
 
-  final String label;
   final IconData icon;
 
-  const ProfileTab(this.label, this.icon);
+  const ProfileTab(this.icon);
 }
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -34,6 +33,19 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+
+  String _tabLabel(AppLocalizations l10n, ProfileTab tab) {
+    switch (tab) {
+      case ProfileTab.posts:
+        return l10n.posts;
+      case ProfileTab.about:
+        return l10n.about;
+      case ProfileTab.interests:
+        return l10n.get('interests');
+      case ProfileTab.badges:
+        return l10n.get('badges');
+    }
+  }
 
   // Per-user profile data — resolved from the fake-profile database when available
   List<NeuroDivergentTrait> get _traits {
@@ -136,6 +148,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
   Widget _buildProfileContent(User user) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
 
     // Get custom avatar if this is current user's profile
     final customAvatar = _isCurrentUser ? ref.watch(customAvatarProvider) : null;
@@ -183,7 +196,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.5),
+                          Colors.black.withValues(alpha: 0.5),
                         ],
                       ),
                     ),
@@ -196,12 +209,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                 IconButton(
                   icon: const Icon(Icons.settings_outlined),
                   onPressed: () => context.push('/settings'),
-                  tooltip: 'Settings',
+                  tooltip: l10n.settings,
                 ),
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () => context.push('/edit-profile'),
-                  tooltip: 'Edit Profile',
+                  tooltip: l10n.editProfile,
                 ),
               ],
               IconButton(
@@ -234,7 +247,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                 controller: _tabController,
                 tabs: ProfileTab.values.map((tab) => Tab(
                   icon: Icon(tab.icon, size: 20),
-                  text: tab.label,
+                  text: _tabLabel(l10n, tab),
                 )).toList(),
                 labelStyle: const TextStyle(
                   fontSize: 11,
@@ -414,6 +427,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   }
 
   Widget _buildActionButtons(User user) {
+    final l10n = context.l10n;
     return Row(
       children: [
         Expanded(
@@ -425,13 +439,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     children: [
                       const Icon(Icons.check, size: 18),
                       const SizedBox(width: 4),
-                      const Text('Following'),
+                      Text(l10n.following),
                     ],
                   ),
                 )
               : ElevatedButton(
                   onPressed: () => _toggleFollow(user.id),
-                  child: const Text('Follow'),
+                  child: Text(l10n.follow),
                 ),
         ),
         const SizedBox(width: 12),
@@ -464,6 +478,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
   Widget _buildEmptyPostsPlaceholder() {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -477,14 +492,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              _isCurrentUser ? 'Share your first post!' : 'No posts yet',
+              _isCurrentUser ? l10n.get('shareYourFirstPost') : l10n.noPosts,
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
               _isCurrentUser
-                  ? 'Your posts will appear here'
-                  : 'Check back later for new content',
+                  ? l10n.get('yourPostsWillAppearHere')
+                  : l10n.get('checkBackLaterForNewContent'),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.outline,
               ),
@@ -498,21 +513,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
   Widget _buildAboutTab(User user) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         // Bio section
         if (user.bio != null && user.bio!.isNotEmpty) ...[
-          _buildAboutSection('About', Icons.info_outline, user.bio!),
+          _buildAboutSection(l10n.about, Icons.info_outline, user.bio!),
           const SizedBox(height: 16),
         ],
 
         // Location
-        _buildAboutSection('Location', Icons.location_on_outlined, _location),
+        _buildAboutSection(l10n.get('location'), Icons.location_on_outlined, _location),
         const SizedBox(height: 16),
 
         // Joined date
-        _buildAboutSection('Joined', Icons.calendar_today_outlined, _joinedDate),
+        _buildAboutSection(l10n.get('joined'), Icons.calendar_today_outlined, _joinedDate),
         const SizedBox(height: 16),
 
         // Traits expanded
@@ -527,7 +543,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     Icon(Icons.psychology, size: 20, color: theme.colorScheme.primary),
                     const SizedBox(width: 8),
                     Text(
-                      'How I Work Best',
+                      l10n.get('howIWorkBest'),
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -541,7 +557,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: trait.color.withOpacity(0.15),
+                      color: trait.color.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
@@ -596,6 +612,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
   Widget _buildInterestsTab() {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -610,7 +627,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '💡 Fun Fact',
+                  l10n.get('funFact'),
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -630,6 +647,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
   Widget _buildBadgesTab(User user) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     final badges = user.badges ?? [];
 
     if (badges.isEmpty) {
@@ -644,12 +662,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'No badges yet',
+              l10n.get('noBadgesYet'),
               style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
-              'Badges are earned through community participation',
+              l10n.get('badgesEarnedThroughCommunityParticipation'),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.outline,
               ),
@@ -693,6 +711,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   }
 
   Widget _buildErrorState(String error) {
+    final l10n = context.l10n;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -709,7 +728,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                 ref.invalidate(currentUserProfileProvider);
               }
             },
-            child: const Text('Retry'),
+            child: Text(l10n.retry),
           ),
         ],
       ),
@@ -761,6 +780,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   }
 
   void _showProfileOptions(BuildContext context) {
+    final l10n = context.l10n;
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -770,18 +790,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             children: [
               ListTile(
                 leading: const Icon(Icons.share),
-                title: const Text('Share Profile'),
+                title: Text(l10n.get('shareProfile')),
                 onTap: () => Navigator.pop(context),
               ),
               if (!_isCurrentUser) ...[
                 ListTile(
                   leading: const Icon(Icons.block),
-                  title: const Text('Block User'),
+                  title: Text(l10n.get('blockUser')),
                   onTap: () => Navigator.pop(context),
                 ),
                 ListTile(
                   leading: const Icon(Icons.report),
-                  title: const Text('Report User'),
+                  title: Text(l10n.get('reportUser')),
                   onTap: () => Navigator.pop(context),
                 ),
               ],

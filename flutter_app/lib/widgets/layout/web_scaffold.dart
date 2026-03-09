@@ -89,7 +89,7 @@ class WebScaffold extends StatelessWidget {
             VerticalDivider(
               width: 1,
               thickness: 1,
-              color: theme.dividerColor.withOpacity(0.3),
+              color: theme.dividerColor.withValues(alpha: 0.3),
             ),
 
             // Main content area
@@ -127,7 +127,7 @@ class WebScaffold extends StatelessWidget {
           VerticalDivider(
             width: 1,
             thickness: 1,
-            color: theme.dividerColor.withOpacity(0.3),
+            color: theme.dividerColor.withValues(alpha: 0.3),
           ),
 
           // Main content area
@@ -161,7 +161,7 @@ class WebScaffold extends StatelessWidget {
                         VerticalDivider(
                           width: 1,
                           thickness: 1,
-                          color: theme.dividerColor.withOpacity(0.3),
+                          color: theme.dividerColor.withValues(alpha: 0.3),
                         ),
                         SizedBox(
                           width: responsive.rightPanelWidth,
@@ -295,7 +295,7 @@ class WebScaffold extends StatelessWidget {
         color: theme.colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: theme.dividerColor.withOpacity(0.3),
+            color: theme.dividerColor.withValues(alpha: 0.3),
           ),
         ),
       ),

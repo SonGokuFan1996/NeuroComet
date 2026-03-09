@@ -89,7 +89,15 @@ object DevOptionsSettings {
         // SECURITY: In production builds, always return hardened defaults
         if (!isDebug) return DevOptions()
 
+        // SECURITY: In debug builds, only authorized devices get dev options
+        if (!DeviceAuthority.isAuthorizedDevice(context)) return DevOptions()
+
         val p = prefs(context)
+
+        // Persisted hidden-unlock state for the settings menu.
+        // Authorized debug devices can still open dev options directly
+        // via the long-press gesture, which sets this flag to true.
+        val devMenuEnabled = p.getBoolean(KEY_DEV_MENU_ENABLED, false)
 
         val moderationOverride = runCatching {
             DevModerationOverride.valueOf(
@@ -116,13 +124,13 @@ object DevOptionsSettings {
 
         return DevOptions(
             // Global
-            devMenuEnabled = p.getBoolean(KEY_DEV_MENU_ENABLED, false),
+            devMenuEnabled = devMenuEnabled,
             verboseLogging = p.getBoolean(KEY_VERBOSE_LOGGING, false),
             // Environment
             environment = environment,
             // Feature Flags
             enableNewFeedLayout = p.getBoolean(KEY_FF_NEW_FEED_LAYOUT, false),
-            enableVideoChat = p.getBoolean(KEY_FF_VIDEO_CHAT, false),
+            enableVideoChat = p.getBoolean(KEY_FF_VIDEO_CHAT, true),
             enableStoryReactions = p.getBoolean(KEY_FF_STORY_REACTIONS, false),
             enableAdvancedSearch = p.getBoolean(KEY_FF_ADVANCED_SEARCH, false),
             enableAiSuggestions = p.getBoolean(KEY_FF_AI_SUGGESTIONS, false),
@@ -158,7 +166,16 @@ object DevOptionsSettings {
     // ─── Write helpers ──────────────────────────────────────
 
     fun setDevMenuEnabled(context: Context, enabled: Boolean) {
-        if (enabled) enforceDebugBuild(context, "enable dev menu")
+        if (enabled) {
+            enforceDebugBuild(context, "enable dev menu")
+            if (!DeviceAuthority.isAuthorizedDevice(context)) {
+                android.util.Log.wtf(
+                    "SECURITY",
+                    "Unauthorized device tried to enable dev menu"
+                )
+                return
+            }
+        }
         prefs(context).edit { putBoolean(KEY_DEV_MENU_ENABLED, enabled) }
     }
 

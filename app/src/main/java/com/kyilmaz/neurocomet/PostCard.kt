@@ -115,7 +115,7 @@ fun LegacyBubblyPostCard(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            text = post.createdAt ?: "Just now",
+                            text = post.createdAt,
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

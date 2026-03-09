@@ -171,7 +171,7 @@ class AppTheme {
     // M3E elevated surface colors
     final surfaceContainer = isDark
         ? const Color(0xFF252529)
-        : colorScheme.surfaceContainerHighest.withOpacity(0.5);
+        : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
     final surfaceContainerHigh = isDark
         ? const Color(0xFF2B2B30)
         : colorScheme.surfaceContainerHighest;
@@ -230,7 +230,7 @@ class AppTheme {
       // ═══════════════════════════════════════════════════════════════
       cardTheme: CardThemeData(
         elevation: isDark ? 0 : 1,
-        shadowColor: colorScheme.shadow.withOpacity(0.1),
+        shadowColor: colorScheme.shadow.withValues(alpha: 0.1),
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(shapeLarge), // M3E larger radius
@@ -309,13 +309,13 @@ class AppTheme {
           backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
           overlayColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.pressed)) {
-              return colorScheme.primary.withOpacity(0.12);
+              return colorScheme.primary.withValues(alpha: 0.12);
             }
             if (states.contains(WidgetState.hovered)) {
-              return colorScheme.onSurfaceVariant.withOpacity(0.08);
+              return colorScheme.onSurfaceVariant.withValues(alpha: 0.08);
             }
             if (states.contains(WidgetState.focused)) {
-              return colorScheme.onSurfaceVariant.withOpacity(0.12);
+              return colorScheme.onSurfaceVariant.withValues(alpha: 0.12);
             }
             return Colors.transparent;
           }),
@@ -342,7 +342,7 @@ class AppTheme {
       // ═══════════════════════════════════════════════════════════════
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? surfaceContainer : colorScheme.surfaceContainerHighest.withOpacity(0.4),
+        fillColor: isDark ? surfaceContainer : colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(shapeExtraLarge),
           borderSide: BorderSide.none,
@@ -365,7 +365,7 @@ class AppTheme {
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         hintStyle: textTheme.bodyLarge?.copyWith(
-          color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
         ),
         labelStyle: textTheme.bodyLarge?.copyWith(
           color: colorScheme.onSurfaceVariant,
@@ -380,7 +380,7 @@ class AppTheme {
       searchBarTheme: SearchBarThemeData(
         elevation: WidgetStateProperty.all(0),
         backgroundColor: WidgetStateProperty.all(
-          isDark ? surfaceContainerHigh : colorScheme.surfaceContainerHighest.withOpacity(0.5),
+          isDark ? surfaceContainerHigh : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         ),
         shadowColor: WidgetStateProperty.all(Colors.transparent),
         surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
@@ -515,7 +515,7 @@ class AppTheme {
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(shapeExtraLarge)),
         ),
-        dragHandleColor: colorScheme.onSurfaceVariant.withOpacity(0.4),
+        dragHandleColor: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
         dragHandleSize: const Size(32, 4),
         showDragHandle: true,
       ),
@@ -526,9 +526,9 @@ class AppTheme {
       chipTheme: ChipThemeData(
         elevation: 0,
         pressElevation: 0,
-        backgroundColor: isDark ? surfaceContainer : colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        backgroundColor: isDark ? surfaceContainer : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         selectedColor: colorScheme.secondaryContainer,
-        disabledColor: colorScheme.onSurface.withOpacity(0.12),
+        disabledColor: colorScheme.onSurface.withValues(alpha: 0.12),
         labelStyle: textTheme.labelLarge?.copyWith(
           fontWeight: FontWeight.w500,
         ),
@@ -619,7 +619,7 @@ class AppTheme {
         activeTrackColor: colorScheme.primary,
         inactiveTrackColor: colorScheme.surfaceContainerHighest,
         thumbColor: colorScheme.primary,
-        overlayColor: colorScheme.primary.withOpacity(0.12),
+        overlayColor: colorScheme.primary.withValues(alpha: 0.12),
         valueIndicatorColor: colorScheme.primary,
         valueIndicatorTextStyle: textTheme.labelLarge?.copyWith(
           color: colorScheme.onPrimary,

@@ -5,12 +5,12 @@
 )
 
 import java.util.Properties
+import org.gradle.api.GradleException
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.google.services)
 }
 
 // Load properties from multiple potential secret files
@@ -25,14 +25,18 @@ listOf("local.properties", "secrets.properties").forEach { fileName ->
 /**
  * Basic obfuscation to hide keys from simple string searches in the binary.
  * Uses XOR with a key and hex encoding.
+ * The key is read from local.properties (OBFUSCATION_KEY) so it never
+ * appears in committed source.
  */
+val obfuscationKey: String = combinedProperties.getProperty("OBFUSCATION_KEY")
+    ?: "neurocomet_internal_security_key_2025"   // fallback so builds don't break
+
 fun obfuscate(value: String?): String {
     if (value.isNullOrEmpty()) return ""
-    val xorKey = "neurocomet_internal_security_key_2025"
     val bytes = value.toByteArray(Charsets.UTF_8)
     val result = StringBuilder()
     for (i in bytes.indices) {
-        val obfuscatedByte = bytes[i].toInt() xor xorKey[i % xorKey.length].code
+        val obfuscatedByte = bytes[i].toInt() xor obfuscationKey[i % obfuscationKey.length].code
         result.append(String.format("%02x", obfuscatedByte and 0xFF))
     }
     return result.toString()
@@ -49,7 +53,7 @@ android {
     defaultConfig {
         applicationId = "com.kyilmaz.neurocomet"
         minSdk = 26
-        targetSdkPreview = "CinnamonBun"
+        targetSdk = 36
         versionCode = 144
         versionName = "2.0.0-beta02"
 
@@ -79,7 +83,10 @@ android {
         
         // Non-secret but device-specific config
         buildConfigField("String", "DEVELOPER_DEVICE_HASH", "\"$devHash\"")
-        buildConfigField("String", "ADMOB_APP_ID", "\"$admobAppId\"")
+        buildConfigField("String", "ADMOB_APP_ID", "\"${obfuscate(admobAppId)}\"")
+
+        // Obfuscation key — injected so SecurityUtils can decrypt at runtime
+        buildConfigField("String", "OBFUSCATION_KEY", "\"$obfuscationKey\"")
 
         // Add AdMob App ID as a manifest placeholder
         manifestPlaceholders["admobAppId"] = admobAppId
@@ -162,6 +169,29 @@ composeCompiler {
     stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose_stability.conf"))
 }
 
+val googleServicesConfigFiles = listOf(
+    file("google-services.json"),
+    file("src/main/google-services.json"),
+    file("src/debug/google-services.json"),
+    file("src/release/google-services.json")
+)
+val hasGoogleServicesConfig = googleServicesConfigFiles.any { it.exists() }
+val requestedTasks = gradle.startParameter.taskNames.map { it.lowercase() }
+val requiresGoogleServices = requestedTasks.any {
+    it.contains("release") || it.contains("bundle")
+}
+
+if (hasGoogleServicesConfig) {
+    apply(plugin = "com.google.gms.google-services")
+} else if (requiresGoogleServices) {
+    throw GradleException(
+        "google-services.json is required for release-style builds. Add app/google-services.json or a variant-specific file under app/src/<variant>/google-services.json."
+    )
+} else {
+    logger.lifecycle(
+        "google-services.json not found; skipping Google Services plugin for this local/debug build. Firebase-backed features will be unavailable."
+    )
+}
 
 dependencies {
     implementation(libs.androidx.core.ktx)

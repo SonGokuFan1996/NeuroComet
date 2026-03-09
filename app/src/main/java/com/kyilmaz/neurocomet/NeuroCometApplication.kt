@@ -49,6 +49,9 @@ class NeuroCometApplication : Application() {
 
                     // Create notification channels
                     NotificationChannels.createNotificationChannels(this)
+
+                    // Initialize A/B testing state (deterministic, no network needed)
+                    ABTestManager.refreshState(this)
                 } catch (e: Exception) {
                     Log.e(TAG, "Error during background initialization", e)
                 }

@@ -906,10 +906,9 @@ fun CallHistoryScreen(
     onCallUser: (userId: String, userName: String, userAvatar: String, callType: CallType) -> Unit = { _, _, _, _ -> },
     onOpenPracticeCallSelection: () -> Unit = {}
 ) {
-    // Safely observe call history with proper null handling using derivedStateOf
-    val callHistory by remember {
-        derivedStateOf { MockCallManager.callHistory }
-    }
+    // Safely observe call history from the real WebRTC call manager
+    val webRtcCallManager = remember { com.kyilmaz.neurocomet.calling.WebRTCCallManager.getInstance() }
+    val callHistory = webRtcCallManager.callHistory
 
     Scaffold(
         topBar = {
@@ -932,7 +931,7 @@ fun CallHistoryScreen(
                     }
                     // Clear history (only when there's history)
                     if (callHistory.isNotEmpty()) {
-                        IconButton(onClick = { MockCallManager.clearCallHistory() }) {
+                        IconButton(onClick = { webRtcCallManager.clearCallHistory() }) {
                             Icon(Icons.Filled.DeleteSweep, "Clear History")
                         }
                     }
@@ -963,7 +962,7 @@ fun CallHistoryScreen(
                 items(
                     items = callHistory,
                     key = { it.id }
-                ) { entry ->
+                ) { entry: com.kyilmaz.neurocomet.calling.CallHistoryEntry ->
                     CallHistoryItem(
                         entry = entry,
                         onCallBack = {
@@ -971,7 +970,9 @@ fun CallHistoryScreen(
                                 entry.recipientId,
                                 entry.recipientName,
                                 entry.recipientAvatar,
-                                entry.callType
+                                entry.callTypeEnum.let { ct ->
+                                    if (ct == com.kyilmaz.neurocomet.calling.CallType.VIDEO) CallType.VIDEO else CallType.VOICE
+                                }
                             )
                         }
                     )
@@ -1079,34 +1080,39 @@ private fun EmptyCallHistoryContent(
  */
 @Composable
 private fun CallHistoryItem(
-    entry: CallHistoryEntry,
+    entry: com.kyilmaz.neurocomet.calling.CallHistoryEntry,
     onCallBack: () -> Unit
 ) {
-    val callIcon = when (entry.callType) {
-        CallType.VOICE -> Icons.Filled.Phone
-        CallType.VIDEO -> Icons.Filled.Videocam
+    val callTypeEnum = entry.callTypeEnum
+    val outcomeEnum = entry.outcomeEnum
+
+    val callIcon = when (callTypeEnum) {
+        com.kyilmaz.neurocomet.calling.CallType.VOICE -> Icons.Filled.Phone
+        com.kyilmaz.neurocomet.calling.CallType.VIDEO -> Icons.Filled.Videocam
     }
 
     val directionIcon = when {
-        entry.outcome == CallOutcome.MISSED -> Icons.AutoMirrored.Filled.CallMissed
+        outcomeEnum == com.kyilmaz.neurocomet.calling.CallOutcome.MISSED -> Icons.AutoMirrored.Filled.CallMissed
         entry.isOutgoing -> Icons.AutoMirrored.Filled.CallMade
         else -> Icons.AutoMirrored.Filled.CallReceived
     }
 
-    val outcomeColor = when (entry.outcome) {
-        CallOutcome.MISSED -> MaterialTheme.colorScheme.error
-        CallOutcome.DECLINED -> MaterialTheme.colorScheme.error
-        CallOutcome.NO_ANSWER -> MaterialTheme.colorScheme.onSurfaceVariant
-        CallOutcome.CANCELLED -> MaterialTheme.colorScheme.onSurfaceVariant
-        CallOutcome.COMPLETED -> MaterialTheme.colorScheme.primary
+    val outcomeColor = when (outcomeEnum) {
+        com.kyilmaz.neurocomet.calling.CallOutcome.MISSED -> MaterialTheme.colorScheme.error
+        com.kyilmaz.neurocomet.calling.CallOutcome.DECLINED -> MaterialTheme.colorScheme.error
+        com.kyilmaz.neurocomet.calling.CallOutcome.NO_ANSWER -> MaterialTheme.colorScheme.onSurfaceVariant
+        com.kyilmaz.neurocomet.calling.CallOutcome.CANCELLED -> MaterialTheme.colorScheme.onSurfaceVariant
+        com.kyilmaz.neurocomet.calling.CallOutcome.COMPLETED -> MaterialTheme.colorScheme.primary
+        com.kyilmaz.neurocomet.calling.CallOutcome.FAILED -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
-    val outcomeText = when (entry.outcome) {
-        CallOutcome.COMPLETED -> if (entry.formattedDuration.isNotEmpty()) entry.formattedDuration else "Connected"
-        CallOutcome.MISSED -> "Missed"
-        CallOutcome.DECLINED -> "Declined"
-        CallOutcome.NO_ANSWER -> "No answer"
-        CallOutcome.CANCELLED -> "Cancelled"
+    val outcomeText = when (outcomeEnum) {
+        com.kyilmaz.neurocomet.calling.CallOutcome.COMPLETED -> if (entry.formattedDuration.isNotEmpty()) entry.formattedDuration else "Connected"
+        com.kyilmaz.neurocomet.calling.CallOutcome.MISSED -> "Missed"
+        com.kyilmaz.neurocomet.calling.CallOutcome.DECLINED -> "Declined"
+        com.kyilmaz.neurocomet.calling.CallOutcome.NO_ANSWER -> "No answer"
+        com.kyilmaz.neurocomet.calling.CallOutcome.CANCELLED -> "Cancelled"
+        com.kyilmaz.neurocomet.calling.CallOutcome.FAILED -> "Failed"
     }
 
     Row(
@@ -1141,7 +1147,7 @@ private fun CallHistoryItem(
                     entry.recipientName,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
-                    color = if (entry.outcome == CallOutcome.MISSED)
+                    color = if (outcomeEnum == com.kyilmaz.neurocomet.calling.CallOutcome.MISSED)
                         MaterialTheme.colorScheme.error
                     else
                         MaterialTheme.colorScheme.onSurface

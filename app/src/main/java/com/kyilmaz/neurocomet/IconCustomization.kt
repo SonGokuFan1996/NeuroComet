@@ -29,11 +29,11 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.pm.ShortcutInfoCompat
@@ -182,6 +182,164 @@ enum class IconCategory(val label: String, val emoji: String) {
     PRIDE("Identity & Pride", "🌈")
 }
 
+private data class IconDepthProfile(
+    val shadowAlpha: Float,
+    val glossAlpha: Float,
+    val rimAlpha: Float,
+    val vignetteAlpha: Float
+)
+
+private fun AppIconStyle.depthProfile(): IconDepthProfile = when (this) {
+    AppIconStyle.DEFAULT -> IconDepthProfile(0.22f, 0.18f, 0.18f, 0.12f)
+    AppIconStyle.CALM -> IconDepthProfile(0.18f, 0.16f, 0.16f, 0.10f)
+    AppIconStyle.FOCUS -> IconDepthProfile(0.26f, 0.14f, 0.20f, 0.16f)
+    AppIconStyle.ENERGY -> IconDepthProfile(0.20f, 0.20f, 0.18f, 0.12f)
+    AppIconStyle.SENSORY_FRIENDLY -> IconDepthProfile(0.16f, 0.10f, 0.14f, 0.18f)
+    AppIconStyle.NEURODIVERSITY_PRIDE -> IconDepthProfile(0.20f, 0.22f, 0.18f, 0.12f)
+}
+
+private fun getIconDrawableResources(iconStyle: AppIconStyle): Pair<Int, Int> = when (iconStyle) {
+    AppIconStyle.DEFAULT -> R.drawable.neuro_comet_icon_background to R.drawable.neuro_comet_icon_foreground_vector
+    AppIconStyle.CALM -> R.drawable.icon_calm_background to R.drawable.icon_calm_foreground
+    AppIconStyle.FOCUS -> R.drawable.icon_focus_background to R.drawable.icon_focus_foreground
+    AppIconStyle.ENERGY -> R.drawable.icon_energy_background to R.drawable.icon_energy_foreground
+    AppIconStyle.SENSORY_FRIENDLY -> R.drawable.icon_sensory_background to R.drawable.icon_sensory_foreground
+    AppIconStyle.NEURODIVERSITY_PRIDE -> R.drawable.icon_pride_background to R.drawable.icon_pride_foreground
+}
+
+private fun renderDepthEnhancedIconBitmap(
+    context: Context,
+    iconStyle: AppIconStyle,
+    size: Int
+): android.graphics.Bitmap? {
+    return try {
+        val (backgroundResId, foregroundResId) = getIconDrawableResources(iconStyle)
+        val bitmap = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(bitmap)
+        val depth = iconStyle.depthProfile()
+
+        val shadowPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+            color = android.graphics.Color.argb((depth.shadowAlpha * 255).toInt(), 10, 16, 28)
+            maskFilter = android.graphics.BlurMaskFilter(size * 0.055f, android.graphics.BlurMaskFilter.Blur.NORMAL)
+        }
+        canvas.drawOval(
+            android.graphics.RectF(size * 0.18f, size * 0.2f, size * 0.82f, size * 0.88f),
+            shadowPaint
+        )
+
+        androidx.core.content.ContextCompat.getDrawable(context, backgroundResId)?.apply {
+            setBounds(0, 0, size, size)
+            draw(canvas)
+        }
+        androidx.core.content.ContextCompat.getDrawable(context, foregroundResId)?.apply {
+            setBounds(0, 0, size, size)
+            draw(canvas)
+        }
+
+        val maskPath = android.graphics.Path().apply {
+            addCircle(size / 2f, size / 2f, size * 0.47f, android.graphics.Path.Direction.CW)
+        }
+        canvas.save()
+        canvas.clipPath(maskPath)
+
+        val glossPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+            shader = android.graphics.LinearGradient(
+                size * 0.15f,
+                size * 0.08f,
+                size * 0.72f,
+                size * 0.72f,
+                android.graphics.Color.argb((depth.glossAlpha * 255).toInt(), 255, 255, 255),
+                android.graphics.Color.TRANSPARENT,
+                android.graphics.Shader.TileMode.CLAMP
+            )
+        }
+        canvas.drawCircle(size / 2f, size / 2f, size * 0.47f, glossPaint)
+
+        val vignettePaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+            shader = android.graphics.RadialGradient(
+                size / 2f,
+                size / 2f,
+                size * 0.55f,
+                intArrayOf(
+                    android.graphics.Color.TRANSPARENT,
+                    android.graphics.Color.TRANSPARENT,
+                    android.graphics.Color.argb((depth.vignetteAlpha * 255).toInt(), 10, 14, 24)
+                ),
+                floatArrayOf(0.55f, 0.82f, 1f),
+                android.graphics.Shader.TileMode.CLAMP
+            )
+        }
+        canvas.drawCircle(size / 2f, size / 2f, size * 0.47f, vignettePaint)
+        canvas.restore()
+
+        val rimPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+            style = android.graphics.Paint.Style.STROKE
+            strokeWidth = maxOf(1f, size * 0.012f)
+            color = android.graphics.Color.argb((depth.rimAlpha * 255).toInt(), 255, 255, 255)
+        }
+        canvas.drawCircle(size / 2f, size / 2f, size * 0.46f, rimPaint)
+        bitmap
+    } catch (e: Exception) {
+        android.util.Log.e("IconCustomization", "Error rendering depth icon for ${iconStyle.name}", e)
+        null
+    }
+}
+
+@Composable
+private fun DepthIconPreview(
+    iconBitmap: android.graphics.Bitmap?,
+    iconStyle: AppIconStyle,
+    size: Dp,
+    isSelected: Boolean = false
+) {
+    Box(contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .size(size + 14.dp)
+                .clip(CircleShape)
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            iconStyle.gradientColors.first().copy(alpha = if (isSelected) 0.24f else 0.16f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
+
+        Surface(
+            modifier = Modifier.size(size + 8.dp),
+            shape = RoundedCornerShape(18.dp),
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
+            tonalElevation = if (isSelected) 2.dp else 1.dp,
+            shadowElevation = if (isSelected) 10.dp else 6.dp
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                if (iconBitmap != null) {
+                    androidx.compose.foundation.Image(
+                        bitmap = iconBitmap.asImageBitmap(),
+                        contentDescription = stringResource(iconStyle.titleRes),
+                        modifier = Modifier.size(size)
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(size)
+                            .clip(CircleShape)
+                            .background(Brush.linearGradient(iconStyle.gradientColors)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(iconStyle.emoji, fontSize = if (size >= 56.dp) 28.sp else 24.sp)
+                    }
+                }
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IconCustomizationScreen(
@@ -195,8 +353,9 @@ fun IconCustomizationScreen(
     }
     var showApplyDialog by remember { mutableStateOf(false) }
 
-    // Pre-fetch strings for Toast
-    val iconAppliedMessage = stringResource(R.string.icon_applied)
+    val dialogIconBitmap = remember(selectedIcon) {
+        renderDepthEnhancedIconBitmap(context, selectedIcon, 220)
+    }
 
     Scaffold(
         topBar = {
@@ -284,17 +443,12 @@ fun IconCustomizationScreen(
         AlertDialog(
             onDismissRequest = { showApplyDialog = false },
             icon = {
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            Brush.linearGradient(selectedIcon.gradientColors)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(selectedIcon.emoji, fontSize = 32.sp)
-                }
+                DepthIconPreview(
+                    iconBitmap = dialogIconBitmap,
+                    iconStyle = selectedIcon,
+                    size = 64.dp,
+                    isSelected = true
+                )
             },
             title = {
                 Text(
@@ -502,46 +656,7 @@ private fun IconOptionCard(
 ) {
     val context = LocalContext.current
 
-    // Load the actual adaptive icon and render it to a bitmap for preview
-    val iconBitmap = remember(iconStyle) {
-        try {
-            val iconResId = when (iconStyle) {
-                AppIconStyle.DEFAULT -> R.mipmap.neuro_comet_icon
-                AppIconStyle.CALM -> R.mipmap.ic_launcher_calm
-                AppIconStyle.FOCUS -> R.mipmap.ic_launcher_focus
-                AppIconStyle.ENERGY -> R.mipmap.ic_launcher_energy
-                AppIconStyle.SENSORY_FRIENDLY -> R.mipmap.ic_launcher_sensory
-                AppIconStyle.NEURODIVERSITY_PRIDE -> R.mipmap.ic_launcher_pride
-            }
-
-            val drawable = androidx.core.content.ContextCompat.getDrawable(context, iconResId)
-            if (drawable != null) {
-                val size = 168
-                val bitmap = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
-                val canvas = android.graphics.Canvas(bitmap)
-
-                // For adaptive icons, we need to handle them specially
-                if (drawable is android.graphics.drawable.AdaptiveIconDrawable) {
-                    // Draw background layer
-                    drawable.background?.let { bg ->
-                        bg.setBounds(0, 0, size, size)
-                        bg.draw(canvas)
-                    }
-                    // Draw foreground layer
-                    drawable.foreground?.let { fg ->
-                        fg.setBounds(0, 0, size, size)
-                        fg.draw(canvas)
-                    }
-                } else {
-                    drawable.setBounds(0, 0, size, size)
-                    drawable.draw(canvas)
-                }
-                bitmap
-            } else null
-        } catch (e: Exception) {
-            null
-        }
-    }
+    val iconBitmap = remember(iconStyle) { renderDepthEnhancedIconBitmap(context, iconStyle, 168) }
 
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.02f else 1f,
@@ -579,27 +694,12 @@ private fun IconOptionCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Icon preview - show actual rendered icon
-            if (iconBitmap != null) {
-                androidx.compose.foundation.Image(
-                    bitmap = iconBitmap.asImageBitmap(),
-                    contentDescription = stringResource(iconStyle.titleRes),
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(
-                            Brush.linearGradient(iconStyle.gradientColors)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(iconStyle.emoji, fontSize = 28.sp)
-                }
-            }
+            DepthIconPreview(
+                iconBitmap = iconBitmap,
+                iconStyle = iconStyle,
+                size = 56.dp,
+                isSelected = isSelected
+            )
 
             Spacer(Modifier.width(16.dp))
 
@@ -980,54 +1080,8 @@ private fun tryLegacyShortcut(context: Context, iconStyle: AppIconStyle, launchI
  * This renders the adaptive icon to a bitmap for proper shortcut support.
  */
 private fun createCompositeIcon(context: Context, iconStyle: AppIconStyle): android.graphics.drawable.Icon {
-    val TAG = "IconCustomization"
-
-    // Get the background and foreground drawable resources
-    val (backgroundResId, foregroundResId) = when (iconStyle) {
-        AppIconStyle.DEFAULT -> Pair(R.drawable.neuro_comet_icon_background, R.drawable.neuro_comet_icon_foreground_vector)
-        AppIconStyle.CALM -> Pair(R.drawable.icon_calm_background, R.drawable.icon_calm_foreground)
-        AppIconStyle.FOCUS -> Pair(R.drawable.icon_focus_background, R.drawable.icon_focus_foreground)
-        AppIconStyle.ENERGY -> Pair(R.drawable.icon_energy_background, R.drawable.icon_energy_foreground)
-        AppIconStyle.SENSORY_FRIENDLY -> Pair(R.drawable.icon_sensory_background, R.drawable.icon_sensory_foreground)
-        AppIconStyle.NEURODIVERSITY_PRIDE -> Pair(R.drawable.icon_pride_background, R.drawable.icon_pride_foreground)
-    }
-
-    android.util.Log.d(TAG, "Creating composite icon for: ${iconStyle.name}, bg=$backgroundResId, fg=$foregroundResId")
-
-    // Create a bitmap by compositing background and foreground
-    // Use a larger size for better quality
-    val size = 432 // Larger for better quality, will be scaled down by system
-    val bitmap = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
-    val canvas = android.graphics.Canvas(bitmap)
-
-    try {
-        // Draw background
-        val background = androidx.core.content.ContextCompat.getDrawable(context, backgroundResId)
-        if (background == null) {
-            android.util.Log.e(TAG, "Failed to load background drawable for ${iconStyle.name}")
-            // Draw a fallback color
-            canvas.drawColor(android.graphics.Color.parseColor("#667eea"))
-        } else {
-            background.setBounds(0, 0, size, size)
-            background.draw(canvas)
-            android.util.Log.d(TAG, "Background drawn for ${iconStyle.name}, intrinsic: ${background.intrinsicWidth}x${background.intrinsicHeight}")
-        }
-
-        // Draw foreground
-        val foreground = androidx.core.content.ContextCompat.getDrawable(context, foregroundResId)
-        if (foreground == null) {
-            android.util.Log.e(TAG, "Failed to load foreground drawable for ${iconStyle.name}")
-        } else {
-            foreground.setBounds(0, 0, size, size)
-            foreground.draw(canvas)
-            android.util.Log.d(TAG, "Foreground drawn for ${iconStyle.name}, intrinsic: ${foreground.intrinsicWidth}x${foreground.intrinsicHeight}")
-        }
-    } catch (e: Exception) {
-        android.util.Log.e(TAG, "Error drawing icon layers", e)
-    }
-
-    android.util.Log.d(TAG, "Composite icon bitmap created: ${bitmap.width}x${bitmap.height}, byteCount=${bitmap.byteCount}")
-
+    val bitmap = renderDepthEnhancedIconBitmap(context, iconStyle, 432)
+        ?: android.graphics.Bitmap.createBitmap(432, 432, android.graphics.Bitmap.Config.ARGB_8888)
     return android.graphics.drawable.Icon.createWithBitmap(bitmap)
 }
 
@@ -1036,62 +1090,8 @@ private fun createCompositeIcon(context: Context, iconStyle: AppIconStyle): andr
  * Returns a Bitmap that can be used with various shortcut APIs.
  */
 private fun createCompositeIconBitmap(context: Context, iconStyle: AppIconStyle): android.graphics.Bitmap {
-    val TAG = "IconCustomization"
-
-    // Get the background and foreground drawable resources
-    val (backgroundResId, foregroundResId) = when (iconStyle) {
-        AppIconStyle.DEFAULT -> Pair(R.drawable.neuro_comet_icon_background, R.drawable.neuro_comet_icon_foreground_vector)
-        AppIconStyle.CALM -> Pair(R.drawable.icon_calm_background, R.drawable.icon_calm_foreground)
-        AppIconStyle.FOCUS -> Pair(R.drawable.icon_focus_background, R.drawable.icon_focus_foreground)
-        AppIconStyle.ENERGY -> Pair(R.drawable.icon_energy_background, R.drawable.icon_energy_foreground)
-        AppIconStyle.SENSORY_FRIENDLY -> Pair(R.drawable.icon_sensory_background, R.drawable.icon_sensory_foreground)
-        AppIconStyle.NEURODIVERSITY_PRIDE -> Pair(R.drawable.icon_pride_background, R.drawable.icon_pride_foreground)
-    }
-
-    android.util.Log.d(TAG, "Creating composite bitmap for: ${iconStyle.name}, bg=$backgroundResId, fg=$foregroundResId")
-
-    // Use standard launcher icon size for maximum compatibility
-    // 192x192 is the recommended size for xxxhdpi adaptive icons
-    val size = 192
-    val bitmap = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
-    val canvas = android.graphics.Canvas(bitmap)
-
-    try {
-        // Draw background
-        val background = androidx.core.content.ContextCompat.getDrawable(context, backgroundResId)
-        if (background == null) {
-            android.util.Log.e(TAG, "Failed to load background drawable for ${iconStyle.name}")
-            // Draw a fallback gradient
-            val paint = android.graphics.Paint().apply {
-                shader = android.graphics.LinearGradient(
-                    0f, 0f, size.toFloat(), size.toFloat(),
-                    android.graphics.Color.parseColor("#667eea"),
-                    android.graphics.Color.parseColor("#764ba2"),
-                    android.graphics.Shader.TileMode.CLAMP
-                )
-            }
-            canvas.drawRect(0f, 0f, size.toFloat(), size.toFloat(), paint)
-        } else {
-            background.setBounds(0, 0, size, size)
-            background.draw(canvas)
-            android.util.Log.d(TAG, "Background drawn for ${iconStyle.name}")
-        }
-
-        // Draw foreground
-        val foreground = androidx.core.content.ContextCompat.getDrawable(context, foregroundResId)
-        if (foreground == null) {
-            android.util.Log.e(TAG, "Failed to load foreground drawable for ${iconStyle.name}")
-        } else {
-            foreground.setBounds(0, 0, size, size)
-            foreground.draw(canvas)
-            android.util.Log.d(TAG, "Foreground drawn for ${iconStyle.name}")
-        }
-    } catch (e: Exception) {
-        android.util.Log.e(TAG, "Error drawing icon layers", e)
-    }
-
-    android.util.Log.d(TAG, "Composite bitmap created: ${bitmap.width}x${bitmap.height}")
-    return bitmap
+    return renderDepthEnhancedIconBitmap(context, iconStyle, 192)
+        ?: android.graphics.Bitmap.createBitmap(192, 192, android.graphics.Bitmap.Config.ARGB_8888)
 }
 
 /**
@@ -1207,47 +1207,7 @@ private fun IconOptionCardCompact(
 ) {
     val context = LocalContext.current
 
-    // Load the actual adaptive icon and render it to a bitmap for preview
-    val iconBitmap = remember(iconStyle) {
-        try {
-            val iconResId = when (iconStyle) {
-                AppIconStyle.DEFAULT -> R.mipmap.neuro_comet_icon
-                AppIconStyle.CALM -> R.mipmap.ic_launcher_calm
-                AppIconStyle.FOCUS -> R.mipmap.ic_launcher_focus
-                AppIconStyle.ENERGY -> R.mipmap.ic_launcher_energy
-                AppIconStyle.SENSORY_FRIENDLY -> R.mipmap.ic_launcher_sensory
-                AppIconStyle.NEURODIVERSITY_PRIDE -> R.mipmap.ic_launcher_pride
-            }
-
-            val drawable = androidx.core.content.ContextCompat.getDrawable(context, iconResId)
-            if (drawable != null) {
-                val size = 160
-                val bitmap = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
-                val canvas = android.graphics.Canvas(bitmap)
-
-                // For adaptive icons, we need to handle them specially
-                if (drawable is android.graphics.drawable.AdaptiveIconDrawable) {
-                    // Draw background layer
-                    drawable.background?.let { bg ->
-                        bg.setBounds(0, 0, size, size)
-                        bg.draw(canvas)
-                    }
-                    // Draw foreground layer
-                    drawable.foreground?.let { fg ->
-                        fg.setBounds(0, 0, size, size)
-                        fg.draw(canvas)
-                    }
-                } else {
-                    drawable.setBounds(0, 0, size, size)
-                    drawable.draw(canvas)
-                }
-                bitmap
-            } else null
-        } catch (e: Exception) {
-            android.util.Log.e("IconCustomization", "Error creating preview for ${iconStyle.name}", e)
-            null
-        }
-    }
+    val iconBitmap = remember(iconStyle) { renderDepthEnhancedIconBitmap(context, iconStyle, 160) }
 
     Card(
         modifier = Modifier
@@ -1274,26 +1234,12 @@ private fun IconOptionCardCompact(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Show the rendered icon
-            if (iconBitmap != null) {
-                androidx.compose.foundation.Image(
-                    bitmap = iconBitmap.asImageBitmap(),
-                    contentDescription = stringResource(iconStyle.titleRes),
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                )
-            } else {
-                // Fallback to gradient with emoji
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(Brush.linearGradient(iconStyle.gradientColors)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(iconStyle.emoji, fontSize = 24.sp)
-                }
-            }
+            DepthIconPreview(
+                iconBitmap = iconBitmap,
+                iconStyle = iconStyle,
+                size = 48.dp,
+                isSelected = isSelected
+            )
 
             Spacer(Modifier.width(12.dp))
 
@@ -1331,5 +1277,4 @@ private fun android.graphics.drawable.Drawable.toBitmap(width: Int, height: Int)
     this.draw(canvas)
     return bitmap
 }
-
 

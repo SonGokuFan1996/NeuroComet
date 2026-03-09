@@ -313,12 +313,24 @@ class FeedNotifier extends Notifier<AsyncValue<List<Post>>> {
 
         final user = profile?.user;
 
+        // Assign category and tags for filtering
+        final categories = ['general', 'support', 'wins', 'following', 'general', 'support', 'general', 'wins', 'following', 'general'];
+        final category = categories[globalIndex % categories.length];
+        final tagsByCategory = <String, List<String>>{
+          'general': ['community', 'neurodivergent'],
+          'support': ['support', 'mentalhealth', 'selfcare'],
+          'wins': ['wins', 'celebration', 'achievement'],
+          'following': ['following', 'friends'],
+        };
+
         return Post(
           id: 'post_${page}_$index',
           authorId: profileKey,
           authorName: user?.displayName ?? 'User ${index + 1}',
           authorAvatarUrl: user?.avatarUrl ?? 'https://i.pravatar.cc/150?img=$index',
           content: content,
+          category: category,
+          tags: tagsByCategory[category] ?? ['community'],
           likeCount: [47, 283, 1562, 92, 534, 2847, 67, 345, 892, 156,
                       3156, 1923, 5621, 412, 78, 234, 1200, 689, 45, 2100][globalIndex % 20],
           commentCount: [12, 45, 187, 8, 67, 342, 5, 29, 67, 23,
