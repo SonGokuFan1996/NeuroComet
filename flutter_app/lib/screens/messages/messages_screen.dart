@@ -759,7 +759,8 @@ class _ConversationTile extends StatelessWidget {
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 
   String _formatTime(DateTime? dateTime) {
@@ -958,7 +959,7 @@ class _NewMessageSheetState extends State<_NewMessageSheet> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      l10n.pickFromContacts,
+                                      l10n.get('pickFromContacts'),
                                       style: theme.textTheme.titleSmall?.copyWith(
                                         fontWeight: FontWeight.bold,
                                         color: AppColors.primaryPurple,
@@ -1085,8 +1086,8 @@ class _MessagesHeader extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       unreadCount > 0
-                          ? l10n.get('youHaveUnreadMessages', {'count': unreadCount.toString()})
-                          : l10n.yourConversations,
+                          ? l10n.get('youHaveUnreadMessages').replaceAll('{count}', unreadCount.toString())
+                          : l10n.get('yourConversations'),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -1969,3 +1970,4 @@ class _ContactsPermissionCard extends StatelessWidget {
     );
   }
 }
+

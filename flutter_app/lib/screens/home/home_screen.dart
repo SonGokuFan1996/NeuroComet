@@ -158,16 +158,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           _RightPanelCard(
-            title: l10n.howAreYouFeeling,
+            title: l10n.get('howAreYouFeeling'),
             icon: Icons.emoji_emotions_outlined,
             onTap: () => context.push('/settings/neuro-state'),
             child: Wrap(
               spacing: 8,
               children: [
-                _MoodChip(emoji: '😊', label: l10n.moodGreat),
-                _MoodChip(emoji: '😐', label: l10n.okay),
-                _MoodChip(emoji: '😔', label: l10n.struggling),
-                _MoodChip(emoji: '😰', label: l10n.anxious),
+                _MoodChip(emoji: '😊', label: l10n.get('moodGreat')),
+                _MoodChip(emoji: '😐', label: l10n.get('okay')),
+                _MoodChip(emoji: '😔', label: l10n.get('struggling')),
+                _MoodChip(emoji: '😰', label: l10n.get('anxious')),
               ],
             ),
           ),
@@ -438,3 +438,4 @@ class _TrendingTopicState extends State<_TrendingTopic> {
     );
   }
 }
+

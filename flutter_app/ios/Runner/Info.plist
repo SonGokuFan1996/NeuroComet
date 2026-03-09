@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>NeuroComet</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>NeuroComet</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<!-- Privacy descriptions required for App Store -->
+	<key>NSCameraUsageDescription</key>
+	<string>NeuroComet needs camera access to take photos and videos for your posts and profile.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>NeuroComet needs photo library access to share photos in your posts and stories.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>NeuroComet needs microphone access to record videos and voice messages.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>NeuroComet needs speech recognition to transcribe your voice during practice calls.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>NeuroComet needs permission to save photos to your library.</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>NeuroComet uses this to show you relevant content and personalize your experience.</string>
+	<!-- Location permissions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>NeuroComet needs your location to show nearby events and connect you with local communities.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>NeuroComet needs background location access to send you reminders about nearby events.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>NeuroComet uses your location in the background to notify you about nearby community events.</string>
+	<!-- Contacts permission -->
+	<key>NSContactsUsageDescription</key>
+	<string>NeuroComet can help you find friends from your contacts who are also using the app.</string>
+	<!-- Calendar permission -->
+	<key>NSCalendarsUsageDescription</key>
+	<string>NeuroComet needs calendar access to help you schedule and remember community events.</string>
+	<!-- Motion/Sensors permission -->
+	<key>NSMotionUsageDescription</key>
+	<string>NeuroComet uses motion sensors to provide interactive fidget and calming experiences.</string>
+	<!-- Enable background modes for notifications -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
+	<!-- App Transport Security -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSAllowsArbitraryLoadsForMedia</key>
+		<true/>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<true/>
+	</dict>
+	<!-- Face ID usage -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>NeuroComet uses Face ID for secure authentication.</string>
+</dict>
+</plist>

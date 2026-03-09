@@ -31,7 +31,7 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
           IconButton(
             icon: const Icon(Icons.history),
             onPressed: () => _showMoodHistory(context),
-            tooltip: l10n.moodHistory,
+            tooltip: l10n.get('moodHistory'),
           ),
         ],
       ),
@@ -50,12 +50,12 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
             const SizedBox(height: 24),
 
             // Energy level
-            _buildSectionHeader(context, l10n.energyLevel),
+            _buildSectionHeader(context, l10n.get('energyLevel')),
             _buildSliderCard(
               context,
               value: _energyLevel,
-              lowLabel: l10n.low,
-              highLabel: l10n.high,
+              lowLabel: l10n.get('low'),
+              highLabel: l10n.get('high'),
               color: AppColors.accentOrange,
               icon: Icons.bolt,
               onChanged: (value) {
@@ -66,12 +66,12 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
             const SizedBox(height: 16),
 
             // Stress level
-            _buildSectionHeader(context, l10n.stressLevel),
+            _buildSectionHeader(context, l10n.get('stressLevel')),
             _buildSliderCard(
               context,
               value: _stressLevel,
-              lowLabel: l10n.calm,
-              highLabel: l10n.stressed,
+              lowLabel: l10n.get('calm'),
+              highLabel: l10n.get('stressed'),
               color: AppColors.categoryAnxiety,
               icon: Icons.psychology,
               onChanged: (value) {
@@ -82,12 +82,12 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
             const SizedBox(height: 16),
 
             // Sensory load
-            _buildSectionHeader(context, l10n.sensoryLoad),
+            _buildSectionHeader(context, l10n.get('sensoryLoad')),
             _buildSliderCard(
               context,
               value: _sensoryLoad,
-              lowLabel: l10n.understimulated,
-              highLabel: l10n.overstimulated,
+              lowLabel: l10n.get('understimulated'),
+              highLabel: l10n.get('overstimulated'),
               color: AppColors.secondaryTeal,
               icon: Icons.hearing,
               onChanged: (value) {
@@ -415,7 +415,7 @@ class _NeuroStateScreenState extends ConsumerState<NeuroStateScreen> {
                 children: [
                   Icon(Icons.history, color: theme.colorScheme.primary),
                   const SizedBox(width: 12),
-                  Text(l10n.moodHistory, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(l10n.get('moodHistory'), style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                   const Spacer(),
                   Text(
                     l10n.get('entriesCount').replaceAll('{count}', history.length.toString()),
@@ -550,3 +550,4 @@ class _NeuroStateChip extends ConsumerWidget {
     );
   }
 }
+

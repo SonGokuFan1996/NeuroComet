@@ -395,7 +395,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
       onReport: (reason) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.reportSubmitted),
+            content: Text(l10n.get('reportSubmitted')),
             duration: Duration(seconds: 2),
           ),
         );
@@ -409,8 +409,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.deletePost),
-        content: Text(l10n.deletePostConfirm),
+        title: Text(l10n.get('deletePost')),
+        content: Text(l10n.get('deletePostConfirm')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -422,7 +422,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
               ref.read(feedProvider.notifier).deletePost(post.id);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(l10n.postDeleted),
+                  content: Text(l10n.get('postDeleted')),
                   duration: Duration(seconds: 1),
                 ),
               );
@@ -1215,7 +1215,8 @@ class _FeedFilterPillState extends State<_FeedFilterPill>
             ],
           ),
         ),
-      );
+      ),
+    );
   }
 }
 
@@ -1479,7 +1480,7 @@ class _EmptyFeedState extends StatelessWidget {
           ),
           const SizedBox(height: 28),
           Text(
-            _getTitle(),
+            _getTitle(context),
             style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -1487,7 +1488,7 @@ class _EmptyFeedState extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            _getSubtitle(),
+            _getSubtitle(context),
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -1542,7 +1543,7 @@ class _EmptyFeedState extends StatelessWidget {
     }
   }
 
-  String _getTitle() {
+  String _getTitle(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     switch (filter) {
       case FeedFilter.forYou:
@@ -1558,7 +1559,7 @@ class _EmptyFeedState extends StatelessWidget {
     }
   }
 
-  String _getSubtitle() {
+  String _getSubtitle(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     switch (filter) {
       case FeedFilter.forYou:
@@ -2063,3 +2064,4 @@ class CommentsSheet extends ConsumerWidget {
     );
   }
 }
+

@@ -1,7 +1,12 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../core/theme/app_colors.dart';
+import '../../services/gemini_practice_call_service.dart';
 
 /// Practice Calls Screen - Practice phone calls with AI personas
 class PracticeCallsScreen extends ConsumerWidget {
@@ -393,6 +398,18 @@ class _PracticeCallScreenState extends State<PracticeCallScreen>
   bool _isSpeakerOn = false;
   int _callDuration = 0;
   late AnimationController _pulseController;
+  
+  GeminiPracticeCallService? _geminiService;
+  final List<Map<String, String>> _transcript = [];
+  final TextEditingController _textController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  bool _isAIResponding = false;
+
+  // Voice features
+  late stt.SpeechToText _speech;
+  late FlutterTts _flutterTts;
+  bool _isListening = false;
+  String _currentWords = '';
 
   @override
   void initState() {
@@ -402,11 +419,153 @@ class _PracticeCallScreenState extends State<PracticeCallScreen>
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
 
+    _initVoice();
+    _initGemini();
+
     // Start call after a brief delay
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted) {
         setState(() => _isCallActive = true);
         _startTimer();
+      }
+    });
+  }
+
+  Future<void> _initVoice() async {
+    _speech = stt.SpeechToText();
+    _flutterTts = FlutterTts();
+
+    // Check permissions
+    final micStatus = await Permission.microphone.request();
+    if (micStatus != PermissionStatus.granted) {
+      debugPrint('Microphone permission denied.');
+    }
+
+    // Initialize TTS
+    await _flutterTts.setLanguage("en-US");
+    await _flutterTts.setSpeechRate(0.5); // Slightly slower for clarity
+    await _flutterTts.setVolume(1.0);
+    await _flutterTts.setPitch(1.0);
+  }
+
+  Future<void> _speakText(String text) async {
+    if (_isCallActive && !_isMuted) {
+      await _flutterTts.speak(text);
+    }
+  }
+
+  void _startListening() async {
+    if (_isMuted || _isAIResponding) return;
+
+    final available = await _speech.initialize(
+      onStatus: (status) {
+        if (status == 'done' || status == 'notListening') {
+          setState(() => _isListening = false);
+          _submitSpokenText();
+        }
+      },
+      onError: (error) => debugPrint('STT Error: $error'),
+    );
+
+    if (available) {
+      setState(() => _isListening = true);
+      _speech.listen(
+        onResult: (result) {
+          setState(() {
+            _currentWords = result.recognizedWords;
+          });
+        },
+      );
+    }
+  }
+
+  void _stopListening() {
+    if (_isListening) {
+      _speech.stop();
+      setState(() => _isListening = false);
+    }
+  }
+
+  void _submitSpokenText() {
+    if (_currentWords.trim().isNotEmpty) {
+      _sendMessage(_currentWords);
+      setState(() {
+        _currentWords = '';
+      });
+    }
+  }
+
+  void _initGemini() {
+    const apiKey = String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
+    if (apiKey.isNotEmpty) {
+      final prompt = 'You are playing the role of ${widget.persona.name}, a ${widget.persona.role}. '
+          '${widget.persona.description}. '
+          'The user is practicing a phone call with you. Keep your responses short, natural, and conversational, '
+          'as if you are speaking on the phone. Ask engaging questions where appropriate to keep the conversation going.';
+      _geminiService = GeminiPracticeCallService(apiKey, systemPrompt: prompt);
+
+      // Initial greeting
+      Future.delayed(const Duration(seconds: 3), () async {
+        if (!mounted || !_isCallActive) return;
+        setState(() {
+          _isAIResponding = true;
+        });
+        
+        final response = await _geminiService!.sendMessage('Hello?');
+        if (mounted) {
+          setState(() {
+            _isAIResponding = false;
+            final text = response ?? 'Hello?';
+            _transcript.add({
+              'sender': widget.persona.name,
+              'text': text,
+            });
+            _speakText(text); // AI speaks its response
+          });
+          _scrollToBottom();
+        }
+      });
+    } else {
+      _transcript.add({
+        'sender': 'System',
+        'text': 'GEMINI_API_KEY is not set. Simulation mode only.',
+      });
+    }
+  }
+
+  void _sendMessage([String? textArg]) async {
+    final text = textArg ?? _textController.text.trim();
+    if (text.isEmpty || _geminiService == null) return;
+
+    if (_isListening) _stopListening();
+    _flutterTts.stop(); // Stop TTS if user interrupts
+
+    setState(() {
+      _transcript.add({'sender': 'You', 'text': text});
+      _isAIResponding = true;
+    });
+    _textController.clear();
+    _scrollToBottom();
+
+    final response = await _geminiService!.sendMessage(text);
+    if (response != null && mounted) {
+      setState(() {
+        _isAIResponding = false;
+        _transcript.add({'sender': widget.persona.name, 'text': response});
+        _speakText(response); // AI speaks its response
+      });
+      _scrollToBottom();
+    }
+  }
+
+  void _scrollToBottom() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
       }
     });
   }
@@ -424,13 +583,19 @@ class _PracticeCallScreenState extends State<PracticeCallScreen>
 
   @override
   void dispose() {
+    _speech.cancel();
+    _flutterTts.stop();
     _pulseController.dispose();
+    _textController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   void _endCall() {
     HapticFeedback.mediumImpact();
     setState(() => _isCallActive = false);
+    _speech.stop();
+    _flutterTts.stop();
 
     showDialog(
       context: context,
@@ -469,7 +634,10 @@ class _PracticeCallScreenState extends State<PracticeCallScreen>
               setState(() {
                 _isCallActive = true;
                 _callDuration = 0;
+                _transcript.clear();
+                _currentWords = '';
               });
+              _initGemini();
               _startTimer();
             },
             child: const Text('Practice Again'),
@@ -503,114 +671,262 @@ class _PracticeCallScreenState extends State<PracticeCallScreen>
 
     return Scaffold(
       backgroundColor: widget.persona.color.withAlpha(30),
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: Column(
           children: [
-            const Spacer(),
-
-            // Persona info
-            AnimatedBuilder(
-              animation: _pulseController,
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: 1 + (_pulseController.value * 0.05),
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: widget.persona.color.withAlpha(100),
-                      shape: BoxShape.circle,
-                      boxShadow: _isCallActive
-                          ? [
-                              BoxShadow(
-                                color: widget.persona.color.withAlpha(100),
-                                blurRadius: 30,
-                                spreadRadius: 10,
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: Center(
-                      child: Text(
-                        widget.persona.emoji,
-                        style: const TextStyle(fontSize: 56),
-                      ),
+            // Top section: Avatar and Info
+            Padding(
+              padding: const EdgeInsets.only(top: 24, bottom: 16),
+              child: Column(
+                children: [
+                  AnimatedBuilder(
+                    animation: _pulseController,
+                    builder: (context, child) {
+                      return Transform.scale(
+                        scale: 1 + (_pulseController.value * 0.05),
+                        child: Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: widget.persona.color.withAlpha(100),
+                            shape: BoxShape.circle,
+                            boxShadow: _isCallActive && (_isAIResponding || _isListening)
+                                ? [
+                                    BoxShadow(
+                                      color: _isListening ? AppColors.success.withAlpha(100) : widget.persona.color.withAlpha(100),
+                                      blurRadius: 20,
+                                      spreadRadius: 5,
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: Center(
+                            child: Text(
+                              widget.persona.emoji,
+                              style: const TextStyle(fontSize: 36),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    widget.persona.name,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                );
-              },
+                  Text(
+                    _isCallActive ? _formatDuration(_callDuration) : 'Connecting...',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: _isCallActive ? AppColors.success : Colors.grey,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (_isListening)
+                    Text(
+                      'Listening...',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.success,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                ],
+              ),
             ),
-            const SizedBox(height: 24),
 
-            Text(
-              widget.persona.name,
-              style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              widget.persona.role,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
+            // Middle section: Live Transcript / Chat
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha(10),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.all(16),
+                          itemCount: _transcript.length + (_isAIResponding ? 1 : 0) + (_currentWords.isNotEmpty ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            if (index == _transcript.length && _isAIResponding) {
+                              return Align(
+                                alignment: Alignment.centerLeft,
+                                child: Container(
+                                  margin: const EdgeInsets.only(top: 8),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(16).copyWith(
+                                      bottomLeft: Radius.zero,
+                                    ),
+                                  ),
+                                  child: const SizedBox(
+                                    width: 40,
+                                    child: LinearProgressIndicator(),
+                                  ),
+                                ),
+                              );
+                            }
 
-            // Call status
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: _isCallActive ? AppColors.success.withAlpha(30) : Colors.grey.withAlpha(30),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                _isCallActive ? _formatDuration(_callDuration) : 'Connecting...',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: _isCallActive ? AppColors.success : Colors.grey,
-                  fontWeight: FontWeight.w600,
+                            if (index == _transcript.length + (_isAIResponding ? 1 : 0) && _currentWords.isNotEmpty) {
+                              return Align(
+                                alignment: Alignment.centerRight,
+                                child: Container(
+                                  margin: const EdgeInsets.only(top: 8),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryPurple.withAlpha(150),
+                                    borderRadius: BorderRadius.circular(16).copyWith(
+                                      bottomRight: Radius.zero,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    '$_currentWords...',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+
+                            final msg = _transcript[index];
+                            final isMe = msg['sender'] == 'You';
+                            final isSystem = msg['sender'] == 'System';
+
+                            if (isSystem) {
+                              return Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  child: Text(
+                                    msg['text']!,
+                                    style: TextStyle(
+                                      color: theme.colorScheme.error,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+
+                            return Align(
+                              alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                              child: Container(
+                                margin: const EdgeInsets.only(top: 8),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: isMe
+                                      ? AppColors.primaryPurple
+                                      : theme.colorScheme.surfaceContainerHighest,
+                                  borderRadius: BorderRadius.circular(16).copyWith(
+                                    bottomRight: isMe ? Radius.zero : const Radius.circular(16),
+                                    bottomLeft: isMe ? const Radius.circular(16) : Radius.zero,
+                                  ),
+                                ),
+                                child: Text(
+                                  msg['text']!,
+                                  style: TextStyle(
+                                    color: isMe ? Colors.white : theme.colorScheme.onSurface,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      
+                      // Input Area
+                      if (_isCallActive)
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surfaceContainerHighest.withAlpha(100),
+                            border: Border(
+                              top: BorderSide(color: theme.dividerColor),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  _isListening ? Icons.mic : Icons.mic_none,
+                                  color: _isListening ? AppColors.error : AppColors.primaryPurple,
+                                ),
+                                onPressed: _isListening ? _stopListening : _startListening,
+                              ),
+                              Expanded(
+                                child: TextField(
+                                  controller: _textController,
+                                  decoration: const InputDecoration(
+                                    hintText: 'Type or speak...',
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                                  ),
+                                  onSubmitted: (_) => _sendMessage(),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.send, color: AppColors.primaryPurple),
+                                onPressed: () => _sendMessage(),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
-
-            const Spacer(),
-
-            // Hint text
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Text(
-                'This is a practice call with an AI. Speak naturally - there are no wrong answers!',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
             // Call controls
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildControlButton(
-                  icon: _isMuted ? Icons.mic_off : Icons.mic,
-                  label: _isMuted ? 'Unmute' : 'Mute',
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    setState(() => _isMuted = !_isMuted);
-                  },
-                ),
-                _buildControlButton(
-                  icon: _isSpeakerOn ? Icons.volume_up : Icons.volume_down,
-                  label: 'Speaker',
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    setState(() => _isSpeakerOn = !_isSpeakerOn);
-                  },
-                ),
-                _buildEndCallButton(),
-              ],
+            Padding(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildControlButton(
+                    icon: _isMuted ? Icons.mic_off : Icons.mic,
+                    label: _isMuted ? 'Unmute' : 'Mute',
+                    color: _isMuted ? Colors.red.withAlpha(200) : Colors.white.withAlpha(200),
+                    iconColor: _isMuted ? Colors.white : Colors.black,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() {
+                         _isMuted = !_isMuted;
+                         if (_isMuted) _stopListening();
+                      });
+                    },
+                  ),
+                  _buildEndCallButton(),
+                  _buildControlButton(
+                    icon: _isSpeakerOn ? Icons.volume_up : Icons.volume_down,
+                    label: 'Speaker',
+                    color: Colors.white.withAlpha(200),
+                    iconColor: Colors.black,
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() => _isSpeakerOn = !_isSpeakerOn);
+                    },
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 48),
           ],
         ),
       ),
@@ -620,6 +936,8 @@ class _PracticeCallScreenState extends State<PracticeCallScreen>
   Widget _buildControlButton({
     required IconData icon,
     required String label,
+    Color color = const Color(0xCCFFFFFF),
+    Color iconColor = Colors.black,
     required VoidCallback onTap,
   }) {
     return Column(
@@ -630,10 +948,10 @@ class _PracticeCallScreenState extends State<PracticeCallScreen>
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: Colors.white.withAlpha(200),
+              color: color,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 28),
+            child: Icon(icon, size: 28, color: iconColor),
           ),
         ),
         const SizedBox(height: 8),
