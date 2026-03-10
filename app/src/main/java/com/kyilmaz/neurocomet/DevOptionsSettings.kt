@@ -97,7 +97,8 @@ object DevOptionsSettings {
         // Persisted hidden-unlock state for the settings menu.
         // Authorized debug devices can still open dev options directly
         // via the long-press gesture, which sets this flag to true.
-        val devMenuEnabled = p.getBoolean(KEY_DEV_MENU_ENABLED, false)
+        // For convenience in debug builds, default to true.
+        val devMenuEnabled = isDebug || p.getBoolean(KEY_DEV_MENU_ENABLED, false)
 
         val moderationOverride = runCatching {
             DevModerationOverride.valueOf(

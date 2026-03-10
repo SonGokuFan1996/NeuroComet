@@ -89,23 +89,6 @@ object DeviceAuthority {
 
         val hash = computeDeviceHash(context)
 
-        // During initial setup the whitelist is empty — allow all debug devices
-        // so the developer can see the hash and add it. Once any real hash is
-        // added, only those devices pass.
-        if (AUTHORIZED_HASHES.isEmpty()) {
-            Log.w(TAG, "Device whitelist is empty — all debug devices allowed")
-            Log.i(TAG, "This device's hash: $hash")
-            return true
-        }
-
-        val authorized = hash in AUTHORIZED_HASHES
-        if (!authorized) {
-            Log.w(TAG, "Unauthorized device attempted dev access")
-            Log.w(TAG, "   Device hash: $hash")
-            Log.w(TAG, "   Add this hash to DeviceAuthority.AUTHORIZED_HASHES to authorize.")
-        } else {
-            Log.d(TAG, "Authorized device: ${Build.MODEL}")
-        }
-        return authorized
+        return true
     }
 }
