@@ -4,10 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../models/conversation.dart';
-import '../../models/dev_options.dart';
 import '../../screens/settings/dev_options_screen.dart';
+import '../../providers/messages_provider.dart';
+import '../../services/supabase_service.dart';
+import '../../widgets/chat/wallpaper_engine.dart';
 import '../../widgets/common/neuro_avatar.dart';
 import '../../core/theme/app_colors.dart';
+import '../../providers/theme_provider.dart';
 import '../../services/webrtc_call_service.dart';
 import '../calling/active_call_screen.dart';
 
@@ -15,11 +18,23 @@ import '../calling/active_call_screen.dart';
 class ChatScreen extends ConsumerStatefulWidget {
   final String? conversationId;
   final String? userId;
+  final String? displayName;
+  final String? avatarUrl;
+  final bool isGroup;
+  final List<String> participantIds;
+  final List<String> memberNames;
+  final String? groupName;
 
   const ChatScreen({
     super.key,
     this.conversationId,
     this.userId,
+    this.displayName,
+    this.avatarUrl,
+    this.isGroup = false,
+    this.participantIds = const [],
+    this.memberNames = const [],
+    this.groupName,
   });
 
   @override
@@ -32,11 +47,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final List<Message> _messages = [];
   bool _isLoading = true;
   bool _isTyping = false;
+  DateTime? _lastSentAt;
 
   @override
   void initState() {
     super.initState();
     _loadMessages();
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.conversationId != widget.conversationId || oldWidget.userId != widget.userId) {
+      _clearAndReload();
+    }
   }
 
   @override
@@ -47,41 +71,39 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Future<void> _loadMessages() async {
-    // Mock messages for now
-    await Future.delayed(const Duration(milliseconds: 500));
+    final resolvedConversationId = _resolvedConversationId();
+
+    // Try Supabase first
+    if (resolvedConversationId != null &&
+        SupabaseService.isInitialized &&
+        SupabaseService.isAuthenticated) {
+      try {
+        final supaMessages =
+            await SupabaseService.getMessages(resolvedConversationId);
+        if (supaMessages.isNotEmpty && mounted) {
+          setState(() {
+            _messages.clear();
+            _messages.addAll(supaMessages);
+            _isLoading = false;
+          });
+          _scrollToBottom();
+          return;
+        }
+      } catch (e) {
+        debugPrint('Chat Supabase fetch failed: $e');
+      }
+    }
+
+    // Demo fallback
     if (!mounted) return;
 
+    final fallbackMessages = _effectiveIsGroup
+        ? _buildDemoGroupMessages()
+        : _buildDemoDirectMessages();
+
     setState(() {
-      _messages.addAll([
-        Message(
-          id: 'msg_1',
-          conversationId: widget.conversationId ?? '',
-          senderId: 'other_user',
-          content: 'Hey! How are you doing today? 😊',
-          createdAt: DateTime.now().subtract(const Duration(minutes: 30)),
-        ),
-        Message(
-          id: 'msg_2',
-          conversationId: widget.conversationId ?? '',
-          senderId: 'current_user',
-          content: 'I\'m doing great, thanks for asking! Just finished my sensory break.',
-          createdAt: DateTime.now().subtract(const Duration(minutes: 25)),
-        ),
-        Message(
-          id: 'msg_3',
-          conversationId: widget.conversationId ?? '',
-          senderId: 'other_user',
-          content: 'That\'s awesome! I love that NeuroComet has those features.',
-          createdAt: DateTime.now().subtract(const Duration(minutes: 20)),
-        ),
-        Message(
-          id: 'msg_4',
-          conversationId: widget.conversationId ?? '',
-          senderId: 'current_user',
-          content: 'Right? It really helps when I need to decompress.',
-          createdAt: DateTime.now().subtract(const Duration(minutes: 15)),
-        ),
-      ]);
+      _messages.clear();
+      _messages.addAll(fallbackMessages);
       _isLoading = false;
     });
 
@@ -105,11 +127,124 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     });
   }
 
+  List<Message> _buildDemoDirectMessages() {
+    final otherSenderId = _resolvedConversation()?.participantId ?? widget.userId ?? 'other_user';
+    return [
+      Message(
+        id: 'msg_1',
+        conversationId: _resolvedConversationId() ?? widget.conversationId ?? '',
+        senderId: otherSenderId,
+        content: 'Hey! How are you doing today? 😊',
+        createdAt: DateTime.now().subtract(const Duration(minutes: 30)),
+      ),
+      Message(
+        id: 'msg_2',
+        conversationId: _resolvedConversationId() ?? widget.conversationId ?? '',
+        senderId: 'current_user',
+        content: 'I\'m doing great, thanks for asking! Just finished my sensory break.',
+        createdAt: DateTime.now().subtract(const Duration(minutes: 25)),
+      ),
+      Message(
+        id: 'msg_3',
+        conversationId: _resolvedConversationId() ?? widget.conversationId ?? '',
+        senderId: otherSenderId,
+        content: 'That\'s awesome! I love that NeuroComet has those features.',
+        createdAt: DateTime.now().subtract(const Duration(minutes: 20)),
+      ),
+      Message(
+        id: 'msg_4',
+        conversationId: _resolvedConversationId() ?? widget.conversationId ?? '',
+        senderId: 'current_user',
+        content: 'Right? It really helps when I need to decompress.',
+        createdAt: DateTime.now().subtract(const Duration(minutes: 15)),
+      ),
+    ];
+  }
+
+  List<Message> _buildDemoGroupMessages() {
+    final participants = _effectiveParticipantIds;
+    final groupMembers = participants.isNotEmpty
+        ? participants.take(3).toList()
+        : ['group_member_1', 'group_member_2', 'group_member_3'];
+
+    return [
+      Message(
+        id: 'group_msg_1',
+        conversationId: _resolvedConversationId() ?? widget.conversationId ?? '',
+        senderId: groupMembers[0],
+        content: 'I\'m opening the body-doubling room in 10 minutes if anyone wants to join.',
+        createdAt: DateTime.now().subtract(const Duration(minutes: 32)),
+      ),
+      Message(
+        id: 'group_msg_2',
+        conversationId: _resolvedConversationId() ?? widget.conversationId ?? '',
+        senderId: groupMembers.length > 1 ? groupMembers[1] : groupMembers[0],
+        content: 'Perfect timing. I need accountability to finish my laundry sprint 😅',
+        createdAt: DateTime.now().subtract(const Duration(minutes: 28)),
+      ),
+      Message(
+        id: 'group_msg_3',
+        conversationId: _resolvedConversationId() ?? widget.conversationId ?? '',
+        senderId: 'current_user',
+        content: 'Count me in too. I\'m tackling email triage tonight.',
+        createdAt: DateTime.now().subtract(const Duration(minutes: 24)),
+      ),
+      Message(
+        id: 'group_msg_4',
+        conversationId: _resolvedConversationId() ?? widget.conversationId ?? '',
+        senderId: groupMembers.length > 2 ? groupMembers[2] : groupMembers[0],
+        content: 'I\'ll bring the playlist link. Low-pressure mode, cameras optional 🎧',
+        createdAt: DateTime.now().subtract(const Duration(minutes: 18)),
+      ),
+    ];
+  }
+
+  String _senderNameFor(String senderId) {
+    final currentUid = SupabaseService.currentUser?.id ?? 'current_user';
+    if (senderId == currentUid || senderId == 'current_user') return 'You';
+
+    final participantIndex = _effectiveParticipantIds.indexOf(senderId);
+    if (participantIndex >= 0) {
+      final hasLeadingYou = _effectiveMemberNames.isNotEmpty && _effectiveMemberNames.first == 'You';
+      final memberIndex = hasLeadingYou ? participantIndex + 1 : participantIndex;
+      if (memberIndex >= 0 && memberIndex < _effectiveMemberNames.length) {
+        return _effectiveMemberNames[memberIndex];
+      }
+    }
+
+    return senderId.length > 18 ? '${senderId.substring(0, 18)}…' : senderId;
+  }
+
+  String _senderAvatarFor(String senderId) {
+    final currentUid = SupabaseService.currentUser?.id ?? 'current_user';
+    if (senderId == currentUid || senderId == 'current_user') {
+      return 'https://i.pravatar.cc/150?u=current_user';
+    }
+    return 'https://i.pravatar.cc/150?u=$senderId';
+  }
+
   void _sendMessage() async {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
+    final targetConversationId = _resolvedConversationId() ?? widget.conversationId;
 
     final opts = ref.read(devOptionsProvider);
+
+    // Feature flag: rate limiting (skipped when disableRateLimit is on)
+    if (!opts.disableRateLimit && _lastSentAt != null) {
+      final elapsed = DateTime.now().difference(_lastSentAt!).inMilliseconds;
+      if (elapsed < 500) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Slow down! Messages are rate-limited.'),
+              duration: Duration(seconds: 1),
+            ),
+          );
+        }
+        return;
+      }
+    }
 
     // Feature flag: force DM send failure
     if (opts.forceSendFailure) {
@@ -147,19 +282,36 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       return;
     }
 
+    final senderId = SupabaseService.currentUser?.id ?? 'current_user';
+
     setState(() {
       _messages.add(Message(
         id: 'msg_${DateTime.now().millisecondsSinceEpoch}',
-        conversationId: widget.conversationId ?? '',
-        senderId: 'current_user',
+        conversationId: targetConversationId ?? '',
+        senderId: senderId,
         content: text,
         createdAt: DateTime.now(),
         status: moderationStatus == 'flagged' ? MessageStatus.sent : MessageStatus.sent,
       ));
     });
 
+    _lastSentAt = DateTime.now();
     _messageController.clear();
     _scrollToBottom();
+
+    // Persist to Supabase (fire-and-forget)
+    if (targetConversationId != null &&
+        SupabaseService.isInitialized &&
+        SupabaseService.isAuthenticated) {
+      try {
+        await SupabaseService.sendMessage(
+          conversationId: targetConversationId,
+          content: text,
+        );
+      } catch (e) {
+        debugPrint('Send message Supabase error: $e');
+      }
+    }
   }
 
   /// Content moderation check, respecting dev override.
@@ -215,6 +367,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           builder: (sheetContext, setSheetState) {
             final theme = Theme.of(sheetContext);
             final isDark = theme.brightness == Brightness.dark;
+            final wallpaper = ref.read(conversationWallpaperProvider.notifier).getWallpaper(widget.conversationId);
 
             return Container(
               constraints: BoxConstraints(
@@ -319,6 +472,42 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                   iconColor: AppColors.info,
                                 ),
                                 const SizedBox(height: 12),
+
+                          // ── Wallpaper Card ──
+                          _DevCardContainer(
+                            isDark: isDark,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const _DevCardHeader(
+                                  icon: Icons.image_outlined,
+                                  title: 'Conversation Wallpaper',
+                                  iconColor: AppColors.primaryPurple,
+                                ),
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: ConversationWallpaper.values.map((w) {
+                                    final isSelected = wallpaper == w;
+                                    return ChoiceChip(
+                                      label: Text(w.name),
+                                      selected: isSelected,
+                                      onSelected: (selected) {
+                                        if (selected && widget.conversationId != null) {
+                                          ref.read(conversationWallpaperProvider.notifier)
+                                              .setWallpaper(widget.conversationId!, w);
+                                          setSheetState(() {});
+                                        }
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
                                 _DevInfoRow(label: 'Messages', value: '${_messages.length}'),
                                 _DevInfoRow(label: 'Conversation ID', value: widget.conversationId ?? 'null'),
                                 _DevInfoRow(
@@ -327,6 +516,42 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                   valueColor: _isTyping ? AppColors.success : null,
                                 ),
                                 _DevInfoRow(label: 'Scroll Position', value: scrollInfo),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // ── Wallpaper Card ──
+                          _DevCardContainer(
+                            isDark: isDark,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const _DevCardHeader(
+                                  icon: Icons.image_outlined,
+                                  title: 'Conversation Wallpaper',
+                                  iconColor: AppColors.primaryPurple,
+                                ),
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: ConversationWallpaper.values.map((w) {
+                                    final isSelected = wallpaper == w;
+                                    return ChoiceChip(
+                                      label: Text(w.name),
+                                      selected: isSelected,
+                                      onSelected: (selected) {
+                                        if (selected && widget.conversationId != null) {
+                                          ref.read(conversationWallpaperProvider.notifier)
+                                              .setWallpaper(widget.conversationId!, w);
+                                          setSheetState(() {});
+                                        }
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
                               ],
                             ),
                           ),
@@ -352,6 +577,42 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
                           const SizedBox(height: 12),
 
+                          // ── Wallpaper Card ──
+                          _DevCardContainer(
+                            isDark: isDark,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const _DevCardHeader(
+                                  icon: Icons.image_outlined,
+                                  title: 'Conversation Wallpaper',
+                                  iconColor: AppColors.primaryPurple,
+                                ),
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: ConversationWallpaper.values.map((w) {
+                                    final isSelected = wallpaper == w;
+                                    return ChoiceChip(
+                                      label: Text(w.name),
+                                      selected: isSelected,
+                                      onSelected: (selected) {
+                                        if (selected && widget.conversationId != null) {
+                                          ref.read(conversationWallpaperProvider.notifier)
+                                              .setWallpaper(widget.conversationId!, w);
+                                          setSheetState(() {});
+                                        }
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
                           // ── Actions Card ──
                           _DevCardContainer(
                             isDark: isDark,
@@ -364,6 +625,42 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                   iconColor: AppColors.accentOrange,
                                 ),
                                 const SizedBox(height: 12),
+
+                          // ── Wallpaper Card ──
+                          _DevCardContainer(
+                            isDark: isDark,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const _DevCardHeader(
+                                  icon: Icons.image_outlined,
+                                  title: 'Conversation Wallpaper',
+                                  iconColor: AppColors.primaryPurple,
+                                ),
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: ConversationWallpaper.values.map((w) {
+                                    final isSelected = wallpaper == w;
+                                    return ChoiceChip(
+                                      label: Text(w.name),
+                                      selected: isSelected,
+                                      onSelected: (selected) {
+                                        if (selected && widget.conversationId != null) {
+                                          ref.read(conversationWallpaperProvider.notifier)
+                                              .setWallpaper(widget.conversationId!, w);
+                                          setSheetState(() {});
+                                        }
+                                      },
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
                                 _DevActionButton(
                                   icon: Icons.checklist_rounded,
                                   label: 'Test All Message Statuses',
@@ -452,6 +749,128 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _loadMessages();
   }
 
+  Conversation? _resolvedConversation() {
+    final conversations = ref.read(conversationsProvider).value ?? const <Conversation>[];
+
+    if (widget.conversationId != null) {
+      for (final conversation in conversations) {
+        if (conversation.id == widget.conversationId) return conversation;
+      }
+    }
+
+    if (widget.userId != null) {
+      for (final conversation in conversations) {
+        if (conversation.participantId == widget.userId) return conversation;
+        final participantIds = conversation.participantIds;
+        if (participantIds != null && participantIds.contains(widget.userId)) {
+          return conversation;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  String? _resolvedConversationId() => _resolvedConversation()?.id ?? widget.conversationId;
+
+  bool get _effectiveIsGroup => _resolvedConversation()?.isGroup ?? widget.isGroup;
+
+  List<String> get _effectiveParticipantIds => _resolvedConversation()?.participantIds ?? widget.participantIds;
+
+  List<String> get _effectiveMemberNames => _resolvedConversation()?.memberNames ?? widget.memberNames;
+
+  String get _effectiveDisplayName =>
+      _resolvedConversation()?.displayName ??
+      widget.displayName ??
+      widget.groupName ??
+      widget.userId ??
+      'Chat';
+
+  String? get _effectiveAvatarUrl => _resolvedConversation()?.avatarUrl ?? widget.avatarUrl;
+
+  String? get _effectiveGroupName => _resolvedConversation()?.groupName ?? widget.groupName;
+
+  void _showGroupInfo(BuildContext context) {
+    final theme = Theme.of(context);
+    final displayName = _effectiveGroupName ?? _effectiveDisplayName;
+    final memberNames = _effectiveMemberNames;
+    HapticFeedback.mediumImpact();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40, height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.dividerColor,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Group header
+              Row(
+                children: [
+                  NeuroAvatar(
+                    imageUrl: _effectiveAvatarUrl,
+                    name: displayName,
+                    size: 56,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          displayName,
+                          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${memberNames.length} members',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Text('Members', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              ...memberNames.map((name) => ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage('https://i.pravatar.cc/150?u=${name.toLowerCase().replaceAll(' ', '_')}'),
+                ),
+                title: Text(name),
+                subtitle: name == 'You'
+                    ? Text('You', style: TextStyle(color: theme.colorScheme.primary))
+                    : null,
+                trailing: name == 'You'
+                    ? null
+                    : Icon(Icons.more_horiz, color: theme.colorScheme.onSurfaceVariant),
+              )),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   // ═══════════════════════════════════════════════════════════════
   // BUILD
   // ═══════════════════════════════════════════════════════════════
@@ -459,42 +878,64 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final resolvedConversation = widget.conversationId != null
+        ? ref.watch(conversationByIdProvider(widget.conversationId!))
+        : (widget.userId != null ? ref.watch(conversationByParticipantProvider(widget.userId!)) : null);
+    final activeConversationId = resolvedConversation?.id ?? widget.conversationId;
+    final isGroup = resolvedConversation?.isGroup ?? widget.isGroup;
+    final memberNames = resolvedConversation?.memberNames ?? widget.memberNames;
+    final chatDisplayName = resolvedConversation?.displayName ?? widget.displayName ?? widget.groupName ?? widget.userId ?? 'Chat';
+    final chatAvatarUrl = resolvedConversation?.avatarUrl ?? widget.avatarUrl;
+    final wallpaper = ref.watch(conversationWallpaperProvider.notifier).getWallpaper(activeConversationId);
+    final reducedMotion = ref.watch(reducedMotionProvider);
+
+    final chatSubtitle = isGroup
+        ? '${memberNames.length} members'
+        : (_isTyping ? 'typing...' : 'Online');
 
     return Scaffold(
       appBar: AppBar(
+        // ...
         titleSpacing: 0,
-        title: Row(
-          children: [
-            const NeuroAvatar(
-              imageUrl: 'https://i.pravatar.cc/150?img=1',
-              name: 'Alex Thompson',
-              size: 40,
-              isOnline: true,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Alex Thompson',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    _isTyping ? 'typing...' : 'Online',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: _isTyping ? AppColors.primaryPurple : AppColors.success,
-                      fontStyle: _isTyping ? FontStyle.italic : FontStyle.normal,
-                    ),
-                  ),
-                ],
+        title: GestureDetector(
+          onTap: isGroup ? () => _showGroupInfo(context) : null,
+          behavior: HitTestBehavior.opaque,
+          child: Row(
+            children: [
+              NeuroAvatar(
+                imageUrl: chatAvatarUrl,
+                name: chatDisplayName,
+                size: 40,
+                isOnline: !isGroup,
               ),
-            ),
-          ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      chatDisplayName,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      chatSubtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: _isTyping ? AppColors.primaryPurple
+                            : isGroup ? theme.colorScheme.onSurfaceVariant
+                            : AppColors.success,
+                        fontStyle: _isTyping ? FontStyle.italic : FontStyle.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
         actions: [
+          if (ref.watch(devOptionsProvider).enableVideoChat) ...[
           IconButton(
             icon: const Icon(Icons.videocam_outlined),
             onPressed: () {
@@ -525,6 +966,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               );
             },
           ),
+          ],
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
             onSelected: (value) {
@@ -534,6 +976,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 case 'block':
                   break;
                 case 'report':
+                  break;
+                case 'handoff':
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Handoff initiated – continue on another device')),
+                  );
                   break;
                 case 'dev_options':
                   _showDevOptionsSheet();
@@ -571,6 +1018,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ],
                 ),
               ),
+              // Feature flag: cross-device handoff
+              if (ref.watch(devOptionsProvider).enableHandoff)
+                const PopupMenuItem(
+                  value: 'handoff',
+                  child: Row(
+                    children: [
+                      Icon(Icons.devices, size: 20),
+                      SizedBox(width: 12),
+                      Text('Continue on other device'),
+                    ],
+                  ),
+                ),
               if (kDebugMode) ...[
                 const PopupMenuDivider(),
                 PopupMenuItem(
@@ -600,36 +1059,81 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // Messages List
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    itemCount: _messages.length + (_isTyping ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      // Show typing indicator as last item
-                      if (_isTyping && index == _messages.length) {
-                        return const _TypingIndicator(
-                          key: ValueKey('typing_indicator'),
-                        );
-                      }
-                      final message = _messages[index];
-                      final isMe = message.senderId == 'current_user';
-                      return _MessageBubble(
-                        message: message,
-                        isMe: isMe,
-                        status: message.status,
-                      );
-                    },
-                  ),
+          // Background Wallpaper
+          Positioned.fill(
+            child: ConversationWallpaperWidget(
+              wallpaper: wallpaper,
+              reducedMotion: reducedMotion,
+            ),
           ),
+          Column(
+            children: [
+              // Messages List
+              Expanded(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        itemCount: _messages.length + (_isTyping ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          // Show typing indicator as last item
+                          if (_isTyping && index == _messages.length) {
+                            return const _TypingIndicator(
+                              key: ValueKey('typing_indicator'),
+                            );
+                          }
+                          final message = _messages[index];
+                          final currentUid = SupabaseService.currentUser?.id ?? 'current_user';
+                          final isMe = message.senderId == currentUid;
+                          return _MessageBubble(
+                            message: message,
+                            isMe: isMe,
+                            status: message.status,
+                            transparent: wallpaper != ConversationWallpaper.none,
+                            senderName: _senderNameFor(message.senderId),
+                            senderAvatarUrl: _senderAvatarFor(message.senderId),
+                            showSenderName: isGroup,
+                          );
+                        },
+                      ),
+              ),
 
-          // Input Area
-          _buildInputArea(context),
+              // Input Area
+              _buildInputArea(context),
+            ],
+          ),
+          // Feature flag: DM debug overlay
+          if (ref.watch(devOptionsProvider).showDmDebugOverlay)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IgnorePointer(
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: DefaultTextStyle(
+                    style: const TextStyle(color: Colors.greenAccent, fontSize: 9, fontFamily: 'monospace', decoration: TextDecoration.none),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('DM DEBUG'),
+                        Text('Msgs: ${_messages.length}'),
+                        Text('Typing: $_isTyping'),
+                        Text('Loading: $_isLoading'),
+                        Text('Conv: ${widget.conversationId ?? "new"}'),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -799,11 +1303,19 @@ class _MessageBubble extends StatefulWidget {
   final Message message;
   final bool isMe;
   final MessageStatus status;
+  final bool transparent;
+  final String? senderName;
+  final String? senderAvatarUrl;
+  final bool showSenderName;
 
   const _MessageBubble({
     required this.message,
     required this.isMe,
     this.status = MessageStatus.delivered,
+    this.transparent = false,
+    this.senderName,
+    this.senderAvatarUrl,
+    this.showSenderName = false,
   });
 
   @override
@@ -825,9 +1337,9 @@ class _MessageBubbleState extends State<_MessageBubble> {
           mainAxisAlignment: widget.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
           children: [
             if (!widget.isMe) ...[
-              const NeuroAvatar(
-                imageUrl: 'https://i.pravatar.cc/150?img=1',
-                name: 'Alex',
+              NeuroAvatar(
+                imageUrl: widget.senderAvatarUrl,
+                name: widget.senderName ?? 'Member',
                 size: 32,
               ),
               const SizedBox(width: 8),
@@ -836,12 +1348,24 @@ class _MessageBubbleState extends State<_MessageBubble> {
               child: Column(
                 crossAxisAlignment: widget.isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 children: [
+                  if (widget.showSenderName && !widget.isMe && widget.senderName != null) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4, bottom: 4),
+                      child: Text(
+                        widget.senderName!,
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     decoration: BoxDecoration(
                       color: widget.isMe
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.surfaceContainerHighest,
+                          ? theme.colorScheme.primary.withValues(alpha: widget.transparent ? 0.85 : 1.0)
+                          : theme.colorScheme.surfaceContainerHighest.withValues(alpha: widget.transparent ? 0.85 : 1.0),
                       borderRadius: BorderRadius.only(
                         topLeft: const Radius.circular(18),
                         topRight: const Radius.circular(18),
@@ -1030,7 +1554,7 @@ class _TypingIndicator extends StatelessWidget {
       child: Row(
         children: [
           const NeuroAvatar(
-            imageUrl: 'https://i.pravatar.cc/150?img=1',
+            imageUrl: 'https://i.pravatar.cc/150?u=alex_thompson',
             name: 'Alex',
             size: 32,
           ),

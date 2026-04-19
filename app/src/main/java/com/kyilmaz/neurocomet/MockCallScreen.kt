@@ -910,6 +910,10 @@ fun CallHistoryScreen(
     val webRtcCallManager = remember { com.kyilmaz.neurocomet.calling.WebRTCCallManager.getInstance() }
     val callHistory = webRtcCallManager.callHistory
 
+    LaunchedEffect(webRtcCallManager) {
+        webRtcCallManager.loadCallHistoryIfNeeded()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(

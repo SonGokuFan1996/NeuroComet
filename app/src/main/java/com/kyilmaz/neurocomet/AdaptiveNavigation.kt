@@ -1,14 +1,8 @@
 package com.kyilmaz.neurocomet
 
-import android.content.res.Configuration
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -35,8 +29,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.kyilmaz.neurocomet.ui.design.M3EAvatar
+import com.kyilmaz.neurocomet.ui.design.M3EDesignSystem
+import com.kyilmaz.neurocomet.ui.design.M3ENavItem
+import com.kyilmaz.neurocomet.ui.design.M3ENavigationBar
+import com.kyilmaz.neurocomet.ui.design.M3ESurface
+import com.kyilmaz.neurocomet.ui.design.M3ESurfaceVariant
 import kotlinx.coroutines.launch
 
 /**
@@ -139,8 +138,6 @@ fun AdaptiveNavigationScaffold(
     content: @Composable (PaddingValues) -> Unit
 ) {
     val navigationType = calculateNavigationType()
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
 
     when (navigationType) {
         NavigationType.BOTTOM_NAVIGATION -> {
@@ -216,13 +213,39 @@ fun NeurodivergentBottomNavBar(
     modifier: Modifier = Modifier,
     highContrast: Boolean = false
 ) {
+    val primaryItems = navItems.take(5)
+    val selectedIndex = primaryItems.indexOfFirst { currentRoute == it.route }.let { index ->
+        if (index >= 0) index else 0
+    }
+
+    if (!highContrast) {
+        M3ENavigationBar(
+            selectedIndex = selectedIndex,
+            onItemSelected = { index ->
+                primaryItems.getOrNull(index)?.route?.let(onNavigate)
+            },
+            items = primaryItems.map { item ->
+                M3ENavItem(
+                    icon = item.iconOutlined,
+                    selectedIcon = item.iconFilled,
+                    label = stringResource(item.labelRes),
+                    badgeCount = item.badgeCount,
+                    route = item.route,
+                )
+            },
+            modifier = modifier
+                .navigationBarsPadding()
+                .semantics { contentDescription = "Main navigation" },
+        )
+        return
+    }
+
     NavigationBar(
         modifier = modifier
             .navigationBarsPadding()
             .semantics { contentDescription = "Main navigation" },
-        containerColor = if (highContrast) Color.Black
-                        else MaterialTheme.colorScheme.surface,
-        tonalElevation = if (highContrast) 0.dp else 3.dp
+        containerColor = Color.Black,
+        tonalElevation = 0.dp
     ) {
         navItems.take(5).forEach { item ->
             val selected = currentRoute == item.route
@@ -288,81 +311,96 @@ fun NeurodivergentNavigationRail(
     modifier: Modifier = Modifier,
     highContrast: Boolean = false
 ) {
-    NavigationRail(
+    val railShape = RoundedCornerShape(
+        topEnd = M3EDesignSystem.Shapes.extraLarge,
+        bottomEnd = M3EDesignSystem.Shapes.extraLarge,
+    )
+
+    M3ESurface(
         modifier = modifier
             .statusBarsPadding()
             .navigationBarsPadding()
+            .padding(vertical = M3EDesignSystem.Spacing.xs, horizontal = M3EDesignSystem.Spacing.xxs)
             .semantics { contentDescription = "Navigation rail" },
-        containerColor = if (highContrast) Color.Black else MaterialTheme.colorScheme.surface,
-        header = {
-            // Profile avatar at top
-            Box(
-                modifier = Modifier
-                    .padding(vertical = 16.dp)
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = onProfileClick),
-                contentAlignment = Alignment.Center
-            ) {
-                if (userAvatar != null) {
-                    AsyncImage(
-                        model = userAvatar,
-                        contentDescription = "Profile",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Icon(
-                        Icons.Filled.AccountCircle,
-                        contentDescription = "Profile",
-                        modifier = Modifier.fillMaxSize(),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-        }
+        shape = railShape,
+        variant = M3ESurfaceVariant.Navigation,
+        shadowElevation = if (highContrast) 0.dp else M3EDesignSystem.Elevation.navigation,
+        containerColor = if (highContrast) Color.Black else null,
     ) {
-        navItems.forEach { item ->
-            val selected = currentRoute == item.route
-
-            NavigationRailItem(
-                selected = selected,
-                onClick = { onNavigate(item.route) },
-                icon = {
-                    Box {
-                        Icon(
-                            imageVector = if (selected) item.iconFilled else item.iconOutlined,
-                            contentDescription = null,
-                            modifier = Modifier.size(if (highContrast) 28.dp else 24.dp)
+        NavigationRail(
+            modifier = Modifier.padding(vertical = M3EDesignSystem.Spacing.xs),
+            containerColor = Color.Transparent,
+            header = {
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = M3EDesignSystem.Spacing.md)
+                        .size(M3EDesignSystem.AvatarSize.lg)
+                        .clip(M3EDesignSystem.Shapes.Avatar)
+                        .clickable(onClick = onProfileClick),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (userAvatar != null) {
+                        M3EAvatar(
+                            imageUrl = userAvatar,
+                            size = 56.dp,
+                            showGradientRing = !highContrast,
+                            contentDescription = "Profile",
                         )
-                        if (item.badgeCount > 0) {
-                            Badge(
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .offset(x = 8.dp, y = (-4).dp)
-                            ) {
-                                Text(
-                                    text = if (item.badgeCount > 99) "99+" else item.badgeCount.toString(),
-                                    fontSize = 10.sp
-                                )
+                    } else {
+                        Icon(
+                            Icons.Filled.AccountCircle,
+                            contentDescription = "Profile",
+                            modifier = Modifier.fillMaxSize(),
+                            tint = if (highContrast) Color.White else MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+            },
+        ) {
+            navItems.forEach { item ->
+                val selected = currentRoute == item.route
+
+                NavigationRailItem(
+                    selected = selected,
+                    onClick = { onNavigate(item.route) },
+                    icon = {
+                        Box {
+                            Icon(
+                                imageVector = if (selected) item.iconFilled else item.iconOutlined,
+                                contentDescription = null,
+                                modifier = Modifier.size(if (highContrast) 28.dp else 24.dp),
+                            )
+                            if (item.badgeCount > 0) {
+                                Badge(
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                        .offset(x = 8.dp, y = (-4).dp),
+                                ) {
+                                    Text(
+                                        text = if (item.badgeCount > 99) "99+" else item.badgeCount.toString(),
+                                        fontSize = 10.sp,
+                                    )
+                                }
                             }
                         }
-                    }
-                },
-                label = {
-                    Text(
-                        text = stringResource(item.labelRes),
-                        fontSize = 11.sp,
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
-                    )
-                },
-                colors = NavigationRailItemDefaults.colors(
-                    selectedIconColor = if (highContrast) Color.White else MaterialTheme.colorScheme.primary,
-                    selectedTextColor = if (highContrast) Color.White else MaterialTheme.colorScheme.primary,
-                    indicatorColor = if (highContrast) Color.White.copy(alpha = 0.2f)
-                                    else MaterialTheme.colorScheme.primaryContainer
+                    },
+                    label = {
+                        Text(
+                            text = stringResource(item.labelRes),
+                            fontSize = 11.sp,
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                        )
+                    },
+                    colors = NavigationRailItemDefaults.colors(
+                        selectedIconColor = if (highContrast) Color.White else MaterialTheme.colorScheme.onSecondaryContainer,
+                        selectedTextColor = if (highContrast) Color.White else MaterialTheme.colorScheme.onSecondaryContainer,
+                        indicatorColor = if (highContrast) Color.White.copy(alpha = 0.2f)
+                        else MaterialTheme.colorScheme.secondaryContainer,
+                        unselectedIconColor = if (highContrast) Color.Gray else MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = if (highContrast) Color.Gray else MaterialTheme.colorScheme.onSurfaceVariant,
+                    ),
                 )
-            )
+            }
         }
     }
 }
@@ -389,16 +427,22 @@ fun NeurodivergentPermanentDrawerContent(
 ) {
     val mainItems = navItems.filter { it.section == NavigationSection.MAIN }
     val secondaryItems = navItems.filter { it.section == NavigationSection.SECONDARY }
-    val settingsItems = navItems.filter { it.section == NavigationSection.SETTINGS }
 
     PermanentDrawerSheet(
-        modifier = modifier.width(if (collapsed) 96.dp else 280.dp),
-        drawerContainerColor = if (highContrast) Color.Black else MaterialTheme.colorScheme.surface
+        modifier = modifier
+            .width(if (collapsed) 96.dp else 280.dp)
+            .clip(
+                RoundedCornerShape(
+                    topEnd = M3EDesignSystem.Shapes.extraLarge,
+                    bottomEnd = M3EDesignSystem.Shapes.extraLarge,
+                )
+            ),
+        drawerContainerColor = if (highContrast) Color.Black else MaterialTheme.colorScheme.surfaceContainerLow,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxHeight()
-                .padding(16.dp)
+                .padding(M3EDesignSystem.Spacing.md)
         ) {
             DrawerBrandHeader(
                 collapsed = collapsed,
@@ -406,7 +450,7 @@ fun NeurodivergentPermanentDrawerContent(
                 onToggleCollapsed = { onToggleCollapsed(!collapsed) }
             )
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = M3EDesignSystem.Spacing.xs))
 
             // User profile section
             if (collapsed) {
@@ -631,7 +675,7 @@ private fun DrawerProfileCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
+        shape = M3EDesignSystem.Shapes.MediumShape,
         colors = CardDefaults.cardColors(
             containerColor = if (highContrast) Color.DarkGray
                             else MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
@@ -640,18 +684,18 @@ private fun DrawerProfileCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(M3EDesignSystem.Spacing.sm),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Avatar with shape clipping
             ClippedImage(
                 imageUrl = userAvatar,
                 shape = CircleShape,
-                size = 48.dp,
+                size = M3EDesignSystem.AvatarSize.lg,
                 contentDescription = "Profile picture"
             )
 
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(M3EDesignSystem.Spacing.sm))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -813,10 +857,10 @@ private fun DrawerNavItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(M3EDesignSystem.Shapes.SmallShape)
             .background(backgroundColor)
             .clickable(onClick = onClick)
-            .padding(12.dp)
+            .padding(M3EDesignSystem.Spacing.sm)
             .semantics {
                 item.accessibilityDescription?.let { contentDescription = it }
             },
@@ -827,7 +871,7 @@ private fun DrawerNavItem(
                 imageVector = if (selected) item.iconFilled else item.iconOutlined,
                 contentDescription = null,
                 tint = contentColor,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(M3EDesignSystem.IconSize.md)
             )
             if (item.badgeCount > 0) {
                 Badge(

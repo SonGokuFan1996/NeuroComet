@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/backup_metadata.dart';
 import 'supabase_service.dart';
 import 'local_backup_service.dart';
+import 'google_drive_backup_service.dart';
 import '../core/constants/app_constants.dart';
 
 /// Progress state for backup operations
@@ -90,185 +91,193 @@ class BackupService {
 
     try {
       final userId = SupabaseService.currentUser?.id;
-      if (userId == null) {
-        progressNotifier.value = BackupProgress.error('Not logged in');
-        return null;
-      }
+      final hasRemoteAuth = userId != null && SupabaseService.isInitialized;
+      final effectiveId = userId ?? 'local_${DateTime.now().millisecondsSinceEpoch}';
 
-      final backupId = '${DateTime.now().millisecondsSinceEpoch}_$userId';
+      final backupId = '${DateTime.now().millisecondsSinceEpoch}_$effectiveId';
       final manifest = <String, int>{};
       final backupData = <String, dynamic>{
         'backup_version': _backupVersion,
         'backup_id': backupId,
-        'user_id': userId,
+        'user_id': effectiveId,
         'created_at': DateTime.now().toIso8601String(),
         'app_version': AppConstants.appVersion,
+        'has_remote_data': hasRemoteAuth,
       };
 
-      final client = SupabaseService.client;
       int step = 0;
       final totalSteps = _countSteps(scope);
 
-      // ---- Profile ----
-      if (scope.includeProfile) {
-        progressNotifier.value = BackupProgress(
-          stage: 'Backing up profile...',
-          progress: step / totalSteps,
-        );
-        try {
-          final profile = await client
-              .from('users')
-              .select()
-              .eq('id', userId)
-              .maybeSingle();
-          if (profile != null) {
-            backupData['profile'] = profile;
-            manifest['profile'] = 1;
-          }
-        } catch (e) {
-          debugPrint('Backup: failed to fetch profile: $e');
-        }
-        step++;
-      }
+      // ---- Remote data sections (only if authenticated) ----
+      if (hasRemoteAuth) {
+        final client = SupabaseService.client;
 
-      // ---- Posts ----
-      if (scope.includePosts) {
-        progressNotifier.value = BackupProgress(
-          stage: 'Backing up posts...',
-          progress: step / totalSteps,
-        );
-        try {
-          final posts = await _fetchAllPaginated(
-            client.from('posts').select().eq('user_id', userId),
+        // ---- Profile ----
+        if (scope.includeProfile) {
+          progressNotifier.value = BackupProgress(
+            stage: 'Backing up profile...',
+            progress: step / totalSteps,
           );
-          backupData['posts'] = posts;
-          manifest['posts'] = posts.length;
-
-          // Also fetch comments on user's posts
-          final comments = await _fetchAllPaginated(
-            client.from('post_comments').select().eq('user_id', userId),
-          );
-          backupData['post_comments'] = comments;
-          manifest['post_comments'] = comments.length;
-
-          // Post likes
-          final likes = await _fetchAllPaginated(
-            client.from('post_likes').select().eq('user_id', userId),
-          );
-          backupData['post_likes'] = likes;
-          manifest['post_likes'] = likes.length;
-        } catch (e) {
-          debugPrint('Backup: failed to fetch posts: $e');
-        }
-        step++;
-      }
-
-      // ---- Messages & Conversations ----
-      if (scope.includeMessages) {
-        progressNotifier.value = BackupProgress(
-          stage: 'Backing up messages...',
-          progress: step / totalSteps,
-        );
-        try {
-          // Get conversation participant records for this user
-          final participantRecords = await _fetchAllPaginated(
-            client.from('conversation_participants')
-                .select('conversation_id')
-                .eq('user_id', userId),
-          );
-          final conversationIds = participantRecords
-              .map((r) => r['conversation_id'] as String)
-              .toList();
-
-          if (conversationIds.isNotEmpty) {
-            // Fetch conversations
-            final conversations = await client
-                .from('conversations')
+          try {
+            final profile = await client
+                .from('users')
                 .select()
-                .inFilter('id', conversationIds);
-            backupData['conversations'] = conversations;
-            manifest['conversations'] = (conversations as List).length;
-
-            // Fetch all messages in those conversations
-            final allMessages = <Map<String, dynamic>>[];
-            for (final convId in conversationIds) {
-              final messages = await _fetchAllPaginated(
-                client.from('dm_messages')
-                    .select()
-                    .eq('conversation_id', convId),
-              );
-              allMessages.addAll(messages);
+                .eq('id', userId)
+                .maybeSingle();
+            if (profile != null) {
+              backupData['profile'] = profile;
+              manifest['profile'] = 1;
             }
-            backupData['messages'] = allMessages;
-            manifest['messages'] = allMessages.length;
+          } catch (e) {
+            debugPrint('Backup: failed to fetch profile: $e');
           }
-        } catch (e) {
-          debugPrint('Backup: failed to fetch messages: $e');
+          step++;
         }
-        step++;
+
+        // ---- Posts ----
+        if (scope.includePosts) {
+          progressNotifier.value = BackupProgress(
+            stage: 'Backing up posts...',
+            progress: step / totalSteps,
+          );
+          try {
+            final posts = await _fetchAllPaginated(
+              client.from('posts').select().eq('user_id', userId),
+            );
+            backupData['posts'] = posts;
+            manifest['posts'] = posts.length;
+
+            // Also fetch comments on user's posts
+            final comments = await _fetchAllPaginated(
+              client.from('post_comments').select().eq('user_id', userId),
+            );
+            backupData['post_comments'] = comments;
+            manifest['post_comments'] = comments.length;
+
+            // Post likes
+            final likes = await _fetchAllPaginated(
+              client.from('post_likes').select().eq('user_id', userId),
+            );
+            backupData['post_likes'] = likes;
+            manifest['post_likes'] = likes.length;
+          } catch (e) {
+            debugPrint('Backup: failed to fetch posts: $e');
+          }
+          step++;
+        }
+
+        // ---- Messages & Conversations ----
+        if (scope.includeMessages) {
+          progressNotifier.value = BackupProgress(
+            stage: 'Backing up messages...',
+            progress: step / totalSteps,
+          );
+          try {
+            // Get conversation participant records for this user
+            final participantRecords = await _fetchAllPaginated(
+              client.from('conversation_participants')
+                  .select('conversation_id')
+                  .eq('user_id', userId),
+            );
+            final conversationIds = participantRecords
+                .map((r) => r['conversation_id'] as String)
+                .toList();
+
+            if (conversationIds.isNotEmpty) {
+              // Fetch conversations
+              final conversations = await client
+                  .from('conversations')
+                  .select()
+                  .inFilter('id', conversationIds);
+              backupData['conversations'] = conversations;
+              manifest['conversations'] = (conversations as List).length;
+
+              // Fetch all messages in those conversations
+              final allMessages = <Map<String, dynamic>>[];
+              for (final convId in conversationIds) {
+                final messages = await _fetchAllPaginated(
+                  client.from('dm_messages')
+                      .select()
+                      .eq('conversation_id', convId),
+                );
+                allMessages.addAll(messages);
+              }
+              backupData['messages'] = allMessages;
+              manifest['messages'] = allMessages.length;
+            }
+          } catch (e) {
+            debugPrint('Backup: failed to fetch messages: $e');
+          }
+          step++;
+        }
+
+        // ---- Bookmarks ----
+        if (scope.includeBookmarks) {
+          progressNotifier.value = BackupProgress(
+            stage: 'Backing up bookmarks...',
+            progress: step / totalSteps,
+          );
+          try {
+            final bookmarks = await _fetchAllPaginated(
+              client.from('bookmarks').select().eq('user_id', userId),
+            );
+            backupData['bookmarks'] = bookmarks;
+            manifest['bookmarks'] = bookmarks.length;
+          } catch (e) {
+            debugPrint('Backup: failed to fetch bookmarks: $e');
+          }
+          step++;
+        }
+
+        // ---- Follows ----
+        if (scope.includeFollows) {
+          progressNotifier.value = BackupProgress(
+            stage: 'Backing up follows...',
+            progress: step / totalSteps,
+          );
+          try {
+            final following = await _fetchAllPaginated(
+              client.from('follows').select().eq('follower_id', userId),
+            );
+            backupData['following'] = following;
+            manifest['following'] = following.length;
+
+            final followers = await _fetchAllPaginated(
+              client.from('follows').select().eq('following_id', userId),
+            );
+            backupData['followers'] = followers;
+            manifest['followers'] = followers.length;
+          } catch (e) {
+            debugPrint('Backup: failed to fetch follows: $e');
+          }
+          step++;
+        }
+
+        // ---- Notifications ----
+        if (scope.includeNotifications) {
+          progressNotifier.value = BackupProgress(
+            stage: 'Backing up notifications...',
+            progress: step / totalSteps,
+          );
+          try {
+            final notifications = await _fetchAllPaginated(
+              client.from('notifications').select().eq('user_id', userId),
+            );
+            backupData['notifications'] = notifications;
+            manifest['notifications'] = notifications.length;
+          } catch (e) {
+            debugPrint('Backup: failed to fetch notifications: $e');
+          }
+          step++;
+        }
+      } else {
+        // Skip remote steps but advance progress
+        debugPrint('Backup: no Supabase auth — backing up local data only');
+        final remoteSteps = _countSteps(scope) - (scope.includeSettings ? 1 : 0);
+        step += remoteSteps;
       }
 
-      // ---- Bookmarks ----
-      if (scope.includeBookmarks) {
-        progressNotifier.value = BackupProgress(
-          stage: 'Backing up bookmarks...',
-          progress: step / totalSteps,
-        );
-        try {
-          final bookmarks = await _fetchAllPaginated(
-            client.from('bookmarks').select().eq('user_id', userId),
-          );
-          backupData['bookmarks'] = bookmarks;
-          manifest['bookmarks'] = bookmarks.length;
-        } catch (e) {
-          debugPrint('Backup: failed to fetch bookmarks: $e');
-        }
-        step++;
-      }
-
-      // ---- Follows ----
-      if (scope.includeFollows) {
-        progressNotifier.value = BackupProgress(
-          stage: 'Backing up follows...',
-          progress: step / totalSteps,
-        );
-        try {
-          final following = await _fetchAllPaginated(
-            client.from('follows').select().eq('follower_id', userId),
-          );
-          backupData['following'] = following;
-          manifest['following'] = following.length;
-
-          final followers = await _fetchAllPaginated(
-            client.from('follows').select().eq('following_id', userId),
-          );
-          backupData['followers'] = followers;
-          manifest['followers'] = followers.length;
-        } catch (e) {
-          debugPrint('Backup: failed to fetch follows: $e');
-        }
-        step++;
-      }
-
-      // ---- Notifications ----
-      if (scope.includeNotifications) {
-        progressNotifier.value = BackupProgress(
-          stage: 'Backing up notifications...',
-          progress: step / totalSteps,
-        );
-        try {
-          final notifications = await _fetchAllPaginated(
-            client.from('notifications').select().eq('user_id', userId),
-          );
-          backupData['notifications'] = notifications;
-          manifest['notifications'] = notifications.length;
-        } catch (e) {
-          debugPrint('Backup: failed to fetch notifications: $e');
-        }
-        step++;
-      }
-
-      // ---- Local Settings (SharedPreferences) ----
+      // ---- Local Settings (SharedPreferences) — always included ----
       if (scope.includeSettings) {
         progressNotifier.value = BackupProgress(
           stage: 'Backing up settings...',
@@ -293,6 +302,18 @@ class BackupService {
             'auto_play_videos',
             'notification_sound',
             'break_reminder_minutes',
+            'anim_all',
+            'anim_logo',
+            'anim_story',
+            'anim_feed',
+            'anim_transitions',
+            'anim_buttons',
+            'anim_loading',
+            'dyslexic_font',
+            'font_letter_spacing',
+            'font_line_height',
+            'locale',
+            'backup_settings',
           ];
           for (final key in keysToBackup) {
             final value = prefs.get(key);
@@ -337,8 +358,18 @@ class BackupService {
         await LocalBackupService.saveMetadata(metadata);
       }
 
-      // Google Drive would be handled here in the future
-      // if (storageLocation == BackupStorageLocation.googleDrive) { ... }
+      // Google Drive upload
+      if (storageLocation == BackupStorageLocation.googleDrive) {
+        final driveFileId = await GoogleDriveBackupService.uploadBackup(
+          backupId: backupId,
+          jsonData: jsonString,
+          metadata: metadata,
+        );
+        if (driveFileId == null) {
+          // Still saved the metadata but upload failed
+          debugPrint('Backup: Google Drive upload failed, data was still serialized');
+        }
+      }
 
       // Update settings with last backup info
       final settings = await loadSettings();
@@ -374,10 +405,7 @@ class BackupService {
 
     try {
       final userId = SupabaseService.currentUser?.id;
-      if (userId == null) {
-        progressNotifier.value = BackupProgress.error('Not logged in');
-        return false;
-      }
+      final hasRemoteAuth = userId != null && SupabaseService.isInitialized;
 
       progressNotifier.value = const BackupProgress(
         stage: 'Loading backup...',
@@ -392,18 +420,22 @@ class BackupService {
 
       final backupData = jsonDecode(jsonString) as Map<String, dynamic>;
       final backupUserId = backupData['user_id'] as String?;
+      final backupHasRemote = backupData['has_remote_data'] as bool? ?? true;
 
-      // Verify the backup belongs to this user
-      if (backupUserId != userId) {
+      // Verify the backup belongs to this user (only for remote-data backups)
+      if (hasRemoteAuth && backupHasRemote && backupUserId != null && backupUserId != userId) {
         progressNotifier.value = BackupProgress.error(
           'This backup belongs to a different account',
         );
         return false;
       }
 
-      final client = SupabaseService.client;
       int step = 0;
       const totalSteps = 7;
+
+      // ---- Restore remote data sections only if authenticated ----
+      if (hasRemoteAuth && backupHasRemote) {
+        final client = SupabaseService.client;
 
       // ---- Restore Profile ----
       if (backupData.containsKey('profile')) {
@@ -510,8 +542,9 @@ class BackupService {
         }
         step++;
       }
+      } // end if (hasRemoteAuth && backupHasRemote)
 
-      // ---- Restore Local Settings ----
+      // ---- Restore Local Settings (always, even without remote auth) ----
       if (backupData.containsKey('local_settings')) {
         progressNotifier.value = BackupProgress(
           stage: 'Restoring settings...',

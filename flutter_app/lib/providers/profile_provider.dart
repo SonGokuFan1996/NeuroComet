@@ -1,19 +1,56 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user.dart';
 import '../models/post.dart';
 import '../models/custom_avatar.dart';
 import '../widgets/profile/neuro_traits.dart';
+import '../services/supabase_service.dart';
 
 final currentUserProfileProvider = FutureProvider<User>((ref) async {
-  // Replace with actual auth/Supabase call
-  await Future.delayed(const Duration(milliseconds: 500));
+  debugPrint('[ProfileProvider] Checking Supabase state: '
+      'initialized=${SupabaseService.isInitialized}, '
+      'authenticated=${SupabaseService.isAuthenticated}, '
+      'currentUser=${SupabaseService.currentUser?.id}');
 
+  // Try fetching the real logged-in user from Supabase
+  if (SupabaseService.isInitialized && SupabaseService.isAuthenticated) {
+    final uid = SupabaseService.currentUser?.id;
+    if (uid != null) {
+      try {
+        final profile = await SupabaseService.getUserProfile(uid);
+        if (profile != null) {
+          debugPrint('[ProfileProvider] ✅ Loaded profile from Supabase: ${profile.displayName}');
+          return profile;
+        }
+        // User is authenticated but no row in users table yet → build from auth metadata
+        debugPrint('[ProfileProvider] No users row for $uid, building from auth metadata');
+        final authUser = SupabaseService.currentUser!;
+        final meta = authUser.userMetadata ?? {};
+        return User(
+          id: uid,
+          displayName: (meta['display_name'] as String?) ??
+              (meta['full_name'] as String?) ??
+              (authUser.email?.split('@').first ?? 'New User'),
+          username: authUser.email?.split('@').first,
+          email: authUser.email,
+          avatarUrl: meta['avatar_url'] as String?,
+          bio: 'New to NeuroComet! 🧠✨',
+          createdAt: DateTime.tryParse(authUser.createdAt),
+        );
+      } catch (e, st) {
+        debugPrint('[ProfileProvider] ❌ Supabase fetch failed: $e\n$st');
+      }
+    } else {
+      debugPrint('[ProfileProvider] ⚠️ isAuthenticated=true but currentUser is null (devModeSkipAuth?)');
+    }
+  }
+
+  // Fallback for offline / demo mode — no artificial delay
   return const User(
     id: 'current_user',
     displayName: 'Current User',
     username: 'currentuser',
-    email: 'user@example.com',
-    avatarUrl: 'https://i.pravatar.cc/150?img=10',
+    avatarUrl: 'https://i.pravatar.cc/150?u=demo_currentuser',
     bio: 'Neurodivergent advocate | ADHD | Autism 🧠✨',
     postCount: 42,
     followerCount: 1234,
@@ -82,7 +119,7 @@ final Map<String, FakeProfileData> _fakeProfiles = {
       id: 'HyperFocusCode',
       displayName: 'Alex Chen',
       username: 'HyperFocusCode',
-      avatarUrl: 'https://i.pravatar.cc/150?u=hyperfocuscode',
+      avatarUrl: 'https://i.pravatar.cc/150?u=alexchen_hfc',
       bio: 'Software dev with ADHD 💻 Building tools for brains like mine. '
           'Triple-alarm productivity system inventor. Code & coffee enthusiast ☕',
       postCount: 284,
@@ -114,7 +151,7 @@ final Map<String, FakeProfileData> _fakeProfiles = {
       id: 'SensorySeeker',
       displayName: 'Jordan Rivera',
       username: 'SensorySeeker',
-      avatarUrl: 'https://i.pravatar.cc/150?u=sensoryseeker',
+      avatarUrl: 'https://i.pravatar.cc/150?u=jordan_sensory',
       bio: 'Sensory processing advocate 🌈 Reviewing weighted blankets so you don\'t have to. '
           'SPD + autism. Cozy vibes only 💙',
       postCount: 156,
@@ -146,7 +183,7 @@ final Map<String, FakeProfileData> _fakeProfiles = {
       id: 'NeuroNurse',
       displayName: 'Dr. Sam Kim',
       username: 'NeuroNurse',
-      avatarUrl: 'https://i.pravatar.cc/150?u=neuronurse',
+      avatarUrl: 'https://i.pravatar.cc/150?u=samkim_neuronurse',
       bio: '🧠 Neurodiversity educator & clinical researcher. '
           'PhD in Neuroscience. Your brain isn\'t broken — it\'s a feature, not a bug. 💜',
       postCount: 521,
@@ -178,7 +215,7 @@ final Map<String, FakeProfileData> _fakeProfiles = {
       id: 'QuietQueen',
       displayName: 'Maya Thompson',
       username: 'QuietQueen',
-      avatarUrl: 'https://i.pravatar.cc/150?u=quietqueen',
+      avatarUrl: 'https://i.pravatar.cc/150?u=maya_quietqueen',
       bio: 'Building a quieter world, one sensory kit at a time 🌱 '
           'Workplace accommodations advocate. Introvert energy. Plants > people (sometimes) 🌿',
       postCount: 198,
@@ -210,7 +247,7 @@ final Map<String, FakeProfileData> _fakeProfiles = {
       id: 'FocusFounder',
       displayName: 'Chris Lee',
       username: 'FocusFounder',
-      avatarUrl: 'https://i.pravatar.cc/150?u=focusfounder',
+      avatarUrl: 'https://i.pravatar.cc/150?u=chrislee_focus',
       bio: 'Body-doubling evangelist 💪 ADHD coach & community builder. '
           'Turning parallel work into a movement. Join our daily focus rooms! ✨',
       postCount: 342,
@@ -244,7 +281,7 @@ final Map<String, FakeProfileData> _fakeProfiles = {
       id: 'ADHDMemes',
       displayName: 'ADHD Meme Central',
       username: 'ADHDMemes',
-      avatarUrl: 'https://i.pravatar.cc/150?u=adhdmemes',
+      avatarUrl: 'https://i.pravatar.cc/150?u=adhd_memes_central',
       bio: 'Making ADHD relatable, one meme at a time 😂 '
           'Laughing through the executive dysfunction. DMs open for meme submissions!',
       postCount: 1247,
@@ -276,7 +313,7 @@ final Map<String, FakeProfileData> _fakeProfiles = {
       id: 'AutismAdvocate',
       displayName: 'Emma\'s Autism Journey',
       username: 'AutismAdvocate',
-      avatarUrl: 'https://i.pravatar.cc/150?u=autismadvocate',
+      avatarUrl: 'https://i.pravatar.cc/150?u=emma_autismadvocate',
       bio: 'Late-diagnosed autistic woman 💙 Unmasking one day at a time. '
           'Educator, writer & thread queen. Your "you don\'t look autistic" is not a compliment.',
       postCount: 623,
@@ -308,7 +345,7 @@ final Map<String, FakeProfileData> _fakeProfiles = {
       id: 'TherapyTips',
       displayName: 'Dr. Mental Health',
       username: 'TherapyTips',
-      avatarUrl: 'https://i.pravatar.cc/150?u=therapytips',
+      avatarUrl: 'https://i.pravatar.cc/150?u=dr_mentalhealth',
       bio: '📊 Evidence-based mental health content for neurodivergent minds. '
           'Licensed psychologist. Community > isolation. Your feelings are valid 💜',
       postCount: 412,
@@ -827,7 +864,7 @@ final Map<String, FakeProfileData> _fakeProfiles = {
       id: 'NonBinaryNinja',
       displayName: 'NonBinaryNinja',
       username: 'NonBinaryNinja',
-      avatarUrl: 'https://i.pravatar.cc/150?u=nonbinaryninja',
+      avatarUrl: 'https://i.pravatar.cc/150?u=nbninja',
       bio: 'Enby with AuDHD. Martial arts historian by day, stim toy reviewer '
           'by night. They/Them 💜🥋',
       postCount: 87,
@@ -923,7 +960,7 @@ final Map<String, FakeProfileData> _fakeProfiles = {
       id: 'PanPride_Sam',
       displayName: 'Pan Pride Sam',
       username: 'PanPride_Sam',
-      avatarUrl: 'https://i.pravatar.cc/150?u=panpridesam',
+      avatarUrl: 'https://i.pravatar.cc/150?u=panpride_sam',
       bio: 'Pansexual, ADHD, and proud! Creating neurodivergent-affirming '
           'LGBTQ+ art. Commissions always open! 💖💛💙🎨',
       postCount: 234,
@@ -1027,9 +1064,22 @@ final fakeProfileDataProvider = Provider.family<FakeProfileData?, String>((ref, 
 });
 
 final profileProvider = FutureProvider.family<User, String>((ref, userId) async {
-  await Future.delayed(const Duration(milliseconds: 500));
+  // Use Supabase when initialized (regardless of whether current user is authenticated,
+  // since public profiles can be fetched with anon key).
+  if (SupabaseService.isInitialized) {
+    try {
+      final profile = await SupabaseService.getUserProfile(userId);
+      if (profile != null) {
+        debugPrint('[profileProvider] ✅ Loaded $userId from Supabase: ${profile.displayName}');
+        return profile;
+      }
+      debugPrint('[profileProvider] No Supabase row for $userId, trying fake profiles');
+    } catch (e) {
+      debugPrint('[profileProvider] ❌ Supabase fetch failed for $userId: $e');
+    }
+  }
 
-  // Check the fake-profile database first
+  // Fallback: Check the fake-profile database (only when not authenticated)
   final fakeProfile = _fakeProfiles[userId];
   if (fakeProfile != null) {
     return fakeProfile.user;
@@ -1040,7 +1090,7 @@ final profileProvider = FutureProvider.family<User, String>((ref, userId) async 
     id: userId,
     displayName: 'User $userId',
     username: 'user_$userId',
-    avatarUrl: 'https://i.pravatar.cc/150?img=$userId',
+    avatarUrl: 'https://i.pravatar.cc/150?u=user_$userId',
     bio: 'Hello! I\'m a NeuroComet user.',
     postCount: 15,
     followerCount: 234,
@@ -1050,9 +1100,18 @@ final profileProvider = FutureProvider.family<User, String>((ref, userId) async 
 });
 
 final userPostsProvider = FutureProvider.family<List<Post>, String>((ref, userId) async {
-  await Future.delayed(const Duration(milliseconds: 300));
+  // Use Supabase when initialized (public data can be read with anon key)
+  if (SupabaseService.isInitialized) {
+    try {
+      final posts = await SupabaseService.getUserPosts(userId);
+      debugPrint('[userPostsProvider] ✅ Fetched ${posts.length} posts from Supabase for $userId');
+      if (posts.isNotEmpty) return posts;
+    } catch (e) {
+      debugPrint('[userPostsProvider] ❌ Supabase fetch failed for $userId: $e');
+    }
+  }
 
-  // Check if we have a fake profile for personality-consistent posts
+  // Fallback: Check if we have a fake profile for personality-consistent posts (only when not authenticated)
   final fakeProfile = _fakeProfiles[userId];
   if (fakeProfile != null) {
     return _generatePersonalityPosts(fakeProfile);
@@ -1064,7 +1123,7 @@ final userPostsProvider = FutureProvider.family<List<Post>, String>((ref, userId
       id: 'post_${userId}_$index',
       authorId: userId,
       authorName: 'User $userId',
-      authorAvatarUrl: 'https://i.pravatar.cc/150?img=$userId',
+      authorAvatarUrl: 'https://i.pravatar.cc/150?u=user_${userId}_$index',
       content: 'This is post #${index + 1} from User $userId! 🎉',
       likeCount: (index * 7) % 100,
       commentCount: (index * 3) % 50,

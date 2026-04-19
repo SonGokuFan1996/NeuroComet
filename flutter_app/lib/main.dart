@@ -10,11 +10,16 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'core/theme/app_theme.dart';
+import 'core/config/supabase_env.dart';
 import 'providers/theme_provider.dart';
 import 'l10n/app_localizations.dart';
 import 'router/app_router.dart';
 import 'core/utils/security_utils.dart';
 import 'screens/settings/dev_options_screen.dart';
+import 'services/google_ads_service.dart';
+import 'services/subscription_service.dart';
+import 'services/app_services.dart';
+import 'services/notification_channels_service.dart';
 
 /// Global analytics instance
 late final FirebaseAnalytics analytics;
@@ -46,6 +51,10 @@ void main() async {
       ]),
     // Initialize Supabase (non-blocking if it fails)
     _initializeSupabase(),
+    // Initialize Ads
+    GoogleAdsService().initialize(),
+    // Initialize In-App Purchases
+    SubscriptionService.instance.init(),
     // Pre-warm image cache
     if (!kIsWeb) _preWarmCaches(),
   ].whereType<Future>());
@@ -56,6 +65,9 @@ void main() async {
     PaintingBinding.instance.imageCache.maximumSize = 50; // Max 50 images
     PaintingBinding.instance.imageCache.maximumSizeBytes = 50 * 1024 * 1024; // 50MB max
   }
+
+  // Restore last-visited tab before the router is created
+  await AppRouter.init();
 
   // Run app with error handling
   runZonedGuarded(() {
@@ -117,19 +129,28 @@ Future<void> _initializeFirebase() async {
 /// Initialize Supabase without blocking app startup
 Future<void> _initializeSupabase() async {
   try {
-    // Read compile-time config only; do not ship checked-in fallback credentials.
+    // 1) Try compile-time dart-define values first (CI / release builds).
     final envUrl = const String.fromEnvironment('SUPABASE_URL');
     final envKey = const String.fromEnvironment('SUPABASE_ANON_KEY');
 
-    final url = SecurityUtils.decrypt(envUrl).ifEmpty(() => envUrl).trim();
-    final key = SecurityUtils.decrypt(envKey).ifEmpty(() => envKey).trim();
+    var url = SecurityUtils.decrypt(envUrl).ifEmpty(() => envUrl).trim();
+    var key = SecurityUtils.decrypt(envKey).ifEmpty(() => envKey).trim();
+
+    // 2) Fall back to the obfuscated built-in config (matches Android native build).
+    if (url.isEmpty || url.contains('your-project')) {
+      url = SupabaseEnv.url.trim();
+    }
+    if (key.isEmpty || key.contains('your-key')) {
+      key = SupabaseEnv.anonKey.trim();
+    }
 
     final hasValidUrl = url.isNotEmpty && !url.contains('your-project');
     final hasValidKey = key.isNotEmpty && !key.contains('your-key');
 
     if (!hasValidUrl || !hasValidKey) {
       debugPrint(
-        'Supabase not initialized: missing SUPABASE_URL and/or SUPABASE_ANON_KEY dart-define values.',
+        'Supabase not initialized: no valid credentials found '
+        '(dart-define empty, built-in config empty).',
       );
       return;
     }
@@ -139,7 +160,7 @@ Future<void> _initializeSupabase() async {
       anonKey: key,
     );
 
-    debugPrint('Supabase initialized successfully');
+    debugPrint('Supabase initialized successfully → $url');
   } catch (e) {
     debugPrint('Supabase initialization error: $e');
   }
@@ -156,11 +177,24 @@ extension StringExtension on String {
       isEmpty || this == 'null' ? defaultValue() : this;
 }
 
-class NeuroCometApp extends ConsumerWidget {
+class NeuroCometApp extends ConsumerStatefulWidget {
   const NeuroCometApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NeuroCometApp> createState() => _NeuroCometAppState();
+}
+
+class _NeuroCometAppState extends ConsumerState<NeuroCometApp> {
+  @override
+  void initState() {
+    super.initState();
+    NotificationChannelsService().initialize();
+    // Initialize notifications with ref to allow provider injection
+    NotificationService().initialize(ref);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
     final neuroState = ref.watch(neuroStateProvider);
     final locale = ref.watch(localeProvider);
@@ -229,10 +263,59 @@ class NeuroCometApp extends ConsumerWidget {
           maxScaleFactor: 1.4 * fontScale,
         );
 
-        return MediaQuery(
+        Widget result = MediaQuery(
           data: mediaQuery.copyWith(textScaler: constrainedTextScaler),
           child: child ?? const SizedBox.shrink(),
         );
+
+        // Feature flag: show debug overlay banner
+        if (!kReleaseMode && devOptions.showDebugOverlay) {
+          result = Stack(
+            children: [
+              result,
+              Positioned(
+                top: mediaQuery.padding.top + 4,
+                right: 4,
+                child: IgnorePointer(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.85),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: DefaultTextStyle(
+                      style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold, decoration: TextDecoration.none),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('ENV: ${devOptions.environment.name.toUpperCase()}'),
+                          Text('OVERRIDES: ${devOptions.activeOverrideCount}'),
+                          Text('THEME: ${themeMode.name}'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+
+        // Feature flag: environment banner — persistent top bar when not production
+        if (!kReleaseMode && devOptions.environment != DevEnvironmentTarget.production) {
+          final envColor = devOptions.environment == DevEnvironmentTarget.staging
+              ? Colors.orange
+              : Colors.green; // local
+          result = Banner(
+            message: devOptions.environment.name.toUpperCase(),
+            location: BannerLocation.topStart,
+            color: envColor,
+            child: result,
+          );
+        }
+
+        return result;
       },
     );
   }

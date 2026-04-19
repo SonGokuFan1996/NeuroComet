@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Manages subscription state for NeuroComet.
@@ -10,18 +11,34 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// Entitlement: "premium" — grants ad-free experience
 ///
-/// When Play Store / App Store billing is configured, replace the
-/// SharedPreferences stub with actual IAP flow using in_app_purchase.
+/// Uses the `in_app_purchase` package for real billing on Play Store / App Store.
+/// Falls back to SharedPreferences caching when billing is unavailable.
 class SubscriptionService {
   SubscriptionService._();
   static final SubscriptionService instance = SubscriptionService._();
 
   static const String _tag = 'SubscriptionService';
-  static const String _billingUnavailableMessage =
-      'Purchases are temporarily unavailable. Please try again later.';
+
+  /// Product IDs configured in Play Console / App Store Connect
+  static const String monthlyProductId = 'monthly_subscription';
+  static const String lifetimeProductId = 'lifetime_purchase';
+  static const Set<String> _productIds = {monthlyProductId, lifetimeProductId};
 
   /// Whether we are in debug / test mode.
   static final bool testMode = kDebugMode;
+
+  // ── IAP ────────────────────────────────────────────────────────
+  final InAppPurchase _iap = InAppPurchase.instance;
+  StreamSubscription<List<PurchaseDetails>>? _purchaseSubscription;
+  bool _iapAvailable = false;
+
+  /// Resolved product details from the store
+  ProductDetails? _monthlyProduct;
+  ProductDetails? _lifetimeProduct;
+
+  // Pending callbacks stored during purchase flow
+  VoidCallback? _pendingOnSuccess;
+  ValueChanged<String>? _pendingOnError;
 
   // ── State ──────────────────────────────────────────────────────
   final ValueNotifier<SubscriptionState> _stateNotifier =
@@ -33,9 +50,41 @@ class SubscriptionService {
   /// Simulated premium flag used in test mode.
   bool _isTestPremium = false;
 
+  // ── Initialization ────────────────────────────────────────────
+
+  /// Initialize IAP listeners. Call once at app startup.
+  Future<void> init() async {
+    if (testMode) {
+      debugPrint('$_tag 🧪 TEST MODE: Skipping IAP init');
+      return;
+    }
+
+    _iapAvailable = await _iap.isAvailable();
+    if (!_iapAvailable) {
+      debugPrint('$_tag ⚠️ In-app purchases not available on this device');
+      return;
+    }
+
+    _purchaseSubscription = _iap.purchaseStream.listen(
+      _handlePurchaseUpdates,
+      onDone: () => _purchaseSubscription?.cancel(),
+      onError: (error) {
+        debugPrint('$_tag Purchase stream error: $error');
+      },
+    );
+
+    debugPrint('$_tag IAP initialized and listening for purchases');
+  }
+
+  /// Dispose IAP subscription. Call on app shutdown.
+  void dispose() {
+    _purchaseSubscription?.cancel();
+    _purchaseSubscription = null;
+  }
+
   // ── Public API ─────────────────────────────────────────────────
 
-  /// Fetch offerings (simulated in debug builds).
+  /// Fetch offerings from the store.
   Future<void> fetchOfferings() async {
     _update(state.copyWith(isLoading: true, error: null));
     if (testMode) {
@@ -44,20 +93,79 @@ class SubscriptionService {
       debugPrint('$_tag 🧪 TEST MODE: Offerings simulated');
       return;
     }
-    // TODO: Replace with in_app_purchase offerings fetch
-    _update(state.copyWith(isLoading: false));
+
+    if (!_iapAvailable) {
+      _update(state.copyWith(
+        isLoading: false,
+        error: 'Purchases are temporarily unavailable. Please try again later.',
+      ));
+      return;
+    }
+
+    try {
+      final response = await _iap.queryProductDetails(_productIds);
+
+      if (response.notFoundIDs.isNotEmpty) {
+        debugPrint('$_tag Products not found: ${response.notFoundIDs}');
+      }
+
+      if (response.error != null) {
+        _update(state.copyWith(
+          isLoading: false,
+          error: response.error!.message,
+        ));
+        return;
+      }
+
+      for (final product in response.productDetails) {
+        if (product.id == monthlyProductId) {
+          _monthlyProduct = product;
+        } else if (product.id == lifetimeProductId) {
+          _lifetimeProduct = product;
+        }
+      }
+
+      _update(state.copyWith(
+        isLoading: false,
+        monthlyPackage: _monthlyProduct,
+        lifetimePackage: _lifetimeProduct,
+      ));
+      debugPrint('$_tag Fetched ${response.productDetails.length} products');
+    } catch (e) {
+      _update(state.copyWith(isLoading: false, error: e.toString()));
+      debugPrint('$_tag Error fetching offerings: $e');
+    }
   }
 
-  /// Check current premium status.
-  Future<bool> checkPremiumStatus() async {
+  /// Check current premium status. 
+  /// Reads cached SharedPreferences flag first, then optionally verifies with the store.
+  Future<bool> checkPremiumStatus({bool forceStoreCheck = false}) async {
     if (testMode) {
       _update(state.copyWith(isPremium: _isTestPremium));
       debugPrint('$_tag 🧪 TEST MODE: Premium = $_isTestPremium');
       return _isTestPremium;
     }
-    // TODO: Replace with in_app_purchase entitlement check
+
     final prefs = await SharedPreferences.getInstance();
-    final isPremium = prefs.getBool('is_premium') ?? false;
+    var isPremium = prefs.getBool('is_premium') ?? false;
+
+    // If not premium locally, or if forced, try to check with the store (restore logic)
+    if (!isPremium || forceStoreCheck) {
+      debugPrint('$_tag Local premium false or forced. Checking store for past purchases...');
+      if (_iapAvailable) {
+        try {
+          // This is a lightweight way to check for active purchases without a full restore UI
+          await _iap.restorePurchases();
+          // The results will be handled by _handlePurchaseUpdates and update SharedPreferences
+          // We wait a bit for the stream to process (though it's async)
+          await Future.delayed(const Duration(milliseconds: 500));
+          isPremium = prefs.getBool('is_premium') ?? false;
+        } catch (e) {
+          debugPrint('$_tag Error auto-checking store: $e');
+        }
+      }
+    }
+
     _update(state.copyWith(isPremium: isPremium));
     return isPremium;
   }
@@ -71,7 +179,8 @@ class SubscriptionService {
       await _simulateTestPurchase('monthly', onSuccess);
       return;
     }
-    await _purchasePackage('monthly', onSuccess: onSuccess, onError: onError);
+    await _purchasePackage('monthly',
+        product: _monthlyProduct, onSuccess: onSuccess, onError: onError);
   }
 
   /// Purchase the lifetime subscription.
@@ -83,7 +192,8 @@ class SubscriptionService {
       await _simulateTestPurchase('lifetime', onSuccess);
       return;
     }
-    await _purchasePackage('lifetime', onSuccess: onSuccess, onError: onError);
+    await _purchasePackage('lifetime',
+        product: _lifetimeProduct, onSuccess: onSuccess, onError: onError);
   }
 
   /// Restore purchases.
@@ -104,16 +214,23 @@ class SubscriptionService {
       onSuccess?.call(_isTestPremium);
       return;
     }
-    // TODO: Replace with in_app_purchase restore
-    final prefs = await SharedPreferences.getInstance();
-    final isPremium = prefs.getBool('is_premium') ?? false;
-    _update(state.copyWith(
-      isLoading: false,
-      isPremium: isPremium,
-      purchaseSuccess: isPremium,
-      purchaseType: isPremium ? 'restored' : null,
-    ));
-    onSuccess?.call(isPremium);
+
+    if (!_iapAvailable) {
+      _update(state.copyWith(isLoading: false, error: 'Store not available'));
+      onError?.call('Store not available');
+      return;
+    }
+
+    try {
+      // Store callbacks for when purchase stream delivers results
+      _pendingOnSuccess = onSuccess != null ? () => onSuccess(true) : null;
+      _pendingOnError = onError;
+      await _iap.restorePurchases();
+      // Results arrive via _handlePurchaseUpdates
+    } catch (e) {
+      _update(state.copyWith(isLoading: false, error: e.toString()));
+      onError?.call(e.toString());
+    }
   }
 
   /// Clear the [purchaseSuccess] flag (call after the UI has shown the result).
@@ -167,11 +284,7 @@ class SubscriptionService {
   Future<void> simulateTestTimedOut() async {
     if (!testMode) return;
     _update(state.copyWith(isLoading: true, error: null));
-    // Short delay to show loading, then just stop — the screen's own
-    // timeout timer handles the timed-out state.
     await Future.delayed(const Duration(milliseconds: 600));
-    // We don't set success or error — we leave the request "in flight"
-    // so the timeout timer on the screen fires.
     debugPrint('$_tag 🧪 TEST: Simulated TIMED_OUT (no response)');
   }
 
@@ -183,33 +296,108 @@ class SubscriptionService {
 
   Future<void> _purchasePackage(
     String purchaseType, {
+    ProductDetails? product,
     VoidCallback? onSuccess,
     ValueChanged<String>? onError,
   }) async {
     _update(state.copyWith(isLoading: true, error: null));
-    try {
-      // TODO: Replace with actual in_app_purchase flow
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('is_premium', true);
-      await prefs.setString(
-          'subscription_date', DateTime.now().toIso8601String());
 
-      _update(state.copyWith(
-        isLoading: false,
-        isPremium: true,
-        purchaseSuccess: true,
-        purchaseType: purchaseType,
-      ));
-      debugPrint('$_tag Purchase successful! Type: $purchaseType');
-      onSuccess?.call();
+    if (!_iapAvailable || product == null) {
+      // Fallback: if store not available, show error
+      const msg = 'Purchases are temporarily unavailable. Please try again later.';
+      _update(state.copyWith(isLoading: false, error: msg));
+      onError?.call(msg);
+      return;
+    }
+
+    try {
+      // Store callbacks for when purchase stream delivers results
+      _pendingOnSuccess = onSuccess;
+      _pendingOnError = onError;
+
+      final purchaseParam = PurchaseParam(productDetails: product);
+
+      // Lifetime is non-consumable, monthly is non-consumable (subscription)
+      final success = await _iap.buyNonConsumable(purchaseParam: purchaseParam);
+      if (!success) {
+        _update(state.copyWith(isLoading: false, error: 'Purchase could not be initiated'));
+        onError?.call('Purchase could not be initiated');
+        _pendingOnSuccess = null;
+        _pendingOnError = null;
+      }
+      // If successful, the purchase stream will deliver the result
     } catch (e) {
-      _update(state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      ));
+      _update(state.copyWith(isLoading: false, error: e.toString()));
       debugPrint('$_tag Purchase error: $e');
       onError?.call(e.toString());
+      _pendingOnSuccess = null;
+      _pendingOnError = null;
     }
+  }
+
+  /// Handle incoming purchase updates from the store.
+  Future<void> _handlePurchaseUpdates(
+      List<PurchaseDetails> purchaseDetailsList) async {
+    for (final purchase in purchaseDetailsList) {
+      switch (purchase.status) {
+        case PurchaseStatus.pending:
+          debugPrint('$_tag Purchase pending: ${purchase.productID}');
+          _update(state.copyWith(isLoading: true));
+          break;
+
+        case PurchaseStatus.purchased:
+        case PurchaseStatus.restored:
+          debugPrint('$_tag Purchase ${purchase.status.name}: ${purchase.productID}');
+
+          // Verify and grant entitlement
+          await _grantPremium(purchase);
+
+          final type = purchase.status == PurchaseStatus.restored
+              ? 'restored'
+              : (purchase.productID == monthlyProductId ? 'monthly' : 'lifetime');
+
+          _update(state.copyWith(
+            isLoading: false,
+            isPremium: true,
+            purchaseSuccess: true,
+            purchaseType: type,
+          ));
+          _pendingOnSuccess?.call();
+          _pendingOnSuccess = null;
+          _pendingOnError = null;
+          break;
+
+        case PurchaseStatus.error:
+          debugPrint('$_tag Purchase error: ${purchase.error?.message}');
+          final errorMsg = purchase.error?.message ?? 'Purchase failed';
+          _update(state.copyWith(isLoading: false, error: errorMsg));
+          _pendingOnError?.call(errorMsg);
+          _pendingOnSuccess = null;
+          _pendingOnError = null;
+          break;
+
+        case PurchaseStatus.canceled:
+          debugPrint('$_tag Purchase canceled: ${purchase.productID}');
+          _update(state.copyWith(isLoading: false));
+          _pendingOnSuccess = null;
+          _pendingOnError = null;
+          break;
+      }
+
+      // Always complete pending purchases
+      if (purchase.pendingCompletePurchase) {
+        await _iap.completePurchase(purchase);
+      }
+    }
+  }
+
+  /// Grant premium entitlement and persist locally.
+  Future<void> _grantPremium(PurchaseDetails purchase) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('is_premium', true);
+    await prefs.setString('subscription_date', DateTime.now().toIso8601String());
+    await prefs.setString('subscription_product_id', purchase.productID);
+    debugPrint('$_tag Premium granted for product: ${purchase.productID}');
   }
 
   Future<void> _simulateTestPurchase(

@@ -2,6 +2,7 @@
 
 package com.kyilmaz.neurocomet
 
+import android.content.Context
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -34,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import org.json.JSONObject
 
 /**
  * Badge categories - organized by type of achievement
@@ -82,6 +84,27 @@ data class AchievementProgress(
     val currentProgress: Int = 0,
     val isUnlocked: Boolean = false,
     val unlockedAt: Long? = null
+)
+
+data class AchievementLevelInfo(
+    val level: Int,
+    val totalXp: Int,
+    val currentLevelBaseXp: Int,
+    val nextLevelXp: Int
+) {
+    val xpIntoLevel: Int get() = totalXp - currentLevelBaseXp
+    val xpNeededForNextLevel: Int get() = nextLevelXp - totalXp
+    val xpSpan: Int get() = nextLevelXp - currentLevelBaseXp
+    val progress: Float get() = if (xpSpan <= 0) 1f else (xpIntoLevel.toFloat() / xpSpan.toFloat()).coerceIn(0f, 1f)
+}
+
+data class AchievementSnapshot(
+    val progressMap: Map<String, AchievementProgress>,
+    val totalXp: Int,
+    val unlockedCount: Int,
+    val totalBadges: Int,
+    val levelInfo: AchievementLevelInfo,
+    val recentlyUnlocked: List<AchievementBadge>
 )
 
 /**
@@ -371,6 +394,128 @@ object AchievementRegistry {
 
     fun getBadgesByRarity(rarity: BadgeRarity): List<AchievementBadge> =
         allBadges.filter { it.rarity == rarity }
+}
+
+object AchievementManager {
+    private const val PREFS_NAME = "neurocomet_achievement_rewards"
+    private const val KEY_PROGRESS = "badge_progress"
+    private const val KEY_TOTAL_XP = "total_xp"
+    private const val XP_PER_LEVEL_STEP = 100
+
+    fun getProgressMap(context: Context): Map<String, AchievementProgress> {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return decodeProgressMap(prefs.getString(KEY_PROGRESS, null))
+    }
+
+    fun getTotalXp(context: Context): Int {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return prefs.getInt(KEY_TOTAL_XP, 0)
+    }
+
+    fun addProgress(context: Context, badgeId: String, amount: Int = 1): Boolean {
+        val badge = AchievementRegistry.getBadgeById(badgeId) ?: return false
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val progressMap = decodeProgressMap(prefs.getString(KEY_PROGRESS, null)).toMutableMap()
+        val current = progressMap[badgeId] ?: AchievementProgress(badgeId = badgeId)
+        val updatedProgress = (current.currentProgress + amount).coerceIn(0, badge.maxProgress)
+        val unlockedNow = !current.isUnlocked && updatedProgress >= badge.maxProgress
+
+        progressMap[badgeId] = current.copy(
+            currentProgress = updatedProgress,
+            isUnlocked = current.isUnlocked || unlockedNow,
+            unlockedAt = if (unlockedNow) System.currentTimeMillis() else current.unlockedAt
+        )
+
+        val editor = prefs.edit()
+            .putString(KEY_PROGRESS, encodeProgressMap(progressMap))
+
+        if (unlockedNow) {
+            editor.putInt(KEY_TOTAL_XP, prefs.getInt(KEY_TOTAL_XP, 0) + badge.xpReward)
+        }
+
+        editor.apply()
+        return unlockedNow
+    }
+
+    fun unlockBadge(context: Context, badgeId: String): Boolean {
+        val badge = AchievementRegistry.getBadgeById(badgeId) ?: return false
+        return addProgress(context, badgeId, badge.maxProgress)
+    }
+
+    fun resetAll(context: Context) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .remove(KEY_PROGRESS)
+            .remove(KEY_TOTAL_XP)
+            .apply()
+    }
+
+    fun getLevelInfo(totalXp: Int): AchievementLevelInfo {
+        var level = 1
+        while (xpThresholdForLevel(level + 1) <= totalXp) {
+            level++
+        }
+        return AchievementLevelInfo(
+            level = level,
+            totalXp = totalXp,
+            currentLevelBaseXp = xpThresholdForLevel(level),
+            nextLevelXp = xpThresholdForLevel(level + 1)
+        )
+    }
+
+    fun getSnapshot(context: Context): AchievementSnapshot {
+        val progressMap = getProgressMap(context)
+        val totalXp = getTotalXp(context)
+        val unlockedEntries = progressMap.entries
+            .filter { it.value.isUnlocked }
+            .sortedByDescending { it.value.unlockedAt ?: 0L }
+
+        return AchievementSnapshot(
+            progressMap = progressMap,
+            totalXp = totalXp,
+            unlockedCount = unlockedEntries.size,
+            totalBadges = AchievementRegistry.allBadges.size,
+            levelInfo = getLevelInfo(totalXp),
+            recentlyUnlocked = unlockedEntries.mapNotNull { AchievementRegistry.getBadgeById(it.key) }.take(3)
+        )
+    }
+
+    private fun xpThresholdForLevel(level: Int): Int {
+        if (level <= 1) return 0
+        val priorLevel = level - 1
+        return (XP_PER_LEVEL_STEP * priorLevel * level) / 2
+    }
+
+    private fun decodeProgressMap(raw: String?): Map<String, AchievementProgress> {
+        if (raw.isNullOrBlank()) return emptyMap()
+        val root = JSONObject(raw)
+        return root.keys().asSequence().associateWith { badgeId ->
+            val item = root.optJSONObject(badgeId) ?: JSONObject()
+            AchievementProgress(
+                badgeId = badgeId,
+                currentProgress = item.optInt("currentProgress", 0),
+                isUnlocked = item.optBoolean("isUnlocked", false),
+                unlockedAt = item.takeIf { !it.isNull("unlockedAt") }?.optLong("unlockedAt")
+            )
+        }
+    }
+
+    private fun encodeProgressMap(progressMap: Map<String, AchievementProgress>): String {
+        val root = JSONObject()
+        progressMap.forEach { (badgeId, progress) ->
+            root.put(
+                badgeId,
+                JSONObject().apply {
+                    put("currentProgress", progress.currentProgress)
+                    put("isUnlocked", progress.isUnlocked)
+                    if (progress.unlockedAt != null) {
+                        put("unlockedAt", progress.unlockedAt)
+                    }
+                }
+            )
+        }
+        return root.toString()
+    }
 }
 
 /**

@@ -20,6 +20,9 @@ class Post {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String moderationStatus;
+  final int? backgroundColor;
+  final String? tone;
+  final String? locationTag;
 
   const Post({
     required this.id,
@@ -38,6 +41,9 @@ class Post {
     this.createdAt,
     this.updatedAt,
     this.moderationStatus = 'clean',
+    this.backgroundColor,
+    this.tone,
+    this.locationTag,
   });
 
   factory Post.fromJson(Map<String, dynamic> json) => _$PostFromJson(json);
@@ -60,6 +66,9 @@ class Post {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? moderationStatus,
+    int? backgroundColor,
+    String? tone,
+    String? locationTag,
   }) {
     return Post(
       id: id ?? this.id,
@@ -78,6 +87,9 @@ class Post {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       moderationStatus: moderationStatus ?? this.moderationStatus,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      tone: tone ?? this.tone,
+      locationTag: locationTag ?? this.locationTag,
     );
   }
 }

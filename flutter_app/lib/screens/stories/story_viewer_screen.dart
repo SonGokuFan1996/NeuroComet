@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/story.dart';
 import '../../providers/stories_provider.dart';
+import '../../screens/settings/dev_options_screen.dart';
 import '../../widgets/common/neuro_avatar.dart';
 import '../../core/theme/app_colors.dart';
 
@@ -31,6 +32,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
   int _currentStoryIndex = 0;
   bool _isPaused = false;
   bool _showReactions = false;
+  double _dragOffset = 0;
 
   // Reaction emojis
   final List<String> _reactions = ['❤️', '😂', '😮', '😢', '🔥', '👏', '💜', '✨'];
@@ -216,7 +218,24 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: PageView.builder(
+      body: GestureDetector(
+        onVerticalDragUpdate: (details) {
+          if (details.delta.dy > 0) {
+            setState(() => _dragOffset += details.delta.dy);
+          }
+        },
+        onVerticalDragEnd: (details) {
+          if (_dragOffset > 100) {
+            Navigator.pop(context);
+          } else {
+            setState(() => _dragOffset = 0);
+          }
+        },
+        child: Transform.translate(
+          offset: Offset(0, _dragOffset.clamp(0, 200)),
+          child: Opacity(
+            opacity: (1 - (_dragOffset / 400)).clamp(0.3, 1.0),
+            child: PageView.builder(
         controller: _pageController,
         onPageChanged: _onPageChanged,
         itemCount: widget.storyGroups.length,
@@ -267,7 +286,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                     _buildBottomBar(),
 
                     // Reactions overlay
-                    if (_showReactions)
+                    if (_showReactions && ref.watch(devOptionsProvider).enableStoryReactions)
                       _buildReactionsOverlay(),
 
                     // Pause indicator
@@ -292,6 +311,9 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
             },
           );
         },
+      ),
+    ),
+        ),
       ),
     );
   }
@@ -329,18 +351,20 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
   }
 
   Widget _buildStoryContent(Story story) {
-    // Text story
-    if (story.contentType == StoryContentType.text) {
-      return _buildTextStory(story);
+    switch (story.contentType) {
+      case StoryContentType.text:
+        return _buildTextStory(story);
+      case StoryContentType.video:
+        return _buildVideoStory(story);
+      case StoryContentType.document:
+        return _buildDocumentStory(story);
+      case StoryContentType.link:
+        return _buildLinkStory(story);
+      case StoryContentType.audio:
+        return _buildAudioStory(story);
+      case StoryContentType.photo:
+        return _buildPhotoStory(story);
     }
-
-    // Video story
-    if (story.contentType == StoryContentType.video) {
-      return _buildVideoStory(story);
-    }
-
-    // Photo story
-    return _buildPhotoStory(story);
   }
 
   Widget _buildTextStory(Story story) {
@@ -458,6 +482,184 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
                 fontSize: 16,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDocumentStory(Story story) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.blueGrey.shade800, Colors.blueGrey.shade900],
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(Icons.description_rounded, color: Colors.white, size: 64),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              story.fileName ?? 'Shared Document',
+              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            if (story.fileSize != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                '${(story.fileSize! / 1024).toStringAsFixed(1)} KB',
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14),
+              ),
+            ],
+            if (story.caption != null && story.caption!.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Text(story.caption!, style: const TextStyle(color: Colors.white70, fontSize: 16), textAlign: TextAlign.center),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLinkStory(Story story) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.indigo.shade800, Colors.indigo.shade900],
+        ),
+      ),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.link_rounded, color: Colors.white, size: 48),
+              ),
+              const SizedBox(height: 24),
+              if (story.linkPreview != null) ...[
+                if (story.linkPreview!.title != null)
+                  Text(
+                    story.linkPreview!.title!,
+                    style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                if (story.linkPreview!.description != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    story.linkPreview!.description!,
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 14),
+                    textAlign: TextAlign.center,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                if (story.linkPreview!.siteName != null) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(story.linkPreview!.siteName!, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                  ),
+                ],
+              ] else
+                Text(
+                  story.mediaUrl ?? 'Shared Link',
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAudioStory(Story story) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.deepPurple.shade800, Colors.purple.shade900],
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(32),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.headphones_rounded, color: Colors.white, size: 56),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              story.fileName ?? 'Audio Story',
+              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            if (story.durationSeconds != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                '${story.durationSeconds! ~/ 60}:${(story.durationSeconds! % 60).toString().padLeft(2, '0')}',
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 14),
+              ),
+            ],
+            const SizedBox(height: 24),
+            // Simulated waveform
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(20, (i) {
+                final height = 10.0 + (i * 7 % 30);
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                  width: 4,
+                  height: height,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                );
+              }),
+            ),
+            if (story.caption != null && story.caption!.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Text(story.caption!, style: const TextStyle(color: Colors.white70, fontSize: 16), textAlign: TextAlign.center),
+              ),
+            ],
           ],
         ),
       ),
@@ -661,6 +863,7 @@ class _StoryViewerScreenState extends ConsumerState<StoryViewerScreen>
             ),
           ),
           const SizedBox(width: 12),
+          if (ref.watch(devOptionsProvider).enableStoryReactions)
           GestureDetector(
             onTap: _toggleReactions,
             child: Container(

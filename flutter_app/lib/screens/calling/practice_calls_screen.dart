@@ -7,6 +7,9 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../core/theme/app_colors.dart';
 import '../../services/gemini_practice_call_service.dart';
+import '../../core/config/gemini_env.dart';
+import '../../core/utils/security_utils.dart';
+import '../../core/utils/app_utils.dart';
 
 /// Practice Calls Screen - Practice phone calls with AI personas
 class PracticeCallsScreen extends ConsumerWidget {
@@ -496,7 +499,17 @@ class _PracticeCallScreenState extends State<PracticeCallScreen>
   }
 
   void _initGemini() {
-    const apiKey = String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
+    // 1) Try compile-time dart-define value first
+    final envKey = const String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
+    
+    // 2) De-obfuscate if it looks like a hex string, otherwise use as-is
+    var apiKey = SecurityUtils.decrypt(envKey).ifEmpty(() => envKey).trim();
+    
+    // 3) Fall back to the built-in obfuscated config (matches Android native build)
+    if (apiKey.isEmpty || apiKey == 'your-gemini-key') {
+      apiKey = GeminiEnv.apiKey.trim();
+    }
+
     if (apiKey.isNotEmpty) {
       final prompt = 'You are playing the role of ${widget.persona.name}, a ${widget.persona.role}. '
           '${widget.persona.description}. '
@@ -511,24 +524,42 @@ class _PracticeCallScreenState extends State<PracticeCallScreen>
           _isAIResponding = true;
         });
         
-        final response = await _geminiService!.sendMessage('Hello?');
-        if (mounted) {
-          setState(() {
-            _isAIResponding = false;
-            final text = response ?? 'Hello?';
-            _transcript.add({
-              'sender': widget.persona.name,
-              'text': text,
+        try {
+          final response = await _geminiService!.sendMessage('Hello?');
+          if (mounted) {
+            setState(() {
+              _isAIResponding = false;
+              if (response != null) {
+                _transcript.add({
+                  'sender': widget.persona.name,
+                  'text': response,
+                });
+                _speakText(response); // AI speaks its response
+              } else {
+                _transcript.add({
+                  'sender': 'System',
+                  'text': 'Error: Failed to get initial response from AI.',
+                });
+              }
             });
-            _speakText(text); // AI speaks its response
-          });
-          _scrollToBottom();
+            _scrollToBottom();
+          }
+        } catch (e) {
+          if (mounted) {
+            setState(() {
+              _isAIResponding = false;
+              _transcript.add({
+                'sender': 'System',
+                'text': 'Error: $e',
+              });
+            });
+          }
         }
       });
     } else {
       _transcript.add({
         'sender': 'System',
-        'text': 'GEMINI_API_KEY is not set. Simulation mode only.',
+        'text': 'GEMINI_API_KEY is not set. Simulation mode only.\n\nTo use AI, start the app with:\n--dart-define=GEMINI_API_KEY=your_key_here',
       });
     }
   }
@@ -548,11 +579,19 @@ class _PracticeCallScreenState extends State<PracticeCallScreen>
     _scrollToBottom();
 
     final response = await _geminiService!.sendMessage(text);
-    if (response != null && mounted) {
+    
+    if (mounted) {
       setState(() {
         _isAIResponding = false;
-        _transcript.add({'sender': widget.persona.name, 'text': response});
-        _speakText(response); // AI speaks its response
+        if (response != null) {
+          _transcript.add({'sender': widget.persona.name, 'text': response});
+          _speakText(response); // AI speaks its response
+        } else {
+          _transcript.add({
+            'sender': 'System',
+            'text': 'Error: Failed to get response from AI. Please try again.',
+          });
+        }
       });
       _scrollToBottom();
     }

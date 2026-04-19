@@ -5,6 +5,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.net.Uri
@@ -786,3 +787,59 @@ class AttachmentState(
         ) == PackageManager.PERMISSION_GRANTED
     }
 }
+
+// ═══════════════════════════════════════════════════════════════
+// IMAGE DIMENSION UTILITIES
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Reads the native aspect ratio (width / height) of an image [Uri] without
+ * decoding the full bitmap.  Returns `null` while loading or if the
+ * dimensions cannot be determined.
+ *
+ * Usage:
+ * ```
+ * val ratio = rememberImageAspectRatio(uri)
+ * Modifier.then(
+ *     if (ratio != null) Modifier.aspectRatio(ratio) else Modifier
+ * )
+ * ```
+ */
+@Composable
+fun rememberImageAspectRatio(uri: Uri?): Float? {
+    val context = LocalContext.current
+    var ratio by remember(uri) { mutableStateOf<Float?>(null) }
+
+    LaunchedEffect(uri) {
+        ratio = if (uri != null) {
+            withContext(Dispatchers.IO) {
+                resolveImageAspectRatio(context, uri)
+            }
+        } else {
+            null
+        }
+    }
+
+    return ratio
+}
+
+/**
+ * Resolves image width and height from a content [Uri] using
+ * [BitmapFactory.Options.inJustDecodeBounds] so no pixel data is loaded.
+ * Returns the aspect ratio (width / height), or `null` on failure.
+ */
+fun resolveImageAspectRatio(context: Context, uri: Uri): Float? {
+    return try {
+        context.contentResolver.openInputStream(uri)?.use { stream ->
+            val opts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeStream(stream, null, opts)
+            val w = opts.outWidth
+            val h = opts.outHeight
+            if (w > 0 && h > 0) w.toFloat() / h.toFloat() else null
+        }
+    } catch (e: Exception) {
+        Log.w(TAG, "Could not resolve image dimensions for $uri", e)
+        null
+    }
+}
+

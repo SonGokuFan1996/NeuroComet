@@ -583,9 +583,16 @@ class EditProfileNotifier extends Notifier<AsyncValue<void>> {
   }) async {
     state = const AsyncValue.loading();
     try {
-      // In a real app, call the Supabase service to update profile
-      // If customAvatarData is set, save it to user preferences or profile
-      await Future.delayed(const Duration(milliseconds: 500));
+      final userId = SupabaseService.currentUser?.id;
+      if (userId != null && SupabaseService.isInitialized) {
+        await SupabaseService.updateUserProfile(
+          userId: userId,
+          displayName: displayName,
+          bio: bio,
+          avatarUrl: avatarUrl,
+          bannerUrl: bannerUrl,
+        );
+      }
 
       // Invalidate the current user profile to refetch
       ref.invalidate(currentUserProfileProvider);

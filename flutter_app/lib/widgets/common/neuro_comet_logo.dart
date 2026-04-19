@@ -288,7 +288,7 @@ class _StaticInfinityLogo extends StatelessWidget {
               flowAngle: 0,
               breatheScale: 1.0,
               colors: _staticGradientColors,
-              strokeMultiplier: 0.12,
+              strokeMultiplier: 0.18, // Bolder
               isAnimated: false,
             ),
           ),
@@ -414,7 +414,7 @@ class _AnimatedInfinityLogoState extends State<_AnimatedInfinityLogo>
                         flowAngle: flowAngle,
                         breatheScale: 1.0,
                         colors: _colors,
-                        strokeMultiplier: 0.16,
+                        strokeMultiplier: 0.22, // Bolder inner glow
                         isAnimated: true,
                       ),
                     ),
@@ -427,7 +427,7 @@ class _AnimatedInfinityLogoState extends State<_AnimatedInfinityLogo>
                   flowAngle: flowAngle,
                   breatheScale: 1.0,
                   colors: _colors,
-                  strokeMultiplier: 0.12,
+                  strokeMultiplier: 0.18, // Bolder symbol
                   isAnimated: true,
                 ),
               ),

@@ -33,6 +33,13 @@ import '../screens/games/infinity_draw_game.dart';
 import '../screens/games/sensory_rain_game.dart';
 import '../screens/games/zen_sand_game.dart';
 import '../screens/games/emotion_garden_game.dart';
+import '../screens/games/texture_tiles_game.dart';
+import '../screens/games/sound_garden_game.dart';
+import '../screens/games/stim_sequencer_game.dart';
+import '../screens/games/safe_space_game.dart';
+import '../screens/games/worry_jar_game.dart';
+import '../screens/games/constellation_connect_game.dart';
+import '../screens/games/mood_mixer_game.dart';
 import '../screens/badges/badges_screen.dart';
 import '../screens/stories/create_story_screen.dart';
 import '../screens/subscription/subscription_screen.dart';
@@ -41,21 +48,29 @@ import '../screens/calling/practice_calls_screen.dart';
 import '../screens/calling/active_call_screen.dart';
 import '../screens/onboarding/tutorial_screen.dart';
 import '../screens/feed/category_feed_screen.dart';
-import '../screens/auth/stay_signed_in_screen.dart';
 import '../screens/settings/parental_blocked_screen.dart';
 import '../screens/settings/dm_privacy_settings_screen.dart';
 import '../screens/settings/social_settings_screen.dart';
 import '../screens/settings/wellbeing_settings_screen.dart';
 import '../screens/settings/backup_settings_screen.dart';
 import '../services/supabase_service.dart';
+import '../services/last_tab_service.dart';
 
 class AppRouter {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
   static final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
+  /// The persisted initial location, loaded before the router is created.
+  static String _initialLocation = '/';
+
+  /// Call once in main() before runApp() to restore the last-visited tab.
+  static Future<void> init() async {
+    _initialLocation = await LastTabService.load();
+  }
+
   static final router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/',
+    initialLocation: _initialLocation,
     redirect: (context, state) {
       final isAuthenticated = SupabaseService.isAuthenticated;
       final isAuthRoute = state.matchedLocation == '/auth';
@@ -65,7 +80,7 @@ class AppRouter {
       }
 
       if (isAuthenticated && isAuthRoute) {
-        return '/';
+        return _initialLocation;
       }
 
       return null;
@@ -87,6 +102,10 @@ class AppRouter {
             pageBuilder: (context, state) => const NoTransitionPage(
               child: FeedScreen(),
             ),
+          ),
+          GoRoute(
+            path: '/feed',
+            redirect: (context, state) => '/',
           ),
           GoRoute(
             path: '/explore',
@@ -163,12 +182,27 @@ class AppRouter {
         },
       ),
       GoRoute(
+        path: '/chat/:conversationId',
+        builder: (context, state) {
+          final conversationId = state.pathParameters['conversationId'];
+          return ChatScreen(
+            conversationId: conversationId,
+          );
+        },
+      ),
+      GoRoute(
         path: '/chat',
         builder: (context, state) {
           final args = state.extra as Map<String, dynamic>?;
           return ChatScreen(
             conversationId: args?['conversationId'],
             userId: args?['userId'],
+            displayName: args?['displayName'],
+            avatarUrl: args?['avatarUrl'],
+            isGroup: args?['isGroup'] ?? false,
+            participantIds: (args?['participantIds'] as List?)?.map((e) => e.toString()).toList() ?? const [],
+            memberNames: (args?['memberNames'] as List<String>?) ?? const [],
+            groupName: args?['groupName'],
           );
         },
       ),
@@ -221,6 +255,34 @@ class AppRouter {
       GoRoute(
         path: '/games/emotion_garden',
         builder: (context, state) => const EmotionGardenGame(),
+      ),
+      GoRoute(
+        path: '/games/texture_tiles',
+        builder: (context, state) => const TextureTilesGame(),
+      ),
+      GoRoute(
+        path: '/games/sound_garden',
+        builder: (context, state) => const SoundGardenGame(),
+      ),
+      GoRoute(
+        path: '/games/stim_sequencer',
+        builder: (context, state) => const StimSequencerGame(),
+      ),
+      GoRoute(
+        path: '/games/safe_space',
+        builder: (context, state) => const SafeSpaceGame(),
+      ),
+      GoRoute(
+        path: '/games/worry_jar',
+        builder: (context, state) => const WorryJarGame(),
+      ),
+      GoRoute(
+        path: '/games/constellation_connect',
+        builder: (context, state) => const ConstellationConnectGame(),
+      ),
+      GoRoute(
+        path: '/games/mood_mixer',
+        builder: (context, state) => const MoodMixerGame(),
       ),
 
       // Badges/Achievements
@@ -329,6 +391,12 @@ class AppRouter {
       GoRoute(
         path: '/settings/social',
         builder: (context, state) => const SocialSettingsScreen(),
+      ),
+
+      // Notification Settings (opens Social Settings on Notifications tab)
+      GoRoute(
+        path: '/settings/notifications',
+        builder: (context, state) => const SocialSettingsScreen(initialTabIndex: 1),
       ),
 
       GoRoute(

@@ -8,8 +8,11 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -63,16 +66,31 @@ fun StoryViewerDialog(
     onStoryViewed: (Story) -> Unit,
     onReply: (Story, String) -> Unit = { _, _ -> },
     enableReactions: Boolean = true,
-    onNextStory: (() -> Unit)? = null
+    onNextStory: (() -> Unit)? = null,
+    onPreviousStory: (() -> Unit)? = null,
+    onReaction: (Story, String) -> Unit = { _, _ -> },
+    onDeleteStoryItem: ((Story, StoryItem) -> Unit)? = null
 ) {
     var currentItemIndex by remember(story.id) { mutableIntStateOf(0) }
     var isPaused by remember(story.id) { mutableStateOf(false) }
     var showReplyField by remember(story.id) { mutableStateOf(false) }
+    var showReactionTray by remember(story.id) { mutableStateOf(false) }
+    var showCustomReactionDialog by remember(story.id) { mutableStateOf(false) }
+    var customReactionInput by remember(story.id) { mutableStateOf("") }
     var replyText by remember(story.id) { mutableStateOf("") }
     var isLiked by remember(story.id) { mutableStateOf(false) }
     val context = LocalContext.current
     val appContext = remember { context.applicationContext }
     val brailleOptimized = SocialSettingsManager.isBrailleOptimized(context)
+    val reactionPrefs = remember(context) {
+        context.getSharedPreferences("story_reaction_prefs", android.content.Context.MODE_PRIVATE)
+    }
+    var customReactionEmojis by remember(story.id) {
+        mutableStateOf(loadStoryReactionEmojis(reactionPrefs))
+    }
+    val availableReactionEmojis = remember(customReactionEmojis) {
+        (DEFAULT_STORY_REACTIONS + customReactionEmojis).distinct().take(12)
+    }
 
     // Swipe-down to dismiss state (neurodivergent-centric: smooth, predictable motion)
     val swipeOffsetY = remember(story.id) { Animatable(0f) }
@@ -251,6 +269,29 @@ fun StoryViewerDialog(
                             }
                         )
                     }
+                    .pointerInput(story.id) {
+                        var dragDistance = 0f
+                        detectHorizontalDragGestures(
+                            onDragStart = {
+                                dragDistance = 0f
+                                isPaused = true
+                            },
+                            onHorizontalDrag = { _, amount ->
+                                dragDistance += amount
+                            },
+                            onDragEnd = {
+                                when {
+                                    dragDistance <= -90f -> {
+                                        if (onNextStory != null) onNextStory() else onDismiss()
+                                    }
+                                    dragDistance >= 90f -> {
+                                        if (onPreviousStory != null) onPreviousStory() else Unit
+                                    }
+                                }
+                                isPaused = false
+                            }
+                        )
+                    }
                     // Tap gestures for navigation (separate from swipe)
                     .pointerInput(Unit) {
                         detectTapGestures(
@@ -283,38 +324,160 @@ fun StoryViewerDialog(
             // Story content - detect if video or image
             currentItem?.let { item ->
 
-                if (isVideo) {
-                    // Video story
-                    StoryVideoPlayer(
-                        videoUri = item.imageUrl,
-                        isPlaying = !isPaused,
-                        isMuted = false,
-                        onVideoEnded = {
-                            if (currentItemIndex < story.items.size - 1) {
-                                currentItemIndex++
-                            } else {
-                                if (onNextStory != null) onNextStory() else onDismiss()
+                when (item.contentType) {
+                    StoryContentType.TEXT_ONLY -> {
+                        val backgroundModifier = if (item.backgroundColorEnd != null) {
+                            Modifier.background(
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        Color(item.backgroundColor.toInt()),
+                                        Color(item.backgroundColorEnd.toInt())
+                                    )
+                                )
+                            )
+                        } else {
+                            Modifier.background(Color(item.backgroundColor.toInt()))
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .then(backgroundModifier),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = item.imageUrl,
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = Color.White,
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(32.dp)
+                            )
+                        }
+                    }
+                    StoryContentType.LINK -> {
+                        // Display the link preview
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.8f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(32.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "Tap to open link",
+                                    color = Color.White.copy(alpha = 0.7f),
+                                    modifier = Modifier.padding(bottom = 16.dp)
+                                )
+                                item.linkPreview?.let { preview ->
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                openSafeExternalUrl(
+                                                    context = context,
+                                                    url = preview.url
+                                                )
+                                            },
+                                        shape = RoundedCornerShape(16.dp)
+                                    ) {
+                                        Column {
+                                            if (preview.imageUrl != null) {
+                                                AsyncImage(
+                                                    model = preview.imageUrl,
+                                                    contentDescription = null,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(150.dp),
+                                                    contentScale = ContentScale.Crop
+                                                )
+                                            }
+                                            Column(modifier = Modifier.padding(16.dp)) {
+                                                Text(
+                                                    text = preview.title,
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                                if (preview.description != null) {
+                                                    Text(
+                                                        text = preview.description,
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        maxLines = 2,
+                                                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                                    )
+                                                }
+                                                Text(
+                                                    text = preview.siteName ?: item.imageUrl,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.padding(top = 8.dp)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
                             }
-                        },
-                        onProgressUpdate = { videoProgress ->
-                            scope.launch { progress.snapTo(videoProgress) }
-                        },
-                        modifier = Modifier.fillMaxSize(),
-                        showControls = false
-                    )
-                } else {
-                    // Image story - use full quality loading
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(item.imageUrl)
-                            .crossfade(true)
-                            // No size constraints - load at full resolution
-                            .size(coil.size.Size.ORIGINAL)
-                            .build(),
-                        contentDescription = stringResource(R.string.story_image_content_description),
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Fit
-                    )
+                        }
+                    }
+                    else -> {
+                        // Fallback logic for IMAGE and VIDEO
+                        if (isVideo) {
+                            // Video story
+                            StoryVideoPlayer(
+                                videoUri = item.imageUrl,
+                                isPlaying = !isPaused,
+                                isMuted = false,
+                                onVideoEnded = {
+                                    if (currentItemIndex < story.items.size - 1) {
+                                        currentItemIndex++
+                                    } else {
+                                        if (onNextStory != null) onNextStory() else onDismiss()
+                                    }
+                                },
+                                onProgressUpdate = { videoProgress ->
+                                    scope.launch { progress.snapTo(videoProgress) }
+                                },
+                                modifier = Modifier.fillMaxSize(),
+                                showControls = false
+                            )
+                        } else {
+                            // Image story - use full quality loading
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                AsyncImage(
+                                    model = ImageRequest.Builder(LocalContext.current)
+                                        .data(item.imageUrl)
+                                        .crossfade(true)
+                                        // No size constraints - load at full resolution
+                                        .size(coil.size.Size.ORIGINAL)
+                                        .build(),
+                                    contentDescription = stringResource(R.string.story_image_content_description),
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Fit
+                                )
+                                // Optional text overlay for images
+                                if (!item.textOverlay.isNullOrBlank()) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(Color.Black.copy(alpha = 0.3f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = item.textOverlay,
+                                            style = MaterialTheme.typography.headlineSmall,
+                                            color = Color.White,
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier.padding(16.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -413,6 +576,16 @@ fun StoryViewerDialog(
                         Spacer(Modifier.width(8.dp))
                     }
 
+                    if (onDeleteStoryItem != null && currentItem != null) {
+                        IconButton(onClick = { onDeleteStoryItem(story, currentItem) }) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = "Delete Story",
+                                tint = Color.White
+                            )
+                        }
+                    }
+
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Filled.Close,
@@ -426,6 +599,42 @@ fun StoryViewerDialog(
 
                 // Bottom reply section (gated by enableReactions flag)
                 if (enableReactions) {
+                if (showReactionTray && !showReplyField) {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        color = Color.Black.copy(alpha = 0.42f),
+                        shape = RoundedCornerShape(28.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState())
+                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            availableReactionEmojis.forEach { emoji ->
+                                TextButton(
+                                    onClick = {
+                                        onReaction(story, emoji)
+                                        showReactionTray = false
+                                        isPaused = false
+                                    }
+                                ) {
+                                    Text(text = emoji, style = MaterialTheme.typography.headlineSmall)
+                                }
+                            }
+                            StoryActionButton(
+                                icon = Icons.Filled.Add,
+                                label = "Add",
+                                onClick = { showCustomReactionDialog = true }
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                }
                 if (showReplyField) {
                     Row(
                         modifier = Modifier
@@ -486,9 +695,21 @@ fun StoryViewerDialog(
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         StoryActionButton(
+                            icon = Icons.Filled.EmojiEmotions,
+                            label = if (showReactionTray) "Hide reactions" else "React",
+                            onClick = {
+                                val nextTrayState = !showReactionTray
+                                showReactionTray = nextTrayState
+                                isPaused = nextTrayState
+                            }
+                        )
+                        StoryActionButton(
                             icon = Icons.Filled.ChatBubbleOutline,
                             label = stringResource(R.string.story_reply),
-                            onClick = { showReplyField = true }
+                            onClick = {
+                                showReactionTray = false
+                                showReplyField = true
+                            }
                         )
                         StoryActionButton(
                             icon = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
@@ -522,10 +743,70 @@ fun StoryViewerDialog(
                     }
                 }
                 } // end enableReactions gate
+
+                if (showCustomReactionDialog) {
+                    AlertDialog(
+                        onDismissRequest = {
+                            showCustomReactionDialog = false
+                            customReactionInput = ""
+                        },
+                        title = { Text("Add custom reaction") },
+                        text = {
+                            OutlinedTextField(
+                                value = customReactionInput,
+                                onValueChange = { customReactionInput = it },
+                                label = { Text("Emoji") },
+                                singleLine = true,
+                                placeholder = { Text("🫶") }
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    val emoji = customReactionInput.trim()
+                                    if (emoji.isNotBlank()) {
+                                        val updated = (customReactionEmojis + emoji).distinct().take(12)
+                                        customReactionEmojis = updated
+                                        saveStoryReactionEmojis(reactionPrefs, updated)
+                                    }
+                                    customReactionInput = ""
+                                    showCustomReactionDialog = false
+                                }
+                            ) {
+                                Text("Save")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = {
+                                showCustomReactionDialog = false
+                                customReactionInput = ""
+                            }) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
+                }
             }
             } // End of swipe-down content Box
         } // End of outer container Box
     }
+}
+
+private val DEFAULT_STORY_REACTIONS = listOf("❤️", "😂", "😮", "😢", "🔥", "👏")
+
+private fun loadStoryReactionEmojis(prefs: android.content.SharedPreferences): List<String> {
+    return prefs.getString("custom_story_reactions", "")
+        ?.split("|")
+        ?.map { it.trim() }
+        ?.filter { it.isNotBlank() }
+        ?: emptyList()
+}
+
+private fun saveStoryReactionEmojis(
+    prefs: android.content.SharedPreferences,
+    emojis: List<String>
+) {
+    prefs.edit().putString("custom_story_reactions", emojis.joinToString("|")).apply()
 }
 
 @Composable
@@ -732,15 +1013,15 @@ fun EnhancedCreateStoryDialog(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(200.dp),
+                            .heightIn(max = 300.dp),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Box(modifier = Modifier.fillMaxSize()) {
                             AsyncImage(
                                 model = currentImageUrl,
                                 contentDescription = stringResource(R.string.create_story_preview_content_description),
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
+                                modifier = Modifier.fillMaxWidth(),
+                                contentScale = ContentScale.Fit
                             )
                             if (currentTextOverlay.isNotBlank()) {
                                 Box(

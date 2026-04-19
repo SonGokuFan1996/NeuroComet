@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../models/post.dart';
 import '../../providers/feed_provider.dart';
 import '../../services/supabase_service.dart';
+import '../../services/app_services.dart';
 import '../../l10n/app_localizations.dart';
-import '../../core/theme/app_colors.dart';
 import '../../utils/cross_platform_image.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-/// Screen for creating a new post
+/// Screen for creating a new post (Polished Bottom Sheet style, inside a Scaffold)
 class CreatePostScreen extends ConsumerStatefulWidget {
   const CreatePostScreen({super.key});
 
@@ -17,43 +20,91 @@ class CreatePostScreen extends ConsumerStatefulWidget {
 
 class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   final _contentController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-  final List<XFile> _selectedImages = [];
-  String? _selectedCategory;
-  final List<String> _selectedTags = [];
+  XFile? _selectedMedia;
+  bool _isVideo = false;
+  String? _selectedMood;
+  bool _hasContentWarning = false;
+  Color? _selectedBackgroundColor;
   bool _isSubmitting = false;
+  bool _isResolvingLocation = false;
+  String? _locationTag;
 
-  // Categories for neurodivergent community
-  final List<Map<String, dynamic>> _categories = [
-    {'id': 'adhd', 'name': 'ADHD', 'icon': Icons.bolt, 'color': AppColors.categoryADHD},
-    {'id': 'autism', 'name': 'Autism', 'icon': Icons.hub, 'color': AppColors.categoryAutism},
-    {'id': 'dyslexia', 'name': 'Dyslexia', 'icon': Icons.menu_book, 'color': AppColors.categoryDyslexia},
-    {'id': 'anxiety', 'name': 'Anxiety', 'icon': Icons.psychology, 'color': AppColors.categoryAnxiety},
-    {'id': 'depression', 'name': 'Depression', 'icon': Icons.cloud, 'color': AppColors.categoryDepression},
-    {'id': 'ocd', 'name': 'OCD', 'icon': Icons.repeat, 'color': AppColors.categoryOCD},
-    {'id': 'bipolar', 'name': 'Bipolar', 'icon': Icons.swap_vert, 'color': AppColors.categoryBipolar},
-    {'id': 'general', 'name': 'General', 'icon': Icons.people, 'color': AppColors.categoryGeneral},
+  final int maxCharacters = 1000; // Premium users logic would alter this
+
+  final List<Color> _backgroundColors = [
+    const Color(0xFF1a1a2e), const Color(0xFF16213e), const Color(0xFF0f3460),
+    const Color(0xFF4ECDC4), const Color(0xFF6BCB77), const Color(0xFFFFB347),
+    const Color(0xFFFF6B6B), const Color(0xFF9B59B6), const Color(0xFFE91E63),
+    const Color(0xFF3F51B5), const Color(0xFF009688), const Color(0xFF795548)
   ];
 
-  // Common tags for the community
-  final List<String> _availableTags = [
-    'Support',
-    'Tips',
-    'Question',
-    'Win',
-    'Struggle',
-    'Meme',
-    'Resource',
-    'Story',
-    'Art',
-    'Music',
-    'Sensory',
-    'SelfCare',
-    'Stimming',
-    'Masking',
-    'Burnout',
-    'Celebration',
-  ];
+  late List<Map<String, String>> _moods;
+
+  @override
+  void initState() {
+    super.initState();
+    _contentController.addListener(_saveDraft);
+    _loadDraft();
+  }
+
+  Future<void> _loadDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _contentController.text = prefs.getString('draft_post_content') ?? '';
+      _selectedMood = prefs.getString('draft_post_mood');
+      _hasContentWarning = prefs.getBool('draft_post_cw') ?? false;
+      _locationTag = prefs.getString('draft_post_location');
+      final bg = prefs.getInt('draft_post_bg');
+      if (bg != null) _selectedBackgroundColor = Color(bg);
+    });
+  }
+
+  Future<void> _saveDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('draft_post_content', _contentController.text);
+    if (_selectedMood != null) {
+      await prefs.setString('draft_post_mood', _selectedMood!);
+    } else {
+      await prefs.remove('draft_post_mood');
+    }
+    await prefs.setBool('draft_post_cw', _hasContentWarning);
+    if (_locationTag != null) {
+      await prefs.setString('draft_post_location', _locationTag!);
+    } else {
+      await prefs.remove('draft_post_location');
+    }
+    if (_selectedBackgroundColor != null) {
+      await prefs.setInt('draft_post_bg', _selectedBackgroundColor!.value);
+    } else {
+      await prefs.remove('draft_post_bg');
+    }
+  }
+
+  Future<void> _clearDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('draft_post_content');
+    await prefs.remove('draft_post_mood');
+    await prefs.remove('draft_post_cw');
+    await prefs.remove('draft_post_location');
+    await prefs.remove('draft_post_bg');
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final l10n = AppLocalizations.of(context)!;
+    _moods = [
+      {'emoji': '😊', 'label': l10n.get('moodMessageGood')},
+      {'emoji': '🤔', 'label': 'Thoughtful'},
+      {'emoji': '😴', 'label': 'Tired'},
+      {'emoji': '🎉', 'label': 'Celebrating'},
+      {'emoji': '💪', 'label': 'Motivated'},
+      {'emoji': '😌', 'label': 'Calm'},
+      {'emoji': '🤯', 'label': 'Mind Blown'},
+      {'emoji': '💡', 'label': 'Inspired'}
+    ];
+  }
 
   @override
   void dispose() {
@@ -61,114 +112,120 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     super.dispose();
   }
 
-  /// Build image preview that works on both web and native platforms
-  Widget _buildImagePreview(XFile image) {
-    return CrossPlatformImage(
-      xFile: image,
-      width: 100,
-      height: 100,
-      fit: BoxFit.cover,
-    );
-  }
-
-  Future<void> _pickImages() async {
+  Future<void> _pickImage() async {
+    HapticFeedback.lightImpact();
     final picker = ImagePicker();
-    final images = await picker.pickMultiImage(
-      maxWidth: 1920,
-      maxHeight: 1920,
-      imageQuality: 85,
-    );
-
-    if (images.isNotEmpty) {
+    final image = await picker.pickImage(source: ImageSource.gallery, maxWidth: 1920, maxHeight: 1920, imageQuality: 85);
+    if (image != null && mounted) {
       setState(() {
-        // Limit to 4 images
-        final remaining = 4 - _selectedImages.length;
-        _selectedImages.addAll(images.take(remaining));
+        _selectedMedia = image;
+        _isVideo = false;
       });
     }
   }
 
   Future<void> _takePhoto() async {
+    HapticFeedback.lightImpact();
     final picker = ImagePicker();
-    final photo = await picker.pickImage(
-      source: ImageSource.camera,
-      maxWidth: 1920,
-      maxHeight: 1920,
-      imageQuality: 85,
-    );
-
-    if (photo != null && _selectedImages.length < 4) {
+    final photo = await picker.pickImage(source: ImageSource.camera, maxWidth: 1920, maxHeight: 1920, imageQuality: 85);
+    if (photo != null && mounted) {
       setState(() {
-        _selectedImages.add(photo);
+        _selectedMedia = photo;
+        _isVideo = false;
       });
     }
   }
 
-  void _removeImage(int index) {
-    setState(() {
-      _selectedImages.removeAt(index);
-    });
-  }
-
-  void _toggleTag(String tag) {
-    setState(() {
-      if (_selectedTags.contains(tag)) {
-        _selectedTags.remove(tag);
-      } else if (_selectedTags.length < 5) {
-        _selectedTags.add(tag);
-      }
-    });
+  Future<void> _pickVideo() async {
+    HapticFeedback.lightImpact();
+    final picker = ImagePicker();
+    final video = await picker.pickVideo(source: ImageSource.gallery, maxDuration: const Duration(seconds: 30));
+    if (video != null && mounted) {
+      setState(() {
+        _selectedMedia = video;
+        _isVideo = true;
+      });
+    }
   }
 
   Future<void> _submitPost() async {
-    if (!_formKey.currentState!.validate()) return;
-
+    if (_contentController.text.trim().isEmpty && _selectedMedia == null) return;
+    
+    HapticFeedback.mediumImpact();
     setState(() => _isSubmitting = true);
 
     try {
-      // Upload images to storage and get URLs
-      List<String>? mediaUrls;
-      if (_selectedImages.isNotEmpty) {
-        mediaUrls = [];
-        for (int i = 0; i < _selectedImages.length; i++) {
-          final image = _selectedImages[i];
-          final bytes = await image.readAsBytes();
-          final ext = image.name.split('.').last;
-          final path = 'posts/${DateTime.now().millisecondsSinceEpoch}_$i.$ext';
-          final url = await SupabaseService.uploadImage(
-            bucket: 'post-media',
-            path: path,
-            bytes: bytes,
-            contentType: 'image/$ext',
-          );
-          mediaUrls.add(url);
+      String? imageUrl;
+      String? videoUrl;
+
+      if (_selectedMedia != null) {
+        final bytes = await _selectedMedia!.readAsBytes();
+        final ext = _selectedMedia!.name.split('.').last;
+        final path = 'posts/${DateTime.now().millisecondsSinceEpoch}.$ext';
+        final url = await SupabaseService.uploadImage(
+          bucket: 'post-media',
+          path: path,
+          bytes: bytes,
+          contentType: _isVideo ? 'video/$ext' : 'image/$ext',
+        );
+        if (_isVideo) {
+          videoUrl = url;
+        } else {
+          imageUrl = url;
         }
       }
 
-      await ref.read(createPostProvider.notifier).createPost(
-        content: _contentController.text.trim(),
-        category: _selectedCategory,
-        tags: _selectedTags.isNotEmpty ? _selectedTags : null,
-        mediaUrls: mediaUrls,
-      );
+      String content = _contentController.text.trim();
+      if (_selectedMood != null) {
+        content = "$_selectedMood $content";
+      }
+      if (_hasContentWarning) {
+        content = "⚠️ Content Warning\n\n$content";
+      }
+
+      final mediaUrls = imageUrl != null
+          ? [imageUrl]
+          : (videoUrl != null ? [videoUrl] : null);
+      final createdPost = SupabaseService.isInitialized &&
+              SupabaseService.isAuthenticated &&
+              SupabaseService.currentUser != null
+          ? await SupabaseService.createPost(
+              content: content,
+              category: '/gen',
+              mediaUrls: mediaUrls,
+              locationTag: _locationTag,
+            )
+          : Post(
+              id: 'local_${DateTime.now().millisecondsSinceEpoch}',
+              authorId: 'local_user',
+              authorName: 'You',
+              content: content,
+              mediaUrls: mediaUrls,
+              category: '/gen',
+              createdAt: DateTime.now(),
+              backgroundColor: _selectedBackgroundColor?.value,
+              locationTag: _locationTag,
+            );
+
+      ref.read(feedProvider.notifier).injectDevPost(
+            createdPost.copyWith(
+              backgroundColor: createdPost.backgroundColor ?? _selectedBackgroundColor?.value,
+              locationTag: createdPost.locationTag ?? _locationTag,
+            ),
+          );
 
       if (mounted) {
+        HapticFeedback.heavyImpact();
+        await _clearDraft();
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Post created successfully!'),
-            behavior: SnackBarBehavior.floating,
-          ),
+          const SnackBar(content: Text('Post shared successfully!'), behavior: SnackBarBehavior.floating),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to create post: $e'),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+          SnackBar(content: Text('Failed to create post: $e'), behavior: SnackBarBehavior.floating, backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     } finally {
@@ -178,265 +235,352 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     }
   }
 
+  Future<void> _toggleLocationTag() async {
+    if (_isResolvingLocation) return;
+    HapticFeedback.lightImpact();
+
+    if (_locationTag != null) {
+      setState(() { _locationTag = null; _saveDraft(); });
+      return;
+    }
+
+    setState(() => _isResolvingLocation = true);
+    final locationService = LocationService();
+
+    try {
+      final locationTag = await locationService.getCurrentLocationTag();
+      if (!mounted) return;
+
+      if (locationTag == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unable to get your current location right now.'), behavior: SnackBarBehavior.floating),
+        );
+        return;
+      }
+      setState(() { _locationTag = locationTag; _saveDraft(); });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to resolve your location: $e'), behavior: SnackBarBehavior.floating),
+      );
+    } finally {
+      if (mounted) setState(() => _isResolvingLocation = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final remainingCharacters = maxCharacters - _contentController.text.length;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        title: Text(l10n.createPost),
+        title: Row(
+          children: [
+            Icon(Icons.create_rounded, color: theme.colorScheme.primary),
+            const SizedBox(width: 8),
+            Text('Create Post', style: TextStyle(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
+          ],
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: const Icon(Icons.close_rounded),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: FilledButton(
-              onPressed: _isSubmitting || _contentController.text.isEmpty
-                  ? null
-                  : _submitPost,
-              child: _isSubmitting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(l10n.post),
+            padding: const EdgeInsets.only(right: 12, top: 8, bottom: 8),
+            child: FilledButton.icon(
+              onPressed: _isSubmitting || (_contentController.text.isEmpty && _selectedMedia == null) ? null : _submitPost,
+              icon: _isSubmitting 
+                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation(Colors.white))) 
+                : const Icon(Icons.send_rounded, size: 16),
+              label: Text(_isSubmitting ? 'Posting...' : 'Post', style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
-          ),
+          )
         ],
       ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Content input
-              TextFormField(
+      body: SingleChildScrollView(
+        padding: EdgeInsets.only(bottom: bottomPadding + 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Text Input
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: TextFormField(
                 controller: _contentController,
                 maxLines: 8,
                 minLines: 4,
-                maxLength: 2000,
+                maxLength: maxCharacters,
+                style: theme.textTheme.bodyLarge,
                 decoration: InputDecoration(
-                  hintText: 'What\'s on your mind? Share with your community...',
+                  hintText: _selectedMood != null ? "What's on your mind? $_selectedMood" : "What's on your mind? Share with your community...",
+                  hintStyle: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6)),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,
                   ),
                   filled: true,
-                  fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.5)),
+                  ),
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter some content';
-                  }
-                  return null;
-                },
                 onChanged: (_) => setState(() {}),
               ),
+            ),
 
-              const SizedBox(height: 20),
-
-              // Media attachments
-              if (_selectedImages.isNotEmpty) ...[
-                Text(
-                  'Attached Media',
-                  style: theme.textTheme.titleSmall,
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  height: 100,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _selectedImages.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: Stack(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: _buildImagePreview(_selectedImages[index]),
-                            ),
-                            Positioned(
-                              top: 4,
-                              right: 4,
-                              child: GestureDetector(
-                                onTap: () => _removeImage(index),
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.black54,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.close,
-                                    size: 16,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
-
-              // Media buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _selectedImages.length >= 4 ? null : _pickImages,
-                      icon: const Icon(Icons.photo_library),
-                      label: const Text('Gallery'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _selectedImages.length >= 4 ? null : _takePhoto,
-                      icon: const Icon(Icons.camera_alt),
-                      label: const Text('Camera'),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // Category selection
-              Text(
-                'Category (optional)',
-                style: theme.textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _categories.map((category) {
-                  final isSelected = _selectedCategory == category['id'];
-                  return FilterChip(
-                    selected: isSelected,
-                    label: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          category['icon'] as IconData,
-                          size: 16,
-                          color: isSelected ? Colors.white : category['color'] as Color,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(category['name'] as String),
-                      ],
-                    ),
-                    selectedColor: category['color'] as Color,
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedCategory = selected ? category['id'] as String : null;
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Tags selection
-              Text(
-                'Tags (optional, max 5)',
-                style: theme.textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _availableTags.map((tag) {
-                  final isSelected = _selectedTags.contains(tag);
-                  return FilterChip(
-                    selected: isSelected,
-                    label: Text('#$tag'),
-                    onSelected: (selected) => _toggleTag(tag),
-                  );
-                }).toList(),
-              ),
-
-              const SizedBox(height: 32),
-
-              // Community guidelines reminder
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
+            // Media Preview
+            if (_selectedMedia != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Stack(
                   children: [
-                    Icon(
-                      Icons.favorite,
-                      color: theme.colorScheme.primary,
+                    Container(
+                      width: double.infinity,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: theme.colorScheme.surfaceContainerHighest,
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: _isVideo
+                          ? const Center(child: Icon(Icons.videocam_rounded, size: 48, color: Colors.white54))
+                          : CrossPlatformImage(xFile: _selectedMedia!, fit: BoxFit.cover),
+                      ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Remember: This is a safe space. Be kind, supportive, and respectful of everyone\'s journey.',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface,
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: GestureDetector(
+                        onTap: () => setState(() => _selectedMedia = null),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.6), shape: BoxShape.circle),
+                          child: const Icon(Icons.close_rounded, size: 18, color: Colors.white),
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
+
+            // Location Tag
+            if (_locationTag != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.place_outlined, color: theme.colorScheme.onSecondaryContainer, size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _locationTag!,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSecondaryContainer,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: 16),
+
+            // Toolbar actions (Camera, Image, Location, CW)
+            SizedBox(
+              height: 60,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  _ToolbarButton(icon: Icons.camera_alt_rounded, onTap: _takePhoto, tooltip: 'Camera'),
+                  const SizedBox(width: 12),
+                  _ToolbarButton(icon: Icons.image_rounded, onTap: _pickImage, tooltip: 'Gallery'),
+                  const SizedBox(width: 12),
+                  _ToolbarButton(icon: Icons.videocam_rounded, onTap: _pickVideo, tooltip: 'Video'),
+                  const SizedBox(width: 12),
+                  _ToolbarButton(
+                    icon: _locationTag == null ? Icons.location_on_outlined : Icons.location_off_rounded, 
+                    onTap: _toggleLocationTag, 
+                    tooltip: 'Location',
+                    isLoading: _isResolvingLocation,
+                  ),
+                  const SizedBox(width: 12),
+                  GestureDetector(
+                    onTap: () {
+                      HapticFeedback.selectionClick();
+                      setState(() { _hasContentWarning = !_hasContentWarning; _saveDraft(); });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: _hasContentWarning ? theme.colorScheme.errorContainer : theme.colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.warning_rounded, size: 20, color: _hasContentWarning ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant),
+                          const SizedBox(width: 8),
+                          Text('CW', style: TextStyle(fontWeight: FontWeight.w600, color: _hasContentWarning ? theme.colorScheme.onErrorContainer : theme.colorScheme.onSurfaceVariant)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text('How are you feeling?', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+            ),
+            const SizedBox(height: 12),
+            
+            // Mood Selector
+            SizedBox(
+              height: 50,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: _moods.length,
+                itemBuilder: (context, index) {
+                  final mood = _moods[index];
+                  final isSelected = _selectedMood == mood['emoji'];
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilterChip(
+                      selected: isSelected,
+                      showCheckmark: false,
+                      onSelected: (selected) {
+                        HapticFeedback.selectionClick();
+                        setState(() { _selectedMood = selected ? mood['emoji'] : null; _saveDraft(); });
+                      },
+                      label: Text(mood['emoji']!, style: const TextStyle(fontSize: 20)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(height: 24),
+            
+            // Background Colors (Only shown if no media)
+            if (_selectedMedia == null) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text('Post Background', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 48,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: _backgroundColors.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return GestureDetector(
+                        onTap: () => setState(() { _selectedBackgroundColor = null; _saveDraft(); }),
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          margin: const EdgeInsets.only(right: 12),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: theme.colorScheme.surfaceContainerHighest,
+                            border: _selectedBackgroundColor == null ? Border.all(color: theme.colorScheme.primary, width: 2) : null,
+                          ),
+                          child: Icon(Icons.block_rounded, size: 20, color: theme.colorScheme.onSurfaceVariant),
+                        ),
+                      );
+                    }
+                    
+                    final color = _backgroundColors[index - 1];
+                    final isSelected = _selectedBackgroundColor == color;
+                    return GestureDetector(
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() { _selectedBackgroundColor = color; _saveDraft(); });
+                      },
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        margin: const EdgeInsets.only(right: 12),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: color,
+                          border: isSelected ? Border.all(color: theme.colorScheme.primary, width: 3) : null,
+                          boxShadow: isSelected ? [BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 2))] : null,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
             ],
-          ),
+          ],
         ),
       ),
     );
   }
 }
 
-/// Provider for creating a post
-final createPostProvider = NotifierProvider<CreatePostNotifier, AsyncValue<void>>(
-  CreatePostNotifier.new,
-);
+class _ToolbarButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final String tooltip;
+  final bool isLoading;
 
-class CreatePostNotifier extends Notifier<AsyncValue<void>> {
+  const _ToolbarButton({
+    required this.icon,
+    required this.onTap,
+    required this.tooltip,
+    this.isLoading = false,
+  });
+
   @override
-  AsyncValue<void> build() => const AsyncValue.data(null);
-
-  Future<void> createPost({
-    required String content,
-    String? category,
-    List<String>? tags,
-    List<String>? mediaUrls,
-  }) async {
-    state = const AsyncValue.loading();
-    try {
-      await SupabaseService.createPost(
-        content: content,
-        category: category,
-        tags: tags,
-        mediaUrls: mediaUrls,
-      );
-
-      // Refresh the feed after creating a post
-      ref.read(feedProvider.notifier).refresh();
-
-      state = const AsyncValue.data(null);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
-      rethrow;
-    }
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: isLoading ? null : () {
+          HapticFeedback.lightImpact();
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Center(
+            child: isLoading 
+              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+              : Icon(icon, color: Theme.of(context).colorScheme.primary),
+          ),
+        ),
+      ),
+    );
   }
 }
-
-

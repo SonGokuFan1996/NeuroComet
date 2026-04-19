@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NeuroComet — A Safe Space for Neurodivergent Minds</title>
+  <meta name="description" content="NeuroComet is an inclusive social platform designed for neurodivergent individuals. Connect with a supportive community, enjoy sensory-friendly features, and access calming tools." />
+  <meta name="theme-color" content="#6B4EFF" />
+  <meta name="color-scheme" content="dark light" />
+
+  <!-- Open Graph / social previews -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="NeuroComet" />
+  <meta property="og:url" content="https://getneurocomet.com/" />
+  <meta property="og:title" content="NeuroComet — A Safe Space for Neurodivergent Minds" />
+  <meta property="og:description" content="A calm, inclusive social platform built for neurodivergent minds." />
+  <meta property="og:image" content="https://getneurocomet.com/og-card.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://getneurocomet.com/" />
+  <meta name="twitter:title" content="NeuroComet" />
+  <meta name="twitter:description" content="A calm, inclusive social platform built for neurodivergent minds." />
+  <meta name="twitter:image" content="https://getneurocomet.com/og-card.png" />
+
+  <link rel="canonical" href="https://getneurocomet.com/" />
+
+  <style>
+    :root {
+      --bg: #0f0b1f;
+      --fg: #f1ebff;
+      --accent: #a896ff;
+      --muted: #b8b0d6;
+      --card: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.08);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #faf8ff;
+        --fg: #1a1333;
+        --accent: #6B4EFF;
+        --muted: #5a527a;
+        --card: rgba(107, 78, 255, 0.04);
+        --border: rgba(107, 78, 255, 0.15);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container { max-width: 720px; margin: 0 auto; padding: 4rem 1.5rem; flex: 1; }
+    h1 { font-size: clamp(2.2rem, 5vw, 3rem); margin: 0 0 1rem; line-height: 1.15; }
+    h1 .dot { color: var(--accent); }
+    p.lead { font-size: 1.15rem; color: var(--muted); margin: 0 0 2rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .cta {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: 0.8rem 1.5rem;
+      border-radius: 999px;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    footer a { margin: 0 0.5rem; }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>Neuro<span class="dot">Comet</span></h1>
+    <p class="lead">A calm, inclusive social platform designed for neurodivergent minds.</p>
+
+    <div class="card">
+      <strong>Coming soon to Google Play.</strong>
+      <p style="margin:0.5rem 0 0;color:var(--muted)">
+        Sensory-friendly. Private. Built with neurodivergent users at the center.
+      </p>
+    </div>
+
+    <div class="card">
+      <strong>For developers</strong>
+      <p style="margin:0.5rem 0 0">
+        This site also hosts the Android App Links proof at
+        <a href="/.well-known/assetlinks.json"><code>/.well-known/assetlinks.json</code></a>.
+      </p>
+    </div>
+  </main>
+
+  <footer>
+    <a href="/privacy">Privacy</a> ·
+    <a href="/terms">Terms</a> ·
+    <a href="mailto:support@getneurocomet.com">Contact</a>
+  </footer>
+</body>
+</html>
+

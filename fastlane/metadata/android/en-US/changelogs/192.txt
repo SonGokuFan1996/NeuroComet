@@ -1,0 +1,10 @@
+NeuroComet 2.0.0-rc36
+
+• Cloud Sync is more reliable: fixes sign-in not being detected on the Cloud Sync and Supabase screens.
+• Resolved the crash when opening some advanced settings.
+• Fixed errors when saving preferences, achievements and feedback to the cloud.
+• Smoother sign-in experience with clearer status messages.
+• Stability and performance improvements.
+
+Thanks for using NeuroComet! Feedback welcome in Settings › Send feedback.
+

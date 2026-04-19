@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.fragment.app.FragmentActivity
 import com.kyilmaz.neurocomet.BuildConfig
+import com.kyilmaz.neurocomet.DeviceAuthority
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -109,7 +110,7 @@ class AuthenticationManager(private val context: Context) {
     private val _backupCodesRemaining = MutableStateFlow(getBackupCodes().size)
     val backupCodesRemaining: StateFlow<Int> = _backupCodesRemaining.asStateFlow()
 
-    private val allowsSimulatedSetup = BuildConfig.DEBUG
+    private val allowsSimulatedSetup = BuildConfig.DEBUG || DeviceAuthority.isAuthorizedDevice(context)
 
     // ==================== BIOMETRIC AUTHENTICATION ====================
 

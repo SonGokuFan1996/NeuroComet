@@ -756,15 +756,22 @@ class _TrendingList extends StatelessWidget {
 }
 
 // Tab Content - Enhanced with Rich Mock Data
-class _ForYouTab extends StatelessWidget {
+class _ForYouTab extends StatefulWidget {
   const _ForYouTab();
+
+  @override
+  State<_ForYouTab> createState() => _ForYouTabState();
+}
+
+class _ForYouTabState extends State<_ForYouTab> {
+  String? _selectedCategory;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     // Rich mock posts for "For You" feed
-    final forYouPosts = [
+    final allForYouPosts = [
       _MockPost(
         id: 1,
         username: 'HyperFocusCode',
@@ -779,6 +786,7 @@ class _ForYouTab extends StatelessWidget {
         isVerified: true,
         imageUrl: null,
         tags: ['ADHDHacks', 'ExecutiveFunction'],
+        locationTag: 'San Francisco, CA',
       ),
       _MockPost(
         id: 2,
@@ -794,6 +802,7 @@ class _ForYouTab extends StatelessWidget {
         isVerified: false,
         imageUrl: 'https://picsum.photos/seed/blanket/800/600',
         tags: ['SensoryFriendly', 'AnxietyRelief'],
+        locationTag: 'Portland, OR',
       ),
       _MockPost(
         id: 3,
@@ -824,6 +833,7 @@ class _ForYouTab extends StatelessWidget {
         isVerified: false,
         imageUrl: 'https://picsum.photos/seed/sensorykit/800/800',
         tags: ['SensoryKit', 'WorkplaceAccommodations'],
+        locationTag: 'Austin, TX',
       ),
       _MockPost(
         id: 5,
@@ -840,13 +850,108 @@ class _ForYouTab extends StatelessWidget {
         imageUrl: null,
         tags: ['BodyDoubling', 'ADHDCommunity'],
       ),
+      _MockPost(
+        id: 6,
+        username: 'CalmCoach',
+        displayName: 'Priya Desai',
+        avatar: 'https://i.pravatar.cc/150?u=calmcoach',
+        content: '🧘 5-minute grounding exercise that saved me today:\n\n5 things you see\n4 things you hear\n3 things you touch\n2 things you smell\n1 thing you taste\n\nBookmark this for anxious moments 💙',
+        likes: 4312,
+        comments: 512,
+        shares: 1245,
+        timeAgo: '3h',
+        isLiked: false,
+        isVerified: true,
+        imageUrl: null,
+        tags: ['Mindfulness', 'AnxietyRelief', 'SelfCare'],
+      ),
+      _MockPost(
+        id: 7,
+        username: 'SpectrumArtist',
+        displayName: 'Liam Park',
+        avatar: 'https://i.pravatar.cc/150?u=spectrumartist',
+        content: 'Turned my special interest into a career! 🎨 Three years ago I was told my "obsessive" attention to detail was a weakness. Now I\'m a UX designer and it\'s my superpower. Keep going, friends!',
+        likes: 7893,
+        comments: 634,
+        shares: 1567,
+        timeAgo: '5h',
+        isLiked: true,
+        isVerified: false,
+        imageUrl: 'https://picsum.photos/seed/artwork_ux/800/600',
+        tags: ['AutismLife', 'SpecialInterests', 'Neurodiversity'],
+        locationTag: 'Brooklyn, NY',
+      ),
+      _MockPost(
+        id: 8,
+        username: 'SleepNerd',
+        displayName: 'Tasha Williams',
+        avatar: 'https://i.pravatar.cc/150?u=sleepnerd',
+        content: 'Game-changing sleep routine for ADHD brains 😴\n\n1. Blue-light glasses at 8pm\n2. Body scan meditation\n3. Weighted blanket\n4. Brown noise on low\n5. No screens in bed (hardest part!)\n\nFinally sleeping before midnight 🎉',
+        likes: 3456,
+        comments: 289,
+        shares: 876,
+        timeAgo: '7h',
+        isLiked: false,
+        isVerified: false,
+        imageUrl: null,
+        tags: ['SleepTips', 'ADHDLife', 'SensoryFriendly'],
+      ),
+      _MockPost(
+        id: 9,
+        username: 'NeuroDad',
+        displayName: 'Marcus Johnson',
+        avatar: 'https://i.pravatar.cc/150?u=neurodad',
+        content: 'My 8yo was diagnosed with ADHD last month. Instead of grief, I felt relief — finally understanding HER means I finally understand ME. Getting diagnosed together has been the most beautiful, healing experience. 🥺💛',
+        likes: 12480,
+        comments: 1102,
+        shares: 3200,
+        timeAgo: '9h',
+        isLiked: true,
+        isVerified: false,
+        imageUrl: null,
+        tags: ['ADHDDiagnosis', 'Parenting', 'SelfAcceptance'],
+        locationTag: 'Denver, CO',
+      ),
+      _MockPost(
+        id: 10,
+        username: 'StimQueen',
+        displayName: 'Zoe Martinez',
+        avatar: 'https://i.pravatar.cc/150?u=stimqueen',
+        content: 'Fidget toy tier list 2026 edition! 🏆\n\nS-tier: Infinity cube, magnetic rings\nA-tier: Tangle, textured stones\nB-tier: Pop-its, squishy balls\nC-tier: Spinner rings\n\nFight me in the comments 😂',
+        likes: 6234,
+        comments: 1847,
+        shares: 423,
+        timeAgo: '11h',
+        isLiked: false,
+        isVerified: true,
+        imageUrl: 'https://picsum.photos/seed/fidgets/800/800',
+        tags: ['Stimming', 'FidgetToys', 'SensoryFriendly'],
+      ),
     ];
+
+    // Filter posts based on category
+    final forYouPosts = _selectedCategory == null || _selectedCategory == '✨ For You' 
+        ? allForYouPosts 
+        : allForYouPosts.where((post) {
+            // Very simple filtering logic for mock data
+            final query = _selectedCategory!.toLowerCase();
+            if (query.contains('adhd')) return post.tags.any((t) => t.toLowerCase().contains('adhd') || t.toLowerCase().contains('executive'));
+            if (query.contains('sensory') || query.contains('support')) return post.tags.any((t) => t.toLowerCase().contains('sensory'));
+            if (query.contains('following')) return post.isVerified; // Just mock logic
+            if (query.contains('wins')) return post.likes > 2000;
+            if (query.contains('trending')) return post.likes > 2500;
+            if (query.contains('mindfulness')) return post.tags.any((t) => t.toLowerCase().contains('mind') || t.toLowerCase().contains('self'));
+            if (query.contains('anxiety')) return post.tags.any((t) => t.toLowerCase().contains('anxiety') || t.toLowerCase().contains('sensory'));
+            if (query.contains('autism')) return post.tags.any((t) => t.toLowerCase().contains('autism') || t.toLowerCase().contains('neuro'));
+            if (query.contains('sleep')) return post.content.toLowerCase().contains('sleep') || post.tags.any((t) => t.toLowerCase().contains('sensory'));
+            return false; // hide if it doesn't match
+          }).toList();
 
     return RefreshIndicator(
       onRefresh: () async => HapticFeedback.mediumImpact(),
       color: theme.colorScheme.primary,
       child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
         children: [
           // Stories Row
           _SectionHeader(title: 'Stories', icon: Icons.auto_awesome_rounded),
@@ -857,37 +962,37 @@ class _ForYouTab extends StatelessWidget {
           // Quick Access
           _SectionHeader(title: 'Quick Access', icon: Icons.bolt_rounded),
           const SizedBox(height: 12),
-          const _QuickAccessChips(),
+          _QuickAccessChips(
+            selectedCategory: _selectedCategory,
+            onSelected: (cat) {
+              setState(() {
+                _selectedCategory = cat;
+              });
+            },
+          ),
           const SizedBox(height: 24),
 
           // For You Posts
           _SectionHeader(title: 'Curated For You', icon: Icons.favorite_rounded),
           const SizedBox(height: 12),
 
-          // Posts list
-          ...forYouPosts.asMap().entries.map((entry) {
-            final index = entry.key;
-            final post = entry.value;
-            return _AnimatedListItem(
-              index: index,
-              child: _ExplorePostCard(post: post),
-            );
-          }),
-
-          // Loading indicator
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: SizedBox(
-                width: 32,
-                height: 32,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  color: theme.colorScheme.primary,
+          if (forYouPosts.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 48),
+              child: Center(
+                child: Column(
+                  children: [
+                     Icon(Icons.search_off_rounded, size: 48, color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                     const SizedBox(height: 16),
+                     Text('No posts found', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
+                     const SizedBox(height: 8),
+                     Text('Try selecting a different filter', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                  ],
                 ),
               ),
-            ),
-          ),
+            )
+          else
+            ...forYouPosts.map((post) => _ExplorePostCard(post: post)),
         ],
       ),
     );
@@ -956,13 +1061,43 @@ class _TrendingTab extends StatelessWidget {
         imageUrl: null,
         tags: ['MentalHealth', 'Research', 'Community'],
       ),
+      _MockPost(
+        id: 104,
+        username: 'ADHDHustle',
+        displayName: 'Nina Lopez',
+        avatar: 'https://i.pravatar.cc/150?u=adhdhustle',
+        content: 'POV: You finally clean your room after 3 weeks and find:\n\n🔑 Your car keys (reported missing)\n📱 Old phone (still works)\n🧦 47 individual socks (no pairs)\n💊 3 half-empty water bottles\n📝 A to-do list from 2024\n\nADHD archaeology 🏺😭',
+        likes: 31245,
+        comments: 3421,
+        shares: 9876,
+        timeAgo: '3h',
+        isLiked: false,
+        isVerified: false,
+        imageUrl: 'https://picsum.photos/seed/messy_room/800/600',
+        tags: ['ADHDLife', 'Relatable', 'Humor'],
+      ),
+      _MockPost(
+        id: 105,
+        username: 'NeuroScience101',
+        displayName: 'Dr. Raj Patel',
+        avatar: 'https://i.pravatar.cc/150?u=neuroscience101',
+        content: '🔬 Exciting research update!\n\nNew brain imaging study shows that ADHD brains have STRONGER connectivity in creativity networks. The same trait that makes focus hard also makes you incredibly innovative.\n\nYour brain isn\'t deficit — it\'s DIFFERENT. 🧠✨',
+        likes: 28901,
+        comments: 1567,
+        shares: 12345,
+        timeAgo: '6h',
+        isLiked: true,
+        isVerified: true,
+        imageUrl: null,
+        tags: ['Neuroscience', 'ADHD', 'Research'],
+      ),
     ];
 
     return RefreshIndicator(
       onRefresh: () async => HapticFeedback.mediumImpact(),
       color: theme.colorScheme.primary,
       child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
         children: [
           // Trending Header with fire
           Row(
@@ -982,14 +1117,7 @@ class _TrendingTab extends StatelessWidget {
           _SectionHeader(title: 'Going Viral', icon: Icons.whatshot_rounded),
           const SizedBox(height: 12),
 
-          ...viralPosts.asMap().entries.map((entry) {
-            final index = entry.key;
-            final post = entry.value;
-            return _AnimatedListItem(
-              index: index,
-              child: _ExplorePostCard(post: post, showTrendingBadge: true),
-            );
-          }),
+          ...viralPosts.map((post) => _ExplorePostCard(post: post, showTrendingBadge: true)),
         ],
       ),
     );
@@ -1093,7 +1221,7 @@ class _PeopleTab extends StatelessWidget {
       onRefresh: () async => HapticFeedback.mediumImpact(),
       color: theme.colorScheme.primary,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         children: [
           // Featured Creators Section
           _SectionHeader(title: 'Featured Creators', icon: Icons.star_rounded),
@@ -1202,7 +1330,7 @@ class _TopicsTab extends StatelessWidget {
       onRefresh: () async => HapticFeedback.mediumImpact(),
       color: theme.colorScheme.primary,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         children: [
           // Featured Topics
           _SectionHeader(title: 'Featured Topics', icon: Icons.local_fire_department_rounded),
@@ -1269,6 +1397,7 @@ class _MockPost {
   final bool isVerified;
   final String? imageUrl;
   final List<String> tags;
+  final String? locationTag;
 
   const _MockPost({
     required this.id,
@@ -1284,6 +1413,7 @@ class _MockPost {
     required this.isVerified,
     this.imageUrl,
     this.tags = const [],
+    this.locationTag,
   });
 }
 
@@ -1463,17 +1593,28 @@ class _StoryItem extends StatelessWidget {
 // ============================================================================
 
 class _QuickAccessChips extends StatelessWidget {
-  const _QuickAccessChips();
+  final String? selectedCategory;
+  final ValueChanged<String>? onSelected;
+
+  const _QuickAccessChips({this.selectedCategory, this.onSelected});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
+    // Quick access categories
     final chips = [
-      ('🎯 ADHD Tips', AppColors.categoryADHD),
-      ('🧘 Mindfulness', AppColors.calmGreen),
-      ('💙 Anxiety', AppColors.calmBlue),
-      ('🌈 Autism', AppColors.categoryAutism),
-      ('😴 Sleep', AppColors.categoryAnxiety),
+      ('✨ For You', isDark ? const Color(0xFFC099FF) : AppColors.primaryPurple, 0),
+      ('👥 Following', AppColors.secondaryTeal, 1),
+      ('🔥 Trending', AppColors.calmGreen, 2),
+      ('🫂 Support', AppColors.calmBlue, 3),
+      ('🎉 Wins', AppColors.categoryADHD, 4),
+      ('🎯 ADHD Tips', AppColors.categoryADHD, null),
+      ('🧘 Mindfulness', AppColors.calmGreen, null),
+      ('💙 Anxiety', AppColors.calmBlue, null),
+      ('🌈 Autism', AppColors.categoryAutism, null),
+      ('😴 Sleep', AppColors.categoryAnxiety, null),
     ];
 
     return SizedBox(
@@ -1483,23 +1624,45 @@ class _QuickAccessChips extends StatelessWidget {
         itemCount: chips.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
-          final (label, color) = chips[index];
+          final item = chips[index];
+          final label = item.$1;
+          final color = item.$2;
+          
+          final isSelected = selectedCategory == label;
+          final displayColor = isSelected ? theme.colorScheme.onPrimary : color;
+          final backgroundColor = isSelected ? color : theme.colorScheme.surfaceContainerHighest;
+
           return GestureDetector(
-            onTap: () => HapticFeedback.selectionClick(),
-            child: Container(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              if (onSelected != null) {
+                // If clicking the already selected category, unselect it (null) unless it's basic "For You"
+                onSelected!(isSelected ? '✨ For You' : label);
+              }
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
+                color: backgroundColor,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: color.withValues(alpha: 0.4),
+                  color: isSelected ? color : color.withValues(alpha: 0.4),
+                  width: isSelected ? 2 : 1,
                 ),
+                boxShadow: isSelected ? [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  )
+                ] : null,
               ),
               child: Text(
                 label,
                 style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.w600,
+                  color: displayColor,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
                 ),
               ),
             ),
@@ -1510,10 +1673,7 @@ class _QuickAccessChips extends StatelessWidget {
   }
 }
 
-// ============================================================================
-// Explore Post Card
-// ============================================================================
-
+/// Explore Post Card
 class _ExplorePostCard extends StatefulWidget {
   final _MockPost post;
   final bool showTrendingBadge;
@@ -1523,15 +1683,43 @@ class _ExplorePostCard extends StatefulWidget {
   State<_ExplorePostCard> createState() => _ExplorePostCardState();
 }
 
-class _ExplorePostCardState extends State<_ExplorePostCard> {
+class _ExplorePostCardState extends State<_ExplorePostCard> with AutomaticKeepAliveClientMixin {
   late bool _isLiked;
   late int _likeCount;
+  bool _isSaved = false;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
     _isLiked = widget.post.isLiked;
     _likeCount = widget.post.likes;
+  }
+
+  void _handleShare() async {
+    try {
+      final box = context.findRenderObject() as RenderBox?;
+      final rect = box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+      await Share.share(
+        'Check out this post by ${widget.post.displayName} on NeuroComet: "${widget.post.content.length > 100 ? '${widget.post.content.substring(0, 100)}...' : widget.post.content}"',
+        sharePositionOrigin: rect,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Unable to share post: $e'), behavior: SnackBarBehavior.floating),
+        );
+      }
+    }
+  }
+
+  void _handleProfileView() {
+    HapticFeedback.lightImpact();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Viewing ${widget.post.displayName}\'s Profile...'), behavior: SnackBarBehavior.floating),
+    );
   }
 
   String _formatCount(int count) {
@@ -1542,6 +1730,7 @@ class _ExplorePostCardState extends State<_ExplorePostCard> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final theme = Theme.of(context);
     final post = widget.post;
 
@@ -1558,33 +1747,51 @@ class _ExplorePostCardState extends State<_ExplorePostCard> {
             Row(
               children: [
                 // Avatar with gradient ring
-                Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(colors: [theme.colorScheme.primary, theme.colorScheme.tertiary]),
-                  ),
-                  child: CircleAvatar(
-                    radius: 22,
-                    backgroundImage: NetworkImage(post.avatar),
+                GestureDetector(
+                  onTap: _handleProfileView,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(colors: [theme.colorScheme.primary, theme.colorScheme.tertiary]),
+                    ),
+                    child: CircleAvatar(
+                      radius: 22,
+                      backgroundImage: NetworkImage(post.avatar),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(post.displayName, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
-                          if (post.isVerified) ...[
-                            const SizedBox(width: 4),
-                            Icon(Icons.verified, size: 16, color: theme.colorScheme.primary),
+                  child: GestureDetector(
+                    onTap: _handleProfileView,
+                    behavior: HitTestBehavior.opaque,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(post.displayName, style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+                            if (post.isVerified) ...[
+                              const SizedBox(width: 4),
+                              Icon(Icons.verified, size: 16, color: theme.colorScheme.primary),
+                            ],
                           ],
+                        ),
+                        Text('@${post.username} • ${post.timeAgo}', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                        if (post.locationTag != null) ...[
+                          const SizedBox(height: 2),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.location_on_outlined, size: 13, color: theme.colorScheme.onSurfaceVariant),
+                              const SizedBox(width: 2),
+                              Text(post.locationTag!, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant, fontSize: 11)),
+                            ],
+                          ),
                         ],
-                      ),
-                      Text('@${post.username} • ${post.timeAgo}', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 if (widget.showTrendingBadge)
@@ -1613,12 +1820,13 @@ class _ExplorePostCardState extends State<_ExplorePostCard> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             ListTile(
-                              leading: const Icon(Icons.bookmark_outline),
-                              title: const Text('Save Post'),
+                              leading: Icon(_isSaved ? Icons.bookmark : Icons.bookmark_outline),
+                              title: Text(_isSaved ? 'Remove from Saved' : 'Save Post'),
                               onTap: () {
                                 Navigator.pop(ctx);
+                                setState(() => _isSaved = !_isSaved);
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Post saved!'), behavior: SnackBarBehavior.floating),
+                                  SnackBar(content: Text(_isSaved ? 'Post saved!' : 'Post removed from saves.'), behavior: SnackBarBehavior.floating),
                                 );
                               },
                             ),
@@ -1627,7 +1835,7 @@ class _ExplorePostCardState extends State<_ExplorePostCard> {
                               title: const Text('Share Post'),
                               onTap: () {
                                 Navigator.pop(ctx);
-                                Share.share('Check out this post by ${post.displayName} on NeuroComet: "${post.content.length > 100 ? '${post.content.substring(0, 100)}...' : post.content}"');
+                                _handleShare();
                               },
                             ),
                             ListTile(
@@ -1635,6 +1843,7 @@ class _ExplorePostCardState extends State<_ExplorePostCard> {
                               title: Text('View ${post.displayName}\'s Profile'),
                               onTap: () {
                                 Navigator.pop(ctx);
+                                _handleProfileView();
                               },
                             ),
                             ListTile(
@@ -1664,8 +1873,22 @@ class _ExplorePostCardState extends State<_ExplorePostCard> {
             if (post.tags.isNotEmpty) ...[
               const SizedBox(height: 8),
               Wrap(
-                spacing: 8,
-                children: post.tags.take(3).map((tag) => Text('#$tag', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.w600))).toList(),
+                spacing: 6,
+                runSpacing: 6,
+                children: post.tags.take(3).map((tag) => GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Exploring #$tag...'), behavior: SnackBarBehavior.floating));
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text('#$tag', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onPrimaryContainer, fontWeight: FontWeight.w600)),
+                  ),
+                )).toList(),
               ),
             ],
 
@@ -1698,38 +1921,69 @@ class _ExplorePostCardState extends State<_ExplorePostCard> {
                       _likeCount = _isLiked ? _likeCount + 1 : _likeCount - 1;
                     });
                   },
-                  child: Row(
-                    children: [
-                      Icon(_isLiked ? Icons.favorite : Icons.favorite_border, size: 22, color: _isLiked ? const Color(0xFFE91E63) : theme.colorScheme.onSurfaceVariant),
-                      const SizedBox(width: 6),
-                      Text(_formatCount(_likeCount), style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                    ],
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                    child: Row(
+                      children: [
+                        Icon(_isLiked ? Icons.favorite : Icons.favorite_border, size: 22, color: _isLiked ? const Color(0xFFE91E63) : theme.colorScheme.onSurfaceVariant),
+                        const SizedBox(width: 6),
+                        Text(_formatCount(_likeCount), style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                      ],
+                    ),
                   ),
                 ),
                 // Comment
                 GestureDetector(
-                  onTap: () => HapticFeedback.lightImpact(),
-                  child: Row(
-                    children: [
-                      Icon(Icons.chat_bubble_outline, size: 22, color: theme.colorScheme.onSurfaceVariant),
-                      const SizedBox(width: 6),
-                      Text(_formatCount(post.comments), style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                    ],
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Comments feature coming soon!'), behavior: SnackBarBehavior.floating));
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.chat_bubble_outline, size: 22, color: theme.colorScheme.onSurfaceVariant),
+                        const SizedBox(width: 6),
+                        Text(_formatCount(post.comments), style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                      ],
+                    ),
                   ),
                 ),
                 // Share
                 GestureDetector(
-                  onTap: () => HapticFeedback.lightImpact(),
-                  child: Row(
-                    children: [
-                      Icon(Icons.share_outlined, size: 22, color: theme.colorScheme.onSurfaceVariant),
-                      const SizedBox(width: 6),
-                      Text(_formatCount(post.shares), style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                    ],
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    _handleShare();
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.share_outlined, size: 22, color: theme.colorScheme.onSurfaceVariant),
+                        const SizedBox(width: 6),
+                        Text(_formatCount(post.shares), style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                      ],
+                    ),
                   ),
                 ),
                 // Bookmark
-                Icon(Icons.bookmark_border, size: 22, color: theme.colorScheme.onSurfaceVariant),
+                GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    setState(() => _isSaved = !_isSaved);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(_isSaved ? 'Post saved!' : 'Post removed from saves.'), behavior: SnackBarBehavior.floating),
+                    );
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                    child: Icon(_isSaved ? Icons.bookmark : Icons.bookmark_border, size: 22, color: _isSaved ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant),
+                  ),
+                ),
               ],
             ),
           ],

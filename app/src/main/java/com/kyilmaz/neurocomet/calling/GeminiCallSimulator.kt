@@ -3,6 +3,9 @@ package com.kyilmaz.neurocomet.calling
 import android.util.Log
 import com.kyilmaz.neurocomet.BuildConfig
 import com.kyilmaz.neurocomet.SecurityUtils
+import com.kyilmaz.neurocomet.AppSupabaseClient
+import com.kyilmaz.neurocomet.safeInsert
+import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +27,7 @@ import org.json.JSONObject
 import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import kotlinx.serialization.json.put
 
 private const val TAG = "GeminiCallSimulator"
 
@@ -161,7 +165,22 @@ object GeminiCallSimulator {
     private var durationJob: Job? = null
     private var callStartTime: Long = 0L
 
-    private var conversationHistory = mutableListOf<Pair<String, String>>() // role, content
+    /**
+     * Represents a part of a message sent to or received from the Gemini API.
+     */
+    sealed class GeminiPart {
+        data class Text(val text: String) : GeminiPart()
+        data class InlineData(val mimeType: String, val data: String, val displayName: String? = null) : GeminiPart()
+        data class FunctionCall(val name: String, val args: JSONObject) : GeminiPart()
+        data class FunctionResponse(val name: String, val response: JSONObject) : GeminiPart()
+    }
+
+    /**
+     * Represents a complete message in the conversation history.
+     */
+    data class GeminiMessage(val role: String, val parts: List<GeminiPart>)
+
+    private var conversationHistory = mutableListOf<GeminiMessage>()
 
     private const val MAX_MESSAGES = 20
     // Using Gemini 2.5 Flash - good balance of speed and quality for roleplay
@@ -215,8 +234,8 @@ object GeminiCallSimulator {
             _callDuration.value = 0L
 
             // Add system context to history
-            conversationHistory.add("user" to "System: ${persona.systemPrompt}")
-            conversationHistory.add("model" to "I understand. I'll roleplay as ${persona.displayName} for this phone call practice.")
+            conversationHistory.add(GeminiMessage("user", listOf(GeminiPart.Text("System: ${persona.systemPrompt}"))))
+            conversationHistory.add(GeminiMessage("model", listOf(GeminiPart.Text("I understand. I'll roleplay as ${persona.displayName} for this phone call practice."))))
 
             scope?.launch {
                 try {
@@ -261,7 +280,7 @@ object GeminiCallSimulator {
                 _currentResponse.value = ""
 
                 // Add user message to history
-                conversationHistory.add("user" to userMessage)
+                conversationHistory.add(GeminiMessage("user", listOf(GeminiPart.Text(userMessage))))
 
                 // Trim history if too long
                 while (conversationHistory.size > MAX_MESSAGES * 2) {
@@ -275,7 +294,7 @@ object GeminiCallSimulator {
 
                 if (response != null) {
                     // Add to history
-                    conversationHistory.add("model" to response)
+                    conversationHistory.add(GeminiMessage("model", listOf(GeminiPart.Text(response))))
 
                     // Simulate streaming for better UX
                     val words = response.split(" ")
@@ -306,7 +325,7 @@ object GeminiCallSimulator {
     /**
      * Call the Gemini API directly using OkHttp
      */
-    private fun callGeminiApi(history: List<Pair<String, String>>): String? {
+    private fun callGeminiApi(history: List<GeminiMessage>): String? {
         val apiKey = SecurityUtils.decrypt(BuildConfig.GEMINI_API_KEY)
         // API key sent via header, NOT as a query parameter, to prevent
         // leakage through URL logging, crash reporters, or proxy tools.
@@ -314,11 +333,39 @@ object GeminiCallSimulator {
 
         // Build the request body
         val contents = JSONArray()
-        for ((role, content) in history) {
-            val parts = JSONArray().put(JSONObject().put("text", content))
+        for (message in history) {
+            val partsArray = JSONArray()
+            for (part in message.parts) {
+                val partObj = JSONObject()
+                when (part) {
+                    is GeminiPart.Text -> partObj.put("text", part.text)
+                    is GeminiPart.InlineData -> {
+                        val inlineDataObj = JSONObject()
+                            .put("mime_type", part.mimeType)
+                            .put("data", part.data)
+                        partObj.put("inline_data", inlineDataObj)
+                        if (part.displayName != null) {
+                            partObj.put("display_name", part.displayName)
+                        }
+                    }
+                    is GeminiPart.FunctionCall -> {
+                        val functionCallObj = JSONObject()
+                            .put("name", part.name)
+                            .put("args", part.args)
+                        partObj.put("function_call", functionCallObj)
+                    }
+                    is GeminiPart.FunctionResponse -> {
+                        val functionResponseObj = JSONObject()
+                            .put("name", part.name)
+                            .put("response", part.response)
+                        partObj.put("function_response", functionResponseObj)
+                    }
+                }
+                partsArray.put(partObj)
+            }
             contents.put(JSONObject()
-                .put("role", role)
-                .put("parts", parts))
+                .put("role", message.role)
+                .put("parts", partsArray))
         }
 
         val generationConfig = JSONObject()
@@ -384,8 +431,18 @@ object GeminiCallSimulator {
     }
 
     fun endCall() {
+        val finalDuration = _callDuration.value
+        val finalMessageCount = _messagesList.size
+        val persona = _currentPersona.value
+
         currentJob?.cancel()
         durationJob?.cancel()
+        
+        // Log to Supabase before cancelling scope
+        if (persona != null && finalDuration > 0) {
+            logCallToSupabase(persona, finalDuration, finalMessageCount)
+        }
+
         scope?.cancel()
         scope = null
         currentJob = null
@@ -394,7 +451,29 @@ object GeminiCallSimulator {
         _state.value = SimulatorState.Ended
         _currentResponse.value = ""
         conversationHistory.clear()
-        Log.d(TAG, "Call ended. Duration: ${_callDuration.value}s")
+        Log.d(TAG, "Call ended. Duration: ${finalDuration}s")
+    }
+
+    private fun logCallToSupabase(persona: NeurodivergentPersona, duration: Long, messageCount: Int) {
+        val client = AppSupabaseClient.client ?: return
+        val userId = try { client.auth.currentUserOrNull()?.id } catch (_: Exception) { null } ?: return
+
+        // We use a global scope or a separate scope because 'scope' is about to be cancelled
+        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
+            try {
+                val payload = kotlinx.serialization.json.buildJsonObject {
+                    put("user_id", userId)
+                    put("persona_id", persona.name)
+                    put("duration_seconds", duration.toInt())
+                    put("message_count", messageCount)
+                    put("created_at", java.time.Instant.now().toString())
+                }
+                client.safeInsert("practice_call_logs", payload)
+                Log.d(TAG, "Successfully logged practice call to Supabase")
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to log practice call: ${e.message}")
+            }
+        }
     }
 
     fun reset() {

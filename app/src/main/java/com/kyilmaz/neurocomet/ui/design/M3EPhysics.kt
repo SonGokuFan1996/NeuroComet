@@ -99,9 +99,13 @@ data class M3EPhysicsSystem(
                 stiffness = Spring.StiffnessMedium
             )
 
-            M3EPhysicsRole.STANDARD,
-            M3EPhysicsRole.CALM,
             M3EPhysicsRole.SNAP -> spring(
+                dampingRatio = Spring.DampingRatioNoBouncy,
+                stiffness = Spring.StiffnessHigh
+            )
+
+            M3EPhysicsRole.STANDARD,
+            M3EPhysicsRole.CALM -> spring(
                 dampingRatio = Spring.DampingRatioNoBouncy,
                 stiffness = Spring.StiffnessMediumLow
             )

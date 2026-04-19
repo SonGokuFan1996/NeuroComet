@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 
 /// Content filtering and audience-based post visibility.
 /// Mirrors the Kotlin ContentFiltering.kt
@@ -37,7 +36,9 @@ class ContentFilteringService {
   bool shouldHideTextForKids(String content, KidsFilterLevel level) {
     if (content.length < 5) return true;
     if (level == KidsFilterLevel.strict &&
-        content.toLowerCase().contains('violence')) return true;
+        content.toLowerCase().contains('violence')) {
+      return true;
+    }
     return false;
   }
 

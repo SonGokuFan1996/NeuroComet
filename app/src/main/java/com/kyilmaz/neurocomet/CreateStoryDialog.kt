@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -60,18 +61,29 @@ import kotlinx.coroutines.delay
 @Composable
 fun CreateStoryDialog(
     onDismiss: () -> Unit,
-    onPost: (StoryContentType, String, Long, String?, LinkPreviewData?) -> Unit,
+    onPost: (StoryContentType, String, Long, String?, Long, Long?, LinkPreviewData?) -> Unit,
     safetyState: SafetyState = SafetyState()
 ) {
     val context = LocalContext.current
 
+    val prefs = context.getSharedPreferences("story_drafts", android.content.Context.MODE_PRIVATE)
+
     // State for story creation
-    var selectedTab by remember { mutableIntStateOf(0) }
+    var selectedTab by remember { mutableIntStateOf(prefs.getInt("draft_tab", 0)) }
     var selectedUri by remember { mutableStateOf<Uri?>(null) }
-    var linkUrl by remember { mutableStateOf("") }
-    var textContent by remember { mutableStateOf("") }
+    var linkUrl by remember { mutableStateOf(prefs.getString("draft_link", "") ?: "") }
+    var textContent by remember { mutableStateOf(prefs.getString("draft_text", "") ?: "") }
     var duration by remember { mutableStateOf("5") }
-    var textOverlay by remember { mutableStateOf("") }
+    var textOverlay by remember { mutableStateOf(prefs.getString("draft_overlay", "") ?: "") }
+    
+    LaunchedEffect(selectedTab, linkUrl, textContent, textOverlay) {
+        prefs.edit()
+            .putInt("draft_tab", selectedTab)
+            .putString("draft_link", linkUrl)
+            .putString("draft_text", textContent)
+            .putString("draft_overlay", textOverlay)
+            .apply()
+    }
     var selectedBackgroundIndex by remember { mutableIntStateOf(0) }
     var selectedGradientIndex by remember { mutableIntStateOf(-1) }
     var linkPreview by remember { mutableStateOf<LinkPreviewData?>(null) }
@@ -125,6 +137,15 @@ fun CreateStoryDialog(
             contentType = StoryContentType.VIDEO
             fileName = StoryFileUtils.getFileName(context, it)
             fileSize = StoryFileUtils.getFileSize(context, it)
+        }
+    }
+
+    val attachmentState = rememberAttachmentState { attachment ->
+        attachment.uri?.let {
+            selectedUri = it
+            contentType = StoryContentType.IMAGE
+            fileName = attachment.displayName
+            fileSize = null
         }
     }
 
@@ -232,6 +253,7 @@ fun CreateStoryDialog(
                                     onPickImage = { imagePickerLauncher.launch("image/*") },
                                     onPickVideo = { videoPickerLauncher.launch("video/*") },
                                     onPickDocument = { documentPickerLauncher.launch("*/*") },
+                                    onTakePhoto = { attachmentState.onTakePhoto() },
                                     onClear = {
                                         selectedUri = null
                                         fileName = null
@@ -299,15 +321,27 @@ fun CreateStoryDialog(
                         onPost = {
                             isPosting = true
                             val durationMs = (duration.toLongOrNull() ?: 5) * 1000L
+                            
+                            val (bgColor, bgColorEnd) = if (selectedGradientIndex != -1) {
+                                val gradient = StoryBackgroundColors.gradients[selectedGradientIndex].first
+                                (gradient.first().toArgb().toLong() and 0xFFFFFFFFL) to 
+                                (gradient.last().toArgb().toLong() and 0xFFFFFFFFL)
+                            } else {
+                                (StoryBackgroundColors.colors[selectedBackgroundIndex].first.toArgb().toLong() and 0xFFFFFFFFL) to null
+                            }
+
                             when (selectedTab) {
                                 0 -> selectedUri?.let {
-                                    onPost(contentType, it.toString(), durationMs, textOverlay.takeIf { overlay -> overlay.isNotBlank() }, null)
+                                    prefs.edit().clear().apply()
+                                    onPost(contentType, it.toString(), durationMs, textOverlay.takeIf { overlay -> overlay.isNotBlank() }, bgColor, bgColorEnd, null)
                                 }
                                 1 -> if (linkPreview?.isSafe == true) {
-                                    onPost(StoryContentType.LINK, linkUrl, durationMs, null, linkPreview)
+                                    prefs.edit().clear().apply()
+                                    onPost(StoryContentType.LINK, linkUrl, durationMs, null, bgColor, bgColorEnd, linkPreview)
                                 }
                                 2 -> if (textContent.isNotBlank()) {
-                                    onPost(StoryContentType.TEXT_ONLY, textContent, durationMs, null, null)
+                                    prefs.edit().clear().apply()
+                                    onPost(StoryContentType.TEXT_ONLY, textContent, durationMs, null, bgColor, bgColorEnd, null)
                                 }
                             }
                         },
@@ -333,7 +367,7 @@ fun CreateStoryDialog(
                             )
                             Spacer(Modifier.height(12.dp))
                             Text(
-                                "Story Posted!",
+                                stringResource(R.string.create_story_posted),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -358,7 +392,7 @@ fun CreateStoryDialog(
             },
             title = {
                 Text(
-                    "Content Blocked",
+                    stringResource(R.string.create_story_content_blocked),
                     fontWeight = FontWeight.Bold
                 )
             },
@@ -400,13 +434,15 @@ private fun StoryDialogHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                "âœ¨",
-                fontSize = 22.sp
+            Icon(
+                Icons.Filled.AutoAwesome,
+                contentDescription = null,
+                modifier = Modifier.size(22.dp),
+                tint = MaterialTheme.colorScheme.primary
             )
             Spacer(Modifier.width(10.dp))
             Text(
-                text = "Create Moment",
+                text = stringResource(R.string.create_moment),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -439,9 +475,9 @@ private fun AnimatedContentTypeTabs(
     enabled: Boolean
 ) {
     val tabs = listOf(
-        TabInfo("ðŸ“·", "Media"),
-        TabInfo("ðŸ”—", "Link"),
-        TabInfo("âœï¸", "Text")
+        TabInfo(Icons.Filled.Image, R.string.create_story_media_tab),
+        TabInfo(Icons.Filled.Link, R.string.create_story_link_tab),
+        TabInfo(Icons.Filled.Edit, R.string.create_story_text_tab)
     )
 
     Surface(
@@ -480,14 +516,20 @@ private fun AnimatedContentTypeTabs(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            tab.emoji,
-                            fontSize = 16.sp
+                        Icon(
+                            imageVector = tab.icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = if (isSelected) {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            }
                         )
                         if (isSelected) {
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                tab.label,
+                                stringResource(tab.labelId),
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -500,7 +542,7 @@ private fun AnimatedContentTypeTabs(
     }
 }
 
-private data class TabInfo(val emoji: String, val label: String)
+private data class TabInfo(val icon: ImageVector, val labelId: Int)
 
 /**
  * Duration selector with visual feedback
@@ -523,7 +565,7 @@ private fun DurationSelector(
             )
             Spacer(Modifier.width(8.dp))
             Text(
-                "Display Duration",
+                stringResource(R.string.create_story_display_duration),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )
@@ -631,6 +673,7 @@ private fun MediaTabContent(
     onPickImage: () -> Unit,
     onPickVideo: () -> Unit,
     onPickDocument: () -> Unit,
+    onTakePhoto: () -> Unit,
     onClear: () -> Unit
 ) {
     var showImageEditor by remember { mutableStateOf(false) }
@@ -638,7 +681,7 @@ private fun MediaTabContent(
 
     Column {
         Text(
-            "Choose content from your device",
+            stringResource(R.string.create_story_choose_content),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -650,6 +693,12 @@ private fun MediaTabContent(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            MediaPickerButton(
+                icon = Icons.Filled.CameraAlt,
+                label = "Camera",
+                onClick = onTakePhoto,
+                modifier = Modifier.weight(1f)
+            )
             MediaPickerButton(
                 icon = Icons.Filled.Image,
                 label = stringResource(R.string.create_story_photo),
@@ -699,7 +748,7 @@ private fun MediaTabContent(
                                     contentDescription = stringResource(R.string.cd_selected_image),
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(200.dp)
+                                        .heightIn(max = 400.dp)
                                         .clip(RoundedCornerShape(16.dp))
                                         .then(
                                             if (editState?.filter?.colorMatrix != null) {
@@ -708,7 +757,7 @@ private fun MediaTabContent(
                                                 }
                                             } else Modifier
                                         ),
-                                    contentScale = ContentScale.Crop,
+                                    contentScale = ContentScale.Fit,
                                     colorFilter = editState?.filter?.colorMatrix?.let {
                                         ColorFilter.colorMatrix(ColorMatrix(it))
                                     }
@@ -848,7 +897,7 @@ private fun MediaTabContent(
                                 Spacer(Modifier.width(16.dp))
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        fileName ?: "File",
+                                        fileName ?: stringResource(R.string.create_story_file),
                                         style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.SemiBold,
                                         maxLines = 1,
@@ -1001,19 +1050,28 @@ private fun LinkPreviewCard(preview: LinkPreviewData) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val typeIcon = when (preview.contentType) {
-                        LinkContentType.VIDEO -> "ðŸŽ¬"
-                        LinkContentType.MUSIC -> "ðŸŽµ"
-                        LinkContentType.REPOSITORY -> "ðŸ’»"
-                        LinkContentType.SOCIAL_POST -> "ðŸ’¬"
-                        LinkContentType.PRODUCT -> "ðŸ›’"
-                        LinkContentType.ARTICLE -> "ðŸ“°"
-                        LinkContentType.DOCUMENT -> "ðŸ“„"
-                        else -> "ðŸ”—"
+                        LinkContentType.VIDEO -> Icons.Filled.Movie
+                        LinkContentType.MUSIC -> Icons.Filled.MusicNote
+                        LinkContentType.REPOSITORY -> Icons.Filled.Code
+                        LinkContentType.SOCIAL_POST -> Icons.Filled.ChatBubble
+                        LinkContentType.PRODUCT -> Icons.Filled.ShoppingCart
+                        LinkContentType.ARTICLE -> Icons.Filled.Description
+                        LinkContentType.DOCUMENT -> Icons.Filled.Description
+                        else -> Icons.Filled.Link
                     }
-                    Text(typeIcon, fontSize = 16.sp)
+                    Icon(
+                        imageVector = typeIcon,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = if (preview.isSafe) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.error
+                        }
+                    )
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        preview.siteName ?: "Link",
+                        preview.siteName ?: stringResource(R.string.create_story_link_tab),
                         style = MaterialTheme.typography.labelMedium,
                         color = if (preview.isSafe)
                             MaterialTheme.colorScheme.primary

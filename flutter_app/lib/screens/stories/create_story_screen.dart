@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../utils/cross_platform_image.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/story.dart';
 import '../../providers/stories_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 /// Premium Create Story Screen - A polished, neurodivergent-friendly story creation experience
@@ -21,10 +23,13 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
   XFile? _selectedMedia;
   bool _isVideo = false;
   final _captionController = TextEditingController();
+  final _linkUrlController = TextEditingController();
   bool _isSubmitting = false;
   Color _backgroundColor = AppColors.primaryPurple;
   String _selectedFilter = 'none';
   StoryType _storyType = StoryType.text;
+  String? _documentFileName;
+  String? _audioFileName;
 
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -36,52 +41,52 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
     StoryBackground(
       name: 'Purple Dream',
       colors: [const Color(0xFF7C4DFF), const Color(0xFF536DFE)],
-      icon: '💜',
+      icon: Icons.auto_awesome_rounded,
     ),
     StoryBackground(
       name: 'Ocean Calm',
       colors: [const Color(0xFF00BFA5), const Color(0xFF26C6DA)],
-      icon: '🌊',
+      icon: Icons.water_drop_rounded,
     ),
     StoryBackground(
       name: 'Sunset Glow',
       colors: [const Color(0xFFFF6E40), const Color(0xFFFFAB40)],
-      icon: '🌅',
+      icon: Icons.wb_sunny_rounded,
     ),
     StoryBackground(
       name: 'Forest Peace',
       colors: [const Color(0xFF66BB6A), const Color(0xFF26A69A)],
-      icon: '🌲',
+      icon: Icons.park_rounded,
     ),
     StoryBackground(
       name: 'Night Sky',
       colors: [const Color(0xFF1A1A2E), const Color(0xFF16213E)],
-      icon: '🌙',
+      icon: Icons.dark_mode_rounded,
     ),
     StoryBackground(
       name: 'Cotton Candy',
       colors: [const Color(0xFFF48FB1), const Color(0xFFCE93D8)],
-      icon: '🍬',
+      icon: Icons.bubble_chart_rounded,
     ),
     StoryBackground(
       name: 'Aurora',
       colors: [const Color(0xFF5C6BC0), const Color(0xFF00BCD4)],
-      icon: '✨',
+      icon: Icons.auto_awesome_rounded,
     ),
     StoryBackground(
       name: 'Warm Embrace',
       colors: [const Color(0xFFFF7043), const Color(0xFFFFCA28)],
-      icon: '🤗',
+      icon: Icons.favorite_rounded,
     ),
   ];
 
   final List<StoryFilter> _filters = [
-    StoryFilter(name: 'None', id: 'none', icon: '✨'),
-    StoryFilter(name: 'Vivid', id: 'vivid', icon: '🎨'),
-    StoryFilter(name: 'Warm', id: 'warm', icon: '☀️'),
-    StoryFilter(name: 'Cool', id: 'cool', icon: '❄️'),
-    StoryFilter(name: 'Vintage', id: 'vintage', icon: '📷'),
-    StoryFilter(name: 'B&W', id: 'mono', icon: '🖤'),
+    StoryFilter(name: 'None', id: 'none', icon: Icons.auto_awesome_rounded),
+    StoryFilter(name: 'Vivid', id: 'vivid', icon: Icons.palette_rounded),
+    StoryFilter(name: 'Warm', id: 'warm', icon: Icons.wb_sunny_rounded),
+    StoryFilter(name: 'Cool', id: 'cool', icon: Icons.ac_unit_rounded),
+    StoryFilter(name: 'Vintage', id: 'vintage', icon: Icons.photo_camera_rounded),
+    StoryFilter(name: 'B&W', id: 'mono', icon: Icons.contrast_rounded),
   ];
 
   // Mood/emoji reactions for story
@@ -90,6 +95,9 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
   @override
   void initState() {
     super.initState();
+    _captionController.addListener(_saveDraft);
+    _linkUrlController.addListener(_saveDraft);
+    _loadDraft();
     _fadeController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
@@ -110,8 +118,44 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
   }
 
   @override
+  Future<void> _loadDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _captionController.text = prefs.getString('draft_story_caption') ?? '';
+      _linkUrlController.text = prefs.getString('draft_story_link') ?? '';
+      _selectedFilter = prefs.getString('draft_story_filter') ?? 'none';
+      final bg = prefs.getInt('draft_story_bg');
+      if (bg != null) _backgroundColor = Color(bg);
+      final typeIndex = prefs.getInt('draft_story_type');
+      if (typeIndex != null && typeIndex >= 0 && typeIndex < StoryType.values.length) {
+        _storyType = StoryType.values[typeIndex];
+      }
+    });
+  }
+
+  Future<void> _saveDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('draft_story_caption', _captionController.text);
+    await prefs.setString('draft_story_link', _linkUrlController.text);
+    await prefs.setString('draft_story_filter', _selectedFilter);
+    await prefs.setInt('draft_story_bg', _backgroundColor.value);
+    await prefs.setInt('draft_story_type', _storyType.index);
+  }
+
+  Future<void> _clearDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('draft_story_caption');
+    await prefs.remove('draft_story_link');
+    await prefs.remove('draft_story_filter');
+    await prefs.remove('draft_story_bg');
+    await prefs.remove('draft_story_type');
+  }
+
+  @override
   void dispose() {
     _captionController.dispose();
+    _linkUrlController.dispose();
     _fadeController.dispose();
     _pulseController.dispose();
     super.dispose();
@@ -168,6 +212,43 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
             _storyType = StoryType.text;
           });
         },
+        onDocumentTap: () async {
+          Navigator.pop(context);
+          final result = await FilePicker.platform.pickFiles(
+            type: FileType.custom,
+            allowedExtensions: ['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'],
+          );
+          if (result != null && result.files.isNotEmpty && mounted) {
+            final file = result.files.first;
+            setState(() {
+              _selectedMedia = XFile(file.path ?? '');
+              _documentFileName = file.name;
+              _storyType = StoryType.document;
+            });
+          }
+        },
+        onLinkTap: () {
+          Navigator.pop(context);
+          setState(() {
+            _selectedMedia = null;
+            _storyType = StoryType.link;
+          });
+        },
+        onAudioTap: () async {
+          Navigator.pop(context);
+          final result = await FilePicker.platform.pickFiles(
+            type: FileType.custom,
+            allowedExtensions: ['mp3', 'wav', 'aac', 'm4a', 'ogg', 'flac'],
+          );
+          if (result != null && result.files.isNotEmpty && mounted) {
+            final file = result.files.first;
+            setState(() {
+              _selectedMedia = XFile(file.path ?? '');
+              _audioFileName = file.name;
+              _storyType = StoryType.audio;
+            });
+          }
+        },
       ),
     );
   }
@@ -180,6 +261,21 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
 
     if ((_storyType == StoryType.photo || _storyType == StoryType.video) && _selectedMedia == null) {
       _showErrorSnackBar('Please select media for your story');
+      return;
+    }
+
+    if (_storyType == StoryType.link && _linkUrlController.text.trim().isEmpty) {
+      _showErrorSnackBar('Please enter a URL for your link story');
+      return;
+    }
+
+    if (_storyType == StoryType.document && _selectedMedia == null) {
+      _showErrorSnackBar('Please select a document for your story');
+      return;
+    }
+
+    if (_storyType == StoryType.audio && _selectedMedia == null) {
+      _showErrorSnackBar('Please select an audio file for your story');
       return;
     }
 
@@ -198,6 +294,9 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
         StoryType.text => StoryContentType.text,
         StoryType.photo => StoryContentType.photo,
         StoryType.video => StoryContentType.video,
+        StoryType.document => StoryContentType.document,
+        StoryType.link => StoryContentType.link,
+        StoryType.audio => StoryContentType.audio,
       };
 
       // Create the story data
@@ -211,6 +310,8 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
         backgroundGradient: _storyType == StoryType.text ? selectedBg.colors : null,
         filter: _selectedFilter != 'none' ? _selectedFilter : null,
         mood: _extractMood(_captionController.text),
+        linkUrl: _storyType == StoryType.link ? _linkUrlController.text.trim() : null,
+        fileName: _documentFileName ?? _audioFileName,
       );
 
       // Create the story via provider
@@ -218,6 +319,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
 
       if (mounted && story != null) {
         HapticFeedback.heavyImpact();
+        await _clearDraft();
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -225,7 +327,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
               children: const [
                 Icon(Icons.check_circle, color: Colors.white),
                 SizedBox(width: 12),
-                Text('Story shared! ✨'),
+                Text('Story shared!'),
               ],
             ),
             behavior: SnackBarBehavior.floating,
@@ -294,9 +396,13 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
 
             // Main Content
             Expanded(
-              child: _storyType == StoryType.text
-                  ? _buildTextStoryEditor(theme)
-                  : _buildMediaStoryEditor(theme),
+              child: switch (_storyType) {
+                StoryType.text => _buildTextStoryEditor(theme),
+                StoryType.link => _buildLinkStoryEditor(theme),
+                StoryType.document => _buildDocumentStoryEditor(theme),
+                StoryType.audio => _buildAudioStoryEditor(theme),
+                _ => _buildMediaStoryEditor(theme),
+              },
             ),
 
             // Bottom Controls
@@ -392,6 +498,12 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
         return 'Photo Story';
       case StoryType.video:
         return 'Video Story';
+      case StoryType.document:
+        return 'Document Story';
+      case StoryType.link:
+        return 'Link Story';
+      case StoryType.audio:
+        return 'Audio Story';
     }
   }
 
@@ -479,7 +591,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(selectedBg.icon, style: const TextStyle(fontSize: 14)),
+                        Icon(selectedBg.icon, color: Colors.white, size: 14),
                         const SizedBox(width: 6),
                         Text(
                           selectedBg.name,
@@ -533,7 +645,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
                 return GestureDetector(
                   onTap: () {
                     HapticFeedback.selectionClick();
-                    setState(() => _backgroundColor = bg.colors.first);
+                    setState(() { _backgroundColor = bg.colors.first; _saveDraft(); });
                   },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
@@ -560,10 +672,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
                           : null,
                     ),
                     child: Center(
-                      child: Text(
-                        bg.icon,
-                        style: const TextStyle(fontSize: 24),
-                      ),
+                      child: Icon(bg.icon, color: Colors.white, size: 24),
                     ),
                   ),
                 );
@@ -659,9 +768,10 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
+                            Icon(
                               _filters.firstWhere((f) => f.id == _selectedFilter).icon,
-                              style: const TextStyle(fontSize: 14),
+                              color: Colors.white,
+                              size: 14,
                             ),
                             const SizedBox(width: 6),
                             Text(
@@ -810,7 +920,7 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
                 return GestureDetector(
                   onTap: () {
                     HapticFeedback.selectionClick();
-                    setState(() => _selectedFilter = filter.id);
+                    setState(() { _selectedFilter = filter.id; _saveDraft(); });
                   },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
@@ -828,10 +938,13 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          filter.icon,
-                          style: const TextStyle(fontSize: 24),
-                        ),
+                          Icon(
+                            filter.icon,
+                            size: 24,
+                            color: isSelected
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurfaceVariant,
+                          ),
                         const SizedBox(height: 4),
                         Text(
                           filter.name,
@@ -851,6 +964,326 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLinkStoryEditor(ThemeData theme) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF00897B), Color(0xFF26C6DA)],
+              ),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF00897B).withValues(alpha: 0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.link_rounded, color: Colors.white, size: 48),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _linkUrlController,
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                  keyboardType: TextInputType.url,
+                  decoration: InputDecoration(
+                    hintText: 'https://example.com',
+                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                    labelText: 'Enter URL',
+                    labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Colors.white),
+                    ),
+                    prefixIcon: Icon(Icons.language, color: Colors.white.withValues(alpha: 0.7)),
+                  ),
+                  onChanged: (_) => setState(() {}),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _captionController,
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  maxLines: 2,
+                  maxLength: 150,
+                  decoration: InputDecoration(
+                    hintText: 'Add a description...',
+                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+                    border: InputBorder.none,
+                    counterStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline, size: 16, color: theme.colorScheme.onSurfaceVariant),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Links will show a preview card with title, description, and thumbnail.',
+                    style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDocumentStoryEditor(ThemeData theme) {
+    return Column(
+      children: [
+        Expanded(
+          child: Container(
+            margin: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.indigo.withValues(alpha: 0.2),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: _selectedMedia != null
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Colors.indigo.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.description_rounded, size: 64, color: Colors.indigo),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          _documentFileName ?? 'Document',
+                          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Ready to share',
+                          style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 14),
+                        ),
+                        const SizedBox(height: 20),
+                        TextField(
+                          controller: _captionController,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          maxLength: 150,
+                          decoration: InputDecoration(
+                            hintText: 'Add a caption...',
+                            hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                            border: InputBorder.none,
+                            counterStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : GestureDetector(
+                    onTap: () async {
+                      final result = await FilePicker.platform.pickFiles(
+                        type: FileType.custom,
+                        allowedExtensions: ['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'],
+                      );
+                      if (result != null && result.files.isNotEmpty && mounted) {
+                        final file = result.files.first;
+                        setState(() {
+                          _selectedMedia = XFile(file.path ?? '');
+                          _documentFileName = file.name;
+                        });
+                      }
+                    },
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.indigo.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.upload_file_rounded, size: 48, color: Colors.indigo),
+                          ),
+                          const SizedBox(height: 16),
+                          Text('Tap to select a document', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 8),
+                          Text('PDF, DOC, TXT, XLS, PPT', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                        ],
+                      ),
+                    ),
+                  ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAudioStoryEditor(ThemeData theme) {
+    return Column(
+      children: [
+        Expanded(
+          child: Container(
+            margin: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFFBF360C), Color(0xFFFF6E40)],
+              ),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.deepOrange.withValues(alpha: 0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: _selectedMedia != null
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.audiotrack_rounded, size: 64, color: Colors.white),
+                        ),
+                        const SizedBox(height: 20),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: Text(
+                            _audioFileName ?? 'Audio',
+                            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Audio ready to share',
+                          style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 14),
+                        ),
+                        const SizedBox(height: 16),
+                        // Fake waveform visualization
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(20, (i) {
+                              final h = (10 + (i * 7 + 13) % 30).toDouble();
+                              return Container(
+                                width: 4,
+                                height: h,
+                                margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.6),
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              );
+                            }),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: TextField(
+                            controller: _captionController,
+                            style: const TextStyle(color: Colors.white, fontSize: 14),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            maxLength: 150,
+                            decoration: InputDecoration(
+                              hintText: 'Add a caption...',
+                              hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+                              border: InputBorder.none,
+                              counterStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : GestureDetector(
+                    onTap: () async {
+                      final result = await FilePicker.platform.pickFiles(
+                        type: FileType.custom,
+                        allowedExtensions: ['mp3', 'wav', 'aac', 'm4a', 'ogg', 'flac'],
+                      );
+                      if (result != null && result.files.isNotEmpty && mounted) {
+                        final file = result.files.first;
+                        setState(() {
+                          _selectedMedia = XFile(file.path ?? '');
+                          _audioFileName = file.name;
+                        });
+                      }
+                    },
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.audiotrack_rounded, size: 48, color: Colors.white),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text('Tap to select audio', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 8),
+                          Text('MP3, WAV, AAC, M4A, OGG', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 14)),
+                        ],
+                      ),
+                    ),
+                  ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -906,54 +1339,114 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
   }
 
   Widget _buildStoryTypeSelector(ThemeData theme) {
-    return Row(
-      children: [
-        _StoryTypeChip(
-          icon: Icons.text_fields_rounded,
-          label: 'Text',
-          isSelected: _storyType == StoryType.text,
-          onTap: () {
-            HapticFeedback.selectionClick();
-            setState(() {
-              _storyType = StoryType.text;
-              _selectedMedia = null;
-            });
-          },
-        ),
-        const SizedBox(width: 8),
-        _StoryTypeChip(
-          icon: Icons.photo_rounded,
-          label: 'Photo',
-          isSelected: _storyType == StoryType.photo,
-          onTap: () {
-            HapticFeedback.selectionClick();
-            if (_storyType != StoryType.photo) {
-              _showMediaPicker();
-            }
-          },
-        ),
-        const SizedBox(width: 8),
-        _StoryTypeChip(
-          icon: Icons.videocam_rounded,
-          label: 'Video',
-          isSelected: _storyType == StoryType.video,
-          onTap: () async {
-            HapticFeedback.selectionClick();
-            final picker = ImagePicker();
-            final video = await picker.pickVideo(
-              source: ImageSource.camera,
-              maxDuration: const Duration(seconds: 30),
-            );
-            if (video != null && mounted) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _StoryTypeChipCompact(
+            icon: Icons.text_fields_rounded,
+            label: 'Text',
+            isSelected: _storyType == StoryType.text,
+            onTap: () {
+              HapticFeedback.selectionClick();
               setState(() {
-                _selectedMedia = video;
-                _isVideo = true;
-                _storyType = StoryType.video;
+                _storyType = StoryType.text;
+                _selectedMedia = null;
+                _saveDraft();
               });
-            }
-          },
-        ),
-      ],
+            },
+          ),
+          const SizedBox(width: 8),
+          _StoryTypeChipCompact(
+            icon: Icons.photo_rounded,
+            label: 'Photo',
+            isSelected: _storyType == StoryType.photo,
+            onTap: () {
+              HapticFeedback.selectionClick();
+              if (_storyType != StoryType.photo) {
+                _showMediaPicker();
+              }
+            },
+          ),
+          const SizedBox(width: 8),
+          _StoryTypeChipCompact(
+            icon: Icons.videocam_rounded,
+            label: 'Video',
+            isSelected: _storyType == StoryType.video,
+            onTap: () async {
+              HapticFeedback.selectionClick();
+              final picker = ImagePicker();
+              final video = await picker.pickVideo(
+                source: ImageSource.camera,
+                maxDuration: const Duration(seconds: 30),
+              );
+              if (video != null && mounted) {
+                setState(() {
+                  _selectedMedia = video;
+                  _isVideo = true;
+                  _storyType = StoryType.video;
+                });
+              }
+            },
+          ),
+          const SizedBox(width: 8),
+          _StoryTypeChipCompact(
+            icon: Icons.description_rounded,
+            label: 'Doc',
+            isSelected: _storyType == StoryType.document,
+            onTap: () async {
+              HapticFeedback.selectionClick();
+              final result = await FilePicker.platform.pickFiles(
+                type: FileType.custom,
+                allowedExtensions: ['pdf', 'doc', 'docx', 'txt', 'xls', 'xlsx', 'ppt', 'pptx'],
+              );
+              if (result != null && result.files.isNotEmpty && mounted) {
+                final file = result.files.first;
+                setState(() {
+                  _selectedMedia = XFile(file.path ?? '');
+                  _documentFileName = file.name;
+                  _storyType = StoryType.document;
+                });
+              }
+            },
+          ),
+          const SizedBox(width: 8),
+          _StoryTypeChipCompact(
+            icon: Icons.link_rounded,
+            label: 'Link',
+            isSelected: _storyType == StoryType.link,
+            onTap: () {
+              HapticFeedback.selectionClick();
+              setState(() {
+                _selectedMedia = null;
+                _storyType = StoryType.link;
+                _saveDraft();
+              });
+            },
+          ),
+          const SizedBox(width: 8),
+          _StoryTypeChipCompact(
+            icon: Icons.audiotrack_rounded,
+            label: 'Audio',
+            isSelected: _storyType == StoryType.audio,
+            onTap: () async {
+              HapticFeedback.selectionClick();
+              final result = await FilePicker.platform.pickFiles(
+                type: FileType.custom,
+                allowedExtensions: ['mp3', 'wav', 'aac', 'm4a', 'ogg', 'flac'],
+              );
+              if (result != null && result.files.isNotEmpty && mounted) {
+                final file = result.files.first;
+                setState(() {
+                  _selectedMedia = XFile(file.path ?? '');
+                  _audioFileName = file.name;
+                  _storyType = StoryType.audio;
+                });
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -1044,12 +1537,12 @@ class _CreateStoryScreenState extends ConsumerState<CreateStoryScreen>
 // Supporting Widgets
 // ============================================================================
 
-enum StoryType { text, photo, video }
+enum StoryType { text, photo, video, document, link, audio }
 
 class StoryBackground {
   final String name;
   final List<Color> colors;
-  final String icon;
+  final IconData icon;
 
   const StoryBackground({
     required this.name,
@@ -1061,7 +1554,7 @@ class StoryBackground {
 class StoryFilter {
   final String name;
   final String id;
-  final String icon;
+  final IconData icon;
 
   const StoryFilter({
     required this.name,
@@ -1076,12 +1569,18 @@ class _MediaPickerSheet extends StatelessWidget {
   final VoidCallback onCameraTap;
   final VoidCallback onVideoTap;
   final VoidCallback onTextTap;
+  final VoidCallback onDocumentTap;
+  final VoidCallback onLinkTap;
+  final VoidCallback onAudioTap;
 
   const _MediaPickerSheet({
     required this.onGalleryTap,
     required this.onCameraTap,
     required this.onVideoTap,
     required this.onTextTap,
+    required this.onDocumentTap,
+    required this.onLinkTap,
+    required this.onAudioTap,
   });
 
   @override
@@ -1148,6 +1647,32 @@ class _MediaPickerSheet extends StatelessWidget {
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _MediaOption(
+                      icon: Icons.description_rounded,
+                      label: 'Document',
+                      color: Colors.indigo,
+                      onTap: onDocumentTap,
+                    ),
+                    _MediaOption(
+                      icon: Icons.link_rounded,
+                      label: 'Link',
+                      color: Colors.teal,
+                      onTap: onLinkTap,
+                    ),
+                    _MediaOption(
+                      icon: Icons.audiotrack_rounded,
+                      label: 'Audio',
+                      color: Colors.deepOrange,
+                      onTap: onAudioTap,
+                    ),
+                    // Spacer for alignment
+                    const SizedBox(width: 64),
+                  ],
+                ),
               ],
             ),
           ),
@@ -1198,6 +1723,27 @@ class _MediaOption extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AddMediaButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _AddMediaButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      icon: const Icon(Icons.add_photo_alternate_rounded),
+      label: const Text('Add Photo or Video'),
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 48),
+        side: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
       ),
     );
   }
@@ -1263,22 +1809,59 @@ class _StoryTypeChip extends StatelessWidget {
   }
 }
 
-class _AddMediaButton extends StatelessWidget {
+class _StoryTypeChipCompact extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isSelected;
   final VoidCallback onTap;
 
-  const _AddMediaButton({required this.onTap});
+  const _StoryTypeChipCompact({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return OutlinedButton.icon(
-      onPressed: onTap,
-      icon: const Icon(Icons.add_photo_alternate_rounded),
-      label: const Text('Add Photo or Video'),
-      style: OutlinedButton.styleFrom(
-        minimumSize: const Size(double.infinity, 48),
-        side: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.colorScheme.primaryContainer
+              : theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+          border: isSelected
+              ? Border.all(color: theme.colorScheme.primary, width: 2)
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                color: isSelected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

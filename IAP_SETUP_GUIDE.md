@@ -22,7 +22,7 @@ Add these lines to your `C:/Users/bkyil/AndroidStudioProjects/NeuroComet/local.p
 
 ```properties
 # RevenueCat
-REVENUECAT_API_KEY=goog_your_actual_revenuecat_api_key
+REVENUECAT_API_KEY=goog_tqbgqglcFYAbwdfvHDhNLgZtXWb
 
 # Google AdMob
 ADMOB_APP_ID=ca-app-pub-XXXXXXXXXX~XXXXXXXXXX

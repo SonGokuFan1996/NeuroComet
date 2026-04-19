@@ -1,5 +1,3 @@
-import '../constants/app_constants.dart';
-
 /// Shared visual metadata for neuro state presentation across multiple UI flows.
 class NeuroStateVisualRegistry {
   NeuroStateVisualRegistry._();
@@ -18,9 +16,9 @@ class NeuroStateVisualRegistry {
   static String? assetPathForStateKey(String stateKey) {
     switch (stateKey) {
       case 'calm':
-        return AppAssetPaths.neuroStateCalmWatersIcon;
+        return 'assets/icons/neuro_state_calm_waters.png';
       case 'autismSensorySeek':
-        return AppAssetPaths.neuroStateSensoryModeIcon;
+        return 'assets/icons/neuro_state_sensory_mode.png';
       default:
         return null;
     }

@@ -8,7 +8,8 @@ import '../../core/theme/app_colors.dart';
 ///
 /// All settings are designed with sensory sensitivities and cognitive needs in mind.
 class SocialSettingsScreen extends StatefulWidget {
-  const SocialSettingsScreen({super.key});
+  final int initialTabIndex;
+  const SocialSettingsScreen({super.key, this.initialTabIndex = 0});
 
   @override
   State<SocialSettingsScreen> createState() => _SocialSettingsScreenState();
@@ -62,7 +63,7 @@ class _SocialSettingsScreenState extends State<SocialSettingsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 5, vsync: this, initialIndex: widget.initialTabIndex);
     _loadSettings();
   }
 

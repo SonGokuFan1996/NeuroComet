@@ -179,14 +179,56 @@ class SupabaseService {
 
   // ============ User Profile ============
 
-  static Future<app_models.User?> getUserProfile(String userId) async {
-    final response = await client
-        .from('users')
-        .select()
-        .eq('id', userId)
-        .single();
+  /// Map a raw Supabase `users` row (snake_case) → app User model.
+  /// The DB schema uses snake_case columns while the Dart model uses camelCase.
+  static app_models.User _userFromSupabaseRow(Map<String, dynamic> row) {
+    return app_models.User(
+      id: (row['id'] ?? '').toString(),
+      displayName: _string(row['display_name']) ??
+          _string(row['displayName']) ??
+          _string(row['username']) ??
+          'User',
+      username: _string(row['username']),
+      email: _string(row['email']),
+      avatarUrl: _string(row['avatar_url']) ?? _string(row['avatarUrl']),
+      bannerUrl: _string(row['banner_url']) ?? _string(row['bannerUrl']),
+      bio: _string(row['bio']),
+      postCount: (row['post_count'] as num?)?.toInt() ??
+          (row['postCount'] as num?)?.toInt() ??
+          0,
+      followerCount: (row['follower_count'] as num?)?.toInt() ??
+          (row['followerCount'] as num?)?.toInt() ??
+          0,
+      followingCount: (row['following_count'] as num?)?.toInt() ??
+          (row['followingCount'] as num?)?.toInt() ??
+          0,
+      isPremium: _bool(row['is_premium'] ?? row['isPremium'] ?? false),
+      isVerified: _bool(row['is_verified'] ?? row['isVerified'] ?? false),
+      createdAt: _dateTime(row['created_at'] ?? row['createdAt']),
+      lastActiveAt: _dateTime(row['last_active_at'] ?? row['lastActiveAt']),
+    );
+  }
 
-    return app_models.User.fromJson(response);
+  static Future<app_models.User?> getUserProfile(String userId) async {
+    try {
+      final response = await client
+          .from('users')
+          .select()
+          .eq('id', userId)
+          .maybeSingle();
+
+      if (response == null) {
+        debugPrint('[SupabaseService] No user row found for id=$userId');
+        return null;
+      }
+
+      final user = _userFromSupabaseRow(response);
+      debugPrint('[SupabaseService] getUserProfile OK: ${user.displayName} (${user.id})');
+      return user;
+    } on PostgrestException catch (e) {
+      debugPrint('[SupabaseService] getUserProfile DB error for $userId: ${e.message} (code ${e.code})');
+      return null;
+    }
   }
 
   static Future<void> updateUserProfile({
@@ -208,21 +250,64 @@ class SupabaseService {
     await client.from('users').update(updates).eq('id', userId);
   }
 
+  /// Ensures a row exists in the `users` table for the currently
+  /// authenticated user. Call this after sign-in / sign-up so that
+  /// `getUserProfile` has something to return.
+  static Future<void> ensureUserProfile() async {
+    final user = currentUser;
+    if (user == null) return;
+
+    try {
+      final existing = await client
+          .from('users')
+          .select('id')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      if (existing != null) return; // row already exists
+
+      final meta = user.userMetadata ?? {};
+      final now = DateTime.now().toUtc().toIso8601String();
+      await client.from('users').insert({
+        'id': user.id,
+        'username': (meta['username'] as String?) ??
+            user.email?.split('@').first ??
+            'user_${user.id.substring(0, 8)}',
+        'display_name': (meta['display_name'] as String?) ??
+            (meta['full_name'] as String?) ??
+            user.email?.split('@').first ??
+            'New User',
+        'email': user.email,
+        'avatar_url': meta['avatar_url'] as String?,
+        'bio': 'New to NeuroComet! 🧠✨',
+        'created_at': now,
+        'updated_at': now,
+      });
+      debugPrint('[SupabaseService] ✅ Created users row for ${user.id}');
+    } on PostgrestException catch (e) {
+      // 23505 = unique_violation — row was created concurrently, that's fine
+      if (e.code == '23505') return;
+      debugPrint('[SupabaseService] ensureUserProfile error: ${e.message}');
+    } catch (e) {
+      debugPrint('[SupabaseService] ensureUserProfile error: $e');
+    }
+  }
+
   // ============ Posts ============
 
   static Future<List<Post>> getFeedPosts({
     int limit = 20,
     int offset = 0,
   }) async {
-    // Query the actual posts table schema:
-    //   id, user_id, content, image_url, video_url, likes, created_at
+    // Join the users table so posts come back with author name/avatar
     final response = await client
         .from('posts')
-        .select('*')
+        .select('*, users(display_name, username, avatar_url)')
         .order('created_at', ascending: false)
         .range(offset, offset + limit - 1);
 
-    return (response as List).map((json) => _postFromSupabaseRow(json)).toList();
+    debugPrint('[SupabaseService] getFeedPosts returned ${(response as List).length} rows');
+    return (response).map((json) => _postFromSupabaseRow(Map<String, dynamic>.from(json))).toList();
   }
 
   static Future<List<Post>> getUserPosts(String userId, {
@@ -231,23 +316,31 @@ class SupabaseService {
   }) async {
     final response = await client
         .from('posts')
-        .select('*')
+        .select('*, users(display_name, username, avatar_url)')
         .eq('user_id', userId)
         .order('created_at', ascending: false)
         .range(offset, offset + limit - 1);
 
-    return (response as List).map((json) => _postFromSupabaseRow(json)).toList();
+    debugPrint('[SupabaseService] getUserPosts($userId) returned ${(response as List).length} rows');
+    return (response).map((json) => _postFromSupabaseRow(Map<String, dynamic>.from(json))).toList();
   }
 
   /// Convert a raw Supabase posts row to a Post model.
   /// The DB schema (id, user_id, content, image_url, video_url, likes, comments, shares, category, created_at)
   /// differs from the app model, so we map manually.
   static Post _postFromSupabaseRow(Map<String, dynamic> json) {
+    // If a user profile was joined, extract name/avatar from it
+    final profile = json['users'] is Map ? json['users'] as Map<String, dynamic> : null;
+    final authorName = _string(profile?['display_name']) ??
+        _string(profile?['username']) ??
+        'User ${(json['user_id'] as String?)?.substring(0, 8) ?? 'anon'}';
+    final authorAvatar = _string(profile?['avatar_url']);
+
     return Post(
       id: json['id'].toString(),
       authorId: (json['user_id'] as String?) ?? 'unknown',
-      authorName: 'User ${(json['user_id'] as String?)?.substring(0, 8) ?? 'anon'}',
-      authorAvatarUrl: null,
+      authorName: authorName,
+      authorAvatarUrl: authorAvatar,
       content: json['content'] as String? ?? '',
       mediaUrls: [
         if (json['image_url'] != null) json['image_url'] as String,
@@ -256,7 +349,10 @@ class SupabaseService {
       likeCount: (json['likes'] as num?)?.toInt() ?? 0,
       commentCount: (json['comments'] as num?)?.toInt() ?? 0,
       shareCount: (json['shares'] as num?)?.toInt() ?? 0,
+      isLiked: _bool(json['is_liked_by_me'] ?? false),
       category: json['category'] as String?,
+      tags: (json['tags'] as List?)?.map((e) => e.toString()).toList(),
+      locationTag: _string(json['location_tag']) ?? _string(json['locationTag']),
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'] as String)
           : null,
@@ -268,15 +364,38 @@ class SupabaseService {
     List<String>? mediaUrls,
     String? category,
     List<String>? tags,
+    String? locationTag,
   }) async {
-    // The actual posts schema: id, user_id (TEXT), content, image_url, video_url, likes, created_at
-    final response = await client.from('posts').insert({
+    final payload = {
       'user_id': currentUser?.id,
       'content': content,
       'image_url': mediaUrls?.isNotEmpty == true ? mediaUrls!.first : null,
-    }).select().single();
+      'category': category,
+      'tags': tags,
+      'location_tag': locationTag,
+      'is_liked_by_me': false,
+    }..removeWhere((key, value) => value == null);
 
-    return _postFromSupabaseRow(response);
+    dynamic response;
+    try {
+      response = await client.from('posts').insert(payload).select().single();
+    } on PostgrestException catch (e) {
+      debugPrint('createPost with location/tag metadata failed, retrying minimal payload: ${e.message}');
+      final fallbackPayload = {
+        'user_id': currentUser?.id,
+        'content': content,
+        'image_url': mediaUrls?.isNotEmpty == true ? mediaUrls!.first : null,
+        'is_liked_by_me': false,
+      }..removeWhere((key, value) => value == null);
+      response = await client.from('posts').insert(fallbackPayload).select().single();
+    }
+
+    final post = _postFromSupabaseRow(response);
+    return post.copyWith(
+      category: post.category ?? category,
+      tags: post.tags ?? tags,
+      locationTag: post.locationTag ?? locationTag,
+    );
   }
 
   static Future<void> deletePost(String postId) async {
@@ -359,12 +478,6 @@ class SupabaseService {
       final rows = (response as List).map(_row).toList();
 
       // Get all participant IDs for these conversations to fetch their profiles
-      final allParticipantIds = <String>{};
-      for (final row in rows) {
-        // You might need an additional join here depending on your schema
-        // For now, we assume participants logic can be fetched efficiently
-      }
-
       // Simplified mapping using the new view data
       return rows.map((row) {
         final conversationId = _string(row['conversation_id']) ?? '';
@@ -434,7 +547,28 @@ class SupabaseService {
         .eq('user_id', uid)
         .order('created_at', ascending: false);
 
-    return (response as List).map((json) => AppNotification.fromJson(json)).toList();
+    return (response as List).map((json) {
+      final row = Map<String, dynamic>.from(json);
+      final actor = row['actor'] is Map
+          ? row['actor'] as Map<String, dynamic>
+          : null;
+      // Map snake_case DB columns → camelCase expected by AppNotification.fromJson
+      return AppNotification.fromJson({
+        'id': row['id']?.toString() ?? '',
+        'type': row['type'] ?? 'system',
+        'title': row['title'],
+        'message': row['message'] ?? row['content'] ?? '',
+        'actorId': _string(row['actor_id']),
+        'actorName': _string(actor?['display_name']),
+        'actorAvatarUrl': _string(actor?['avatar_url']),
+        'targetId': _string(row['target_id']),
+        'targetType': _string(row['target_type']),
+        'actionUrl': _string(row['action_url']),
+        'relatedPostId': row['related_post_id'] ?? row['post_id'],
+        'isRead': _bool(row['is_read'] ?? false),
+        'createdAt': _string(row['created_at']),
+      });
+    }).toList();
   }
 
   static Future<void> markNotificationAsRead(String notificationId) async {
@@ -945,9 +1079,9 @@ class SupabaseService {
           .or('username.ilike.%$query%,display_name.ilike.%$query%')
           .limit(limit);
 
-      return (response as List).map((e) => app_models.User.fromJson(e)).toList();
+      return (response as List).map((e) => _userFromSupabaseRow(Map<String, dynamic>.from(e))).toList();
     } catch (e) {
-      debugPrint('Error searching users: $e');
+      debugPrint('[SupabaseService] Error searching users: $e');
       return [];
     }
   }
@@ -1098,16 +1232,14 @@ Created at: ${now.toIso8601String()}
 
       final userId = currentUser?.id;
 
-      // Build post data matching the actual database schema:
-      //   posts (id BIGSERIAL, user_id TEXT, content TEXT, image_url TEXT,
-      //          video_url TEXT, likes INTEGER, comments INTEGER, shares INTEGER,
-      //          category TEXT, created_at TIMESTAMPTZ)
+      // Build post data matching the actual database schema.
       final Map<String, dynamic> postData = {
         'content': testContent,
         'created_at': now.toIso8601String(),
         'likes': 0,
         'comments': 0,
         'shares': 0,
+        'is_liked_by_me': false,
       };
 
       // Add user_id if logged in (stored as TEXT in DB)
@@ -1362,9 +1494,15 @@ Created at: ${now.toIso8601String()}
 
       // Simple query to test connectivity using posts table
       final response = await client.from('posts').select('id').limit(1);
+      final authStatus = currentUser != null
+          ? 'Logged in as ${currentUser!.email ?? currentUser!.id}'
+          : (devModeSkipAuth ? 'Dev-mode skip (no real user)' : 'Not authenticated');
       return {
         'success': true,
-        'message': 'Database connection successful!\nURL: $url\nPosts found: ${(response as List).length}',
+        'message': 'Database connection successful!\n'
+            'URL: $url\n'
+            'Auth: $authStatus\n'
+            'Posts found: ${(response as List).length}',
         'data': response,
       };
     } on PostgrestException catch (e) {

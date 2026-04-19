@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/message_delete_mode_provider.dart';
+import '../../services/device_authorization_service.dart';
+import '../../services/subscription_service.dart';
 import '../../services/supabase_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_colors.dart';
@@ -29,6 +31,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   int _easterEggTapCount = 0;
   DateTime _lastTapTime = DateTime.now();
   bool _devOptionsUnlocked = kDebugMode;
+  bool _devOptionsAvailable = kDebugMode;
+  bool _devAccessChecked = kDebugMode;
 
   // Premium status (would come from provider in real app)
   bool _isFakePremiumEnabled = false;
@@ -51,6 +55,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   void initState() {
     super.initState();
     _loadDevOptionsUnlocked();
+    _loadFakePremiumState();
     _headerAnimController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
@@ -69,22 +74,49 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   }
 
   Future<void> _loadDevOptionsUnlocked() async {
-    if (kDebugMode) return;
     final prefs = await SharedPreferences.getInstance();
-    final unlocked = prefs.getBool(_devOptionsUnlockedKey) ?? false;
-    if (!mounted || unlocked == _devOptionsUnlocked) return;
+    final hasAccess = kDebugMode
+        ? true
+        : await DeviceAuthorizationService.canUseDeveloperTools();
+    final unlocked = hasAccess && (prefs.getBool(_devOptionsUnlockedKey) ?? false);
+    if (!hasAccess) {
+      await prefs.remove(_devOptionsUnlockedKey);
+    }
+    if (!mounted) return;
     setState(() {
+      _devOptionsAvailable = hasAccess;
+      _devAccessChecked = true;
       _devOptionsUnlocked = unlocked;
     });
   }
 
   Future<void> _saveDevOptionsUnlocked(bool unlocked) async {
+    if (!kDebugMode && !_devOptionsAvailable) return;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_devOptionsUnlockedKey, unlocked);
   }
 
-  void _handleVersionTap() {
+  Future<void> _loadFakePremiumState() async {
+    final isPremium = await SubscriptionService.instance.checkPremiumStatus();
+    if (!mounted) return;
+    setState(() => _isFakePremiumEnabled = isPremium);
+  }
+
+  Future<void> _handleVersionTap() async {
     HapticFeedback.lightImpact();
+    if (!_devAccessChecked) return;
+    if (!kDebugMode && !_devOptionsAvailable) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Developer tools are restricted to authorized devices.'),
+          duration: const Duration(milliseconds: 1200),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+
     final now = DateTime.now();
     if (now.difference(_lastTapTime).inSeconds > 3) {
       _easterEggTapCount = 1;
@@ -494,7 +526,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                         description: 'Read our privacy policy',
                         icon: Icons.privacy_tip_rounded,
                         iconColor: AppColors.primaryPurple,
-                        onTap: () => _launchUrl('https://neurocomet.github.io/NeuroComet/privacy.html'),
+                        onTap: () => _launchUrl('https://getneurocomet.com/privacy'),
                       ),
                       _ModernSettingsDivider(),
                       _ModernSettingsItem(
@@ -502,7 +534,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                         description: 'Read our terms of service',
                         icon: Icons.description_rounded,
                         iconColor: AppColors.secondaryTeal,
-                        onTap: () => _launchUrl('https://neurocomet.github.io/NeuroComet/terms.html'),
+                        onTap: () => _launchUrl('https://getneurocomet.com/terms'),
                       ),
                       _ModernSettingsDivider(),
                       _ModernSettingsItem(
@@ -518,7 +550,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   // ═══════════════════════════════════════════════════════════════
                   // DEVELOPER OPTIONS
                   // ═══════════════════════════════════════════════════════════════
-                  if (_devOptionsUnlocked || kDebugMode) ...[
+                  if ((_devOptionsUnlocked || kDebugMode) && _devOptionsAvailable) ...[
                     const SizedBox(height: 20),
                     _SettingsSectionHeader(
                       title: l10n.developerOptions,
@@ -533,8 +565,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                           icon: Icons.star_rounded,
                           iconColor: const Color(0xFFFFD700),
                           value: _isFakePremiumEnabled,
-                          onChanged: (value) {
+                          onChanged: (value) async {
                             HapticFeedback.selectionClick();
+                            if (value) {
+                              await SubscriptionService.instance.simulateTestSuccess();
+                            } else {
+                              SubscriptionService.instance.resetTestPurchase();
+                            }
+                            if (!mounted) return;
                             setState(() => _isFakePremiumEnabled = value);
                           },
                         ),
@@ -561,11 +599,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   // ═══════════════════════════════════════════════════════════════
                   const SizedBox(height: 32),
                   _AppVersionInfo(
-                    onTap: _handleVersionTap,
+                    onTap: () {
+                      _handleVersionTap();
+                    },
                     tapCount: _easterEggTapCount,
                     l10n: l10n,
                   ),
                   const SizedBox(height: 16),
+                  // Extra clearance for bottom navigation bar
+                  const SizedBox(height: 100),
                 ]),
               ),
             ),

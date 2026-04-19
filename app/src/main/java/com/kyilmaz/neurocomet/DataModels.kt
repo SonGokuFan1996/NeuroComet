@@ -40,7 +40,9 @@ data class Post(
     val imageUrl: String? = null, // Legacy single image support
     val videoUrl: String? = null, // Legacy single video support
     val mediaItems: List<MediaItem> = emptyList(), // New multi-media support (max 20)
-    val minAudience: Audience = Audience.UNDER_13
+    val minAudience: Audience = Audience.UNDER_13,
+    val backgroundColor: Long? = null,
+    val locationTag: String? = null
 ) {
     val timeAgo: String
         get() {
@@ -252,7 +254,12 @@ val MOCK_USERS = listOf(
 data class StoryItem(
     val id: String,
     val imageUrl: String,
-    val duration: Long = 5000L // Duration in milliseconds
+    val duration: Long = 5000L, // Duration in milliseconds
+    val contentType: StoryContentType = StoryContentType.IMAGE,
+    val textOverlay: String? = null,
+    val backgroundColor: Long = 0xFF1a1a2eL,
+    val backgroundColorEnd: Long? = null,
+    val linkPreview: LinkPreviewData? = null
 )
 
 // Represents the collection of stories for a single user
@@ -262,7 +269,8 @@ data class Story(
     val userAvatar: String,
     val userName: String,
     val items: List<StoryItem>,
-    var isViewed: Boolean = false
+    var isViewed: Boolean = false,
+    val userId: String = "" // Author's user ID for DM routing; falls back to userName when empty
 )
 
 @Serializable
@@ -385,5 +393,7 @@ data class Conversation(
     var unreadCount: Int = 0,
     val isGroup: Boolean = false,
     val isArchived: Boolean = false,
-    val groupName: String? = null
+    val groupName: String? = null,
+    val groupAvatarUrl: String? = null,
+    val memberNames: List<String> = emptyList()
 )

@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.kyilmaz.neurocomet.M3EShapes
 
 // ============================================================================
 // DYNAMIC COLOR THEME SETTINGS
@@ -212,6 +213,7 @@ fun NeuroCometWorkingTitleTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
+        shapes = M3EShapes.shapes,
         content = content
     )
 }

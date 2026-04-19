@@ -19,6 +19,11 @@ class Story {
   final List<String> viewerIds;
   final bool isViewed; // Whether current user has viewed
   final List<StoryReaction> reactions;
+  final LinkPreviewData? linkPreview;
+  final String? textOverlay;
+  final int? durationSeconds;
+  final String? fileName;
+  final int? fileSize;
 
   const Story({
     required this.id,
@@ -38,6 +43,11 @@ class Story {
     this.viewerIds = const [],
     this.isViewed = false,
     this.reactions = const [],
+    this.linkPreview,
+    this.textOverlay,
+    this.durationSeconds,
+    this.fileName,
+    this.fileSize,
   });
 
   /// Check if the story has expired
@@ -73,6 +83,11 @@ class Story {
     List<String>? viewerIds,
     bool? isViewed,
     List<StoryReaction>? reactions,
+    LinkPreviewData? linkPreview,
+    String? textOverlay,
+    int? durationSeconds,
+    String? fileName,
+    int? fileSize,
   }) {
     return Story(
       id: id ?? this.id,
@@ -92,6 +107,11 @@ class Story {
       viewerIds: viewerIds ?? this.viewerIds,
       isViewed: isViewed ?? this.isViewed,
       reactions: reactions ?? this.reactions,
+      linkPreview: linkPreview ?? this.linkPreview,
+      textOverlay: textOverlay ?? this.textOverlay,
+      durationSeconds: durationSeconds ?? this.durationSeconds,
+      fileName: fileName ?? this.fileName,
+      fileSize: fileSize ?? this.fileSize,
     );
   }
 }
@@ -101,6 +121,26 @@ enum StoryContentType {
   text,
   photo,
   video,
+  document,
+  link,
+  audio,
+}
+
+/// Preview data for link stories
+class LinkPreviewData {
+  final String url;
+  final String? title;
+  final String? description;
+  final String? imageUrl;
+  final String? siteName;
+
+  const LinkPreviewData({
+    required this.url,
+    this.title,
+    this.description,
+    this.imageUrl,
+    this.siteName,
+  });
 }
 
 /// Reaction to a story
@@ -159,6 +199,9 @@ class CreateStoryData {
   final List<Color>? backgroundGradient;
   final String? filter;
   final String? mood;
+  final String? linkUrl;
+  final String? textOverlay;
+  final String? fileName;
 
   const CreateStoryData({
     required this.contentType,
@@ -168,6 +211,9 @@ class CreateStoryData {
     this.backgroundGradient,
     this.filter,
     this.mood,
+    this.linkUrl,
+    this.textOverlay,
+    this.fileName,
   });
 }
 

@@ -213,7 +213,8 @@ fun M3EPostCard(
             shape = M3EDesignSystem.Shapes.BubblyCard,
             variant = if (isQuietMode) M3ESurfaceVariant.Settings else M3ESurfaceVariant.Feed,
             shadowElevation = if (isQuietMode) 8.dp else M3EDesignSystem.Elevation.card,
-            contentPadding = PaddingValues(M3EDesignSystem.Spacing.md)
+            contentPadding = PaddingValues(M3EDesignSystem.Spacing.md),
+            containerColor = post.backgroundColor?.let { Color(it.toInt()) }
         ) {
             Column(
                 modifier = Modifier
@@ -233,7 +234,7 @@ fun M3EPostCard(
                     },
                     onCopyLink = {
                         clipboardManager?.setPrimaryClip(
-                            ClipData.newPlainText("NeuroComet post link", "https://neurocomet.app/post/${post.id}")
+                            ClipData.newPlainText("NeuroComet post link", "https://getneurocomet.com/post/${post.id}")
                         )
                         Toast.makeText(context, "Link copied!", Toast.LENGTH_SHORT).show()
                     },
@@ -510,7 +511,7 @@ private fun PostCardActions(
             // Comment button
             M3EIconTextButton(
                 icon = Icons.AutoMirrored.Outlined.Comment,
-                text = if (commentCount > 0) formatCount(commentCount) else null,
+                text = if (commentCount > 0) commentCount.toString() else null,
                 onClick = onComment
             )
 

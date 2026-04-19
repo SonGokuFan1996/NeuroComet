@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../services/supabase_service.dart';
+import '../settings/dev_options_screen.dart';
 
 // ═══════════════════════════════════════════════════════════════
 // SHARED HELPERS — device info & offline queue sync
@@ -245,14 +246,14 @@ class _FeedbackNavCard extends StatelessWidget {
 // BUG REPORT SCREEN — standalone settings pane
 // ═══════════════════════════════════════════════════════════════
 
-class FeedbackBugReportScreen extends StatefulWidget {
+class FeedbackBugReportScreen extends ConsumerStatefulWidget {
   const FeedbackBugReportScreen({super.key});
 
   @override
-  State<FeedbackBugReportScreen> createState() => _FeedbackBugReportScreenState();
+  ConsumerState<FeedbackBugReportScreen> createState() => _FeedbackBugReportScreenState();
 }
 
-class _FeedbackBugReportScreenState extends State<FeedbackBugReportScreen> {
+class _FeedbackBugReportScreenState extends ConsumerState<FeedbackBugReportScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -269,6 +270,20 @@ class _FeedbackBugReportScreenState extends State<FeedbackBugReportScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Rate limit check
+    final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    final todayCount = prefs.getInt('feedback_count_$today') ?? 0;
+    final options = ref.read(devOptionsProvider);
+    if (todayCount >= 5 && !options.bypassFeedbackRateLimit) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Daily feedback limit reached (5/day). Try again tomorrow.'), behavior: SnackBarBehavior.floating),
+        );
+      }
+      return;
+    }
 
     setState(() => _isSubmitting = true);
 
@@ -288,13 +303,18 @@ class _FeedbackBugReportScreenState extends State<FeedbackBugReportScreen> {
       await flushPendingFeedback();
 
       try {
+        if (options.forceFeedbackSubmitFailure) {
+          throw Exception('Forced submission failure (dev option)');
+        }
         await SupabaseService.client.from('feedback').insert(feedbackData);
       } catch (_) {
-        final prefs = await SharedPreferences.getInstance();
         final existing = prefs.getStringList('pending_feedback') ?? [];
         existing.add(jsonEncode(feedbackData));
         await prefs.setStringList('pending_feedback', existing);
       }
+
+      // Increment daily count
+      await prefs.setInt('feedback_count_$today', todayCount + 1);
 
       if (mounted) {
         _titleController.clear();
@@ -438,14 +458,14 @@ class _FeedbackBugReportScreenState extends State<FeedbackBugReportScreen> {
 // FEATURE REQUEST SCREEN — standalone settings pane
 // ═══════════════════════════════════════════════════════════════
 
-class FeedbackFeatureRequestScreen extends StatefulWidget {
+class FeedbackFeatureRequestScreen extends ConsumerStatefulWidget {
   const FeedbackFeatureRequestScreen({super.key});
 
   @override
-  State<FeedbackFeatureRequestScreen> createState() => _FeedbackFeatureRequestScreenState();
+  ConsumerState<FeedbackFeatureRequestScreen> createState() => _FeedbackFeatureRequestScreenState();
 }
 
-class _FeedbackFeatureRequestScreenState extends State<FeedbackFeatureRequestScreen> {
+class _FeedbackFeatureRequestScreenState extends ConsumerState<FeedbackFeatureRequestScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -473,6 +493,20 @@ class _FeedbackFeatureRequestScreenState extends State<FeedbackFeatureRequestScr
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    // Rate limit check
+    final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    final todayCount = prefs.getInt('feedback_count_$today') ?? 0;
+    final options = ref.read(devOptionsProvider);
+    if (todayCount >= 5 && !options.bypassFeedbackRateLimit) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Daily feedback limit reached (5/day). Try again tomorrow.'), behavior: SnackBarBehavior.floating),
+        );
+      }
+      return;
+    }
+
     setState(() => _isSubmitting = true);
 
     try {
@@ -491,13 +525,18 @@ class _FeedbackFeatureRequestScreenState extends State<FeedbackFeatureRequestScr
       await flushPendingFeedback();
 
       try {
+        if (options.forceFeedbackSubmitFailure) {
+          throw Exception('Forced submission failure (dev option)');
+        }
         await SupabaseService.client.from('feedback').insert(feedbackData);
       } catch (_) {
-        final prefs = await SharedPreferences.getInstance();
         final existing = prefs.getStringList('pending_feedback') ?? [];
         existing.add(jsonEncode(feedbackData));
         await prefs.setStringList('pending_feedback', existing);
       }
+
+      // Increment daily count
+      await prefs.setInt('feedback_count_$today', todayCount + 1);
 
       if (mounted) {
         _titleController.clear();
@@ -636,14 +675,14 @@ class _FeedbackFeatureRequestScreenState extends State<FeedbackFeatureRequestScr
 // GENERAL FEEDBACK SCREEN — standalone settings pane
 // ═══════════════════════════════════════════════════════════════
 
-class FeedbackGeneralScreen extends StatefulWidget {
+class FeedbackGeneralScreen extends ConsumerStatefulWidget {
   const FeedbackGeneralScreen({super.key});
 
   @override
-  State<FeedbackGeneralScreen> createState() => _FeedbackGeneralScreenState();
+  ConsumerState<FeedbackGeneralScreen> createState() => _FeedbackGeneralScreenState();
 }
 
-class _FeedbackGeneralScreenState extends State<FeedbackGeneralScreen> {
+class _FeedbackGeneralScreenState extends ConsumerState<FeedbackGeneralScreen> {
   final _formKey = GlobalKey<FormState>();
   final _feedbackController = TextEditingController();
   int _rating = 0;
@@ -670,6 +709,20 @@ class _FeedbackGeneralScreenState extends State<FeedbackGeneralScreen> {
     setState(() => _isSubmitting = true);
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final today = DateTime.now().toIso8601String().substring(0, 10);
+      final todayCount = prefs.getInt('feedback_count_$today') ?? 0;
+      final options = ref.read(devOptionsProvider);
+      if (todayCount >= 5 && !options.bypassFeedbackRateLimit) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Daily feedback limit reached (5/day). Try again tomorrow.'), behavior: SnackBarBehavior.floating),
+          );
+        }
+        setState(() => _isSubmitting = false);
+        return;
+      }
+
       final deviceInfo = await getDeviceInfoMap();
       final feedbackData = {
         'type': 'general_feedback',
@@ -684,13 +737,18 @@ class _FeedbackGeneralScreenState extends State<FeedbackGeneralScreen> {
       await flushPendingFeedback();
 
       try {
+        if (options.forceFeedbackSubmitFailure) {
+          throw Exception('Forced submission failure (dev option)');
+        }
         await SupabaseService.client.from('feedback').insert(feedbackData);
       } catch (_) {
-        final prefs = await SharedPreferences.getInstance();
         final existing = prefs.getStringList('pending_feedback') ?? [];
         existing.add(jsonEncode(feedbackData));
         await prefs.setStringList('pending_feedback', existing);
       }
+
+      // Increment daily count
+      await prefs.setInt('feedback_count_$today', todayCount + 1);
 
       if (mounted) {
         _feedbackController.clear();

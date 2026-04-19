@@ -48,6 +48,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kyilmaz.neurocomet.ads.GoogleAdsManager
 import com.kyilmaz.neurocomet.auth.AuthResult
+import io.github.jan.supabase.auth.auth
 import com.kyilmaz.neurocomet.utils.StressTester
 import com.kyilmaz.neurocomet.utils.StressTestResult
 import kotlinx.coroutines.delay
@@ -531,6 +532,222 @@ fun EnhancedLocationSensorsDevSection() {
     }
 }
 
+/**
+ * Cloud Sync & Supabase dev section.
+ *
+ * Surfaces the tables and columns that were recently added to Supabase:
+ *   • user_preferences  – theme / accessibility settings sync
+ *   • user_game_achievements – cross-device game achievement sync
+ *   • ab_test_assignments    – stable experiment variants per user
+ *   • users.is_premium / premium_until columns (Premium status)
+ *
+ * Lets developers pretend-toggle premium, force-push the local preferences /
+ * achievements payloads, and read back the rows from Supabase.
+ */
+/**
+ * Renders a Supabase auth-status card with an inline dev sign-in form when
+ * the user is not authenticated. Returns the live-tracked UID (null when
+ * signed out). Shared between [CloudSyncDevSection] and [SupabaseTestDataSection]
+ * so every table-seeding button in Developer Options can gate on a real JWT.
+ */
+@Composable
+private fun SupabaseAuthGate(authViewModel: AuthViewModel): String? {
+    var currentUid by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            currentUid = try {
+                AppSupabaseClient.client?.auth?.currentUserOrNull()?.id
+            } catch (_: Throwable) { null }
+            kotlinx.coroutines.delay(1500)
+        }
+    }
+    val devAuthStatus by authViewModel.devAuthStatus.collectAsState()
+    var devEmail by remember { mutableStateOf("dev+neurocomet@example.com") }
+
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = if (currentUid != null)
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+            else
+                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f)
+        ),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    if (currentUid != null) Icons.Filled.CheckCircle else Icons.Filled.Warning,
+                    null,
+                    Modifier.size(18.dp),
+                    tint = if (currentUid != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                )
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = currentUid?.let { "Signed in: ${it.take(8)}\u2026" }
+                        ?: "Not signed in \u2014 sign in to write",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            if (currentUid == null) {
+                Text(
+                    "These tables enforce RLS (auth.uid() = user_id); a real Supabase JWT is required for inserts.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                OutlinedTextField(
+                    value = devEmail,
+                    onValueChange = { devEmail = it },
+                    label = { Text("Dev email", fontSize = 11.sp) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    textStyle = MaterialTheme.typography.bodySmall
+                )
+                Button(
+                    onClick = { authViewModel.devSignInForTesting(devEmail) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Filled.Login, null, Modifier.size(16.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Dev sign in / sign up")
+                }
+            }
+            devAuthStatus?.let {
+                Text(it, style = MaterialTheme.typography.labelSmall)
+            }
+        }
+    }
+    return currentUid
+}
+
+@Composable
+fun CloudSyncDevSection(@Suppress("UNUSED_PARAMETER") devOptionsViewModel: DevOptionsViewModel, authViewModel: AuthViewModel) {
+    val scope = rememberCoroutineScope()
+    val isAvailable = remember { SupabaseTestData.isSupabaseAvailable() }
+
+    var prefsCount by remember { mutableStateOf<Int?>(null) }
+    var achievementsCount by remember { mutableStateOf<Int?>(null) }
+    var abCount by remember { mutableStateOf<Int?>(null) }
+    var status by remember { mutableStateOf<String?>(null) }
+    var isBusy by remember { mutableStateOf(false) }
+
+    suspend fun refreshCounts() {
+        if (!isAvailable) return
+        SupabaseTestData.getTableRowCount("user_preferences").onSuccess { prefsCount = it }
+        SupabaseTestData.getTableRowCount("user_game_achievements").onSuccess { achievementsCount = it }
+        SupabaseTestData.getTableRowCount("ab_test_assignments").onSuccess { abCount = it }
+    }
+
+    fun run(label: String, action: suspend () -> Result<String>) {
+        if (isBusy) return
+        isBusy = true
+        status = "\u23F3 $label\u2026"
+        scope.launch {
+            try {
+                action().fold(
+                    onSuccess = { status = it; refreshCounts() },
+                    onFailure = { status = "Error: ${it.message}" }
+                )
+            } catch (e: Throwable) {
+                status = "Crash: ${e.javaClass.simpleName}: ${e.message}"
+            } finally {
+                isBusy = false
+            }
+        }
+    }
+
+    DevSectionCard(title = "Cloud Sync & Supabase", icon = Icons.Filled.CloudSync) {
+        if (!isAvailable) {
+            Text("\u26A0\uFE0F Supabase not configured", color = MaterialTheme.colorScheme.error)
+            return@DevSectionCard
+        }
+
+        val currentUid = SupabaseAuthGate(authViewModel)
+        LaunchedEffect(currentUid) { refreshCounts() }
+        Spacer(Modifier.height(12.dp))
+
+        Text(
+            "Tables tied to the freshly-added migrate_feedback_and_extras.sql: " +
+                "preferences, achievements, and A/B assignments. Use these to " +
+                "verify cross-device sync and premium gating.",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(12.dp))
+
+        // Row counts
+        Card(
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                listOf(
+                    "user_preferences" to prefsCount,
+                    "user_game_achievements" to achievementsCount,
+                    "ab_test_assignments" to abCount
+                ).forEach { (name, count) ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(name, style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
+                        Text(
+                            count?.toString() ?: "\u2014",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = if (count != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+        Text("Push sample rows", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+        val canPush = !isBusy && currentUid != null
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = { run("Sync preferences") { SupabaseTestData.sendTestPreference() } },
+                enabled = canPush,
+                modifier = Modifier.weight(1f)
+            ) { Text("Prefs", fontSize = 11.sp) }
+            Button(
+                onClick = { run("Sync achievements") { SupabaseTestData.sendTestGameAchievement() } },
+                enabled = canPush,
+                modifier = Modifier.weight(1f)
+            ) { Text("Achievements", fontSize = 11.sp) }
+            Button(
+                onClick = { run("Assign A/B") { SupabaseTestData.sendTestAbAssignment() } },
+                enabled = canPush,
+                modifier = Modifier.weight(1f)
+            ) { Text("A/B", fontSize = 11.sp) }
+        }
+
+        Spacer(Modifier.height(12.dp))
+        OutlinedButton(
+            onClick = { scope.launch { refreshCounts() } },
+            enabled = !isBusy,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(Icons.Filled.Refresh, null, Modifier.size(16.dp))
+            Spacer(Modifier.width(6.dp))
+            Text("Refresh row counts")
+        }
+
+        if (isBusy) {
+            Spacer(Modifier.height(8.dp))
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
+
+        status?.let {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                it,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (it.startsWith("Error") || it.startsWith("Crash"))
+                    MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
 @Composable
 fun SupabaseDbTestDevSection() {
     val scope = rememberCoroutineScope()
@@ -538,8 +755,10 @@ fun SupabaseDbTestDevSection() {
     var results by remember { mutableStateOf<List<String>?>(null) }
     val isAvailable = remember { SupabaseTestData.isSupabaseAvailable() }
 
-    // Table row counts
-    val tables = remember { listOf("users", "profiles", "posts", "post_likes", "post_comments", "bookmarks", "blocked_users", "reports", "conversations", "dm_messages", "call_signals", "call_history", "notifications") }
+    // Table row counts — mirrors SupabaseTestData.REQUIRED_TABLES so new tables
+    // (stories, feedback, user_game_achievements, practice_call_logs,
+    // user_preferences, ab_test_assignments) are monitored automatically.
+    val tables = remember { SupabaseTestData.REQUIRED_TABLES }
     var tableCounts by remember { mutableStateOf<Map<String, Int?>>(emptyMap()) }
 
     DevSectionCard(title = "Supabase DB Testing", icon = Icons.Filled.CloudSync) {
@@ -658,8 +877,7 @@ fun SupabaseDbTestDevSection() {
 }
 
 @Composable
-fun SupabaseTestDataSection() {
-    val context = LocalContext.current
+fun SupabaseTestDataSection(authViewModel: AuthViewModel) {
     val scope = rememberCoroutineScope()
     var isLoading by remember { mutableStateOf(false) }
     var postsCount by remember { mutableStateOf<Int?>(null) }
@@ -674,49 +892,128 @@ fun SupabaseTestDataSection() {
         }
     }
 
+    // Helper that runs a suspend block and updates loading/status state.
+    fun runAction(label: String, block: suspend () -> Result<String>) {
+        isLoading = true
+        statusMessage = "\u23F3 $label\u2026"
+        scope.launch {
+            try {
+                val result = block()
+                result.onSuccess { msg ->
+                    statusMessage = msg
+                    // Refresh posts count if user inserted into posts.
+                    if (label.contains("post", ignoreCase = true)) {
+                        SupabaseTestData.getTableRowCount("posts").onSuccess { postsCount = it }
+                    }
+                }
+                result.onFailure { err ->
+                    statusMessage = "Error: ${err.message}"
+                    Log.e("DevTestSections", "$label failed", err)
+                }
+            } catch (e: Throwable) {
+                statusMessage = "Crash: ${e.javaClass.simpleName}: ${e.message}"
+                Log.e("DevTestSections", "Uncaught error in $label", e)
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
     DevSectionCard(title = "Supabase Data", icon = Icons.Filled.CloudUpload) {
         if (!isAvailable) {
             Text("Not Configured", color = MaterialTheme.colorScheme.error)
-        } else {
-            Text("Posts: ${postsCount ?: "\u2014"}", style = MaterialTheme.typography.bodyMedium)
-            Spacer(Modifier.height(12.dp))
+            return@DevSectionCard
+        }
+
+        val currentUid = SupabaseAuthGate(authViewModel)
+        Spacer(Modifier.height(12.dp))
+
+        Text("Posts: ${postsCount ?: "\u2014"}", style = MaterialTheme.typography.bodyMedium)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Seed the newly-added Supabase tables with test rows. Posts now include " +
+                "media_items / min_audience / background_color columns, and stories is a brand-new table.",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(12.dp))
+
+        val signedIn = currentUid != null
+        // Posts/stories use anon-insertable policies (no FK to auth.users required),
+        // so they work without sign-in. Feedback is also nullable-user_id.
+        // Practice-call/achievements/prefs/ab REQUIRE a real JWT.
+        // Posts & stories (content tables)
+        Text("Content", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(
-                onClick = {
-                    isLoading = true
-                    statusMessage = null
-                    scope.launch {
-                        try {
-                            val result = SupabaseTestData.sendTestPost()
-                            result.onSuccess { msg ->
-                                statusMessage = msg
-                                SupabaseTestData.getTableRowCount("posts").onSuccess { postsCount = it }
-                            }
-                            result.onFailure { err ->
-                                statusMessage = "Error: ${err.message}"
-                                Log.e("DevTestSections", "sendTestPost failed", err)
-                            }
-                        } catch (e: Throwable) {
-                            statusMessage = "Crash: ${e.javaClass.simpleName}: ${e.message}"
-                            Log.e("DevTestSections", "Uncaught error in sendTestPost", e)
-                        } finally {
-                            isLoading = false
-                        }
-                    }
-                },
+                onClick = { runAction("Send test post") { SupabaseTestData.sendTestPost() } },
                 enabled = !isLoading,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                if (isLoading) CircularProgressIndicator(Modifier.size(16.dp)) else Text("Send Test Post")
-            }
-            statusMessage?.let {
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    it,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (it.startsWith("Error") || it.startsWith("Crash"))
-                        MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                )
-            }
+                modifier = Modifier.weight(1f)
+            ) { Text("Post", fontSize = 12.sp) }
+            Button(
+                onClick = { runAction("Bulk posts") { SupabaseTestData.sendBulkTestPosts(5) } },
+                enabled = !isLoading,
+                modifier = Modifier.weight(1f)
+            ) { Text("x5 Posts", fontSize = 12.sp) }
+            Button(
+                onClick = { runAction("Send test story") { SupabaseTestData.sendTestStory() } },
+                enabled = !isLoading,
+                modifier = Modifier.weight(1f)
+            ) { Text("Story", fontSize = 12.sp) }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        // Feedback + practice calls
+        Text("Feedback & AI", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = { runAction("Send feedback") { SupabaseTestData.sendTestFeedback() } },
+                enabled = !isLoading,
+                modifier = Modifier.weight(1f)
+            ) { Text("Feedback", fontSize = 12.sp) }
+            Button(
+                onClick = { runAction("Practice call log") { SupabaseTestData.sendTestPracticeCall() } },
+                enabled = !isLoading && signedIn,
+                modifier = Modifier.weight(1f)
+            ) { Text("Practice Call", fontSize = 12.sp) }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        // Games / preferences / A-B
+        Text("User State", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(
+                onClick = { runAction("Game achievement") { SupabaseTestData.sendTestGameAchievement() } },
+                enabled = !isLoading && signedIn,
+                modifier = Modifier.weight(1f)
+            ) { Text("Achievements", fontSize = 11.sp) }
+            Button(
+                onClick = { runAction("Preferences") { SupabaseTestData.sendTestPreference() } },
+                enabled = !isLoading && signedIn,
+                modifier = Modifier.weight(1f)
+            ) { Text("Prefs", fontSize = 11.sp) }
+            Button(
+                onClick = { runAction("A/B assignment") { SupabaseTestData.sendTestAbAssignment() } },
+                enabled = !isLoading && signedIn,
+                modifier = Modifier.weight(1f)
+            ) { Text("A/B", fontSize = 11.sp) }
+        }
+
+        if (isLoading) {
+            Spacer(Modifier.height(12.dp))
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
+
+        statusMessage?.let {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                it,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (it.startsWith("Error") || it.startsWith("Crash"))
+                    MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
@@ -812,7 +1109,7 @@ fun AuthenticationTestingSection(authViewModel: AuthViewModel?, devOptionsViewMo
                     onClick = {
                         scope.launch {
                             authResult = "🔄 Signing in with mock credentials..."
-                            authViewModel?.signIn("dev@neurocomet.app", "password123")
+                            authViewModel?.signIn("dev@getneurocomet.com", "password123")
                             delay(1200)
                             authResult = if (authViewModel?.user?.value != null) "✅ Signed in" else "⏳ 2FA Required"
                         }
@@ -1169,7 +1466,7 @@ fun BiometricFidoDevSection(authViewModel: AuthViewModel?, devOptionsViewModel: 
         } else {
             Button(
                 onClick = {
-                    authViewModel?.startTotpSetup("dev@neurocomet.app")
+                    authViewModel?.startTotpSetup("dev@getneurocomet.com")
                     authTestResult = "📱 TOTP setup started — use authenticator app to scan"
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -2142,7 +2439,7 @@ fun ContactPickerDevSection() {
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Row(Modifier.padding(12.dp), verticalAlignment = Alignment.Top) {
+                Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         Icons.Filled.Error,
                         contentDescription = null,
@@ -2187,7 +2484,7 @@ fun ContactPickerDevSection() {
     }
 }
 
-// ════════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════
 // A/B Testing Dev Section
 // ════════════════════════════════════════════════════════════════════
 
@@ -3034,6 +3331,4 @@ fun StressTestingSection(feedViewModel: FeedViewModel?, context: Context) {
         }
     }
 }
-
-
 

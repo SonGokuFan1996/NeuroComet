@@ -114,22 +114,22 @@ private fun M3ENavigationBarItem(
 
     val animatedIndicatorWidth by animateDpAsState(
         targetValue = if (selected) 64.dp else 0.dp,
-        animationSpec = physics.dpSpec(M3EPhysicsRole.EMPHASIZED),
+        animationSpec = physics.dpSpec(M3EPhysicsRole.SNAP),
         label = "indicatorWidth"
     )
     
     val animatedIndicatorColor by animateColorAsState(
         targetValue = if (selected) {
-            MaterialTheme.colorScheme.secondary.copy(alpha = 0.14f)
+            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f)
         } else {
             Color.Transparent
         },
-        animationSpec = physics.colorSpec(M3EPhysicsRole.STANDARD),
+        animationSpec = physics.colorSpec(M3EPhysicsRole.SNAP),
         label = "indicatorColor"
     )
     val animatedIndicatorBorder by animateColorAsState(
-        targetValue = if (selected) Color.White.copy(alpha = 0.22f) else Color.Transparent,
-        animationSpec = physics.colorSpec(M3EPhysicsRole.STANDARD),
+        targetValue = if (selected) Color.White.copy(alpha = 0.18f) else Color.Transparent,
+        animationSpec = physics.colorSpec(M3EPhysicsRole.SNAP),
         label = "indicatorBorder"
     )
     
@@ -139,7 +139,7 @@ private fun M3ENavigationBarItem(
         } else {
             MaterialTheme.colorScheme.onSurfaceVariant
         },
-        animationSpec = physics.colorSpec(M3EPhysicsRole.CALM),
+        animationSpec = physics.colorSpec(M3EPhysicsRole.STANDARD),
         label = "contentColor"
     )
     
@@ -173,16 +173,15 @@ private fun M3ENavigationBarItem(
                     if (selected) {
                         Brush.verticalGradient(
                             colors = listOf(
-                                Color.White.copy(alpha = 0.12f),
                                 animatedIndicatorColor,
-                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f)
+                                animatedIndicatorColor.copy(alpha = animatedIndicatorColor.alpha * 0.85f)
                             )
                         )
                     } else {
                         Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
                     }
                 )
-                .border(1.dp, animatedIndicatorBorder, M3EDesignSystem.Shapes.PillShape),
+                .border(0.5.dp, animatedIndicatorBorder, M3EDesignSystem.Shapes.PillShape),
             contentAlignment = Alignment.Center
         ) {
             BadgedBox(

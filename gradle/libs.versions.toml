@@ -2,7 +2,7 @@
 
 [versions]
 kotlin = "2.3.0"
-agp = "9.1.0"
+agp = "9.1.1"
 googleServices = "4.4.2"
 coreKtx = "1.17.0"
 junit = "4.13.2"
@@ -69,6 +69,7 @@ firebase-auth = { module = "com.google.firebase:firebase-auth" }
 supabase-postgrest = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
 supabase-auth = { module = "io.github.jan-tennert.supabase:auth-kt" }
 supabase-realtime = { module = "io.github.jan-tennert.supabase:realtime-kt" }
+supabase-storage = { module = "io.github.jan-tennert.supabase:storage-kt" }
 coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller" }
 google-material = { module = "com.google.android.material:material", version.ref = "material" }
@@ -84,3 +85,4 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+hotswan-compiler = { id = "com.github.skydoves.compose.hotswan.compiler", version = "1.1.1" }

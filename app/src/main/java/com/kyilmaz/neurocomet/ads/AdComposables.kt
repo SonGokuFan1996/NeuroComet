@@ -1,6 +1,7 @@
 package com.kyilmaz.neurocomet.ads
 
 import android.app.Activity
+import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,32 +57,39 @@ fun BannerAd(
     val context = LocalContext.current
     val adsState by GoogleAdsManager.adsState.collectAsState()
 
-    // Key observation: We MUST react to adsState changes here.
-    // If we return early based on shouldShowAds(), the composable might not re-trigger
-    // if the underlying state change doesn't cause a recomposition of the parent.
+    LaunchedEffect(context) {
+        GoogleAdsManager.ensureInitialized(context)
+    }
+
     val showAds = GoogleAdsManager.shouldShowAds()
 
-    var isLoading by remember { mutableStateOf(true) }
-    var hasError by remember { mutableStateOf(false) }
-    var adView by remember { mutableStateOf<com.google.android.gms.ads.AdView?>(null) }
-
-    // Create and load ad on first composition
-    LaunchedEffect(adKey, showAds) {
-        if (showAds) {
-            isLoading = true
-            hasError = false
-        }
-    }
-
-    DisposableEffect(adKey, showAds) {
+    DisposableEffect(adKey) {
         onDispose {
-            adView?.destroy()
-            adView = null
+            GoogleAdsManager.destroyBannerAd(adKey)
         }
     }
 
-    // Don't show anything if ads are disabled
-    if (!showAds || hasError) {
+    if (!adsState.isInitialized) {
+        if (adsState.isLoading) {
+            Box(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(getBannerHeight(adSize))
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                )
+            }
+        }
+        return
+    }
+
+    if (!showAds) {
         return
     }
 
@@ -93,8 +101,7 @@ fun BannerAd(
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
         contentAlignment = Alignment.Center
     ) {
-        if (isLoading) {
-            // Loading indicator
+        if (!adsState.bannerLoaded && adsState.error == null) {
             CircularProgressIndicator(
                 modifier = Modifier.size(24.dp),
                 strokeWidth = 2.dp,
@@ -102,48 +109,16 @@ fun BannerAd(
             )
         }
 
-        // Actual ad view - create directly in AndroidView
         AndroidView(
             modifier = Modifier.fillMaxWidth(),
             factory = { ctx ->
-                com.google.android.gms.ads.AdView(ctx).apply {
-                    setAdSize(adSize)
-                    // Use test ad unit ID in debug, production in release
-                    adUnitId = if (adsState.useTestAds) {
-                        "ca-app-pub-3940256099942544/6300978111" // Google test banner
-                    } else {
-                        "ca-app-pub-XXXXXXXX/XXXXXXXX" // Replace with production ID
-                    }
-
-                    adListener = object : com.google.android.gms.ads.AdListener() {
-                        override fun onAdLoaded() {
-                            isLoading = false
-                            hasError = false
-                        }
-
-                        override fun onAdFailedToLoad(error: com.google.android.gms.ads.LoadAdError) {
-                            isLoading = false
-                            hasError = true
-                        }
-
-                        override fun onAdClicked() {
-                            // Ad clicked
-                        }
-
-                        override fun onAdImpression() {
-                            // Ad impression recorded
-                        }
-                    }
-
-                    // Load the ad
-                    loadAd(com.google.android.gms.ads.AdRequest.Builder().build())
-
-                    adView = this
-                }
+                GoogleAdsManager.createBannerAdView(
+                    context = ctx,
+                    adSize = adSize,
+                    adUnitKey = adKey
+                ) ?: View(ctx)
             },
-            update = { view ->
-                // Update if needed
-            }
+            update = { }
         )
     }
 }
@@ -157,7 +132,6 @@ fun AdaptiveBannerAd(
     adKey: String = "adaptive_banner"
 ) {
     val context = LocalContext.current
-    val adsState by GoogleAdsManager.adsState.collectAsState()
 
     if (!GoogleAdsManager.shouldShowAds()) {
         return
@@ -197,11 +171,29 @@ fun RewardedAdButton(
 
     var isLoading by remember { mutableStateOf(false) }
 
-    // Preload rewarded ad if not loaded
-    LaunchedEffect(Unit) {
-        if (!adsState.rewardedLoaded) {
+    LaunchedEffect(adsState.isInitialized, adsState.rewardedLoaded) {
+        if (!adsState.isInitialized) {
+            GoogleAdsManager.ensureInitialized(context)
+        } else if (GoogleAdsManager.shouldShowAds() && !adsState.rewardedLoaded) {
             GoogleAdsManager.loadRewardedAd(context)
         }
+    }
+
+    if (!adsState.isInitialized) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (adsState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp
+                )
+            }
+        }
+        return
     }
 
     // Don't show if in kids mode

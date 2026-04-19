@@ -325,7 +325,7 @@
     <string name="settings_fake_premium_title">Fake Premium</string>
     <string name="settings_fake_premium_subtitle">Simulate paid status.</string>
     <string name="settings_mock_interface_title">Mock Interface</string>
-    <string name="settings_mock_interface_subtitle">Show fake data for demo.</string>
+    <string name="settings_mock_interface_subtitle">Show the public-release demo UI with safe mock data.</string>
     <string name="settings_simulate_badge_title">Simulate Badge Notification</string>
     <string name="settings_simulate_badge_subtitle">Triggers notification for \'%s\'.</string>
     <string name="settings_nuke_db_title">Nuke Database</string>
@@ -376,6 +376,13 @@
     <string name="create_story_text_preview">Your text here…</string>
     <string name="create_story_background_color">Background Color</string>
     <string name="create_story_gradient_backgrounds">Gradient Backgrounds</string>
+    <string name="create_story_media_tab">Media</string>
+    <string name="create_story_link_tab">Link</string>
+    <string name="create_story_text_tab">Text</string>
+    <string name="create_story_display_duration">Display Duration</string>
+    <string name="create_story_posted">Story Posted!</string>
+    <string name="create_story_content_blocked">Content Blocked</string>
+    <string name="create_story_choose_content">Choose content from your device</string>
     <string name="story_add_button_content_description">Add Story</string>
     <string name="story_your_story_label">Your Story</string>
     <string name="story_user_story_content_description">%s\'s Story</string>
@@ -506,7 +513,7 @@
     <string name="create_post_title">Create Post</string>
     <string name="create_post_close">Close</string>
     <string name="create_post_how_feeling">How are you feeling?</string>
-    <string name="create_post_placeholder">What\'s on your mind?</string>
+    <string name="create_post_placeholder">What\'s on your mind? 😊</string>
     <string name="create_post_add_media">Add Media</string>
     <string name="create_post_image_url">Image URL</string>
     <string name="create_post_video_url">Video URL</string>
@@ -1606,10 +1613,10 @@
     <string name="settings_section_legal">Legal</string>
     <string name="settings_privacy_policy_url">Privacy Policy</string>
     <string name="settings_privacy_policy_desc">How we protect your data</string>
-    <string name="settings_privacy_policy_link">https://neurocomet.github.io/NeuroComet/</string>
+    <string name="settings_privacy_policy_link">https://getneurocomet.com/privacy</string>
     <string name="settings_terms_url">Terms of Service</string>
     <string name="settings_terms_desc">Rules for using NeuroComet</string>
-    <string name="settings_terms_link">https://neurocomet.app/terms</string>
+    <string name="settings_terms_link">https://getneurocomet.com/terms</string>
     <string name="settings_licenses_desc">Open source libraries we use</string>
     <string name="settings_about_app">About NeuroComet</string>
     <string name="settings_about_app_desc">Version info, credits &amp; more</string>

@@ -63,23 +63,11 @@ object ParentalControlsSettings {
     private const val MAX_PIN_LENGTH = 8
     private const val TIME_DRIFT_TOLERANCE_MS = 5 * 60 * 1000L // 5 minutes tolerance for normal drift
 
-    // Developer master PIN for bypassing parental controls (debug builds only)
-    private const val DEV_MASTER_PIN = "000000"
-
-    /**
-     * Check if a PIN is the developer master PIN (only works in debug builds)
-     */
-    private fun isDevMasterPin(context: Context, pin: String): Boolean {
-        val isDebuggable = (context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
-        return isDebuggable && pin == DEV_MASTER_PIN
-    }
-
     /**
      * Check if the current device is a developer device
      */
     fun isDevDevice(context: Context): Boolean {
-        val isDebuggable = (context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
-        return isDebuggable
+        return DeviceAuthority.isAuthorizedDevice(context)
     }
 
     /**
@@ -238,14 +226,8 @@ object ParentalControlsSettings {
      * Verify the entered PIN against the stored hash.
      * Implements lockout after MAX_FAILED_ATTEMPTS.
      * Uses monotonic time (elapsedRealtime) to prevent time manipulation bypass.
-     * Developer master PIN (000000) bypasses verification in debug builds.
      */
     fun verifyPin(context: Context, pin: String): PinVerifyResult {
-        // Developer master PIN bypass (debug builds only)
-        if (isDevMasterPin(context, pin)) {
-            clearTimeTamperingFlag(context)
-            return PinVerifyResult.Success
-        }
 
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 

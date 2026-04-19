@@ -69,10 +69,11 @@ fun M3ESurface(
     variant: M3ESurfaceVariant = M3ESurfaceVariant.Settings,
     shadowElevation: Dp = 16.dp,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    containerColor: Color? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
     val scheme = MaterialTheme.colorScheme
-    val containerColor = when (variant) {
+    val defaultColor = when (variant) {
         M3ESurfaceVariant.Feed -> scheme.surfaceContainerLow
         M3ESurfaceVariant.Navigation -> scheme.surfaceContainer
         M3ESurfaceVariant.Settings -> scheme.surface
@@ -81,7 +82,7 @@ fun M3ESurface(
     Surface(
         modifier = modifier,
         shape = shape,
-        color = containerColor,
+        color = containerColor ?: defaultColor,
         shadowElevation = shadowElevation,
         tonalElevation = shadowElevation
     ) {

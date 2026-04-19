@@ -89,12 +89,12 @@ class PrivacyPolicyScreen extends StatelessWidget {
             _buildSection(
               theme,
               'Contact Us',
-              'If you have questions about this Privacy Policy or your data, please contact us at privacy@neurocomet.app',
+              'If you have questions about this Privacy Policy or your data, please contact us at privacy@getneurocomet.com',
             ),
             const SizedBox(height: 32),
             Center(
               child: TextButton(
-                onPressed: () => _launchUrl('https://neurocomet.app/privacy'),
+                onPressed: () => _launchUrl('https://getneurocomet.com/privacy'),
                 child: const Text('View Full Privacy Policy Online'),
               ),
             ),
@@ -221,12 +221,12 @@ class TermsOfServiceScreen extends StatelessWidget {
             _buildSection(
               theme,
               'Contact',
-              'Questions about these Terms should be sent to legal@neurocomet.app',
+              'Questions about these Terms should be sent to legal@getneurocomet.com',
             ),
             const SizedBox(height: 32),
             Center(
               child: TextButton(
-                onPressed: () => _launchUrl('https://neurocomet.app/terms'),
+                onPressed: () => _launchUrl('https://getneurocomet.com/terms'),
                 child: const Text('View Full Terms Online'),
               ),
             ),

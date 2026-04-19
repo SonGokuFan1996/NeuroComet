@@ -29,6 +29,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import io.github.jan.supabase.auth.auth
+import com.kyilmaz.neurocomet.ui.design.M3EDesignSystem
 
 /**
  * Neurodivergent-friendly profile traits that users can display
@@ -1009,10 +1011,37 @@ fun ProfileScreen(
     onPostClick: (Long) -> Unit = {},
     onEditProfile: () -> Unit = {}
 ) {
-    val profile = remember(userId) { getMockUserProfile(userId) }
-    val isOwnProfile = userId == "me"
+    // Determine current authenticated user for follow-relationship checks
+    val currentUserId = remember {
+        try {
+            AppSupabaseClient.client?.auth?.currentSessionOrNull()?.user?.id
+        } catch (_: Exception) { null }
+    }
+
+    // Start with mock data, then overlay Supabase profile when available
+    val mockProfile = remember(userId) { getMockUserProfile(userId) }
+    var profile by remember { mutableStateOf(mockProfile) }
+
+    // Fetch real profile from Supabase if authenticated
+    LaunchedEffect(userId) {
+        if (AppSupabaseClient.isAvailable() && currentUserId != null && userId != "me") {
+            val real = ProfileRepository.fetchProfile(userId, currentUserId)
+            if (real != null) {
+                // Merge: keep mock traits/interests/badges as fallbacks (Supabase doesn't store those yet)
+                profile = real.copy(
+                    traits = real.traits.ifEmpty { mockProfile.traits },
+                    specialInterests = real.specialInterests.ifEmpty { mockProfile.specialInterests },
+                    energyStatus = mockProfile.energyStatus,
+                    communicationNotes = real.communicationNotes.ifBlank { mockProfile.communicationNotes },
+                    badges = real.badges.ifEmpty { mockProfile.badges }
+                )
+            }
+        }
+    }
+
+    val isOwnProfile = userId == "me" || userId == currentUserId
     var selectedTab by remember { mutableStateOf(ProfileTab.POSTS) }
-    var isFollowing by remember { mutableStateOf(profile.isFollowing) }
+    var isFollowing by remember(profile) { mutableStateOf(profile.isFollowing) }
     var showStatusPicker by remember { mutableStateOf(false) }
     var showTraitsInfo by remember { mutableStateOf(false) }
     var selectedTrait by remember { mutableStateOf<NeuroDivergentTrait?>(null) }
@@ -1056,7 +1085,7 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(bottom = 32.dp)
+            contentPadding = PaddingValues(bottom = M3EDesignSystem.Spacing.bottomNavPadding)
         ) {
             // Profile Header
             item {

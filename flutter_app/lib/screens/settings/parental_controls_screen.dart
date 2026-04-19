@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
+import 'dev_options_screen.dart';
 
 /// Parental Controls Screen for managing child-safe features
 class ParentalControlsScreen extends ConsumerStatefulWidget {
@@ -35,6 +36,9 @@ class _ParentalControlsScreenState extends ConsumerState<ParentalControlsScreen>
   // Usage reports
   bool _weeklyReports = false;
 
+  // Recovery email
+  String? _recoveryEmail;
+
   @override
   void dispose() {
     _pinController.dispose();
@@ -44,6 +48,13 @@ class _ParentalControlsScreenState extends ConsumerState<ParentalControlsScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final devOpts = ref.watch(devOptionsProvider);
+
+    // Feature flag: force parental PIN as set
+    if (devOpts.forcePinSet && !_parentalControlsEnabled) {
+      _parentalControlsEnabled = true;
+      _savedPin ??= '0000';
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -307,7 +318,9 @@ class _ParentalControlsScreenState extends ConsumerState<ParentalControlsScreen>
                 ListTile(
                   leading: const Icon(Icons.email),
                   title: const Text('Recovery Email'),
-                  subtitle: const Text('j***@email.com'),
+                  subtitle: Text(_recoveryEmail != null
+                      ? _maskEmail(_recoveryEmail!)
+                      : 'Not set'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => _showRecoveryEmailDialog(context),
                 ),
@@ -333,7 +346,25 @@ class _ParentalControlsScreenState extends ConsumerState<ParentalControlsScreen>
     );
   }
 
+  String _maskEmail(String email) {
+    final parts = email.split('@');
+    if (parts.length != 2 || parts[0].isEmpty) return '***@***';
+    final name = parts[0];
+    final masked = '${name[0]}${'*' * (name.length - 1)}';
+    return '$masked@${parts[1]}';
+  }
+
   void _verifyPin() {
+    // Feature flag: auto-pass PIN verification
+    final devOpts = ref.read(devOptionsProvider);
+    if (devOpts.forcePinVerifySuccess) {
+      setState(() {
+        _isUnlocked = true;
+        _pinController.clear();
+      });
+      return;
+    }
+
     if (_pinController.text == _savedPin) {
       setState(() {
         _isUnlocked = true;
@@ -463,12 +494,21 @@ class _ParentalControlsScreenState extends ConsumerState<ParentalControlsScreen>
           FilledButton(
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Reset link sent to your email'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+              if (_recoveryEmail != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Reset link sent to ${_maskEmail(_recoveryEmail!)}'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('No recovery email set. Please contact support.'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
             },
             child: const Text('Send Reset Link'),
           ),
@@ -579,15 +619,31 @@ class _ParentalControlsScreenState extends ConsumerState<ParentalControlsScreen>
                 ),
               ),
               Expanded(
-                child: ListView.builder(
-                  controller: controller,
-                  itemCount: 10,
-                  itemBuilder: (context, index) => ListTile(
-                    leading: CircleAvatar(
-                      child: Icon(_getActivityIcon(index)),
-                    ),
-                    title: Text(_getActivityTitle(index)),
-                    subtitle: Text(_getActivityTime(index)),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.history,
+                        size: 48,
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No activity recorded yet',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Activity will appear here once usage tracking is enabled.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -596,32 +652,6 @@ class _ParentalControlsScreenState extends ConsumerState<ParentalControlsScreen>
         ),
       ),
     );
-  }
-
-  IconData _getActivityIcon(int index) {
-    final icons = [
-      Icons.login,
-      Icons.article,
-      Icons.favorite,
-      Icons.chat,
-      Icons.search,
-    ];
-    return icons[index % icons.length];
-  }
-
-  String _getActivityTitle(int index) {
-    final titles = [
-      'App opened',
-      'Viewed feed',
-      'Liked a post',
-      'Sent a message',
-      'Used search',
-    ];
-    return titles[index % titles.length];
-  }
-
-  String _getActivityTime(int index) {
-    return '${index + 1} hour${index == 0 ? '' : 's'} ago';
   }
 
   void _showChangePinDialog(BuildContext context) {
@@ -705,7 +735,7 @@ class _ParentalControlsScreenState extends ConsumerState<ParentalControlsScreen>
   }
 
   void _showRecoveryEmailDialog(BuildContext context) {
-    final emailController = TextEditingController();
+    final emailController = TextEditingController(text: _recoveryEmail ?? '');
 
     showDialog(
       context: context,
@@ -726,13 +756,24 @@ class _ParentalControlsScreenState extends ConsumerState<ParentalControlsScreen>
           ),
           FilledButton(
             onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Recovery email updated'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+              final email = emailController.text.trim();
+              if (email.isNotEmpty && email.contains('@')) {
+                setState(() => _recoveryEmail = email);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Recovery email updated'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please enter a valid email address'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
             },
             child: const Text('Save'),
           ),

@@ -33,6 +33,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -87,14 +88,19 @@ import kotlinx.coroutines.launch
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import android.widget.Toast
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.kyilmaz.neurocomet.calling.WebRTCCallManager
+import com.kyilmaz.neurocomet.ui.design.M3EDesignSystem
+
 
 // =============================================================================
 // NEURO-FRIENDLY MESSAGES UI - REBUILT FROM GROUND UP
 // =============================================================================
 
 // Quick reaction emojis for messages (like WhatsApp/Telegram/iMessage)
-private val QUICK_REACTIONS = listOf("❤️", "👍", "😂", "😮", "😢", "🙏")
+private val QUICK_REACTIONS = listOf("\u2764\uFE0F", "\uD83D\uDC4D", "\uD83D\uDE02", "\uD83D\uDE2E", "\uD83D\uDE22", "\uD83D\uDE4F")
 
 /**
  * Screen size categories for adaptive layouts
@@ -128,37 +134,37 @@ private fun rememberMessagesDesign(): MessagesDesignTokens {
     return remember(screenSize, isLandscape) {
         MessagesDesignTokens(
             touchTarget = when (screenSize) {
-                ScreenSize.COMPACT -> 48.dp
+                ScreenSize.COMPACT -> M3EDesignSystem.ComponentHeight.button
                 ScreenSize.MEDIUM -> 52.dp
                 ScreenSize.EXPANDED -> 56.dp
             },
             avatarSize = when (screenSize) {
-                ScreenSize.COMPACT -> 36.dp
-                ScreenSize.MEDIUM -> 40.dp
-                ScreenSize.EXPANDED -> 44.dp
+                ScreenSize.COMPACT -> M3EDesignSystem.AvatarSize.comment
+                ScreenSize.MEDIUM -> M3EDesignSystem.AvatarSize.md
+                ScreenSize.EXPANDED -> M3EDesignSystem.AvatarSize.postCard
             },
             avatarSizeLarge = when (screenSize) {
-                ScreenSize.COMPACT -> 48.dp
+                ScreenSize.COMPACT -> M3EDesignSystem.AvatarSize.lg
                 ScreenSize.MEDIUM -> 52.dp
-                ScreenSize.EXPANDED -> 56.dp
+                ScreenSize.EXPANDED -> M3EDesignSystem.ComponentHeight.bottomSheet
             },
             bubbleMaxWidth = when (screenSize) {
                 ScreenSize.COMPACT -> 280.dp
                 ScreenSize.MEDIUM -> 400.dp
                 ScreenSize.EXPANDED -> 500.dp
             },
-            bubbleCornerRadius = 12.dp,
-            composerCornerRadius = 28.dp,
+            bubbleCornerRadius = M3EDesignSystem.Shapes.medium,
+            composerCornerRadius = M3EDesignSystem.Shapes.extraLarge,
             bubblePadding = when (screenSize) {
-                ScreenSize.COMPACT -> 12.dp
+                ScreenSize.COMPACT -> M3EDesignSystem.Spacing.sm
                 ScreenSize.MEDIUM -> 14.dp
-                ScreenSize.EXPANDED -> 16.dp
+                ScreenSize.EXPANDED -> M3EDesignSystem.Spacing.md
             },
-            itemSpacing = 4.dp,
+            itemSpacing = M3EDesignSystem.Spacing.xxs,
             horizontalPadding = when (screenSize) {
-                ScreenSize.COMPACT -> 8.dp
-                ScreenSize.MEDIUM -> 16.dp
-                ScreenSize.EXPANDED -> 24.dp
+                ScreenSize.COMPACT -> M3EDesignSystem.Spacing.xs
+                ScreenSize.MEDIUM -> M3EDesignSystem.Spacing.md
+                ScreenSize.EXPANDED -> M3EDesignSystem.Spacing.xl
             },
             contentMaxWidth = when (screenSize) {
                 ScreenSize.COMPACT -> null // Full width
@@ -186,15 +192,15 @@ private data class MessagesDesignTokens(
 
 // Static fallback for non-composable contexts
 private object MessagesDesign {
-    val touchTarget = 48.dp
-    val avatarSize = 36.dp
-    val avatarSizeLarge = 48.dp
+    val touchTarget = M3EDesignSystem.ComponentHeight.button
+    val avatarSize = M3EDesignSystem.AvatarSize.comment
+    val avatarSizeLarge = M3EDesignSystem.AvatarSize.lg
     val bubbleMaxWidth = 320.dp
-    val bubbleCornerRadius = 12.dp
-    val composerCornerRadius = 28.dp
-    val bubblePadding = 12.dp
-    val itemSpacing = 4.dp
-    val horizontalPadding = 8.dp
+    val bubbleCornerRadius = M3EDesignSystem.Shapes.medium
+    val composerCornerRadius = M3EDesignSystem.Shapes.extraLarge
+    val bubblePadding = M3EDesignSystem.Spacing.sm
+    val itemSpacing = M3EDesignSystem.Spacing.xxs
+    val horizontalPadding = M3EDesignSystem.Spacing.xs
 }
 
 /**
@@ -237,6 +243,141 @@ private val sensoryModes = listOf(
     SensoryMode.STIM to "Stim"
 )
 
+private data class ResolvedConversationUser(
+    val id: String,
+    val displayName: String,
+    val avatarUrl: String,
+    val username: String? = null,
+    val isVerified: Boolean = false
+)
+
+private data class ChatUserOption(
+    val id: String,
+    val displayName: String,
+    val secondaryLabel: String,
+    val avatarUrl: String,
+    val isVerified: Boolean
+)
+
+private data class DeviceContactOption(
+    val key: String,
+    val displayName: String,
+    val secondaryLabel: String,
+    val matchedUserId: String? = null,
+    val isMatchedOnApp: Boolean = false
+)
+
+private fun resolveConversationPeerId(participants: List<String>, currentUserId: String): String? {
+    return participants.firstOrNull { it != currentUserId && it != "me" }
+        ?: participants.firstOrNull { it != currentUserId }
+        ?: participants.firstOrNull { it != "me" }
+        ?: participants.firstOrNull()
+}
+
+private fun resolveConversationUser(
+    userId: String,
+    profiles: Map<String, MessagesRepository.DbProfile>
+): ResolvedConversationUser {
+    val profile = profiles[userId]
+    if (profile != null) {
+        return ResolvedConversationUser(
+            id = userId,
+            displayName = profile.display_name?.takeIf { it.isNotBlank() }
+                ?: profile.username?.takeIf { it.isNotBlank() }
+                ?: userId,
+            avatarUrl = profile.avatar_url ?: avatarUrl(userId),
+            username = profile.username,
+            isVerified = profile.is_verified
+        )
+    }
+
+    val mockUser = MOCK_USERS.find { it.id == userId }
+    return ResolvedConversationUser(
+        id = userId,
+        displayName = mockUser?.name ?: userId,
+        avatarUrl = mockUser?.avatarUrl ?: avatarUrl(userId),
+        username = mockUser?.id?.takeIf { it != userId },
+        isVerified = mockUser?.isVerified == true
+    )
+}
+
+private fun buildChatUserOptions(
+    currentUserId: String,
+    discoverableProfiles: List<MessagesRepository.DbProfile>
+): List<ChatUserOption> {
+    if (currentUserId != "me") {
+        return discoverableProfiles
+            .filter { it.id != currentUserId }
+            .map { profile ->
+                val name = profile.display_name?.takeIf { it.isNotBlank() }
+                    ?: profile.username?.takeIf { it.isNotBlank() }
+                    ?: profile.id
+                ChatUserOption(
+                    id = profile.id,
+                    displayName = name,
+                    secondaryLabel = profile.username?.takeIf { it.isNotBlank() }?.let { "@$it" } ?: profile.id,
+                    avatarUrl = profile.avatar_url ?: avatarUrl(profile.id),
+                    isVerified = profile.is_verified
+                )
+            }
+    }
+
+    return MOCK_USERS
+        .filter { it.id != currentUserId }
+        .map { user ->
+            ChatUserOption(
+                id = user.id,
+                displayName = user.name,
+                secondaryLabel = "@${user.id}",
+                avatarUrl = user.avatarUrl,
+                isVerified = user.isVerified
+            )
+        }
+}
+
+private fun normalizedNameToken(value: String?): String {
+    return value.orEmpty()
+        .lowercase()
+        .replace(Regex("[^a-z0-9]+"), "")
+}
+
+private fun buildDeviceContactOptions(
+    deviceContacts: List<ContactsManager.DeviceContact>,
+    appUsers: List<ChatUserOption>
+): List<DeviceContactOption> {
+    val appUsersByToken = appUsers.flatMap { user ->
+        buildList {
+            val displayToken = normalizedNameToken(user.displayName)
+            if (displayToken.isNotBlank()) add(displayToken to user)
+            val secondaryToken = normalizedNameToken(user.secondaryLabel.removePrefix("@"))
+            if (secondaryToken.isNotBlank()) add(secondaryToken to user)
+        }
+    }.groupBy({ it.first }, { it.second })
+
+    return deviceContacts.mapIndexed { index, contact ->
+        val match = appUsersByToken[normalizedNameToken(contact.displayName)]?.firstOrNull()
+        DeviceContactOption(
+            key = buildString {
+                append(index)
+                append('|')
+                append(
+                    listOfNotNull(
+                        contact.displayName,
+                        contact.phoneNumbers.firstOrNull(),
+                        contact.emails.firstOrNull()
+                    ).joinToString("|").ifBlank { contact.displayName }
+                )
+            },
+            displayName = contact.displayName,
+            secondaryLabel = contact.phoneNumbers.firstOrNull()
+                ?: contact.emails.firstOrNull()
+                ?: "No phone or email saved",
+            matchedUserId = match?.id,
+            isMatchedOnApp = match != null
+        )
+    }
+}
+
 // =============================================================================
 // INBOX SCREEN - NeuroComet Unique Design
 // =============================================================================
@@ -247,9 +388,18 @@ fun NeuroInboxScreen(
     safetyState: SafetyState,
     onOpenConversation: (String) -> Unit,
     onStartNewChat: (userId: String) -> Unit = {},
+    onSearchNewChatUsers: (String) -> Unit = {},
+    onResetNewChatSearch: () -> Unit = {},
     onBack: (() -> Unit)? = null,
     onOpenCallHistory: () -> Unit = {},
-    onOpenPracticeCall: () -> Unit = {}
+    onOpenPracticeCall: () -> Unit = {},
+    onStartCall: (userId: String, displayName: String, avatar: String, isVideo: Boolean) -> Unit = { _, _, _, _ -> },
+    currentUserId: String = "me",
+    profiles: Map<String, MessagesRepository.DbProfile> = emptyMap(),
+    discoverableProfiles: List<MessagesRepository.DbProfile> = emptyList(),
+    newChatProfiles: List<MessagesRepository.DbProfile> = emptyList(),
+    isSearchingNewChatUsers: Boolean = false,
+    isStartingConversation: Boolean = false
 ) {
     val context = LocalContext.current
     val parentalState = remember { ParentalControlsSettings.getState(context) }
@@ -277,9 +427,9 @@ fun NeuroInboxScreen(
         // Apply search filter
         if (searchQuery.isNotBlank()) {
             result = result.filter { conv ->
-                val otherId = conv.participants.firstOrNull { it != "me" } ?: ""
-                val user = MOCK_USERS.find { it.id == otherId }
-                val text = "${user?.name ?: otherId} ${conv.messages.lastOrNull()?.content ?: ""}"
+                val otherId = resolveConversationPeerId(conv.participants, currentUserId).orEmpty()
+                val user = resolveConversationUser(otherId, profiles)
+                val text = "${user.displayName} ${user.username.orEmpty()} ${conv.messages.lastOrNull()?.content ?: ""}"
                 text.contains(searchQuery, ignoreCase = true)
             }
         }
@@ -298,6 +448,9 @@ fun NeuroInboxScreen(
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
     val unreadTotal = conversations.sumOf { it.unreadCount }
     val haptic = LocalHapticFeedback.current
+    val experimentalChromeVariant = remember(context) {
+        ABTestManager.getVariant(context, ABExperiment.LIQUID_GLASS)
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -317,7 +470,8 @@ fun NeuroInboxScreen(
                         onClose = {
                             isSearching = false
                             searchQuery = ""
-                        }
+                        },
+                        variant = experimentalChromeVariant
                     )
                 }
             } else {
@@ -336,7 +490,8 @@ fun NeuroInboxScreen(
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         onOpenCallHistory()
                     },
-                    isDark = isDark
+                    isDark = isDark,
+                    variant = experimentalChromeVariant
                 )
             }
         },
@@ -375,7 +530,8 @@ fun NeuroInboxScreen(
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 selectedFilter = filter
                             },
-                            isDark = isDark
+                            isDark = isDark,
+                            variant = experimentalChromeVariant
                         )
                     }
                 }
@@ -386,6 +542,9 @@ fun NeuroInboxScreen(
                 InlineCallHistoryView(
                     onOpenCallHistory = onOpenCallHistory,
                     onOpenPracticeCall = onOpenPracticeCall,
+                    onStartCall = onStartCall,
+                    currentUserId = currentUserId,
+                    discoverableProfiles = discoverableProfiles,
                     modifier = Modifier.weight(1f)
                 )
             } else if (filteredConversations.isEmpty()) {
@@ -402,25 +561,30 @@ fun NeuroInboxScreen(
                     items(filteredConversations, key = { it.id }) { conversation ->
                         ModernConversationListItem(
                             conversation = conversation,
+                            currentUserId = currentUserId,
+                            profiles = profiles,
                             onClick = { onOpenConversation(conversation.id) },
                             isDark = isDark,
+                            variant = experimentalChromeVariant,
                             onVideoCall = {
-                                val otherId = conversation.participants.firstOrNull { it != "me" } ?: return@ModernConversationListItem
-                                val user = MOCK_USERS.find { it.id == otherId }
+                                val otherId = resolveConversationPeerId(conversation.participants, currentUserId)
+                                    ?: return@ModernConversationListItem
+                                val user = resolveConversationUser(otherId, profiles)
                                 WebRTCCallManager.getInstance().startCall(
                                     recipientId = otherId,
-                                    recipientName = user?.name ?: otherId,
-                                    recipientAvatar = user?.avatarUrl ?: avatarUrl(otherId),
+                                    recipientName = user.displayName,
+                                    recipientAvatar = user.avatarUrl,
                                     callType = com.kyilmaz.neurocomet.calling.CallType.VIDEO
                                 )
                             },
                             onVoiceCall = {
-                                val otherId = conversation.participants.firstOrNull { it != "me" } ?: return@ModernConversationListItem
-                                val user = MOCK_USERS.find { it.id == otherId }
+                                val otherId = resolveConversationPeerId(conversation.participants, currentUserId)
+                                    ?: return@ModernConversationListItem
+                                val user = resolveConversationUser(otherId, profiles)
                                 WebRTCCallManager.getInstance().startCall(
                                     recipientId = otherId,
-                                    recipientName = user?.name ?: otherId,
-                                    recipientAvatar = user?.avatarUrl ?: avatarUrl(otherId),
+                                    recipientName = user.displayName,
+                                    recipientAvatar = user.avatarUrl,
                                     callType = com.kyilmaz.neurocomet.calling.CallType.VOICE
                                 )
                             }
@@ -428,7 +592,7 @@ fun NeuroInboxScreen(
                     }
 
                     // Bottom spacing for navigation bar
-                    item { Spacer(Modifier.height(100.dp)) }
+                    item { Spacer(Modifier.height(M3EDesignSystem.Spacing.bottomNavPadding)) }
                 }
             }
         }
@@ -438,7 +602,13 @@ fun NeuroInboxScreen(
     if (showNewChatDialog) {
         NewChatDialog(
             existingConversations = conversations,
+            currentUserId = currentUserId,
+            discoverableProfiles = if (currentUserId == "me") discoverableProfiles else newChatProfiles,
+            isSearchingUsers = isSearchingNewChatUsers,
+            isStartingConversation = isStartingConversation,
+            onSearchQueryChanged = onSearchNewChatUsers,
             onDismiss = { showNewChatDialog = false },
+            onResetSearch = onResetNewChatSearch,
             onSelectUser = { userId ->
                 showNewChatDialog = false
                 onStartNewChat(userId)
@@ -455,13 +625,21 @@ fun NeuroInboxScreen(
 private fun InlineCallHistoryView(
     onOpenCallHistory: () -> Unit,
     onOpenPracticeCall: () -> Unit,
+    onStartCall: (userId: String, displayName: String, avatar: String, isVideo: Boolean) -> Unit = { _, _, _, _ -> },
+    currentUserId: String,
+    discoverableProfiles: List<MessagesRepository.DbProfile>,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val callManager = remember { WebRTCCallManager.getInstance() }
     val callHistory = callManager.callHistory
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(callManager) {
+        callManager.loadCallHistoryIfNeeded()
+    }
 
     // Device contacts state
     var hasContactsPermission by remember {
@@ -483,11 +661,15 @@ private fun InlineCallHistoryView(
         if (granted) {
             scope.launch {
                 isLoading = true
-                deviceContacts = ContactsManager.readDeviceContacts(context)
-                matchedContacts = ContactsManager.findFriendsOnApp(context)
+                val snapshot = ContactsManager.loadContactsSnapshot(context)
+                deviceContacts = snapshot.deviceContacts
+                matchedContacts = snapshot.matchedContacts
                 ContactsManager.setContactsSyncEnabled(context, true)
                 isLoading = false
             }
+        } else {
+            deviceContacts = emptyList()
+            matchedContacts = emptyList()
         }
     }
 
@@ -495,14 +677,43 @@ private fun InlineCallHistoryView(
     LaunchedEffect(hasContactsPermission) {
         if (hasContactsPermission && deviceContacts.isEmpty()) {
             isLoading = true
-            deviceContacts = ContactsManager.readDeviceContacts(context)
-            matchedContacts = ContactsManager.findFriendsOnApp(context)
+            val snapshot = ContactsManager.loadContactsSnapshot(context)
+            deviceContacts = snapshot.deviceContacts
+            matchedContacts = snapshot.matchedContacts
             isLoading = false
+        } else if (!hasContactsPermission) {
+            deviceContacts = emptyList()
+            matchedContacts = emptyList()
+        }
+    }
+
+    DisposableEffect(lifecycleOwner, hasContactsPermission, deviceContacts) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                val granted = ContactsManager.hasContactsPermission(context)
+                hasContactsPermission = granted
+                if (granted && (deviceContacts.isEmpty() || ContactsManager.isContactsSyncEnabled(context))) {
+                    scope.launch {
+                        isLoading = true
+                        val snapshot = ContactsManager.loadContactsSnapshot(context)
+                        deviceContacts = snapshot.deviceContacts
+                        matchedContacts = snapshot.matchedContacts
+                        isLoading = false
+                    }
+                } else if (!granted) {
+                    deviceContacts = emptyList()
+                    matchedContacts = emptyList()
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 
     // Build a unified contact list: matched app users first, then device contacts with phone numbers
-    val callableContacts = remember(matchedContacts, deviceContacts) {
+    val callableContacts = remember(matchedContacts, deviceContacts, currentUserId, discoverableProfiles) {
         val result = mutableListOf<CallableContact>()
 
         // 1. Matched contacts (device contact ↔ app user) — can do in-app calls
@@ -520,8 +731,20 @@ private fun InlineCallHistoryView(
 
         // 2. App users not yet matched via contacts
         val matchedIds = matchedContacts.map { it.appUser.id }.toSet()
-        for (user in MOCK_USERS.filter { it.id != "me" && it.id !in matchedIds }) {
-            result.add(
+        val fallbackAppUsers = if (currentUserId != "me" && discoverableProfiles.isNotEmpty()) {
+            discoverableProfiles.map { profile ->
+                CallableContact(
+                    id = profile.id,
+                    name = profile.display_name?.takeIf { it.isNotBlank() }
+                        ?: profile.username?.takeIf { it.isNotBlank() }
+                        ?: profile.id,
+                    phoneNumber = null,
+                    photoUri = profile.avatar_url ?: avatarUrl(profile.id),
+                    isAppUser = true
+                )
+            }
+        } else {
+            MOCK_USERS.filter { it.id != currentUserId }.map { user ->
                 CallableContact(
                     id = user.id,
                     name = user.name,
@@ -529,17 +752,28 @@ private fun InlineCallHistoryView(
                     photoUri = user.avatarUrl,
                     isAppUser = true
                 )
-            )
+            }
         }
+        fallbackAppUsers.filter { it.id !in matchedIds }.forEach(result::add)
 
         // 3. Device contacts with phone numbers (not matched to app users)
-        val matchedNames = matchedContacts.map { it.deviceContact.displayName.lowercase() }.toSet()
+        val matchedPhoneNumbers = matchedContacts
+            .flatMap { it.deviceContact.phoneNumbers }
+            .toSet()
+        val matchedEmails = matchedContacts
+            .flatMap { it.deviceContact.emails }
+            .toSet()
         for (contact in deviceContacts) {
-            if (contact.displayName.lowercase() in matchedNames) continue
+            val overlapsMatchedContact = contact.phoneNumbers.any { it in matchedPhoneNumbers } ||
+                contact.emails.any { it in matchedEmails }
+            if (overlapsMatchedContact) continue
             if (contact.phoneNumbers.isEmpty()) continue
+            val stableDeviceKey = contact.phoneNumbers.firstOrNull()
+                ?: contact.emails.firstOrNull()
+                ?: contact.displayName
             result.add(
                 CallableContact(
-                    id = "device_${contact.displayName.hashCode()}",
+                    id = "device_${stableDeviceKey.hashCode()}_${contact.displayName.hashCode()}",
                     name = contact.displayName,
                     phoneNumber = contact.phoneNumbers.first(),
                     photoUri = contact.photoUri,
@@ -646,7 +880,7 @@ private fun InlineCallHistoryView(
                     Spacer(Modifier.height(12.dp))
                 }
 
-                items(callableContacts.take(20)) { contact ->
+                items(callableContacts) { contact ->
                     CallableContactRow(
                         contact = contact,
                         onVoiceCall = {
@@ -692,28 +926,18 @@ private fun InlineCallHistoryView(
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.padding(bottom = 16.dp)
                     ) {
-                        items(callableContacts.take(12)) { contact ->
+                        items(callableContacts) { contact ->
                             QuickCallContact(
                                 name = contact.name,
                                 photoUri = contact.photoUri,
                                 isAppUser = contact.isAppUser,
                                 onVoiceCall = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    callManager.startCall(
-                                        recipientId = contact.id,
-                                        recipientName = contact.name,
-                                        recipientAvatar = contact.photoUri ?: "",
-                                        callType = com.kyilmaz.neurocomet.calling.CallType.VOICE
-                                    )
+                                    onStartCall(contact.id, contact.name, contact.photoUri ?: "", false)
                                 },
                                 onVideoCall = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    callManager.startCall(
-                                        recipientId = contact.id,
-                                        recipientName = contact.name,
-                                        recipientAvatar = contact.photoUri ?: "",
-                                        callType = com.kyilmaz.neurocomet.calling.CallType.VIDEO
-                                    )
+                                    onStartCall(contact.id, contact.name, contact.photoUri ?: "", true)
                                 }
                             )
                         }
@@ -1024,7 +1248,7 @@ private fun InlineCallHistoryItem(
     }
 
     val outcomeText = when (outcomeEnum) {
-        com.kyilmaz.neurocomet.calling.CallOutcome.COMPLETED -> if (entry.formattedDuration.isNotEmpty()) entry.formattedDuration else "Connected"
+        com.kyilmaz.neurocomet.calling.CallOutcome.COMPLETED -> entry.formattedDuration.ifEmpty { "Connected" }
         com.kyilmaz.neurocomet.calling.CallOutcome.MISSED -> "Missed"
         com.kyilmaz.neurocomet.calling.CallOutcome.DECLINED -> "Declined"
         com.kyilmaz.neurocomet.calling.CallOutcome.NO_ANSWER -> "No answer"
@@ -1104,15 +1328,13 @@ private fun MessagesHeader(
     onNewMessage: () -> Unit,
     onSearch: () -> Unit,
     onCallHistory: () -> Unit,
-    isDark: Boolean
+    isDark: Boolean,
+    variant: String
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
-            .statusBarsPadding()
-            .padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 8.dp)
-    ) {
+    val useSkeuomorphic = isSkeumorphicVariant(variant)
+    var showOverflowMenu by remember { mutableStateOf(false) }
+
+    val headerContent: @Composable () -> Unit = {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -1126,7 +1348,9 @@ private fun MessagesHeader(
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = (-0.5).sp,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     if (unreadCount > 0) {
                         Spacer(Modifier.width(12.dp))
@@ -1138,42 +1362,127 @@ private fun MessagesHeader(
                     text = if (unreadCount > 0) {
                         "You have $unreadCount unread ${if (unreadCount == 1) "message" else "messages"}"
                     } else {
-                        "Your conversations ✨"
+                        "Meaningful connections \u2728"
                     },
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
 
-            // Action buttons
+            // Action buttons — 2 compact + overflow menu (matches Flutter)
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 MessagesHeaderIconButton(
                     icon = Icons.Outlined.Search,
                     onClick = onSearch,
                     contentDescription = stringResource(R.string.conversation_search),
-                    isDark = isDark
-                )
-                MessagesHeaderIconButton(
-                    icon = Icons.Outlined.Videocam,
-                    onClick = onCallHistory,
-                    contentDescription = "Video calls",
-                    isDark = isDark
-                )
-                MessagesHeaderIconButton(
-                    icon = Icons.Outlined.Phone,
-                    onClick = onCallHistory,
-                    contentDescription = "Call history",
-                    isDark = isDark
+                    isDark = isDark,
+                    variant = variant
                 )
                 MessagesHeaderIconButton(
                     icon = Icons.Outlined.Edit,
                     onClick = onNewMessage,
                     contentDescription = stringResource(R.string.conversation_new_message),
                     isPrimary = true,
-                    isDark = isDark
+                    isDark = isDark,
+                    variant = variant
                 )
+                // Overflow menu
+                Box {
+                    if (useSkeuomorphic) {
+                        SkeuomorphicPanel(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable { showOverflowMenu = true },
+                            shape = RoundedCornerShape(10.dp),
+                            variant = variant
+                        ) {
+                            Box(
+                                modifier = Modifier.padding(8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.MoreHoriz,
+                                    contentDescription = "More options",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    } else {
+                        Surface(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable { showOverflowMenu = true },
+                            shape = RoundedCornerShape(10.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant
+                        ) {
+                            Box(
+                                modifier = Modifier.padding(8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.MoreHoriz,
+                                    contentDescription = "More options",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                    DropdownMenu(
+                        expanded = showOverflowMenu,
+                        onDismissRequest = { showOverflowMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Video Calls") },
+                            onClick = { showOverflowMenu = false; onCallHistory() },
+                            leadingIcon = { Icon(Icons.Outlined.Videocam, contentDescription = null) }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Call History") },
+                            onClick = { showOverflowMenu = false; onCallHistory() },
+                            leadingIcon = { Icon(Icons.Outlined.Phone, contentDescription = null) }
+                        )
+                    }
+                }
             }
         }
+    }
+
+    if (useSkeuomorphic) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
+        ) {
+            SkeuomorphicPanel(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(28.dp),
+                variant = variant
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 12.dp)
+                ) {
+                    headerContent()
+                }
+            }
+        }
+        return
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+            .padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 8.dp)
+    ) {
+        headerContent()
     }
 }
 
@@ -1203,7 +1512,7 @@ private fun UnreadBadge(count: Int) {
                 brush = Brush.linearGradient(
                     colors = listOf(primaryColor, tertiaryColor)
                 ),
-                shape = RoundedCornerShape(20.dp)
+                shape = M3EDesignSystem.Shapes.Chip
             )
             .padding(horizontal = 10.dp, vertical = 4.dp)
     ) {
@@ -1217,7 +1526,8 @@ private fun UnreadBadge(count: Int) {
 }
 
 /**
- * Header icon button - uses dynamic colors
+ * Compact header icon button - matches Flutter compact style.
+ * padding 8dp, icon 20dp, radius 10dp (default) / SkeuomorphicPanel (skeu).
  */
 @Composable
 private fun MessagesHeaderIconButton(
@@ -1225,15 +1535,40 @@ private fun MessagesHeaderIconButton(
     onClick: () -> Unit,
     contentDescription: String?,
     isDark: Boolean,
+    variant: String,
     isPrimary: Boolean = false
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
 
+    if (isSkeumorphicVariant(variant)) {
+        val palette = rememberSkeuomorphicPalette(variant)
+        SkeuomorphicPanel(
+            modifier = Modifier
+                .clip(RoundedCornerShape(10.dp))
+                .clickable(onClick = onClick),
+            shape = RoundedCornerShape(10.dp),
+            variant = variant
+        ) {
+            Box(
+                modifier = Modifier.padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = contentDescription,
+                    modifier = Modifier.size(20.dp),
+                    tint = if (isPrimary) palette.accent else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        return
+    }
+
     Surface(
         modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(10.dp))
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(10.dp),
         color = if (isPrimary) {
             primaryColor.copy(alpha = 0.15f)
         } else {
@@ -1241,13 +1576,13 @@ private fun MessagesHeaderIconButton(
         }
     ) {
         Box(
-            modifier = Modifier.padding(10.dp),
+            modifier = Modifier.padding(8.dp),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
-                modifier = Modifier.size(22.dp),
+                modifier = Modifier.size(20.dp),
                 tint = if (isPrimary) primaryColor else MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -1263,9 +1598,74 @@ private fun MessagesFilterPill(
     count: Int?,
     isSelected: Boolean,
     onClick: () -> Unit,
-    isDark: Boolean
+    isDark: Boolean,
+    variant: String
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
+
+    if (isSkeumorphicVariant(variant)) {
+        val palette = rememberSkeuomorphicPalette(variant)
+        SkeuomorphicPanel(
+            modifier = Modifier
+                .clip(RoundedCornerShape(24.dp))
+                .clickable(onClick = onClick),
+            shape = RoundedCornerShape(24.dp),
+            variant = variant
+        ) {
+            if (isSelected) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    palette.activeTop.copy(alpha = 0.92f),
+                                    palette.activeBottom.copy(alpha = 0.96f)
+                                )
+                            )
+                        )
+                )
+            }
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                if (isSelected) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = palette.accent
+                    )
+                }
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                    color = if (isSelected) palette.accent else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (count != null && count > 0) {
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color = palette.accent.copy(alpha = 0.18f),
+                                shape = CircleShape
+                            )
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = count.toString(),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = palette.accent
+                        )
+                    }
+                }
+            }
+        }
+        return
+    }
 
     Surface(
         modifier = Modifier
@@ -1325,8 +1725,11 @@ private fun MessagesFilterPill(
 @Composable
 private fun ModernConversationListItem(
     conversation: Conversation,
+    currentUserId: String,
+    profiles: Map<String, MessagesRepository.DbProfile>,
     onClick: () -> Unit,
     isDark: Boolean,
+    variant: String,
     onVideoCall: () -> Unit = {},
     onVoiceCall: () -> Unit = {}
 ) {
@@ -1335,29 +1738,17 @@ private fun ModernConversationListItem(
     val successColor = Color(0xFF4CAF50)
 
     val hasUnread = conversation.unreadCount > 0
-    val otherUserId = conversation.participants.firstOrNull { it != "me" } ?: ""
-    val otherUser = MOCK_USERS.find { it.id == otherUserId }
+    val otherUserId = resolveConversationPeerId(conversation.participants, currentUserId).orEmpty()
+    val otherUser = resolveConversationUser(otherUserId, profiles)
     val displayName = if (conversation.isGroup) {
         conversation.groupName ?: "Group Chat"
     } else {
-        otherUser?.name ?: otherUserId
+        otherUser.displayName
     }
     val lastMessage = conversation.messages.lastOrNull()
 
 
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        color = if (hasUnread) {
-            primaryColor.copy(alpha = 0.08f)
-        } else {
-            MaterialTheme.colorScheme.surface
-        }
-    ) {
+    val rowContent: @Composable () -> Unit = {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -1388,26 +1779,69 @@ private fun ModernConversationListItem(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = displayName.take(1).uppercase(),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    if (conversation.isGroup && conversation.groupAvatarUrl != null) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(conversation.groupAvatarUrl)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = "Group avatar",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else if (conversation.isGroup) {
+                        Icon(
+                            Icons.Default.Groups,
+                            contentDescription = "Group",
+                            modifier = Modifier.size(28.dp),
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    } else {
+                        Text(
+                            text = displayName.take(1).uppercase(),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+                // Group member count badge
+                if (conversation.isGroup && conversation.participants.size > 2) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .offset(x = (-2).dp, y = (-2).dp)
+                            .size(20.dp)
+                            .background(MaterialTheme.colorScheme.tertiaryContainer, CircleShape)
+                            .border(1.5.dp, MaterialTheme.colorScheme.surface, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "${conversation.participants.size}",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 9.sp,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    }
+                }
+                // Online indicator (only for 1:1 conversations)
+                if (!conversation.isGroup) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .offset(x = if (hasUnread) (-4).dp else (-2).dp, y = if (hasUnread) (-4).dp else (-2).dp)
+                            .size(14.dp)
+                            .background(successColor, CircleShape)
+                            .border(
+                                2.dp,
+                                MaterialTheme.colorScheme.background,
+                                CircleShape
+                            )
                     )
                 }
-                // Online indicator
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .offset(x = if (hasUnread) (-4).dp else (-2).dp, y = if (hasUnread) (-4).dp else (-2).dp)
-                        .size(14.dp)
-                        .background(successColor, CircleShape)
-                        .border(
-                            2.dp,
-                            MaterialTheme.colorScheme.background,
-                            CircleShape
-                        )
-                )
             }
 
             Spacer(Modifier.width(12.dp))
@@ -1425,7 +1859,7 @@ private fun ModernConversationListItem(
                         modifier = Modifier.weight(1f, fill = false)
                     )
                     // Verified badge (if applicable)
-                    if (otherUser?.name?.contains("Dr.") == true) {
+                    if (otherUser.isVerified) {
                         Spacer(Modifier.width(4.dp))
                         Icon(
                             imageVector = Icons.Filled.Verified,
@@ -1433,6 +1867,21 @@ private fun ModernConversationListItem(
                             modifier = Modifier.size(16.dp),
                             tint = primaryColor
                         )
+                    }
+                    // Group badge
+                    if (conversation.isGroup) {
+                        Spacer(Modifier.width(4.dp))
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.secondaryContainer
+                        ) {
+                            Text(
+                                text = "${conversation.participants.size} members",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
                     }
                     Spacer(Modifier.weight(1f))
                     Text(
@@ -1509,13 +1958,91 @@ private fun ModernConversationListItem(
             }
         }
     }
+
+    val contentModifier = Modifier
+        .fillMaxWidth()
+        .clip(RoundedCornerShape(16.dp))
+        .clickable(onClick = onClick)
+
+    if (isSkeumorphicVariant(variant)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+        ) {
+            SkeuomorphicPanel(
+                modifier = contentModifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                variant = variant
+            ) {
+                rowContent()
+            }
+        }
+        return
+    }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .then(contentModifier),
+        shape = RoundedCornerShape(16.dp),
+        color = if (hasUnread) {
+            primaryColor.copy(alpha = 0.08f)
+        } else {
+            MaterialTheme.colorScheme.surface
+        }
+    ) {
+        rowContent()
+    }
 }
 @Composable
 private fun NeuroSearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    variant: String
 ) {
+    if (isSkeumorphicVariant(variant)) {
+        SkeuomorphicPanel(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            shape = RoundedCornerShape(28.dp),
+            variant = variant
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onClose) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Close search")
+                }
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = onQueryChange,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = 4.dp),
+                    placeholder = { Text(stringResource(R.string.dm_search_conversations_placeholder)) },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.Transparent,
+                        unfocusedBorderColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent
+                    )
+                )
+                if (query.isNotEmpty()) {
+                    IconButton(onClick = { onQueryChange("") }) {
+                        Icon(Icons.Filled.Clear, contentDescription = "Clear")
+                    }
+                }
+            }
+        }
+        return
+    }
+
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -1607,117 +2134,520 @@ private fun NeuroEmptyInboxState(
 @Composable
 private fun NewChatDialog(
     existingConversations: List<Conversation>,
+    currentUserId: String,
+    discoverableProfiles: List<MessagesRepository.DbProfile>,
+    isSearchingUsers: Boolean,
+    isStartingConversation: Boolean,
+    onSearchQueryChanged: (String) -> Unit,
     onDismiss: () -> Unit,
+    onResetSearch: () -> Unit,
     onSelectUser: (String) -> Unit
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
     var searchQuery by remember { mutableStateOf("") }
-    val availableUsers = remember(searchQuery, existingConversations) {
-        MOCK_USERS.filter { user ->
-            user.id != "me" && (
-                searchQuery.isBlank() ||
-                user.name.contains(searchQuery, ignoreCase = true) ||
-                user.id.contains(searchQuery, ignoreCase = true)
-            )
+    var hasContactsPermission by remember { mutableStateOf(ContactsManager.hasContactsPermission(context)) }
+    var isLoadingContacts by remember { mutableStateOf(false) }
+    var deviceContacts by remember { mutableStateOf<List<ContactsManager.DeviceContact>>(emptyList()) }
+
+    fun loadDeviceContacts() {
+        if (!ContactsManager.hasContactsPermission(context)) {
+            hasContactsPermission = false
+            deviceContacts = emptyList()
+            return
+        }
+        scope.launch {
+            isLoadingContacts = true
+            hasContactsPermission = true
+            deviceContacts = ContactsManager.readDeviceContacts(context)
+            isLoadingContacts = false
         }
     }
+
+    val contactsPermissionLauncher = rememberLauncherForActivityResult(
+        contract = androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        hasContactsPermission = granted
+        if (granted) {
+            loadDeviceContacts()
+        } else {
+            deviceContacts = emptyList()
+        }
+    }
+
+    LaunchedEffect(searchQuery, currentUserId) {
+        if (currentUserId != "me") {
+            kotlinx.coroutines.delay(250)
+            onSearchQueryChanged(searchQuery)
+        }
+    }
+
+    LaunchedEffect(hasContactsPermission) {
+        if (hasContactsPermission && deviceContacts.isEmpty()) {
+            loadDeviceContacts()
+        } else if (!hasContactsPermission) {
+            deviceContacts = emptyList()
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onResetSearch()
+        onDispose { onResetSearch() }
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                val granted = ContactsManager.hasContactsPermission(context)
+                hasContactsPermission = granted
+                if (granted) {
+                    loadDeviceContacts()
+                } else {
+                    deviceContacts = emptyList()
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    val appUsers = remember(searchQuery, currentUserId, discoverableProfiles) {
+        buildChatUserOptions(currentUserId, discoverableProfiles).filter { user ->
+            searchQuery.isBlank() ||
+                user.displayName.contains(searchQuery, ignoreCase = true) ||
+                user.id.contains(searchQuery, ignoreCase = true) ||
+                user.secondaryLabel.contains(searchQuery, ignoreCase = true)
+        }
+    }
+    val deviceContactOptions = remember(searchQuery, deviceContacts, appUsers) {
+        buildDeviceContactOptions(deviceContacts, appUsers).filter { contact ->
+            searchQuery.isBlank() ||
+                contact.displayName.contains(searchQuery, ignoreCase = true) ||
+                contact.secondaryLabel.contains(searchQuery, ignoreCase = true)
+        }
+    }
+
+    // ── Unified Liquid Glass A/B experiment ────────────────
+    val liquidGlassVariant = remember(context) {
+        ABTestManager.getVariant(context, ABExperiment.LIQUID_GLASS)
+    }
+    val useGlass = liquidGlassVariant != "control"
+    val useSkeuomorphic = isSkeumorphicVariant(liquidGlassVariant)
+    val palette = if (useSkeuomorphic) rememberSkeuomorphicPalette(liquidGlassVariant) else null
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = if (useGlass)
+            Color.Transparent
+        else
+            MaterialTheme.colorScheme.surface,
         tonalElevation = 0.dp,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.new_chat),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
-            )
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
+        val body: @Composable () -> Unit = {
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                placeholder = { Text(stringResource(R.string.search_users)) },
-                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                singleLine = true,
-                shape = RoundedCornerShape(16.dp)
-            )
-            Spacer(Modifier.height(12.dp))
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 360.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                    .padding(bottom = 24.dp)
             ) {
-                if (availableUsers.isEmpty()) {
-                    item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "No users found",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(16.dp)
+                            text = stringResource(R.string.new_chat),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
+                        if (useSkeuomorphic && palette != null) {
+                            Text(
+                                text = if (isFullSkeumorphicVariant(liquidGlassVariant)) {
+                                    "Shaped contact cards with richer depth"
+                                } else {
+                                    "Gentle tactile surfaces for quick starts"
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = palette.accent.copy(alpha = 0.85f)
+                            )
+                        }
                     }
-                } else {
-                    items(availableUsers, key = { it.id }) { user ->
-                        val hasExistingChat = existingConversations.any { conv -> conv.participants.contains(user.id) }
-                        Surface(
-                            onClick = { onSelectUser(user.id) },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(14.dp),
-                            color = Color.Transparent
+                    if (useSkeuomorphic) {
+                        SkeuomorphicPanel(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .clickable(onClick = onDismiss),
+                            shape = CircleShape,
+                            variant = liquidGlassVariant
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 8.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(14.dp)
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(46.dp)
-                                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = user.name.take(1).uppercase(),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                }
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = user.name,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = "@${user.id}",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                                if (hasExistingChat) {
-                                    AssistChip(
-                                        onClick = { onSelectUser(user.id) },
-                                        label = { Text("Open") }
-                                    )
-                                }
+                                Icon(
+                                    Icons.Filled.Close,
+                                    contentDescription = "Close",
+                                    tint = palette?.accent ?: MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
                     }
                 }
+
+                if (useSkeuomorphic) {
+                    SkeuomorphicPanel(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        variant = liquidGlassVariant
+                    ) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                            placeholder = { Text(stringResource(R.string.search_users)) },
+                            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                            singleLine = true,
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color.Transparent,
+                                unfocusedBorderColor = Color.Transparent,
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                disabledContainerColor = Color.Transparent
+                            )
+                        )
+                    }
+                } else {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
+                        placeholder = { Text(stringResource(R.string.search_users)) },
+                        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                        singleLine = true,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                }
+                Spacer(Modifier.height(12.dp))
+
+                if (!hasContactsPermission) {
+                    if (useSkeuomorphic) {
+                        SkeuomorphicPanel(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp),
+                            shape = RoundedCornerShape(18.dp),
+                            variant = liquidGlassVariant
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(42.dp)
+                                        .background(palette?.accent?.copy(alpha = 0.16f) ?: MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), RoundedCornerShape(14.dp)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(Icons.Filled.Contacts, contentDescription = null, tint = palette?.accent ?: MaterialTheme.colorScheme.primary)
+                                }
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Allow contacts access",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = "Show your full device list and highlight people already on NeuroComet",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(8.dp))
+                    }
+                    AssistChip(
+                        onClick = {
+                            contactsPermissionLauncher.launch(android.Manifest.permission.READ_CONTACTS)
+                        },
+                        label = { Text("Allow contacts to show your full device list") },
+                        leadingIcon = {
+                            Icon(Icons.Filled.Contacts, contentDescription = null)
+                        },
+                        modifier = Modifier.padding(horizontal = 20.dp)
+                    )
+                    Spacer(Modifier.height(12.dp))
+                }
+
+                if (isSearchingUsers || isStartingConversation) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                        Text(
+                            text = if (isStartingConversation) "Starting conversation…" else "Searching people…",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 360.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (appUsers.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "People on NeuroComet",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+                            )
+                        }
+                        items(appUsers, key = { it.id }) { user ->
+                            val hasExistingChat = existingConversations.any { conv -> conv.participants.contains(user.id) }
+                            val rowContent: @Composable () -> Unit = {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(46.dp)
+                                            .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = user.displayName.take(1).uppercase(),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    }
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = user.displayName,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = user.secondaryLabel,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    if (user.isVerified) {
+                                        Icon(
+                                            Icons.Filled.Verified,
+                                            contentDescription = null,
+                                            tint = palette?.accent ?: MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                    if (hasExistingChat) {
+                                        AssistChip(
+                                            onClick = {
+                                                if (!isStartingConversation) onSelectUser(user.id)
+                                            },
+                                            label = { Text("Open") }
+                                        )
+                                    }
+                                }
+                            }
+
+                            if (useSkeuomorphic) {
+                                SkeuomorphicPanel(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(18.dp))
+                                        .clickable {
+                                            if (!isStartingConversation) onSelectUser(user.id)
+                                        },
+                                    shape = RoundedCornerShape(18.dp),
+                                    variant = liquidGlassVariant
+                                ) {
+                                    rowContent()
+                                }
+                            } else {
+                                Surface(
+                                    onClick = {
+                                        if (!isStartingConversation) onSelectUser(user.id)
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(14.dp),
+                                    color = Color.Transparent
+                                ) {
+                                    rowContent()
+                                }
+                            }
+                        }
+                    }
+
+                    if (hasContactsPermission) {
+                        item {
+                            Text(
+                                text = if (deviceContacts.isNotEmpty()) {
+                                    "Contacts on this device • ${deviceContacts.size} total"
+                                } else {
+                                    "Contacts on this device"
+                                },
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+                            )
+                        }
+
+                        if (isLoadingContacts) {
+                            item {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                                }
+                            }
+                        } else {
+                            items(deviceContactOptions, key = { it.key }) { contact ->
+                                val rowContent: @Composable () -> Unit = {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 12.dp, vertical = 12.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(46.dp)
+                                                .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = contact.displayName.take(1).uppercase(),
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                                            )
+                                        }
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = contact.displayName,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                fontWeight = FontWeight.Medium,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = contact.secondaryLabel,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        AssistChip(
+                                            onClick = {
+                                                if (!isStartingConversation && contact.matchedUserId != null) {
+                                                    onSelectUser(contact.matchedUserId)
+                                                }
+                                            },
+                                            enabled = contact.matchedUserId != null && !isStartingConversation,
+                                            label = { Text(if (contact.isMatchedOnApp) "Message" else "Not on app") }
+                                        )
+                                    }
+                                }
+
+                                if (useSkeuomorphic) {
+                                    SkeuomorphicPanel(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(18.dp))
+                                            .clickable(enabled = contact.matchedUserId != null && !isStartingConversation) {
+                                                onSelectUser(contact.matchedUserId ?: return@clickable)
+                                            },
+                                        shape = RoundedCornerShape(18.dp),
+                                        variant = liquidGlassVariant
+                                    ) {
+                                        rowContent()
+                                    }
+                                } else {
+                                    Surface(
+                                        onClick = {
+                                            if (!isStartingConversation && contact.matchedUserId != null) {
+                                                onSelectUser(contact.matchedUserId)
+                                            }
+                                        },
+                                        enabled = contact.matchedUserId != null && !isStartingConversation,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(14.dp),
+                                        color = Color.Transparent
+                                    ) {
+                                        rowContent()
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (appUsers.isEmpty() && (!hasContactsPermission || deviceContactOptions.isEmpty()) && !isLoadingContacts) {
+                        item {
+                            Text(
+                                text = if (currentUserId != "me" && searchQuery.isNotBlank()) {
+                                    "No people matched that search yet"
+                                } else {
+                                    "No users found"
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
+                }
             }
+        }
+
+        if (useGlass) {
+            LiquidGlassSheetContent(variant = liquidGlassVariant) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    body()
+                }
+            }
+        } else {
+            body()
         }
     }
 }
@@ -1726,27 +2656,46 @@ private fun NewChatDialog(
 @Composable
 fun NeuroConversationScreen(
     conversation: Conversation,
+    currentUserId: String = "me",
+    profiles: Map<String, MessagesRepository.DbProfile> = emptyMap(),
     onBack: () -> Unit,
     onSend: (recipientId: String, content: String) -> Unit,
     onReport: (messageId: String) -> Unit,
     onRetryMessage: (convId: String, msgId: String) -> Unit,
     onReactToMessage: (messageId: String, emoji: String) -> Unit = { _, _ -> },
-    isBlocked: (String) -> Boolean,
-    isMuted: (String) -> Boolean,
+    isUserBlocked: Boolean = false,
+    isUserMuted: Boolean = false,
     onBlockUser: (String) -> Unit = {},
     onUnblockUser: (String) -> Unit = {},
+    onReportUser: (String) -> Unit = {},
+    onMuteUser: (String) -> Unit = {},
+    onUnmuteUser: (String) -> Unit = {},
+    onProfileClick: (String) -> Unit = {},
+    onStartCall: (userId: String, displayName: String, avatar: String, isVideo: Boolean) -> Unit = { _, _, _, _ -> },
     enableVideoChat: Boolean = true,
     typingIndicatorVariant: String = "control",
     enableSimulatedReplies: Boolean = false,
     onSimulatedReply: (conversationId: String, senderId: String, content: String) -> Unit = { _, _, _ -> }
 ) {
-    val recipientId = conversation.participants.firstOrNull { it != "me" } ?: return
-    val user = MOCK_USERS.find { it.id == recipientId }
-    val avatar = user?.avatarUrl ?: avatarUrl(recipientId)
-    val displayName = user?.name ?: recipientId
-
-    val isUserBlocked = isBlocked(recipientId)
-    val isUserMuted = isMuted(recipientId)
+    val recipientId = remember(conversation, currentUserId) {
+        resolveConversationPeerId(conversation.participants, currentUserId)
+            ?: conversation.messages
+                .asSequence()
+                .flatMap { message -> sequenceOf(message.senderId, message.recipientId) }
+                .firstOrNull { candidate -> candidate.isNotBlank() && candidate != currentUserId }
+    }
+    val user = recipientId?.let { resolveConversationUser(it, profiles) }
+    val sendTargetId = if (conversation.isGroup) conversation.id else (recipientId ?: return)
+    val avatar = if (conversation.isGroup) {
+        conversation.groupAvatarUrl ?: user?.avatarUrl ?: avatarUrl(conversation.id)
+    } else {
+        user?.avatarUrl ?: avatarUrl(recipientId ?: conversation.id)
+    }
+    val displayName = if (conversation.isGroup) {
+        conversation.groupName ?: "Group chat"
+    } else {
+        user?.displayName ?: (recipientId ?: return)
+    }
 
     // Detect dark mode for theme-aware colors
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
@@ -1765,6 +2714,20 @@ fun NeuroConversationScreen(
     var pendingAttachment by remember { mutableStateOf<MessageAttachment?>(null) }
     val context = LocalContext.current
 
+    // In-conversation search state
+    var showSearchBar by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    val displayedMessages = remember(conversation.messages, searchQuery) {
+        val query = searchQuery.trim()
+        if (query.isBlank()) {
+            conversation.messages
+        } else {
+            conversation.messages.filter { message ->
+                message.content.contains(query, ignoreCase = true)
+            }
+        }
+    }
+
     // Wallpaper state
     var showWallpaperPicker by remember { mutableStateOf(false) }
     var activeWallpaperKey by remember {
@@ -1780,7 +2743,7 @@ fun NeuroConversationScreen(
     // Typing indicator state for optional demo replies in debug/mock mode only.
     var isOtherTyping by remember(conversation.id) { mutableStateOf(false) }
     var lastSentMessageCount by remember(conversation.id) {
-        mutableIntStateOf(conversation.messages.count { it.senderId == "me" })
+        mutableIntStateOf(conversation.messages.count { it.senderId == currentUserId })
     }
 
     LaunchedEffect(enableSimulatedReplies) {
@@ -1792,7 +2755,7 @@ fun NeuroConversationScreen(
     // Simulated auto-reply is intentionally disabled for production behavior.
     LaunchedEffect(conversation.messages.size, enableSimulatedReplies) {
         if (!enableSimulatedReplies) return@LaunchedEffect
-        val currentSentCount = conversation.messages.count { it.senderId == "me" }
+        val currentSentCount = conversation.messages.count { it.senderId == currentUserId }
         if (currentSentCount < lastSentMessageCount) {
             lastSentMessageCount = currentSentCount
             return@LaunchedEffect
@@ -1803,14 +2766,24 @@ fun NeuroConversationScreen(
             isOtherTyping = true
             kotlinx.coroutines.delay((1500L..3000L).random())
             isOtherTyping = false
-            val lastMsg = conversation.messages.lastOrNull { it.senderId == "me" }?.content ?: ""
+            val lastMsg = conversation.messages.lastOrNull { it.senderId == currentUserId }?.content ?: ""
             val reply = generateSimulatedReply(displayName, lastMsg)
-            onSimulatedReply(conversation.id, recipientId, reply)
+            recipientId?.let { id ->
+                onSimulatedReply(conversation.id, id, reply)
+            }
         }
     }
 
     // Call manager — uses real WebRTC call manager (dialog handled globally by MainActivity)
     val webRtcCallManager = remember { WebRTCCallManager.getInstance() }
+
+    LaunchedEffect(recipientId) {
+        webRtcCallManager.initialize(
+            context = context,
+            supabase = AppSupabaseClient.client,
+            userId = currentUserId.takeUnless { it == "me" }
+        )
+    }
 
     // Voice recorder
     val voiceRecorder = remember { VoiceRecorder(context) }
@@ -1856,9 +2829,26 @@ fun NeuroConversationScreen(
         }
     }
 
+    LaunchedEffect(isUserBlocked, recipientId) {
+        if (!isUserBlocked) {
+            return@LaunchedEffect
+        }
+        showMenu = false
+        showSearchBar = false
+        searchQuery = ""
+        showAttachmentPicker = false
+        showEmojiPanel = false
+        pendingAttachment = null
+        if (isRecordingVoice) {
+            voiceRecorder.cancelRecording()
+            isRecordingVoice = false
+        }
+        keyboardController?.hide()
+    }
+
     // Scroll to bottom on new messages or typing indicator
-    LaunchedEffect(conversation.messages.size, isOtherTyping) {
-        val itemCount = conversation.messages.size + (if (isOtherTyping && showsTypingBubble) 1 else 0)
+    LaunchedEffect(displayedMessages.size, isOtherTyping, searchQuery) {
+        val itemCount = displayedMessages.size + (if (isOtherTyping && showsTypingBubble && searchQuery.isBlank()) 1 else 0)
         if (itemCount > 0) {
             listState.animateScrollToItem(itemCount - 1)
         }
@@ -1867,7 +2857,7 @@ fun NeuroConversationScreen(
     // Show scroll-to-bottom button logic
     val showScrollButton by remember {
         derivedStateOf {
-            val total = conversation.messages.size
+            val total = displayedMessages.size
             if (total <= 2) false
             else {
                 val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
@@ -1957,6 +2947,7 @@ fun NeuroConversationScreen(
                             val statusColor = when {
                                 isUserBlocked -> MaterialTheme.colorScheme.error
                                 isUserMuted -> MaterialTheme.colorScheme.outline
+                                conversation.isGroup -> MaterialTheme.colorScheme.secondary
                                 isOtherTyping && showsTypingStatusText -> MaterialTheme.colorScheme.primary
                                 else -> Color(0xFF4CAF50) // Online green
                             }
@@ -1969,6 +2960,7 @@ fun NeuroConversationScreen(
                                 text = when {
                                     isUserBlocked -> stringResource(R.string.status_blocked)
                                     isUserMuted -> stringResource(R.string.status_muted)
+                                    conversation.isGroup -> "${conversation.memberNames.ifEmpty { conversation.participants }.size} members"
                                     isOtherTyping && showsTypingStatusText -> "typing..."
                                     else -> stringResource(R.string.status_online)
                                 },
@@ -1980,11 +2972,11 @@ fun NeuroConversationScreen(
 
                     // Action buttons — voice & video calling (always visible)
                     IconButton(onClick = {
-                        webRtcCallManager.startCall(
-                            recipientId = recipientId,
-                            recipientName = displayName,
-                            recipientAvatar = avatar,
-                            callType = com.kyilmaz.neurocomet.calling.CallType.VIDEO
+                        onStartCall(
+                            recipientId ?: "",
+                            displayName,
+                            avatar,
+                            true // isVideo
                         )
                     }) {
                         Icon(
@@ -1995,11 +2987,11 @@ fun NeuroConversationScreen(
                     }
 
                     IconButton(onClick = {
-                        webRtcCallManager.startCall(
-                            recipientId = recipientId,
-                            recipientName = displayName,
-                            recipientAvatar = avatar,
-                            callType = com.kyilmaz.neurocomet.calling.CallType.VOICE
+                        onStartCall(
+                            recipientId ?: "",
+                            displayName,
+                            avatar,
+                            false // isVideo
                         )
                     }) {
                         Icon(
@@ -2024,12 +3016,19 @@ fun NeuroConversationScreen(
                         ) {
                             DropdownMenuItem(
                                 text = { Text("View profile") },
-                                onClick = { showMenu = false },
+                                onClick = {
+                                    showMenu = false
+                                    onProfileClick(recipientId ?: "")
+                                },
                                 leadingIcon = { Icon(Icons.Outlined.Person, null) }
                             )
                             DropdownMenuItem(
                                 text = { Text("Search") },
-                                onClick = { showMenu = false },
+                                onClick = {
+                                    showMenu = false
+                                    showSearchBar = !showSearchBar
+                                    if (!showSearchBar) searchQuery = ""
+                                },
                                 leadingIcon = { Icon(Icons.Outlined.Search, null) }
                             )
                             DropdownMenuItem(
@@ -2043,12 +3042,28 @@ fun NeuroConversationScreen(
                             HorizontalDivider()
                             DropdownMenuItem(
                                 text = { Text(if (isUserBlocked) "Unblock" else "Block") },
-                                onClick = { showMenu = false },
+                                onClick = { 
+                                    showMenu = false 
+                                    val id = recipientId ?: ""
+                                    if (isUserBlocked) {
+                                        onUnblockUser(id)
+                                    } else {
+                                        onBlockUser(id)
+                                    }
+                                },
                                 leadingIcon = { Icon(Icons.Filled.Block, null) }
                             )
                             DropdownMenuItem(
                                 text = { Text(if (isUserMuted) "Unmute" else "Mute") },
-                                onClick = { showMenu = false },
+                                onClick = {
+                                    showMenu = false
+                                    val id = recipientId ?: ""
+                                    if (isUserMuted) {
+                                        onUnmuteUser(id)
+                                    } else {
+                                        onMuteUser(id)
+                                    }
+                                },
                                 leadingIcon = {
                                     Icon(
                                         if (isUserMuted) Icons.AutoMirrored.Filled.VolumeUp
@@ -2061,7 +3076,7 @@ fun NeuroConversationScreen(
                                 text = { Text("Report User", color = MaterialTheme.colorScheme.error) },
                                 onClick = {
                                     showMenu = false
-                                    Toast.makeText(context, "Report submitted. Thank you!", Toast.LENGTH_SHORT).show()
+                                    onReportUser(recipientId ?: "")
                                 },
                                 leadingIcon = { Icon(Icons.Outlined.Flag, null, tint = MaterialTheme.colorScheme.error) }
                             )
@@ -2070,6 +3085,30 @@ fun NeuroConversationScreen(
                 }
         }
 
+
+        // ── Search Bar (toggleable) ──
+        if (showSearchBar) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shadowElevation = 2.dp
+            ) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text("Search messages…") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    singleLine = true,
+                    trailingIcon = {
+                        IconButton(onClick = { showSearchBar = false; searchQuery = "" }) {
+                            Icon(Icons.Filled.Close, contentDescription = "Close search")
+                        }
+                    }
+                )
+            }
+        }
 
         // ── Content Area (messages) ──
         Box(
@@ -2083,7 +3122,7 @@ fun NeuroConversationScreen(
                     dataSaver = SettingsManager.dataSaver
                 )
         ) {
-            if (conversation.messages.isEmpty()) {
+            if (displayedMessages.isEmpty()) {
                 // Empty state - neurodivergent calming design
                 Column(
                     modifier = Modifier
@@ -2118,7 +3157,7 @@ fun NeuroConversationScreen(
                     Spacer(Modifier.height(24.dp))
 
                     Text(
-                        "Start chatting with $displayName",
+                        if (searchQuery.isBlank()) "Start chatting with $displayName" else "No messages found",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Medium,
                         textAlign = TextAlign.Center,
@@ -2128,7 +3167,11 @@ fun NeuroConversationScreen(
                     Spacer(Modifier.height(8.dp))
 
                     Text(
-                        text = "Messages are end-to-end encrypted. Say hi! 👋",
+                        text = if (searchQuery.isBlank()) {
+                            "Messages are end-to-end encrypted. Say hi! 👋"
+                        } else {
+                            "Try a different search term in this conversation."
+                        },
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -2137,16 +3180,18 @@ fun NeuroConversationScreen(
                     Spacer(Modifier.height(24.dp))
 
                     // Quick action suggestions - neurodivergent friendly
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        listOf("👋 Hi!", "✨ Hello!", "💜 Hey there!").forEach { suggestion ->
-                            SuggestionChip(
-                                onClick = {
-                                    onSend(recipientId, suggestion.substringAfter(" "))
-                                },
-                                label = { Text(suggestion) }
-                            )
+                    if (searchQuery.isBlank()) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            listOf("👋 Hi!", "✨ Hello!", "💜 Hey there!").forEach { suggestion ->
+                                SuggestionChip(
+                                    onClick = {
+                                        onSend(sendTargetId, suggestion.substringAfter(" "))
+                                    },
+                                    label = { Text(suggestion) }
+                                )
+                            }
                         }
                     }
                 }
@@ -2158,12 +3203,27 @@ fun NeuroConversationScreen(
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    items(conversation.messages, key = { it.id }) { message ->
-                        val isFromMe = message.senderId == "me"
+                    itemsIndexed(
+                        items = displayedMessages,
+                        key = { index, message ->
+                            message.id.takeIf { it.isNotBlank() }
+                                ?: "${conversation.id}:${message.timestamp}:${message.senderId}:$index"
+                        }
+                    ) { _, message ->
+                        val isFromMe = message.senderId == currentUserId
+                        val senderDisplayName = when {
+                            isFromMe -> "You"
+                            else -> profiles[message.senderId]?.display_name
+                                ?.takeIf { it.isNotBlank() }
+                                ?: MOCK_USERS.firstOrNull { it.id == message.senderId }?.name
+                                ?: message.senderId
+                        }
 
                         NeuroMessageItem(
                             message = message,
                             isFromMe = isFromMe,
+                            showSenderName = conversation.isGroup,
+                            senderDisplayName = senderDisplayName,
                             isDark = isDark,
                             onReport = { onReport(message.id) },
                             onRetry = { onRetryMessage(conversation.id, message.id) },
@@ -2172,7 +3232,7 @@ fun NeuroConversationScreen(
                     }
 
                     // Typing indicator
-                    if (isOtherTyping && showsTypingBubble) {
+                    if (isOtherTyping && showsTypingBubble && searchQuery.isBlank()) {
                         item(key = "typing_indicator") {
                             TypingIndicatorBubble(
                                 displayName = displayName,
@@ -2194,7 +3254,9 @@ fun NeuroConversationScreen(
                     SmallFloatingActionButton(
                         onClick = {
                             coroutineScope.launch {
-                                listState.animateScrollToItem(conversation.messages.size - 1)
+                                if (displayedMessages.isNotEmpty()) {
+                                    listState.animateScrollToItem(displayedMessages.size - 1)
+                                }
                             }
                         },
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -2247,7 +3309,7 @@ fun NeuroConversationScreen(
                                     color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
                                 )
                             }
-                            FilledTonalButton(onClick = { onUnblockUser(recipientId) }) {
+                            FilledTonalButton(onClick = { onUnblockUser(recipientId ?: "") }) {
                                 Text("Unblock")
                             }
                         }
@@ -2485,7 +3547,7 @@ fun NeuroConversationScreen(
                                                 onSend = {
                                                     val text = messageText.trim()
                                                     if (text.isNotEmpty()) {
-                                                        onSend(recipientId, text)
+                                                        onSend(sendTargetId, text)
                                                         messageText = ""
                                                         showEmojiPanel = false
                                                     }
@@ -2534,7 +3596,7 @@ fun NeuroConversationScreen(
                                                 } else {
                                                     text
                                                 }
-                                                onSend(recipientId, finalMessage)
+                                                onSend(sendTargetId, finalMessage)
                                                 messageText = ""
                                                 pendingAttachment = null
                                                 showEmojiPanel = false
@@ -2544,7 +3606,7 @@ fun NeuroConversationScreen(
                                                 val voiceMessage = voiceRecorder.stopRecording()
                                                 isRecordingVoice = false
                                                 if (voiceMessage != null) {
-                                                    onSend(recipientId, "[Voice message: ${voiceMessage.durationFormatted}]")
+                                                    onSend(sendTargetId, "[Voice message: ${voiceMessage.durationFormatted}]")
                                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                                                 }
                                             }
@@ -2872,6 +3934,8 @@ private fun formatRecordingDuration(durationMs: Long): String {
 private fun NeuroMessageItem(
     message: DirectMessage,
     isFromMe: Boolean,
+    showSenderName: Boolean,
+    senderDisplayName: String,
     isDark: Boolean,
     onReport: () -> Unit,
     onRetry: () -> Unit,
@@ -2907,6 +3971,14 @@ private fun NeuroMessageItem(
         Column(
             horizontalAlignment = if (isFromMe) Alignment.End else Alignment.Start
         ) {
+            if (showSenderName && !isFromMe) {
+                Text(
+                    text = senderDisplayName,
+                    style = NeuroDivergentTypography.timestamp(fontSettings),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(start = 6.dp, bottom = 2.dp)
+                )
+            }
             // Message bubble with long-press for reactions
             Surface(
                 color = bubbleColor,

@@ -323,7 +323,7 @@ class WebScaffold extends StatelessWidget {
     return NeuroNavigationBar(
       selectedIndex: selectedIndex,
       onDestinationSelected: onNavigationChanged,
-      height: 80,
+      height: 56,
       destinations: navigationItems.map((item) {
         Widget icon = Icon(item.icon);
         Widget selectedIcon = Icon(item.selectedIcon ?? item.icon);

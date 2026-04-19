@@ -42,7 +42,8 @@ object MockDataProvider {
                 type = NotificationType.LIKE,
                 isRead = false,
                 avatarUrl = avatarUrl("alex_stims"),
-                relatedUserId = "Alex_Stims"
+                relatedUserId = "Alex_Stims",
+                relatedPostId = 1L
             ),
             NotificationItem(
                 id = "4",
@@ -62,7 +63,8 @@ object MockDataProvider {
                 type = NotificationType.COMMENT,
                 isRead = true,
                 avatarUrl = avatarUrl("dinolover99"),
-                relatedUserId = "DinoLover99"
+                relatedUserId = "DinoLover99",
+                relatedPostId = 4L
             ),
             NotificationItem(
                 id = "6",
@@ -72,7 +74,8 @@ object MockDataProvider {
                 type = NotificationType.MENTION,
                 isRead = true,
                 avatarUrl = avatarUrl("calmobserver"),
-                relatedUserId = "CalmObserver"
+                relatedUserId = "CalmObserver",
+                relatedPostId = 6L
             ),
             NotificationItem(
                 id = "7",
@@ -82,7 +85,8 @@ object MockDataProvider {
                 type = NotificationType.REPOST,
                 isRead = true,
                 avatarUrl = avatarUrl("focusfriend"),
-                relatedUserId = "FocusFriend"
+                relatedUserId = "FocusFriend",
+                relatedPostId = 7L
             ),
             NotificationItem(
                 id = "8",
@@ -120,6 +124,8 @@ object MockDataProvider {
                 shares = 3,
                 isLikedByMe = false,
                 userAvatar = MOCK_USERS.find { it.id == "CalmObserver" }?.avatarUrl,
+                imageUrl = "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=800",
+                locationTag = "Denver, CO",
                 minAudience = Audience.UNDER_13
             ),
             Post(
@@ -132,6 +138,7 @@ object MockDataProvider {
                 shares = 8,
                 isLikedByMe = true,
                 userAvatar = MOCK_USERS.find { it.id == "DinoLover99" }?.avatarUrl,
+                locationTag = "Chicago, IL",
                 minAudience = Audience.UNDER_13
             ),
             Post(
@@ -144,6 +151,8 @@ object MockDataProvider {
                 shares = 15,
                 isLikedByMe = false,
                 userAvatar = MOCK_USERS.find { it.id == "SensorySeeker" }?.avatarUrl,
+                imageUrl = "https://images.unsplash.com/photo-1511988617509-a57c8a288659?w=800",
+                locationTag = "Tokyo, JP",
                 minAudience = Audience.UNDER_13
             ),
             Post(
@@ -156,6 +165,7 @@ object MockDataProvider {
                 shares = 5,
                 isLikedByMe = false,
                 userAvatar = MOCK_USERS.find { it.id == "Alex_Stims" }?.avatarUrl,
+                locationTag = "Amsterdam, NL",
                 minAudience = Audience.UNDER_13
             ),
             Post(
@@ -168,6 +178,8 @@ object MockDataProvider {
                 shares = 12,
                 isLikedByMe = true,
                 userAvatar = MOCK_USERS.find { it.id == "SensorySeeker" }?.avatarUrl,
+                imageUrl = "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800",
+                locationTag = "Dublin, IE",
                 minAudience = Audience.UNDER_13
             ),
             Post(
@@ -180,6 +192,7 @@ object MockDataProvider {
                 shares = 18,
                 isLikedByMe = false,
                 userAvatar = MOCK_USERS.find { it.id == "CalmObserver" }?.avatarUrl,
+                locationTag = "Vancouver, BC",
                 minAudience = Audience.UNDER_13
             ),
             Post(
@@ -192,6 +205,8 @@ object MockDataProvider {
                 shares = 8,
                 isLikedByMe = true,
                 userAvatar = MOCK_USERS.find { it.id == "DinoLover99" }?.avatarUrl,
+                imageUrl = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800",
+                locationTag = "Stockholm, SE",
                 minAudience = Audience.UNDER_13
             ),
             Post(
@@ -204,6 +219,8 @@ object MockDataProvider {
                 shares = 15,
                 isLikedByMe = false,
                 userAvatar = MOCK_USERS.find { it.id == "SensorySeeker" }?.avatarUrl,
+                imageUrl = "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800",
+                locationTag = "Barcelona, ES",
                 minAudience = Audience.UNDER_13
             ),
 
@@ -219,6 +236,7 @@ object MockDataProvider {
                 isLikedByMe = true,
                 userAvatar = MOCK_USERS.find { it.id == "HyperFocusCode" }?.avatarUrl,
                 imageUrl = "https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?w=800",
+                locationTag = "Brooklyn, NY",
                 minAudience = Audience.TEEN
             ),
             Post(
@@ -232,6 +250,7 @@ object MockDataProvider {
                 isLikedByMe = false,
                 userAvatar = MOCK_USERS.find { it.id == "SensorySeeker" }?.avatarUrl,
                 imageUrl = "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800",
+                locationTag = "Toronto, CA",
                 minAudience = Audience.TEEN
             ),
             Post(
@@ -244,6 +263,8 @@ object MockDataProvider {
                 shares = 45,
                 isLikedByMe = false,
                 userAvatar = MOCK_USERS.find { it.id == "NeuroNaut" }?.avatarUrl,
+                imageUrl = "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800",
+                locationTag = "Singapore",
                 minAudience = Audience.TEEN
             ),
             Post(
@@ -256,6 +277,7 @@ object MockDataProvider {
                 shares = 22,
                 isLikedByMe = true,
                 userAvatar = MOCK_USERS.find { it.id == "CalmObserver" }?.avatarUrl,
+                locationTag = "Cape Town, ZA",
                 minAudience = Audience.TEEN
             ),
 
@@ -270,7 +292,9 @@ object MockDataProvider {
                 shares = 1,
                 isLikedByMe = false,
                 userAvatar = MOCK_USERS.find { it.id == "CalmObserver" }?.avatarUrl,
-                minAudience = Audience.ADULT
+                imageUrl = "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800",
+                minAudience = Audience.ADULT,
+                locationTag = "Vancouver, BC"
             ),
             Post(
                 id = 9L,
@@ -282,6 +306,8 @@ object MockDataProvider {
                 shares = 80,
                 isLikedByMe = true,
                 userAvatar = MOCK_USERS.find { it.id == "NeuroNaut" }?.avatarUrl,
+                imageUrl = "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800",
+                locationTag = "São Paulo, BR",
                 minAudience = Audience.ADULT
             ),
             Post(
@@ -294,7 +320,8 @@ object MockDataProvider {
                 shares = 34,
                 isLikedByMe = false,
                 userAvatar = MOCK_USERS.find { it.id == "HyperFocusCode" }?.avatarUrl,
-                minAudience = Audience.ADULT
+                minAudience = Audience.ADULT,
+                locationTag = "Chicago, IL"
             ),
             Post(
                 id = 11L,
@@ -318,7 +345,8 @@ object MockDataProvider {
                 shares = 234,
                 isLikedByMe = false,
                 userAvatar = MOCK_USERS.find { it.id == "NeuroNaut" }?.avatarUrl,
-                minAudience = Audience.ADULT
+                minAudience = Audience.ADULT,
+                locationTag = "Melbourne, AU"
             )
         )
     }
@@ -338,8 +366,9 @@ object MockDataProvider {
                 comments = 156,
                 shares = 89,
                 isLikedByMe = true,
-                userAvatar = "https://i.pravatar.cc/150?u=focusqueen",
-                imageUrl = "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800"
+                userAvatar = "https://i.pravatar.cc/150?u=focusqueen_ws",
+                imageUrl = "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800",
+                locationTag = "Portland, OR"
             ),
             Post(
                 id = 102L,
@@ -350,7 +379,9 @@ object MockDataProvider {
                 comments = 342,
                 shares = 1205,
                 isLikedByMe = false,
-                userAvatar = "https://i.pravatar.cc/150?u=ndpride"
+                userAvatar = "https://i.pravatar.cc/150?u=ndpride_inspire",
+                imageUrl = "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800",
+                locationTag = "San Francisco, CA"
             ),
             Post(
                 id = 103L,
@@ -361,7 +392,9 @@ object MockDataProvider {
                 comments = 287,
                 shares = 156,
                 isLikedByMe = false,
-                userAvatar = "https://i.pravatar.cc/150?u=adhdstudent"
+                userAvatar = "https://i.pravatar.cc/150?u=adhdstudent_study",
+                imageUrl = "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800",
+                locationTag = "Austin, TX"
             ),
             Post(
                 id = 104L,
@@ -372,8 +405,9 @@ object MockDataProvider {
                 comments = 198,
                 shares = 445,
                 isLikedByMe = true,
-                userAvatar = "https://i.pravatar.cc/150?u=stimhappy",
-                imageUrl = "https://images.unsplash.com/photo-1612538498456-e861df91d4d0?w=800"
+                userAvatar = "https://i.pravatar.cc/150?u=stimhappy_fidget",
+                imageUrl = "https://images.unsplash.com/photo-1612538498456-e861df91d4d0?w=800",
+                locationTag = "London, UK"
             ),
             Post(
                 id = 105L,
@@ -384,7 +418,9 @@ object MockDataProvider {
                 comments = 523,
                 shares = 892,
                 isLikedByMe = false,
-                userAvatar = "https://i.pravatar.cc/150?u=lifehacker"
+                userAvatar = "https://i.pravatar.cc/150?u=lifehacker_tips",
+                imageUrl = "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=800",
+                locationTag = "Berlin, DE"
             ),
             Post(
                 id = 106L,
@@ -395,7 +431,9 @@ object MockDataProvider {
                 comments = 178,
                 shares = 234,
                 isLikedByMe = true,
-                userAvatar = "https://i.pravatar.cc/150?u=selfcare"
+                userAvatar = "https://i.pravatar.cc/150?u=selfcare_sunday",
+                imageUrl = "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800",
+                locationTag = "Seattle, WA"
             )
         )
     }
@@ -531,7 +569,9 @@ object MockDataProvider {
                 lastMessageTimestamp = Instant.now().minusSeconds(5000).toString(),
                 unreadCount = 3,
                 isGroup = true,
-                groupName = "Stim Toy Reviews 🧸"
+                groupName = "Stim Toy Reviews 🧸",
+                groupAvatarUrl = "https://i.pravatar.cc/150?u=group_stimtoy",
+                memberNames = listOf("You", "DinoLover99", "NeuroNaut", "SensorySeeker")
             ),
             Conversation(
                 id = "group2",
@@ -544,7 +584,41 @@ object MockDataProvider {
                 lastMessageTimestamp = Instant.now().minusSeconds(10400).toString(),
                 unreadCount = 0,
                 isGroup = true,
-                groupName = "Focus Friends 🎯"
+                groupName = "Focus Friends 🎯",
+                groupAvatarUrl = "https://i.pravatar.cc/150?u=group_focusfriends",
+                memberNames = listOf("You", "H.F. Code", "CalmObserver", "Alex_Stims")
+            ),
+            // New group conversations
+            Conversation(
+                id = "group3",
+                participants = listOf(currentUserId, "RainbowNerd", "TransTechie", "NonBinaryNinja", "BiBookworm"),
+                messages = listOf(
+                    DirectMessage("grp7", "RainbowNerd", currentUserId, "Happy Pride month everyone! 🏳️‍🌈🎉", Instant.now().minusSeconds(3600).toString()),
+                    DirectMessage("grp8", "TransTechie", currentUserId, "Built a rainbow gradient animation for my app today! 🌈", Instant.now().minusSeconds(3400).toString()),
+                    DirectMessage("grp9", "NonBinaryNinja", currentUserId, "That sounds amazing, share a screen recording! 💜", Instant.now().minusSeconds(3200).toString()),
+                    DirectMessage("grp10", "BiBookworm", currentUserId, "Also just finished a great queer YA novel, recommending in the book club thread 📚", Instant.now().minusSeconds(3000).toString())
+                ),
+                lastMessageTimestamp = Instant.now().minusSeconds(3000).toString(),
+                unreadCount = 4,
+                isGroup = true,
+                groupName = "Queer ND Squad 🌈♾️",
+                groupAvatarUrl = "https://i.pravatar.cc/150?u=group_queernd",
+                memberNames = listOf("You", "RainbowNerd", "TransTechie", "NonBinaryNinja", "BiBookworm")
+            ),
+            Conversation(
+                id = "group4",
+                participants = listOf(currentUserId, "AceExplorer", "PanPride_Sam", "QueerCoder"),
+                messages = listOf(
+                    DirectMessage("grp11", "AceExplorer", currentUserId, "Found a sensory-friendly hotel in Barcelona! Adding to the travel doc 🌍", Instant.now().minusSeconds(7200).toString()),
+                    DirectMessage("grp12", "PanPride_Sam", currentUserId, "Ooh I want to go! Is it autism-friendly too?", Instant.now().minusSeconds(7000).toString()),
+                    DirectMessage("grp13", "QueerCoder", currentUserId, "I can build us a shared trip planner app this weekend 💻", Instant.now().minusSeconds(6800).toString())
+                ),
+                lastMessageTimestamp = Instant.now().minusSeconds(6800).toString(),
+                unreadCount = 0,
+                isGroup = true,
+                groupName = "ND Travel Buddies ✈️",
+                groupAvatarUrl = "https://i.pravatar.cc/150?u=group_ndtravel",
+                memberNames = listOf("You", "AceExplorer", "Pan Pride Sam", "QueerCoder")
             ),
             // Archived conversations
             Conversation(

@@ -90,6 +90,19 @@
             android:exported="true"
             android:theme="@style/Theme.NeuroComet"
             android:windowSoftInputMode="adjustResize">
+
+            <!-- Android App Links: https://getneurocomet.com/post/<id> and /u/<handle>
+                 Requires a matching assetlinks.json at
+                 https://getneurocomet.com/.well-known/assetlinks.json -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="getneurocomet.com" android:pathPrefix="/post/" />
+                <data android:scheme="https" android:host="www.getneurocomet.com" android:pathPrefix="/post/" />
+                <data android:scheme="https" android:host="getneurocomet.com" android:pathPrefix="/u/" />
+                <data android:scheme="https" android:host="www.getneurocomet.com" android:pathPrefix="/u/" />
+            </intent-filter>
         </activity>
 
         <activity

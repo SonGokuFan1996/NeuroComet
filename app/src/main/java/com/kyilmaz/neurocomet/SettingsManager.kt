@@ -2,9 +2,16 @@ package com.kyilmaz.neurocomet
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import io.github.jan.supabase.auth.auth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.put
 
 /**
  * Central settings manager that persists all app settings across app updates.
@@ -68,6 +75,9 @@ object SettingsManager {
 
     // Developer
     private const val KEY_DEVELOPER_MODE = "developer_mode"
+
+    // Navigation
+    private const val KEY_LAST_TAB = "last_tab"
 
     // Chat Wallpaper
     private const val KEY_GLOBAL_WALLPAPER = "global_chat_wallpaper"
@@ -191,8 +201,41 @@ object SettingsManager {
     private var _globalWallpaper by mutableStateOf("NONE")
     val globalWallpaper: String get() = _globalWallpaper
 
+    // Navigation — last top-level tab the user visited
+    private val allowedTabs = setOf("feed", "explore", "messages", "notifications", "settings")
+    private var _lastTab by mutableStateOf("feed")
+    val lastTab: String get() = _lastTab
+
     private var context: Context? = null
     private var isInitialized = false
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    // ═══════════════════════════════════════════════════════════════
+    // SUPABASE SYNC
+    // ═══════════════════════════════════════════════════════════════
+
+    private fun syncSettingsToSupabase() {
+        val client = AppSupabaseClient.client ?: return
+        val userId = try { client.auth.currentUserOrNull()?.id } catch (_: Exception) { null } ?: return
+
+        scope.launch {
+            try {
+                val payload = kotlinx.serialization.json.buildJsonObject {
+                    put("user_id", userId)
+                    put("theme_mode", themeMode)
+                    put("is_high_contrast", highContrast)
+                    put("reduce_motion", reducedMotion)
+                    put("dyslexia_font", dyslexiaFriendly)
+                    put("text_scale_factor", fontScale.toDouble())
+                    put("notifications_enabled", notificationsEnabled)
+                    put("updated_at", java.time.Instant.now().toString())
+                }
+                client.safeUpsert("user_preferences", payload, "user_id")
+            } catch (e: Exception) {
+                Log.w("SettingsManager", "Failed to sync preferences: ${e.message}")
+            }
+        }
+    }
 
     // ═══════════════════════════════════════════════════════════════
     // INITIALIZATION
@@ -276,6 +319,10 @@ object SettingsManager {
 
             // Chat Wallpaper
             _globalWallpaper = prefs.getString(KEY_GLOBAL_WALLPAPER, "NONE") ?: "NONE"
+
+            // Navigation
+            val savedTab = prefs.getString(KEY_LAST_TAB, "feed") ?: "feed"
+            _lastTab = if (savedTab in allowedTabs) savedTab else "feed"
         } catch (e: Exception) {
             android.util.Log.e("SettingsManager", "Error loading settings, using defaults", e)
         }
@@ -289,6 +336,7 @@ object SettingsManager {
     fun setThemeMode(value: String) {
         _themeMode = value
         getPrefs()?.edit()?.putString(KEY_THEME_MODE, value)?.apply()
+        syncSettingsToSupabase()
     }
 
     fun setDynamicColors(value: Boolean) {
@@ -309,17 +357,20 @@ object SettingsManager {
     fun setHighContrast(value: Boolean) {
         _highContrast = value
         getPrefs()?.edit()?.putBoolean(KEY_HIGH_CONTRAST, value)?.apply()
+        syncSettingsToSupabase()
     }
 
     // Accessibility setters
     fun setReducedMotion(value: Boolean) {
         _reducedMotion = value
         getPrefs()?.edit()?.putBoolean(KEY_REDUCED_MOTION, value)?.apply()
+        syncSettingsToSupabase()
     }
 
     fun setFontScale(value: Float) {
         _fontScale = value
         getPrefs()?.edit()?.putFloat(KEY_FONT_SCALE, value)?.apply()
+        syncSettingsToSupabase()
     }
 
     fun setSelectedFont(value: String) {
@@ -330,6 +381,7 @@ object SettingsManager {
     fun setDyslexiaFriendly(value: Boolean) {
         _dyslexiaFriendly = value
         getPrefs()?.edit()?.putBoolean(KEY_DYSLEXIA_FRIENDLY, value)?.apply()
+        syncSettingsToSupabase()
     }
 
     fun setScreenReaderMode(value: Boolean) {
@@ -341,6 +393,7 @@ object SettingsManager {
     fun setNotificationsEnabled(value: Boolean) {
         _notificationsEnabled = value
         getPrefs()?.edit()?.putBoolean(KEY_NOTIFICATIONS_ENABLED, value)?.apply()
+        syncSettingsToSupabase()
     }
 
     fun setMessageNotifications(value: Boolean) {
@@ -486,6 +539,13 @@ object SettingsManager {
         }?.apply()
     }
 
+    // Navigation setter
+    fun setLastTab(value: String) {
+        if (value !in allowedTabs) return
+        _lastTab = value
+        getPrefs()?.edit()?.putString(KEY_LAST_TAB, value)?.apply()
+    }
+
     // ═══════════════════════════════════════════════════════════════
     // RESET
     // ═══════════════════════════════════════════════════════════════
@@ -544,6 +604,9 @@ object SettingsManager {
             remove(KEY_GLOBAL_WALLPAPER)
             // Note: per-conversation wallpapers are NOT cleared on reset (user preference)
 
+            // Navigation
+            remove(KEY_LAST_TAB)
+
             if (includeParentalControls) {
                 remove(KEY_PARENTAL_PIN_HASH)
                 remove(KEY_SCREEN_TIME_LIMIT)
@@ -577,7 +640,8 @@ object SettingsManager {
             "dataSaver" to dataSaver,
             "selectedLocale" to selectedLocale,
             "developerMode" to developerMode,
-            "globalWallpaper" to globalWallpaper
+            "globalWallpaper" to globalWallpaper,
+            "lastTab" to lastTab
         )
     }
 }

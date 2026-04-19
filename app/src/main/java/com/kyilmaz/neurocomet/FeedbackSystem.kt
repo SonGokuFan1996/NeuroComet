@@ -36,6 +36,7 @@ import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.put
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
@@ -57,7 +58,9 @@ import java.util.*
 enum class FeedbackType {
     BUG_REPORT,
     FEATURE_REQUEST,
-    GENERAL_FEEDBACK
+    GENERAL_FEEDBACK,
+    SAFETY_REPORT,
+    SUPPORT_TICKET
 }
 
 enum class BugSeverity {
@@ -223,7 +226,17 @@ object FeedbackManager {
             try {
                 val client = AppSupabaseClient.client
                 if (client != null) {
-                    client.from("feedback").insert(data)
+                    val payload = kotlinx.serialization.json.buildJsonObject {
+                        data.forEach { (key, value) ->
+                            when (value) {
+                                is String -> put(key, value)
+                                is Number -> put(key, value)
+                                is Boolean -> put(key, value)
+                                null -> put(key, kotlinx.serialization.json.JsonNull)
+                            }
+                        }
+                    }
+                    client.safeInsert("feedback", payload)
                     Log.d(TAG, "Feedback submitted to Supabase")
                 } else {
                     // No client — queue locally
@@ -498,6 +511,30 @@ fun FeedbackHubScreen(
                     emoji = "💬",
                     color = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    onClick = onOpenGeneralFeedback
+                )
+            }
+
+            item {
+                FeedbackOptionCard(
+                    icon = Icons.Filled.Shield,
+                    title = "Safety & Reporting",
+                    description = "Report content or users that violate community guidelines.",
+                    emoji = "🛡️",
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    onClick = { /* Could navigate to a specific safety screen */ onOpenBugReport() }
+                )
+            }
+
+            item {
+                FeedbackOptionCard(
+                    icon = Icons.Filled.SupportAgent,
+                    title = "Get Support",
+                    description = "Need help with your account or a specific feature?",
+                    emoji = "🤝",
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     onClick = onOpenGeneralFeedback
                 )
             }

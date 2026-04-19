@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/user.dart';
+import '../../services/supabase_service.dart';
 import '../../widgets/common/neuro_avatar.dart';
 import '../../widgets/common/neuro_loading.dart';
 import '../../l10n/app_localizations.dart';
@@ -116,7 +118,7 @@ class _FollowersList extends ConsumerWidget {
               itemBuilder: (context, index) => _UserTile(
                 user: users[index],
                 onTap: () {
-                  Navigator.pushNamed(context, '/profile/${users[index].id}');
+                  context.push('/profile/${users[index].id}');
                 },
                 onFollow: () {
                   // Toggle follow
@@ -255,16 +257,41 @@ class _UserTile extends StatelessWidget {
 
 // Providers
 final followersProvider = FutureProvider.family<List<User>, String>((ref, userId) async {
-  await Future.delayed(const Duration(milliseconds: 500));
+  // Try Supabase first
+  try {
+    if (SupabaseService.isInitialized && SupabaseService.isAuthenticated) {
+      final response = await SupabaseService.client
+          .from('follows')
+          .select('follower:users!follower_id(id, display_name, username, avatar_url, bio, is_verified)')
+          .eq('following_id', userId);
 
-  // Mock data
+      final rows = response as List;
+      if (rows.isNotEmpty) {
+        return rows.map((row) {
+          final u = row['follower'] as Map<String, dynamic>? ?? {};
+          return User(
+            id: u['id']?.toString() ?? '',
+            displayName: u['display_name']?.toString() ?? 'User',
+            username: u['username']?.toString(),
+            avatarUrl: u['avatar_url']?.toString(),
+            bio: u['bio']?.toString(),
+            isVerified: u['is_verified'] == true,
+          );
+        }).toList();
+      }
+    }
+  } catch (e) {
+    debugPrint('Followers Supabase fetch failed: $e');
+  }
+
+  // Demo fallback
   return List.generate(
     15,
     (index) => User(
       id: 'follower_$index',
       displayName: 'Follower ${index + 1}',
       username: 'follower${index + 1}',
-      avatarUrl: 'https://i.pravatar.cc/150?img=${index + 20}',
+      avatarUrl: 'https://i.pravatar.cc/150?u=follower_${index + 1}',
       bio: index % 2 == 0 ? 'Neurodivergent advocate 🧠' : null,
       isVerified: index % 5 == 0,
       isFollowing: index % 3 == 0,
@@ -273,16 +300,42 @@ final followersProvider = FutureProvider.family<List<User>, String>((ref, userId
 });
 
 final followingProvider = FutureProvider.family<List<User>, String>((ref, userId) async {
-  await Future.delayed(const Duration(milliseconds: 500));
+  // Try Supabase first
+  try {
+    if (SupabaseService.isInitialized && SupabaseService.isAuthenticated) {
+      final response = await SupabaseService.client
+          .from('follows')
+          .select('following:users!following_id(id, display_name, username, avatar_url, bio, is_verified)')
+          .eq('follower_id', userId);
 
-  // Mock data
+      final rows = response as List;
+      if (rows.isNotEmpty) {
+        return rows.map((row) {
+          final u = row['following'] as Map<String, dynamic>? ?? {};
+          return User(
+            id: u['id']?.toString() ?? '',
+            displayName: u['display_name']?.toString() ?? 'User',
+            username: u['username']?.toString(),
+            avatarUrl: u['avatar_url']?.toString(),
+            bio: u['bio']?.toString(),
+            isVerified: u['is_verified'] == true,
+            isFollowing: true,
+          );
+        }).toList();
+      }
+    }
+  } catch (e) {
+    debugPrint('Following Supabase fetch failed: $e');
+  }
+
+  // Demo fallback
   return List.generate(
     10,
     (index) => User(
       id: 'following_$index',
       displayName: 'Following ${index + 1}',
       username: 'following${index + 1}',
-      avatarUrl: 'https://i.pravatar.cc/150?img=${index + 40}',
+      avatarUrl: 'https://i.pravatar.cc/150?u=following_${index + 1}',
       bio: index % 2 == 0 ? 'Community member 💜' : null,
       isVerified: index % 4 == 0,
       isFollowing: true,

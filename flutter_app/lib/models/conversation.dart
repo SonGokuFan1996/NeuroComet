@@ -22,6 +22,8 @@ class Conversation {
   final List<String>? participantIds;
   final DateTime? createdAt;
   final ModerationStatus moderationStatus;
+  final String? groupName;
+  final List<String>? memberNames;
 
   const Conversation({
     required this.id,
@@ -42,6 +44,8 @@ class Conversation {
     this.participantIds,
     this.createdAt,
     this.moderationStatus = ModerationStatus.none,
+    this.groupName,
+    this.memberNames,
   });
 
   factory Conversation.fromJson(Map<String, dynamic> json) =>
@@ -67,6 +71,8 @@ class Conversation {
     List<String>? participantIds,
     DateTime? createdAt,
     ModerationStatus? moderationStatus,
+    String? groupName,
+    List<String>? memberNames,
   }) {
     return Conversation(
       id: id ?? this.id,
@@ -87,6 +93,8 @@ class Conversation {
       participantIds: participantIds ?? this.participantIds,
       createdAt: createdAt ?? this.createdAt,
       moderationStatus: moderationStatus ?? this.moderationStatus,
+      groupName: groupName ?? this.groupName,
+      memberNames: memberNames ?? this.memberNames,
     );
   }
 }

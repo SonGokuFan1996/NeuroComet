@@ -129,9 +129,11 @@ class BackupNotifier extends Notifier<BackupState> {
         );
         return metadata;
       } else {
+        // Use the specific error from the progress notifier if available
+        final specificError = BackupService.progressNotifier.value.error;
         state = state.copyWith(
           isBackingUp: false,
-          errorMessage: 'Backup failed. Please try again.',
+          errorMessage: specificError ?? 'Backup failed. Please try again.',
         );
         return null;
       }
@@ -166,9 +168,10 @@ class BackupNotifier extends Notifier<BackupState> {
           successMessage: 'Data restored successfully! Restart the app for all changes to take effect.',
         );
       } else {
+        final specificError = BackupService.progressNotifier.value.error;
         state = state.copyWith(
           isRestoring: false,
-          errorMessage: 'Restore failed. Please try again.',
+          errorMessage: specificError ?? 'Restore failed. Please try again.',
         );
       }
       return success;

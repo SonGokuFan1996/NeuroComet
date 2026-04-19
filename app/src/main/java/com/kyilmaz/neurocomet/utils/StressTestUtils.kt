@@ -617,9 +617,9 @@ object StressTester {
             val manager = AuthenticationManager.getInstance(context)
 
             // 1. Generate a secret
-            val secret = manager.generateTotpSecret("stress_test@neurocomet.app")
+            val secret = manager.generateTotpSecret("stress_test@getneurocomet.com")
             val secretValid = secret.secret.isNotBlank()
-                    && secret.accountName == "stress_test@neurocomet.app"
+                    && secret.accountName == "stress_test@getneurocomet.com"
                     && secret.issuer == "NeuroComet"
                     && secret.digits == 6
                     && secret.period == 30
@@ -673,7 +673,7 @@ object StressTester {
         val startTime = System.currentTimeMillis()
         return try {
             val manager = AuthenticationManager.getInstance(context)
-            val secret = manager.generateTotpSecret("window_test@neurocomet.app")
+            val secret = manager.generateTotpSecret("window_test@getneurocomet.com")
             manager.storeTotpSecret(secret)
 
             // The current code should always verify
@@ -774,7 +774,7 @@ object StressTester {
             val blankRejected = blankResult is AuthResult.Error
 
             // 2. Send to a valid address
-            val sendResult = manager.sendEmailVerificationCode("test@neurocomet.app")
+            val sendResult = manager.sendEmailVerificationCode("test@getneurocomet.com")
             val sendOk = sendResult is AuthResult.Success || sendResult is AuthResult.NotAvailable
             // (NotAvailable is valid in release builds)
 

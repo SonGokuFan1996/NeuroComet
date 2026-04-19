@@ -8,8 +8,6 @@ class PrivacyService {
   static final PrivacyService _instance = PrivacyService._internal();
   factory PrivacyService() => _instance;
   PrivacyService._internal();
-
-  static const String _prefsName = 'NeuroComet_privacy';
   static const String _keyBlockedUsers = 'blocked_users';
   static const String _keyMutedUsers = 'muted_users';
   static const String _keyMutedWords = 'muted_words';

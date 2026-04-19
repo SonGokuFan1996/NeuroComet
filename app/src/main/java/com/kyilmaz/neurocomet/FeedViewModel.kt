@@ -22,6 +22,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
+import io.github.jan.supabase.auth.auth
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
 
 /**
  * ViewModel for managing the main feed, stories, conversations, and notifications.
@@ -68,8 +72,9 @@ val MOCK_FEED_POSTS = listOf(
         comments = 156,
         shares = 89,
         isLikedByMe = true,
-        userAvatar = "https://i.pravatar.cc/150?u=focusqueen",
-        imageUrl = "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800"
+        userAvatar = "https://i.pravatar.cc/150?u=focusqueen_ws",
+        imageUrl = "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800",
+        locationTag = "Portland, OR"
     ),
     Post(
         id = 102L,
@@ -80,7 +85,9 @@ val MOCK_FEED_POSTS = listOf(
         comments = 342,
         shares = 1205,
         isLikedByMe = false,
-        userAvatar = "https://i.pravatar.cc/150?u=ndpride"
+        userAvatar = "https://i.pravatar.cc/150?u=ndpride_inspire",
+        imageUrl = "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800",
+        locationTag = "San Francisco, CA"
     ),
     Post(
         id = 103L,
@@ -91,7 +98,9 @@ val MOCK_FEED_POSTS = listOf(
         comments = 287,
         shares = 156,
         isLikedByMe = false,
-        userAvatar = "https://i.pravatar.cc/150?u=adhdstudent"
+        userAvatar = "https://i.pravatar.cc/150?u=adhdstudent_study",
+        imageUrl = "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800",
+        locationTag = "Austin, TX"
     ),
     Post(
         id = 104L,
@@ -102,8 +111,9 @@ val MOCK_FEED_POSTS = listOf(
         comments = 198,
         shares = 445,
         isLikedByMe = true,
-        userAvatar = "https://i.pravatar.cc/150?u=stimhappy",
-        imageUrl = "https://images.unsplash.com/photo-1612538498456-e861df91d4d0?w=800"
+        userAvatar = "https://i.pravatar.cc/150?u=stimhappy_fidget",
+        imageUrl = "https://images.unsplash.com/photo-1612538498456-e861df91d4d0?w=800",
+        locationTag = "London, UK"
     ),
     Post(
         id = 105L,
@@ -114,7 +124,9 @@ val MOCK_FEED_POSTS = listOf(
         comments = 523,
         shares = 892,
         isLikedByMe = false,
-        userAvatar = "https://i.pravatar.cc/150?u=lifehacker"
+        userAvatar = "https://i.pravatar.cc/150?u=lifehacker_tips",
+        imageUrl = "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?w=800",
+        locationTag = "Berlin, DE"
     ),
     Post(
         id = 106L,
@@ -125,7 +137,9 @@ val MOCK_FEED_POSTS = listOf(
         comments = 178,
         shares = 234,
         isLikedByMe = true,
-        userAvatar = "https://i.pravatar.cc/150?u=selfcare"
+        userAvatar = "https://i.pravatar.cc/150?u=selfcare_sunday",
+        imageUrl = "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800",
+        locationTag = "Seattle, WA"
     )
 )
 
@@ -150,10 +164,16 @@ data class FeedUiState(
     val activeConversation: Conversation? = null,
     val isDinoBanned: Boolean = false,
     val notifications: List<NotificationItem> = emptyList(),
+    val submittedReports: List<Map<String, String>> = emptyList(),
     // Content preferences (synced from Settings)
     val hideLikeCounts: Boolean = false,
     val hideViewCounts: Boolean = false,
-    val dataSaverMode: Boolean = false
+    val dataSaverMode: Boolean = false,
+    // Supabase-synced social state
+    val bookmarkedPostIds: Set<Long> = emptySet(),
+    val followingUserIds: Set<String> = emptySet(),
+    val blockedUserIds: Set<String> = emptySet(),
+    val mutedUserIds: Set<String> = emptySet()
 )
 
 class FeedViewModel(application: Application) : AndroidViewModel(application) {
@@ -212,6 +232,12 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _userStories = MutableStateFlow<List<Story>>(emptyList())
     private val _userConversations = MutableStateFlow<List<Conversation>>(_localizedConversations)
+    private val _userCreatedPosts = MutableStateFlow<List<Post>>(emptyList())
+    private val _deletedPostIds = MutableStateFlow<Set<Long>>(emptySet())
+
+    /** Observable status from dev story operations (for StoriesTestingSection UI). */
+    private val _devStoryStatus = MutableStateFlow<String?>(null)
+    val devStoryStatus: StateFlow<String?> = _devStoryStatus
 
     // Mock strike counter
     private val _userStrikeCount = MutableStateFlow<Map<String, Int>>(emptyMap())
@@ -224,6 +250,45 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         fetchStories()
         fetchConversations()
         fetchNotifications()
+        loadSocialState()
+    }
+
+    /**
+     * Load bookmarks, follows, blocks, and mutes from Supabase on startup.
+     * These are used by the UI to show correct initial states for bookmark icons,
+     * follow badges, etc. Falls back gracefully when Supabase is not available.
+     */
+    private fun loadSocialState() {
+        val userId = AppSupabaseClient.client?.auth?.currentUserOrNull()?.id ?: return
+        if (userId == CURRENT_USER_ID_MOCK) return
+
+        viewModelScope.launch {
+            try {
+                val bookmarks = BookmarksRepository.getBookmarkedPostIds(userId)
+                val following = FollowsRepository.getFollowingIds(userId).toSet()
+                val blocked = try {
+                    safeSelect("blocked_users", "blocked_id", "blocker_id=eq.$userId")
+                        .mapNotNull { it.jsonObject["blocked_id"]?.jsonPrimitive?.content }
+                        .toSet()
+                } catch (_: Exception) { emptySet() }
+                val muted = try {
+                    safeSelect("muted_users", "muted_id", "muter_id=eq.$userId")
+                        .mapNotNull { it.jsonObject["muted_id"]?.jsonPrimitive?.content }
+                        .toSet()
+                } catch (_: Exception) { emptySet() }
+
+                _uiState.update {
+                    it.copy(
+                        bookmarkedPostIds = bookmarks,
+                        followingUserIds = following,
+                        blockedUserIds = blocked,
+                        mutedUserIds = muted
+                    )
+                }
+            } catch (e: Exception) {
+                android.util.Log.w("FeedVM", "Failed to load social state from Supabase", e)
+            }
+        }
     }
 
     private fun devOptions(): DevOptions {
@@ -233,15 +298,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
     // Mock content moderation
     private fun performContentModeration(content: String): ModerationStatus {
-        val lowerCaseContent = content.lowercase()
-        val flaggedKeywords = listOf("scam", "phishing", "hate", "link", "spam", "shit", "damn")
-        val blockedKeywords = listOf("kill", "harm", "abuse", "underage", "threat", "illegal", "criminal")
-
-        return when {
-            blockedKeywords.any { lowerCaseContent.contains(it) } -> ModerationStatus.BLOCKED
-            flaggedKeywords.any { lowerCaseContent.contains(it) } -> ModerationStatus.FLAGGED
-            else -> ModerationStatus.CLEAN
-        }
+        return ModerationHeuristics.analyze(content).status
     }
 
     private fun effectiveModerationStatus(content: String): ModerationStatus {
@@ -502,36 +559,189 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun submitReport(contentType: String, contentId: String, reason: String) {
+        viewModelScope.launch {
+            // Log locally for testing as requested
+            val report = mapOf(
+                "timestamp" to Instant.now().toString(),
+                "content_type" to contentType,
+                "content_id" to contentId,
+                "reason" to reason
+            )
+            _uiState.update { it.copy(submittedReports = it.submittedReports + report) }
+
+            try {
+                val client = AppSupabaseClient.client ?: run {
+                    android.util.Log.d("FeedViewModel", "Supabase not available, report stored locally only")
+                    _uiState.update { it.copy(errorMessage = "Report submitted (Local Test Mode)") }
+                    return@launch
+                }
+                val userId = client.auth.currentUserOrNull()?.id ?: run {
+                    _uiState.update { it.copy(errorMessage = "Report submitted (Local Test Mode)") }
+                    return@launch
+                }
+                val payload = kotlinx.serialization.json.buildJsonObject {
+                    put("reporter_id", kotlinx.serialization.json.JsonPrimitive(userId))
+                    put("content_type", kotlinx.serialization.json.JsonPrimitive(contentType))
+                    put("content_id", kotlinx.serialization.json.JsonPrimitive(contentId))
+                    put("reason", kotlinx.serialization.json.JsonPrimitive(reason))
+                }
+                client.safeInsert("reports", payload)
+                android.util.Log.d("FeedViewModel", "Successfully submitted report for $contentType $contentId")
+                _uiState.update { it.copy(errorMessage = "Report submitted successfully") }
+            } catch (e: Exception) {
+                android.util.Log.e("FeedViewModel", "Failed to submit report", e)
+                _uiState.update { it.copy(errorMessage = "Failed to submit report. Stored locally.") }
+            }
+        }
+    }
+
     fun isUserBlocked(userId: String): Boolean {
-        // Mock logic: assume user is not blocked unless they are Dino and we banned Dino in our mock state
-        return userId == DINO_USER_ID && _uiState.value.isDinoBanned
+        return _uiState.value.blockedUserIds.contains(userId)
+                || (userId == DINO_USER_ID && _uiState.value.isDinoBanned)
     }
 
     fun isUserMuted(userId: String): Boolean {
-        // Mock logic: no users are muted in this mock implementation
-        return false
+        return _uiState.value.mutedUserIds.contains(userId)
     }
 
     fun blockUser(userId: String) {
-        // Mock logic
-        _uiState.update { it.copy(errorMessage = "$userId blocked (mock).") }
+        _uiState.update { it.copy(
+            blockedUserIds = it.blockedUserIds + userId,
+            errorMessage = "$userId blocked."
+        ) }
         banUser(userId)
+        // Persist to Supabase
+        viewModelScope.launch {
+            try {
+                val currentId = AppSupabaseClient.client?.auth?.currentUserOrNull()?.id ?: return@launch
+                val client = AppSupabaseClient.client ?: return@launch
+                client.safeInsert("blocked_users", kotlinx.serialization.json.buildJsonObject {
+                    put("blocker_id", kotlinx.serialization.json.JsonPrimitive(currentId))
+                    put("blocked_id", kotlinx.serialization.json.JsonPrimitive(userId))
+                })
+            } catch (e: Exception) {
+                android.util.Log.w("FeedVM", "Failed to persist block", e)
+            }
+        }
     }
 
     fun unblockUser(userId: String) {
-        // Mock logic
-        _uiState.update { it.copy(errorMessage = "$userId unblocked (mock).") }
+        _uiState.update { it.copy(
+            blockedUserIds = it.blockedUserIds - userId,
+            errorMessage = "$userId unblocked."
+        ) }
         if (userId == DINO_USER_ID) {
             _uiState.update { it.copy(isDinoBanned = false) }
+        }
+        // Persist to Supabase
+        viewModelScope.launch {
+            try {
+                val currentId = AppSupabaseClient.client?.auth?.currentUserOrNull()?.id ?: return@launch
+                safeDelete("blocked_users", "blocker_id=eq.$currentId&blocked_id=eq.$userId")
+            } catch (e: Exception) {
+                android.util.Log.w("FeedVM", "Failed to persist unblock", e)
+            }
         }
     }
 
     fun muteUser(userId: String) {
-        _uiState.update { it.copy(errorMessage = "$userId muted (mock).") }
+        _uiState.update { it.copy(
+            mutedUserIds = it.mutedUserIds + userId,
+            errorMessage = "$userId muted."
+        ) }
+        // Persist to Supabase
+        viewModelScope.launch {
+            try {
+                val currentId = AppSupabaseClient.client?.auth?.currentUserOrNull()?.id ?: return@launch
+                val client = AppSupabaseClient.client ?: return@launch
+                client.safeInsert("muted_users", kotlinx.serialization.json.buildJsonObject {
+                    put("muter_id", kotlinx.serialization.json.JsonPrimitive(currentId))
+                    put("muted_id", kotlinx.serialization.json.JsonPrimitive(userId))
+                })
+            } catch (e: Exception) {
+                android.util.Log.w("FeedVM", "Failed to persist mute", e)
+            }
+        }
     }
 
     fun unmuteUser(userId: String) {
-        _uiState.update { it.copy(errorMessage = "$userId unmuted (mock).") }
+        _uiState.update { it.copy(
+            mutedUserIds = it.mutedUserIds - userId,
+            errorMessage = "$userId unmuted."
+        ) }
+        // Persist to Supabase
+        viewModelScope.launch {
+            try {
+                val currentId = AppSupabaseClient.client?.auth?.currentUserOrNull()?.id ?: return@launch
+                safeDelete("muted_users", "muter_id=eq.$currentId&muted_id=eq.$userId")
+            } catch (e: Exception) {
+                android.util.Log.w("FeedVM", "Failed to persist unmute", e)
+            }
+        }
+    }
+
+    /** Hide a post from the feed (client-side removal). */
+    fun hidePost(postId: Long) {
+        _uiState.update { state ->
+            state.copy(posts = state.posts.filter { it.id != postId })
+        }
+    }
+
+
+    // --- Bookmark toggling (Supabase-persisted) ---
+
+    fun toggleBookmark(postId: Long) {
+        val currentlyBookmarked = _uiState.value.bookmarkedPostIds.contains(postId)
+        // Optimistic UI update
+        _uiState.update {
+            it.copy(
+                bookmarkedPostIds = if (currentlyBookmarked) it.bookmarkedPostIds - postId
+                                    else it.bookmarkedPostIds + postId
+            )
+        }
+        // Persist to Supabase
+        viewModelScope.launch {
+            val userId = AppSupabaseClient.client?.auth?.currentUserOrNull()?.id ?: return@launch
+            BookmarksRepository.toggleBookmark(userId, postId)
+        }
+    }
+
+    fun isPostBookmarked(postId: Long): Boolean {
+        return _uiState.value.bookmarkedPostIds.contains(postId)
+    }
+
+    // --- Follow toggling (Supabase-persisted) ---
+
+    fun toggleFollow(targetUserId: String) {
+        val parentalRestriction = shouldBlockFeature(
+            parentalState = ParentalControlsSettings.getState(getApplication()),
+            feature = BlockableFeature.FOLLOWS
+        )
+        if (parentalRestriction != null) {
+            _uiState.update {
+                it.copy(errorMessage = "Follow actions are restricted by parental controls right now.")
+            }
+            return
+        }
+
+        val currentlyFollowing = _uiState.value.followingUserIds.contains(targetUserId)
+        // Optimistic UI update
+        _uiState.update {
+            it.copy(
+                followingUserIds = if (currentlyFollowing) it.followingUserIds - targetUserId
+                                   else it.followingUserIds + targetUserId
+            )
+        }
+        // Persist to Supabase
+        viewModelScope.launch {
+            val userId = AppSupabaseClient.client?.auth?.currentUserOrNull()?.id ?: return@launch
+            FollowsRepository.toggleFollow(userId, targetUserId)
+        }
+    }
+
+    fun isFollowingUser(targetUserId: String): Boolean {
+        return _uiState.value.followingUserIds.contains(targetUserId)
     }
 
     // --- Premium ---
@@ -548,7 +758,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
                     // Attempted to set premium without valid purchase
                     android.util.Log.w("FeedViewModel", "⚠️ Premium status verification failed")
                     realPremiumStatus = false
-                    _uiState.update { it.copy(isPremium = if (it.isFakePremiumEnabled) true else false) }
+                    _uiState.update { it.copy(isPremium = it.isFakePremiumEnabled) }
                 }
             }
         } else {
@@ -559,8 +769,9 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun toggleFakePremium(enabled: Boolean) {
-        // SECURITY: Only allow fake premium in debug builds
-        if (!BuildConfig.DEBUG && enabled) {
+        // SECURITY: Only allow fake premium on debug builds or authorized dev devices
+        val hasDeveloperAccess = BuildConfig.DEBUG || DeviceAuthority.isAuthorizedDevice(getApplication())
+        if (!hasDeveloperAccess && enabled) {
             android.util.Log.e("FeedViewModel", "🚨 SECURITY: Fake premium blocked in release build")
             throw SecurityException("Debug features are not available in production builds.")
         }
@@ -595,13 +806,25 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { it.copy(isVideoAutoplayEnabled = enabled) }
     }
 
+    fun setDevUiModes(
+        isMockInterfaceEnabled: Boolean = _uiState.value.isMockInterfaceEnabled,
+        isFallbackUiEnabled: Boolean = _uiState.value.isFallbackUiEnabled
+    ) {
+        _uiState.update {
+            it.copy(
+                isMockInterfaceEnabled = isMockInterfaceEnabled,
+                isFallbackUiEnabled = isFallbackUiEnabled
+            )
+        }
+    }
+
     fun toggleMockInterface(enabled: Boolean) {
-        _uiState.update { it.copy(isMockInterfaceEnabled = enabled) }
+        setDevUiModes(isMockInterfaceEnabled = enabled)
         fetchPosts()
     }
 
     fun toggleFallbackUi(enabled: Boolean) {
-        _uiState.update { it.copy(isFallbackUiEnabled = enabled) }
+        setDevUiModes(isFallbackUiEnabled = enabled)
     }
 
     // --- Data loading ---
@@ -637,9 +860,33 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
                 delay(effectiveLatency)
             }
 
-            // Combine localized explore posts with localized feed posts
-            // All posts are now localized for proper language support
-            val combinedPosts = _localizedPosts + _localizedFeedPosts
+            // Fetch from Supabase if available, otherwise use localized mock data
+            val userId = AppSupabaseClient.client?.auth?.currentUserOrNull()?.id ?: CURRENT_USER_ID_MOCK
+            
+            val remotePosts = if (AppSupabaseClient.isAvailable()) {
+                PostsRepository.fetchPosts()
+            } else {
+                emptyList()
+            }
+
+            // Get liked posts for the current user
+            val likedPostIds = if (AppSupabaseClient.isAvailable() && userId != CURRENT_USER_ID_MOCK) {
+                LikesRepository.getUserLikedPosts(userId).toSet()
+            } else {
+                emptySet<Long>()
+            }
+
+            // Combine localized explore posts with localized feed posts and remote posts
+            val deletedIds = _deletedPostIds.value
+            val combinedPosts = (_userCreatedPosts.value + remotePosts + _localizedPosts + _localizedFeedPosts)
+                .distinctBy { it.id }
+                .filter { it.id !in deletedIds }
+                .map { post ->
+                    if (post.id in likedPostIds) {
+                        post.copy(isLikedByMe = true)
+                    } else post
+                }
+
             _uiState.update { it.copy(posts = combinedPosts, isLoading = false) }
         }
     }
@@ -655,6 +902,8 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
             _userStories.value = emptyList()
             _userConversations.value = MockDataProvider.getLocalizedConversations(getApplication())
+            _userCreatedPosts.value = emptyList()
+            _deletedPostIds.value = emptySet()
 
             _uiState.update { state ->
                 state.copy(
@@ -675,52 +924,98 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun fetchStories() {
-        val allStories = MOCK_STORIES + _userStories.value
-        _uiState.update { state ->
-            state.copy(
-                stories = allStories,
-                activeStory = state.activeStory?.let { active ->
-                    allStories.firstOrNull { it.id == active.id }
-                }
-            )
+        viewModelScope.launch {
+            val remoteStories = if (AppSupabaseClient.isAvailable()) {
+                StoriesRepository.fetchStories()
+            } else {
+                emptyList()
+            }
+            
+            val allStories = _userStories.value + remoteStories + MOCK_STORIES
+            
+            _uiState.update { state ->
+                state.copy(
+                    stories = allStories.distinctBy { it.id },
+                    activeStory = state.activeStory?.let { active ->
+                        allStories.firstOrNull { it.id == active.id }
+                    }
+                )
+            }
         }
     }
 
     // --- Post actions ---
 
-    fun createPost(content: String, tone: String, imageUrl: String? = null, videoUrl: String? = null) {
+    fun createPost(content: String, tone: String, imageUrl: String? = null, videoUrl: String? = null, backgroundColor: Long? = null, locationTag: String? = null) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            // No artificial delay
-            val newPost = Post(
-                id = System.currentTimeMillis(),
-                createdAt = Instant.now().toString(),
-                content = content,
-                userId = CURRENT_USER_ID_MOCK,
-                likes = 0,
-                comments = 0,
-                shares = 0,
-                isLikedByMe = false,
-                imageUrl = imageUrl,
-                userAvatar = CURRENT_USER.avatarUrl,
-                videoUrl = videoUrl
-            )
-            _uiState.update { it.copy(posts = listOf(newPost) + it.posts, isLoading = false) }
+            
+            val userId = AppSupabaseClient.client?.auth?.currentUserOrNull()?.id ?: CURRENT_USER_ID_MOCK
+            
+            if (AppSupabaseClient.isAvailable() && userId != CURRENT_USER_ID_MOCK) {
+                val result = PostsRepository.createPost(
+                    userId = userId,
+                    content = content,
+                    imageUrl = imageUrl,
+                    videoUrl = videoUrl,
+                    backgroundColor = backgroundColor,
+                    category = tone,
+                    locationTag = locationTag
+                )
+                
+                result.onSuccess { fetchPosts() }
+                    .onFailure { error ->
+                        _uiState.update { it.copy(errorMessage = "Failed to post to server: ${error.message}", isLoading = false) }
+                    }
+            } else {
+                // Fallback to local-only
+                val newPost = Post(
+                    id = System.currentTimeMillis(),
+                    createdAt = Instant.now().toString(),
+                    content = content,
+                    userId = CURRENT_USER_ID_MOCK,
+                    likes = 0,
+                    comments = 0,
+                    shares = 0,
+                    isLikedByMe = false,
+                    imageUrl = imageUrl,
+                    userAvatar = CURRENT_USER.avatarUrl,
+                    videoUrl = videoUrl,
+                    backgroundColor = backgroundColor,
+                    locationTag = locationTag
+                )
+                _userCreatedPosts.update { listOf(newPost) + it }
+                fetchPosts()
+            }
         }
     }
 
     fun deletePost(postId: Long) {
+        // Immediately remove from UI
+        _uiState.update { state ->
+            state.copy(posts = state.posts.filter { it.id != postId })
+        }
+        // Track deletion so the post doesn't reappear on refresh
+        _deletedPostIds.update { it + postId }
+        _userCreatedPosts.update { it.filter { p -> p.id != postId } }
+
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            // No artificial delay
-            _uiState.update { it.copy(posts = it.posts.filter { p -> p.id != postId }, isLoading = false) }
+            val userId = AppSupabaseClient.client?.auth?.currentUserOrNull()?.id ?: CURRENT_USER_ID_MOCK
+            if (AppSupabaseClient.isAvailable() && !isMockPostId(postId)) {
+                PostsRepository.deletePost(postId, userId)
+            }
         }
     }
 
     fun deleteStory(storyId: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            // No artificial delay
+            
+            val userId = AppSupabaseClient.client?.auth?.currentUserOrNull()?.id ?: CURRENT_USER_ID_MOCK
+            if (AppSupabaseClient.isAvailable() && storyId.startsWith("s-")) {
+                StoriesRepository.deleteStory(storyId, userId)
+            }
+            
             // Remove the story from the main stories list
             _uiState.update { currentState ->
                 currentState.copy(
@@ -735,6 +1030,58 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun deleteStoryItem(storyId: String, itemId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            val userId = AppSupabaseClient.client?.auth?.currentUserOrNull()?.id ?: CURRENT_USER_ID_MOCK
+            if (AppSupabaseClient.isAvailable() && !itemId.startsWith("si-")) {
+                StoriesRepository.deleteStory(itemId, userId)
+            }
+
+            // Remove the item from the story in main stories list
+            _uiState.update { currentState ->
+                val updatedStories = currentState.stories.mapNotNull { story ->
+                    if (story.id == storyId) {
+                        val updatedItems = story.items.filter { it.id != itemId }
+                        if (updatedItems.isEmpty()) null else story.copy(items = updatedItems)
+                    } else {
+                        story
+                    }
+                }
+                
+                // If the active story was deleted completely, dismiss it
+                var newActiveStory = currentState.activeStory
+                if (newActiveStory?.id == storyId) {
+                    val activeAfterDelete = updatedStories.find { it.id == storyId }
+                    if (activeAfterDelete == null) {
+                        newActiveStory = null
+                    } else {
+                        newActiveStory = activeAfterDelete
+                    }
+                }
+
+                currentState.copy(
+                    stories = updatedStories,
+                    activeStory = newActiveStory,
+                    isLoading = false
+                )
+            }
+
+            // Remove the item from mutable user stories list
+            _userStories.update { currentStories ->
+                currentStories.mapNotNull { story ->
+                    if (story.id == storyId) {
+                        val updatedItems = story.items.filter { it.id != itemId }
+                        if (updatedItems.isEmpty()) null else story.copy(items = updatedItems)
+                    } else {
+                        story
+                    }
+                }
+            }
+        }
+    }
+
     // --- Story actions ---
 
     fun viewStory(story: Story) {
@@ -745,26 +1092,48 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { it.copy(activeStory = null) }
     }
 
-    /** Advance to the next unviewed story, or dismiss if none remain. */
-    fun advanceToNextStory() {
+    private fun moveToAdjacentStory(direction: Int, markCurrentViewed: Boolean) {
         val current = _uiState.value.activeStory ?: run {
             dismissStory()
             return
         }
-        // Mark current as viewed
-        markStoryAsViewed(current.id)
-        // Find the next story in the list after the current one
+        if (markCurrentViewed) {
+            markStoryAsViewed(current.id)
+        }
+
         val stories = _uiState.value.stories
         val currentIndex = stories.indexOfFirst { it.id == current.id }
-        val nextStory = if (currentIndex >= 0) {
-            stories.drop(currentIndex + 1).firstOrNull { !it.isViewed }
-                ?: stories.drop(currentIndex + 1).firstOrNull()
-        } else null
-        if (nextStory != null) {
-            _uiState.update { it.copy(activeStory = nextStory) }
+        if (currentIndex < 0) {
+            dismissStory()
+            return
+        }
+
+        val adjacentStory = when {
+            direction > 0 -> stories.drop(currentIndex + 1).firstOrNull()
+            direction < 0 -> stories.take(currentIndex).lastOrNull()
+            else -> null
+        }
+
+        if (adjacentStory != null) {
+            _uiState.update { it.copy(activeStory = adjacentStory) }
         } else {
             dismissStory()
         }
+    }
+
+    /** Advance to the next story user after the current user is finished. */
+    fun advanceToNextStory() {
+        moveToAdjacentStory(direction = 1, markCurrentViewed = true)
+    }
+
+    /** Skip to the next user's stories without forcing this user's remaining items to be completed. */
+    fun skipToNextStoryUser() {
+        moveToAdjacentStory(direction = 1, markCurrentViewed = false)
+    }
+
+    /** Return to the previous user's stories. */
+    fun goToPreviousStoryUser() {
+        moveToAdjacentStory(direction = -1, markCurrentViewed = false)
     }
 
     fun markStoryAsViewed(storyId: String) {
@@ -776,25 +1145,76 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun createStory(imageUrl: String, duration: Long) {
+    fun createStory(
+        imageUrl: String,
+        duration: Long,
+        contentType: StoryContentType = StoryContentType.IMAGE,
+        textOverlay: String? = null,
+        backgroundColor: Long = 0xFF1a1a2eL,
+        backgroundColorEnd: Long? = null,
+        linkPreview: LinkPreviewData? = null
+    ) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            // No artificial delay
+            
+            val userId = AppSupabaseClient.client?.auth?.currentUserOrNull()?.id ?: CURRENT_USER_ID_MOCK
+            
+            if (AppSupabaseClient.isAvailable() && userId != CURRENT_USER_ID_MOCK) {
+                val result = StoriesRepository.createStory(
+                    userId = userId,
+                    imageUrl = imageUrl,
+                    duration = duration,
+                    contentType = contentType,
+                    textOverlay = textOverlay,
+                    backgroundColor = backgroundColor,
+                    backgroundColorEnd = backgroundColorEnd,
+                    linkPreview = linkPreview
+                )
+                result.onSuccess { fetchStories() }
+                    .onFailure { error ->
+                        _uiState.update { it.copy(errorMessage = "Failed to post story: ${error.message}", isLoading = false) }
+                    }
+            } else {
+                val newItem = StoryItem(
+                    id = "si-${System.currentTimeMillis()}",
+                    imageUrl = imageUrl,
+                    duration = duration,
+                    contentType = contentType,
+                    textOverlay = textOverlay,
+                    backgroundColor = backgroundColor,
+                    backgroundColorEnd = backgroundColorEnd,
+                    linkPreview = linkPreview
+                )
 
-            val newStory = Story(
-                id = "s-${System.currentTimeMillis()}",
-                userName = CURRENT_USER_ID_MOCK,
-                userAvatar = CURRENT_USER.avatarUrl,
-                items = listOf(StoryItem("si-${System.currentTimeMillis()}", imageUrl, duration))
-            )
-            _userStories.update { listOf(newStory) + it }
-            fetchStories()
-            _uiState.update { it.copy(isLoading = false) }
+                _userStories.update { currentStories ->
+                    val myExistingStory = currentStories.find { it.userName == CURRENT_USER.name }
+                    if (myExistingStory != null) {
+                        currentStories.map { 
+                            if (it.id == myExistingStory.id) {
+                                it.copy(items = it.items + newItem, isViewed = false)
+                            } else it
+                        }
+                    } else {
+                        val newStory = Story(
+                            id = "s-me",
+                            userName = CURRENT_USER.name,
+                            userAvatar = CURRENT_USER.avatarUrl,
+                            items = listOf(newItem),
+                            userId = CURRENT_USER_ID_MOCK
+                        )
+                        listOf(newStory) + currentStories
+                    }
+                }
+                fetchStories()
+                _uiState.update { it.copy(isLoading = false) }
+            }
         }
     }
 
 
     fun toggleLike(postId: Long) {
+        val userId = AppSupabaseClient.client?.auth?.currentUserOrNull()?.id ?: CURRENT_USER_ID_MOCK
+        
         // Update UI immediately for responsive feel
         try {
             _uiState.update { currentState ->
@@ -830,7 +1250,7 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
         // Persist to Supabase in background
         viewModelScope.launch {
             try {
-                val result = LikesRepository.toggleLike(postId, CURRENT_USER_ID_MOCK)
+                val result = LikesRepository.toggleLike(postId, userId)
                 result.onSuccess { isNowLiked ->
                     android.util.Log.d("NeuroComet", "✅ Like persisted to Supabase: Post #$postId | Liked: $isNowLiked")
                 }.onFailure { error ->
@@ -846,13 +1266,24 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     // --- Comments bottom sheet ---
 
     fun openCommentSheet(post: Post) {
-        val postId = post.id
-        _uiState.update { state ->
-            state.copy(
-                activePostId = postId,
-                activePostComments = postId?.let { state.commentsByPostId[it] }.orEmpty(),
-                isCommentSheetVisible = true
-            )
+        val postId = post.id ?: return
+        
+        _uiState.update { it.copy(activePostId = postId, isCommentSheetVisible = true, isLoading = true) }
+        
+        viewModelScope.launch {
+            val remoteComments = if (AppSupabaseClient.isAvailable() && !isMockPostId(postId)) {
+                CommentsRepository.fetchComments(postId)
+            } else {
+                emptyList()
+            }
+            
+            _uiState.update { state ->
+                val localComments = state.commentsByPostId[postId].orEmpty()
+                state.copy(
+                    activePostComments = (remoteComments + localComments).distinctBy { it.id },
+                    isLoading = false
+                )
+            }
         }
     }
 
@@ -875,45 +1306,332 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addComment(content: String) {
         val postId = _uiState.value.activePostId ?: return
+        val userId = AppSupabaseClient.client?.auth?.currentUserOrNull()?.id ?: CURRENT_USER_ID_MOCK
+
+        // Optimistic UI update
         val newComment = Comment(
             id = "c-${System.currentTimeMillis()}",
             postId = postId,
-            userId = CURRENT_USER_ID_MOCK,
+            userId = userId,
             userAvatar = CURRENT_USER.avatarUrl,
             content = content,
             timestamp = Instant.now().toString()
         )
 
-        // Add comment to the active post comments list (optimistic)
         _uiState.update { state ->
             val existingComments = state.commentsByPostId[postId].orEmpty()
-            // Also update the comment count on the post
             val updatedPosts = state.posts.map { post ->
                 if (post.id == postId) {
                     post.copy(comments = post.comments + 1)
                 } else post
             }
             state.copy(
-                activePostComments = existingComments + newComment,
+                activePostComments = (existingComments + newComment).distinctBy { it.id },
                 commentsByPostId = state.commentsByPostId + (postId to (existingComments + newComment)),
                 commentDraftsByPostId = state.commentDraftsByPostId - postId,
                 posts = updatedPosts
             )
         }
 
-        // Persist to Supabase if configured
+        // Persist to Supabase
         viewModelScope.launch {
-            try {
-                val client = AppSupabaseClient.client ?: return@launch
-                client.safeInsert("post_comments", kotlinx.serialization.json.buildJsonObject {
-                    put("post_id", kotlinx.serialization.json.JsonPrimitive(postId))
-                    put("user_id", kotlinx.serialization.json.JsonPrimitive(CURRENT_USER_ID_MOCK))
-                    put("content", kotlinx.serialization.json.JsonPrimitive(content))
-                })
-            } catch (e: Exception) {
-                android.util.Log.w("FeedVM", "Failed to persist comment to Supabase", e)
+            if (AppSupabaseClient.isAvailable() && !isMockPostId(postId) && userId != CURRENT_USER_ID_MOCK) {
+                CommentsRepository.addComment(postId, userId, content)
+            } else {
+                // Keep the existing safeInsert logic for backward compatibility/simpler setups
+                try {
+                    val client = AppSupabaseClient.client ?: return@launch
+                    client.safeInsert("post_comments", kotlinx.serialization.json.buildJsonObject {
+                        put("post_id", kotlinx.serialization.json.JsonPrimitive(postId))
+                        put("user_id", kotlinx.serialization.json.JsonPrimitive(userId))
+                        put("content", kotlinx.serialization.json.JsonPrimitive(content))
+                    })
+                } catch (e: Exception) {
+                    android.util.Log.w("FeedVM", "Failed to persist comment to Supabase", e)
+                }
             }
         }
+    }
+
+    // --- Dev-only: Story testing ---
+
+    /**
+     * Helper: persist a list of StoryItems via optimistic local update + Supabase.
+     *
+     * 1. **Always** adds to local [_userStories] immediately (so the story is visible).
+     * 2. If Supabase is available AND the user is authenticated, also inserts each item
+     *    via [StoriesRepository.createStory] (uses the real `user_id` for FK/RLS).
+     * 3. Reports outcome to [_devStoryStatus] so the dev UI shows what happened.
+     */
+    private fun devPersistStoryItems(
+        items: List<StoryItem>,
+        localFallbackLabel: String = "DevStory"
+    ) {
+        viewModelScope.launch {
+            // ── Step 1: optimistic local insert ─────────────────────
+            val ts = System.currentTimeMillis()
+            val localStory = Story(
+                id = "dev-$localFallbackLabel-$ts",
+                userName = localFallbackLabel,
+                userAvatar = avatarUrl(localFallbackLabel.lowercase()),
+                userId = CURRENT_USER_ID_MOCK,
+                items = items
+            )
+            _userStories.update { listOf(localStory) + it }
+            fetchStories()
+
+            // ── Step 2: attempt Supabase persist ────────────────────
+            val client = AppSupabaseClient.client
+            val userId = client?.auth?.currentUserOrNull()?.id
+            val sessionToken = try {
+                client?.auth?.currentSessionOrNull()?.accessToken
+            } catch (_: Exception) { null }
+
+            if (!AppSupabaseClient.isAvailable()) {
+                _devStoryStatus.value = "⚠️ Supabase client not configured → local-only"
+                return@launch
+            }
+            if (userId == null || userId == CURRENT_USER_ID_MOCK) {
+                _devStoryStatus.value = "⚠️ Not signed in (userId=$userId) → local-only"
+                return@launch
+            }
+            if (sessionToken.isNullOrBlank()) {
+                _devStoryStatus.value = "⚠️ No active session / expired JWT → local-only (userId=$userId)"
+                return@launch
+            }
+
+            // We have a client, userId, and session → try Supabase
+
+            // Ensure the public.users row exists (FK target for stories.user_id).
+            // The DB trigger should create it on sign-up, but it may be missing
+            // if the SQL setup script wasn't applied or the trigger failed.
+            try {
+                val userEmail = client.auth.currentUserOrNull()?.email ?: ""
+                val displayName = userEmail.substringBefore("@").ifEmpty { "DevTester" }
+                client.safeUpsert("users", kotlinx.serialization.json.buildJsonObject {
+                    put("id", userId)
+                    put("email", userEmail)
+                    put("username", "dev_${userId.take(8)}")
+                    put("display_name", displayName)
+                    put("created_at", java.time.Instant.now().toString())
+                    put("updated_at", java.time.Instant.now().toString())
+                })
+            } catch (e: Exception) {
+                android.util.Log.w("FeedVM", "ensurePublicUserExists: ${e.message}")
+            }
+
+            var succeeded = 0
+            var failed = 0
+            val errors = mutableListOf<String>()
+            for (item in items) {
+                val result = StoriesRepository.createStory(
+                    userId = userId,
+                    imageUrl = item.imageUrl,
+                    duration = item.duration,
+                    contentType = item.contentType,
+                    textOverlay = item.textOverlay,
+                    backgroundColor = item.backgroundColor,
+                    backgroundColorEnd = item.backgroundColorEnd,
+                    linkPreview = item.linkPreview
+                )
+                result.onSuccess { succeeded++ }
+                result.onFailure { e ->
+                    failed++
+                    errors.add(e.message ?: "unknown")
+                    android.util.Log.w("FeedVM", "devPersistStoryItems: insert failed", e)
+                }
+            }
+
+            _devStoryStatus.value = if (failed == 0) {
+                "✅ Inserted $succeeded item(s) into Supabase (userId=${userId.take(8)}…)"
+            } else {
+                "❌ $failed/${ succeeded + failed } inserts failed: ${errors.firstOrNull()}"
+            }
+            // Re-fetch to include the Supabase-persisted stories
+            fetchStories()
+        }
+    }
+
+    /**
+     * Inject a single test story with one image item.
+     * Good for verifying basic story display, progress bar, and auto-advance.
+     */
+    fun devAddSingleImageStory() {
+        devPersistStoryItems(
+            items = listOf(
+                StoryItem(
+                    id = "si-dev-${System.currentTimeMillis()}",
+                    imageUrl = "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1080",
+                    duration = 5000L
+                )
+            ),
+            localFallbackLabel = "DevTester"
+        )
+    }
+
+    /**
+     * Inject a multi-item story (3 pages) to test navigation between items,
+     * progress bar segments, and auto-advance between pages.
+     */
+    fun devAddMultiItemStory() {
+        val ts = System.currentTimeMillis()
+        devPersistStoryItems(
+            items = listOf(
+                StoryItem(
+                    id = "si-m1-$ts",
+                    imageUrl = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1080",
+                    duration = 4000L
+                ),
+                StoryItem(
+                    id = "si-m2-$ts",
+                    imageUrl = "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1080",
+                    duration = 3000L
+                ),
+                StoryItem(
+                    id = "si-m3-$ts",
+                    imageUrl = "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=1080",
+                    duration = 5000L
+                )
+            ),
+            localFallbackLabel = "MultiStory"
+        )
+    }
+
+    /**
+     * Inject a text-only story with gradient background.
+     * Tests the TEXT_ONLY content type path and overlay rendering.
+     */
+    fun devAddTextOnlyStory() {
+        devPersistStoryItems(
+            items = listOf(
+                StoryItem(
+                    id = "si-txt-${System.currentTimeMillis()}",
+                    imageUrl = "Today's vibe: hyperfocusing on accessibility improvements 🧠✨",
+                    duration = 6000L,
+                    contentType = StoryContentType.TEXT_ONLY,
+                    backgroundColor = 0xFF6A1B9AL,
+                    backgroundColorEnd = 0xFF0D47A1L
+                )
+            ),
+            localFallbackLabel = "TextPoster"
+        )
+    }
+
+    /**
+     * Inject a story with a link preview to test the LINK content type.
+     */
+    fun devAddLinkPreviewStory() {
+        devPersistStoryItems(
+            items = listOf(
+                StoryItem(
+                    id = "si-link-${System.currentTimeMillis()}",
+                    imageUrl = "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1080",
+                    duration = 8000L,
+                    contentType = StoryContentType.LINK,
+                    textOverlay = "Check out this awesome resource!",
+                    linkPreview = LinkPreviewData(
+                        url = "https://www.neurodivergent-resources.org",
+                        title = "Neurodivergent Resources Hub",
+                        description = "A curated collection of tools, tips, and communities for neurodivergent individuals.",
+                        imageUrl = "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400",
+                        siteName = "ND Resources"
+                    )
+                )
+            ),
+            localFallbackLabel = "LinkSharer"
+        )
+    }
+
+    /**
+     * Inject a story from the "current user" to test own-story features
+     * (delete button, "Your Story" indicator, etc.).
+     */
+    fun devAddOwnStory() {
+        // Own story always uses createStory() which already handles Supabase vs local
+        createStory(
+            imageUrl = "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=1080",
+            duration = 5000L,
+            textOverlay = "My dev test story! 🚀"
+        )
+    }
+
+    /**
+     * Bulk-add many stories to test scrolling the stories bar, performance,
+     * and navigation through a long list.
+     */
+    fun devFloodStories(count: Int = 10) {
+        val ts = System.currentTimeMillis()
+        val items = (1..count).map { i ->
+            StoryItem(
+                id = "si-flood-$ts-$i",
+                imageUrl = "https://picsum.photos/seed/nc$i/1080/1920",
+                duration = 4000L
+            )
+        }
+        devPersistStoryItems(items, localFallbackLabel = "FloodTest")
+    }
+
+    /**
+     * Clear all user-created/dev stories, keeping only the built-in MOCK_STORIES.
+     */
+    fun devClearStories() {
+        _userStories.value = emptyList()
+        _uiState.update { it.copy(stories = MOCK_STORIES) }
+    }
+
+    /**
+     * Add a story that mixes all supported content types in one multi-page story.
+     * This is the comprehensive test that exercises every rendering path.
+     */
+    fun devAddKitchenSinkStory() {
+        val ts = System.currentTimeMillis()
+        devPersistStoryItems(
+            items = listOf(
+                StoryItem(
+                    id = "si-ks1-$ts",
+                    imageUrl = "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1080",
+                    duration = 4000L,
+                    contentType = StoryContentType.IMAGE,
+                    textOverlay = "Page 1: Image with overlay"
+                ),
+                StoryItem(
+                    id = "si-ks2-$ts",
+                    imageUrl = "Page 2: Text-only with gradient 🎨",
+                    duration = 5000L,
+                    contentType = StoryContentType.TEXT_ONLY,
+                    backgroundColor = 0xFFE91E63L,
+                    backgroundColorEnd = 0xFFFF9800L
+                ),
+                StoryItem(
+                    id = "si-ks3-$ts",
+                    imageUrl = "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1080",
+                    duration = 7000L,
+                    contentType = StoryContentType.LINK,
+                    textOverlay = "Page 3: Link preview",
+                    linkPreview = LinkPreviewData(
+                        url = "https://github.com/neurocomet",
+                        title = "NeuroComet on GitHub",
+                        description = "Open-source neurodivergent social platform",
+                        siteName = "GitHub"
+                    )
+                ),
+                StoryItem(
+                    id = "si-ks4-$ts",
+                    imageUrl = "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1080",
+                    duration = 3000L,
+                    contentType = StoryContentType.IMAGE
+                ),
+                StoryItem(
+                    id = "si-ks5-$ts",
+                    imageUrl = "Page 5: Final page — does auto-dismiss work? ✅",
+                    duration = 4000L,
+                    contentType = StoryContentType.TEXT_ONLY,
+                    backgroundColor = 0xFF1B5E20L,
+                    backgroundColorEnd = 0xFF004D40L
+                )
+            ),
+            localFallbackLabel = "KitchenSink"
+        )
     }
 
     // --- Dev-only actions referenced in SettingsScreen ---
@@ -937,20 +1655,17 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun sharePost(context: Context, post: Post) {
-        val shareText = buildString {
-            append(post.content)
-            if (!post.userId.isNullOrEmpty()) {
-                append("\n\n— ${post.userId} on NeuroComet")
-            }
-        }
-
+        val postUrl = "https://neurocomet.com/post/${post.id}"
+        val shareTitle = post.content.ifBlank { "NeuroComet post" }.take(80)
         val sendIntent = Intent().apply {
             action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_TEXT, shareText)
+            putExtra(Intent.EXTRA_TEXT, postUrl)
+            putExtra(Intent.EXTRA_SUBJECT, shareTitle)
+            putExtra(Intent.EXTRA_TITLE, shareTitle)
             type = "text/plain"
         }
 
-           val shareIntent = Intent.createChooser(sendIntent, context.getString(R.string.post_share_post_via))
+        val shareIntent = Intent.createChooser(sendIntent, context.getString(R.string.post_share_post_via))
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(shareIntent)
 
@@ -971,7 +1686,24 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
 
     fun fetchNotifications() {
         viewModelScope.launch {
-            // No artificial delay
+            val userId = AppSupabaseClient.client?.auth?.currentUserOrNull()?.id
+
+            if (userId != null && userId != CURRENT_USER_ID_MOCK && AppSupabaseClient.isAvailable()) {
+                // Real mode: fetch from Supabase, merge with any locally-added notifications
+                try {
+                    val remote = NotificationsRepository.fetchNotifications(userId)
+                    val localOnly = _notifications.value.filter { local ->
+                        remote.none { it.id == local.id }
+                    }
+                    val merged = (localOnly + remote).sortedByDescending {
+                        runCatching { Instant.parse(it.timestamp) }.getOrNull() ?: Instant.EPOCH
+                    }
+                    _notifications.value = merged
+                } catch (e: Exception) {
+                    android.util.Log.w("FeedVM", "Failed to fetch remote notifications", e)
+                }
+            }
+
             _uiState.update { it.copy(notifications = _notifications.value) }
         }
     }
@@ -987,6 +1719,10 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         _uiState.update { it.copy(notifications = _notifications.value) }
+        // Persist to Supabase
+        viewModelScope.launch {
+            NotificationsRepository.markAsRead(notificationId)
+        }
     }
 
     fun markAllNotificationsAsRead() {
@@ -994,6 +1730,11 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
             list.map { it.copy(isRead = true) }
         }
         _uiState.update { it.copy(notifications = _notifications.value) }
+        // Persist to Supabase
+        viewModelScope.launch {
+            val userId = AppSupabaseClient.client?.auth?.currentUserOrNull()?.id ?: return@launch
+            NotificationsRepository.markAllAsRead(userId)
+        }
     }
 
     fun dismissNotification(notificationId: String) {
@@ -1001,6 +1742,10 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
             list.filter { it.id != notificationId }
         }
         _uiState.update { it.copy(notifications = _notifications.value) }
+        // Persist to Supabase
+        viewModelScope.launch {
+            NotificationsRepository.deleteNotification(notificationId)
+        }
     }
 
     // Legacy functions for backward compatibility
@@ -1035,6 +1780,7 @@ val MOCK_STORIES = listOf(
         id = "1",
         userName = "NeuroTips",
         userAvatar = "https://i.pravatar.cc/150?u=neurotips",
+        userId = "NeuroTips",
         items = listOf(
             StoryItem("s1i1", "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1080"),
             StoryItem("s1i2", "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1080"),
@@ -1045,6 +1791,7 @@ val MOCK_STORIES = listOf(
         id = "2",
         userName = "StimSpace",
         userAvatar = "https://i.pravatar.cc/150?u=stimspace",
+        userId = "StimSpace",
         items = listOf(
             StoryItem("s2i1", "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1080")
         )
@@ -1053,6 +1800,7 @@ val MOCK_STORIES = listOf(
         id = "3",
         userName = "ADHDWins",
         userAvatar = "https://i.pravatar.cc/150?u=adhdwins",
+        userId = "ADHDWins",
         items = listOf(
             StoryItem("s3i1", "https://images.unsplash.com/photo-1552581234-26160f608093?w=1080"),
             StoryItem("s3i2", "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=1080")
@@ -1062,6 +1810,7 @@ val MOCK_STORIES = listOf(
         id = "4",
         userName = "CalmCorner",
         userAvatar = "https://i.pravatar.cc/150?u=calmcorner",
+        userId = "CalmCorner",
         items = listOf(
             StoryItem("s4i1", "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=1080")
         )
@@ -1070,6 +1819,7 @@ val MOCK_STORIES = listOf(
         id = "5",
         userName = "FocusFlow",
         userAvatar = "https://i.pravatar.cc/150?u=focusflow",
+        userId = "FocusFlow",
         items = listOf(
             StoryItem("s5i1", "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=1080"),
             StoryItem("s5i2", "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=1080")
@@ -1079,6 +1829,7 @@ val MOCK_STORIES = listOf(
         id = "6",
         userName = "SensoryJoy",
         userAvatar = "https://i.pravatar.cc/150?u=sensoryjoy",
+        userId = "SensoryJoy",
         items = listOf(
             StoryItem("s6i1", "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1080")
         )
@@ -1143,43 +1894,7 @@ val MOCK_CONVERSATIONS = listOf(
         ),
         lastMessageTimestamp = Instant.now().minusSeconds(256000).toString(),
         unreadCount = 0
-    ),
-    Conversation(
-        id = "conv6",
-        participants = listOf(CURRENT_USER_ID_MOCK, "CalmObserver"),
-        messages = listOf(
-            DirectMessage("msg19", "CalmObserver", CURRENT_USER_ID_MOCK, "Hi there! Wanted to share a grounding technique that helped me today.", Instant.now().minusSeconds(345600).toString()),
-            DirectMessage("msg20", CURRENT_USER_ID_MOCK, "CalmObserver", "I'm all ears! Been having a rough week with anxiety.", Instant.now().minusSeconds(344000).toString()),
-            DirectMessage("msg21", "CalmObserver", CURRENT_USER_ID_MOCK, "Try the 5-4-3-2-1 method: 5 things you see, 4 you hear, 3 you touch, 2 you smell, 1 you taste.", Instant.now().minusSeconds(343000).toString()),
-            DirectMessage("msg22", CURRENT_USER_ID_MOCK, "CalmObserver", "This is really helpful, thank you! 💙", Instant.now().minusSeconds(342000).toString()),
-            DirectMessage("msg23", "CalmObserver", CURRENT_USER_ID_MOCK, "Anytime! We're all in this together. 🤗", Instant.now().minusSeconds(341000).toString())
-        ),
-        lastMessageTimestamp = Instant.now().minusSeconds(341000).toString(),
-        unreadCount = 1
-    ),
-    Conversation(
-        id = "conv7",
-        participants = listOf(CURRENT_USER_ID_MOCK, "Alex_Stims"),
-        messages = listOf(
-            DirectMessage("msg24", "Alex_Stims", CURRENT_USER_ID_MOCK, "Just got the new mechanical keyboard! The clicks are SO satisfying 🎹", Instant.now().minusSeconds(432000).toString()),
-            DirectMessage("msg25", CURRENT_USER_ID_MOCK, "Alex_Stims", "Ooooh which switches did you get?", Instant.now().minusSeconds(431000).toString()),
-            DirectMessage("msg26", "Alex_Stims", CURRENT_USER_ID_MOCK, "Cherry MX Blues! The tactile feedback is *chef's kiss* for my stimming needs.", Instant.now().minusSeconds(430000).toString()),
-            DirectMessage("msg27", CURRENT_USER_ID_MOCK, "Alex_Stims", "I've been eyeing those! Do they help you focus while coding?", Instant.now().minusSeconds(429000).toString()),
-            DirectMessage("msg28", CURRENT_USER_ID_MOCK, "Alex_Stims", "Absolutely! The rhythmic clicking is like a built-in focus soundtrack. Highly recommend!", Instant.now().minusSeconds(428000).toString()),
-            DirectMessage("msg29", CURRENT_USER_ID_MOCK, "Alex_Stims", "Adding to cart right now 😂", Instant.now().minusSeconds(427000).toString())
-        ),
-        lastMessageTimestamp = Instant.now().minusSeconds(427000).toString(),
-        unreadCount = 0
-    ),
-    Conversation(
-        id = "conv8",
-        participants = listOf(CURRENT_USER_ID_MOCK, "SpoonCounter"),
-        messages = listOf(
-            DirectMessage("msg30", "SpoonCounter", CURRENT_USER_ID_MOCK, "Low spoon day today 😴 How are you managing?", Instant.now().minusSeconds(14400).toString()),
-            DirectMessage("msg31", CURRENT_USER_ID_MOCK, "SpoonCounter", "Same here. Decided to cancel all non-essential plans.", Instant.now().minusSeconds(13800).toString()),
-            DirectMessage("msg32", "SpoonCounter", CURRENT_USER_ID_MOCK, "That's smart! Self-care isn't selfish. Rest up! 💜", Instant.now().minusSeconds(13200).toString())
-        ),
-        lastMessageTimestamp = Instant.now().minusSeconds(13200).toString(),
-        unreadCount = 1
     )
 )
+
+

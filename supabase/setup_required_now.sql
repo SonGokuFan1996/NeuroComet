@@ -52,6 +52,9 @@ CREATE TABLE IF NOT EXISTS public.posts (
     comments INTEGER NOT NULL DEFAULT 0,
     shares INTEGER NOT NULL DEFAULT 0,
     category TEXT,
+    media_items JSONB,
+    min_audience TEXT DEFAULT 'UNDER_13',
+    background_color BIGINT,
     is_liked_by_me BOOLEAN DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -310,6 +313,23 @@ CREATE TABLE IF NOT EXISTS public.call_history (
 CREATE INDEX IF NOT EXISTS idx_call_history_caller ON public.call_history(caller_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_call_history_recipient ON public.call_history(recipient_id, created_at DESC);
 
+CREATE TABLE IF NOT EXISTS public.stories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+    image_url TEXT,
+    video_url TEXT,
+    duration INTEGER DEFAULT 5000,
+    content_type TEXT DEFAULT 'IMAGE',
+    text_overlay TEXT,
+    background_color BIGINT DEFAULT 4279917102,
+    background_color_end BIGINT,
+    link_preview JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '24 hours')
+);
+CREATE INDEX IF NOT EXISTS idx_stories_user_id ON public.stories(user_id);
+CREATE INDEX IF NOT EXISTS idx_stories_expires_at ON public.stories(expires_at);
+
 -- ============================================================================
 -- 5. RLS
 -- ============================================================================
@@ -327,6 +347,7 @@ ALTER TABLE public.blocked_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.muted_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bookmarks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.stories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.call_signals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.call_history ENABLE ROW LEVEL SECURITY;
@@ -391,6 +412,10 @@ DROP POLICY IF EXISTS "Users can read their own call signals" ON public.call_sig
 DROP POLICY IF EXISTS "Users can insert their call history" ON public.call_history;
 DROP POLICY IF EXISTS "Users can read their call history" ON public.call_history;
 DROP POLICY IF EXISTS "Users can delete their call history" ON public.call_history;
+
+DROP POLICY IF EXISTS "Stories are viewable by everyone" ON public.stories;
+DROP POLICY IF EXISTS "Users can create own stories" ON public.stories;
+DROP POLICY IF EXISTS "Users can delete own stories" ON public.stories;
 
 CREATE POLICY "Public profiles are viewable by everyone"
     ON public.users FOR SELECT
@@ -593,6 +618,18 @@ CREATE POLICY "Users can delete their call history"
     ON public.call_history FOR DELETE
     USING (auth.uid()::text = caller_id);
 
+CREATE POLICY "Stories are viewable by everyone"
+    ON public.stories FOR SELECT
+    USING (true);
+
+CREATE POLICY "Users can create own stories"
+    ON public.stories FOR INSERT
+    WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "Users can delete own stories"
+    ON public.stories FOR DELETE
+    USING (user_id = auth.uid());
+
 -- ============================================================================
 -- 6. REALTIME + MESSAGE/TRIGGER HELPERS
 -- ============================================================================
@@ -674,6 +711,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.notifications       TO anon, auth
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.reports             TO anon, authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.call_signals        TO anon, authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.call_history        TO anon, authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.stories             TO anon, authenticated;
 
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
 

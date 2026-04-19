@@ -29,6 +29,13 @@ object ContactsManager {
     private const val KEY_LAST_SYNC = "last_contacts_sync"
     private const val KEY_SYNCED_COUNT = "synced_contact_count"
 
+    private data class MutableDeviceContact(
+        var displayName: String? = null,
+        var photoUri: String? = null,
+        val phoneNumbers: MutableSet<String> = linkedSetOf(),
+        val emails: MutableSet<String> = linkedSetOf()
+    )
+
     // ── Data classes ──
 
     data class DeviceContact(
@@ -41,6 +48,11 @@ object ContactsManager {
     data class MatchedContact(
         val deviceContact: DeviceContact,
         val appUser: User
+    )
+
+    data class ContactsSnapshot(
+        val deviceContacts: List<DeviceContact> = emptyList(),
+        val matchedContacts: List<MatchedContact> = emptyList()
     )
 
     // ── Preferences ──
@@ -99,6 +111,40 @@ object ContactsManager {
      */
     fun supportsPrivacyPicker(): Boolean = Build.VERSION.SDK_INT >= 37
 
+    private fun normalizePhoneNumber(value: String?): String {
+        return value.orEmpty().filter { it.isDigit() || it == '+' }
+    }
+
+    private fun normalizeEmail(value: String?): String {
+        return value.orEmpty().trim().lowercase()
+    }
+
+    private fun resolveDisplayName(contact: MutableDeviceContact): String {
+        return contact.displayName
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?: contact.phoneNumbers.firstOrNull()
+            ?: contact.emails.firstOrNull()
+            ?: "Unnamed contact"
+    }
+
+    private fun buildMatchedContacts(deviceContacts: List<DeviceContact>): List<MatchedContact> {
+        val appUsers = MOCK_USERS.filter { it.id != "me" }
+
+        val matches = mutableListOf<MatchedContact>()
+        for (contact in deviceContacts) {
+            val nameLower = contact.displayName.lowercase()
+            for (user in appUsers) {
+                val userNameLower = user.name.lowercase()
+                if (nameLower.contains(userNameLower) || userNameLower.contains(nameLower)) {
+                    matches.add(MatchedContact(contact, user))
+                    break
+                }
+            }
+        }
+        return matches
+    }
+
     // ── Reading device contacts ──
 
     /**
@@ -109,7 +155,7 @@ object ContactsManager {
         withContext(Dispatchers.IO) {
             if (!hasContactsPermission(context)) return@withContext emptyList()
 
-            val contacts = mutableMapOf<Long, DeviceContact>()
+            val contacts = linkedMapOf<Long, MutableDeviceContact>()
             val cr: ContentResolver = context.contentResolver
 
             try {
@@ -119,6 +165,7 @@ object ContactsManager {
                     arrayOf(
                         ContactsContract.Contacts._ID,
                         ContactsContract.Contacts.DISPLAY_NAME_PRIMARY,
+                        ContactsContract.Contacts.DISPLAY_NAME_ALTERNATIVE,
                         ContactsContract.Contacts.PHOTO_THUMBNAIL_URI
                     ),
                     null, null,
@@ -126,13 +173,23 @@ object ContactsManager {
                 )?.use { cursor ->
                     val idIdx = cursor.getColumnIndex(ContactsContract.Contacts._ID)
                     val nameIdx = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME_PRIMARY)
+                    val altNameIdx = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME_ALTERNATIVE)
                     val photoIdx = cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_THUMBNAIL_URI)
 
                     while (cursor.moveToNext()) {
                         val id = if (idIdx >= 0) cursor.getLong(idIdx) else continue
-                        val name = if (nameIdx >= 0) cursor.getString(nameIdx) ?: continue else continue
+                        val name = sequenceOf(
+                            if (nameIdx >= 0) cursor.getString(nameIdx) else null,
+                            if (altNameIdx >= 0) cursor.getString(altNameIdx) else null
+                        ).mapNotNull { it?.trim()?.takeIf { value -> value.isNotEmpty() } }
+                            .firstOrNull()
                         val photo = if (photoIdx >= 0) cursor.getString(photoIdx) else null
-                        contacts[id] = DeviceContact(displayName = name, photoUri = photo)
+                        contacts.getOrPut(id) { MutableDeviceContact() }.apply {
+                            if (!name.isNullOrBlank()) {
+                                displayName = name
+                            }
+                            photoUri = photo ?: photoUri
+                        }
                     }
                 }
 
@@ -150,10 +207,9 @@ object ContactsManager {
 
                     while (cursor.moveToNext()) {
                         val id = if (idIdx >= 0) cursor.getLong(idIdx) else continue
-                        val number = if (numIdx >= 0) cursor.getString(numIdx) else continue
-                        contacts[id]?.let { c ->
-                            contacts[id] = c.copy(phoneNumbers = c.phoneNumbers + number.orEmpty())
-                        }
+                        val number = normalizePhoneNumber(if (numIdx >= 0) cursor.getString(numIdx) else continue)
+                        if (number.isBlank()) continue
+                        contacts.getOrPut(id) { MutableDeviceContact() }.phoneNumbers += number
                     }
                 }
 
@@ -171,10 +227,9 @@ object ContactsManager {
 
                     while (cursor.moveToNext()) {
                         val id = if (idIdx >= 0) cursor.getLong(idIdx) else continue
-                        val email = if (emailIdx >= 0) cursor.getString(emailIdx) else continue
-                        contacts[id]?.let { c ->
-                            contacts[id] = c.copy(emails = c.emails + email.orEmpty())
-                        }
+                        val email = normalizeEmail(if (emailIdx >= 0) cursor.getString(emailIdx) else continue)
+                        if (email.isBlank()) continue
+                        contacts.getOrPut(id) { MutableDeviceContact() }.emails += email
                     }
                 }
             } catch (e: SecurityException) {
@@ -184,8 +239,27 @@ object ContactsManager {
                 Log.e(TAG, "Error reading device contacts", e)
                 return@withContext emptyList()
             }
+            contacts.values
+                .map { contact ->
+                    DeviceContact(
+                        displayName = resolveDisplayName(contact),
+                        phoneNumbers = contact.phoneNumbers.toList(),
+                        emails = contact.emails.toList(),
+                        photoUri = contact.photoUri
+                    )
+                }
+                .sortedBy { it.displayName.lowercase() }
+        }
 
-            contacts.values.toList()
+    suspend fun loadContactsSnapshot(context: Context): ContactsSnapshot =
+        withContext(Dispatchers.Default) {
+            val deviceContacts = readDeviceContacts(context)
+            val matchedContacts = buildMatchedContacts(deviceContacts)
+            updateSyncMetadata(context, deviceContacts.size)
+            ContactsSnapshot(
+                deviceContacts = deviceContacts,
+                matchedContacts = matchedContacts
+            )
         }
 
     /**
@@ -193,33 +267,17 @@ object ContactsManager {
      * In a real app this would query the server; here we match against MOCK_USERS.
      */
     suspend fun findFriendsOnApp(context: Context): List<MatchedContact> =
-        withContext(Dispatchers.Default) {
-            val deviceContacts = readDeviceContacts(context)
-            val appUsers = MOCK_USERS.filter { it.id != "me" }
+        loadContactsSnapshot(context).matchedContacts
 
-            val matches = mutableListOf<MatchedContact>()
-            for (contact in deviceContacts) {
-                for (user in appUsers) {
-                    val nameLower = contact.displayName.lowercase()
-                    val userNameLower = user.name.lowercase()
-                    if (nameLower.contains(userNameLower) || userNameLower.contains(nameLower)) {
-                        matches.add(MatchedContact(contact, user))
-                        break
-                    }
-                }
-            }
-
-            updateSyncMetadata(context, deviceContacts.size)
-            matches
-        }
+    fun findFriendsOnApp(deviceContacts: List<DeviceContact>): List<MatchedContact> {
+        return buildMatchedContacts(deviceContacts)
+    }
 
     /**
      * Quick sync: read contacts count and update metadata.
      */
     suspend fun syncContacts(context: Context): Int = withContext(Dispatchers.IO) {
-        val contacts = readDeviceContacts(context)
-        updateSyncMetadata(context, contacts.size)
-        contacts.size
+        loadContactsSnapshot(context).deviceContacts.size
     }
 }
 

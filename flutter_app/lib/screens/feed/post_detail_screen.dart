@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/post.dart';
 import '../../providers/feed_provider.dart';
 import '../../widgets/post/post_card.dart';
@@ -124,7 +125,7 @@ class _PostDetailScreenState extends ConsumerState<PostDetailScreen> {
               );
             },
             onProfileTap: () {
-              Navigator.pushNamed(context, '/profile/${post.authorId}');
+              context.push('/profile/${post.authorId}');
             },
           ),
         ),
@@ -449,14 +450,47 @@ class _CommentTile extends StatelessWidget {
 
 // Providers for post detail and comments
 final postDetailProvider = FutureProvider.family<Post, String>((ref, postId) async {
-  await Future.delayed(const Duration(milliseconds: 300));
+  // Try Supabase first
+  try {
+    if (SupabaseService.isInitialized && SupabaseService.isAuthenticated) {
+      final response = await SupabaseService.client
+          .from('posts')
+          .select('*, author:users!user_id(display_name, avatar_url)')
+          .eq('id', postId)
+          .maybeSingle();
 
-  // Mock data - replace with actual API call
+      if (response != null) {
+        final author = response['author'] as Map<String, dynamic>?;
+        return Post(
+          id: response['id'].toString(),
+          authorId: (response['user_id'] as String?) ?? 'unknown',
+          authorName: author?['display_name']?.toString() ?? 'User',
+          authorAvatarUrl: author?['avatar_url']?.toString(),
+          content: response['content'] as String? ?? '',
+          mediaUrls: [
+            if (response['image_url'] != null) response['image_url'] as String,
+            if (response['video_url'] != null) response['video_url'] as String,
+          ],
+          likeCount: (response['likes'] as num?)?.toInt() ?? 0,
+          commentCount: (response['comments'] as num?)?.toInt() ?? 0,
+          shareCount: (response['shares'] as num?)?.toInt() ?? 0,
+          category: response['category'] as String?,
+          createdAt: response['created_at'] != null
+              ? DateTime.tryParse(response['created_at'] as String)
+              : null,
+        );
+      }
+    }
+  } catch (e) {
+    debugPrint('Post detail Supabase fetch failed: $e');
+  }
+
+  // Demo fallback
   return Post(
     id: postId,
     authorId: 'user_1',
     authorName: 'Alex Thompson',
-    authorAvatarUrl: 'https://i.pravatar.cc/150?img=1',
+    authorAvatarUrl: 'https://i.pravatar.cc/150?u=alex_thompson',
     content: 'Just had an amazing breakthrough with my ADHD management strategy! '
         'Turns out that breaking tasks into tiny 5-minute chunks works so much better for me. '
         'Anyone else tried this approach? Would love to hear your experiences! 🧠✨',
@@ -470,8 +504,17 @@ final postDetailProvider = FutureProvider.family<Post, String>((ref, postId) asy
 });
 
 final commentsProvider = FutureProvider.family<List<Comment>, String>((ref, postId) async {
-  await Future.delayed(const Duration(milliseconds: 300));
+  // Try Supabase first
+  try {
+    if (SupabaseService.isInitialized && SupabaseService.isAuthenticated) {
+      final comments = await SupabaseService.getComments(postId);
+      if (comments.isNotEmpty) return comments;
+    }
+  } catch (e) {
+    debugPrint('Comments Supabase fetch failed: $e');
+  }
 
+  // Demo fallback
   return List.generate(
     5,
     (index) => Comment(
@@ -479,7 +522,7 @@ final commentsProvider = FutureProvider.family<List<Comment>, String>((ref, post
       postId: postId,
       authorId: 'user_$index',
       authorName: 'User ${index + 1}',
-      authorAvatarUrl: 'https://i.pravatar.cc/150?img=${index + 10}',
+      authorAvatarUrl: 'https://i.pravatar.cc/150?u=commenter_${index + 1}',
       content: 'This is comment #${index + 1}. Great post! 💪',
       likeCount: (index * 3) % 20,
       createdAt: DateTime.now().subtract(Duration(hours: index)),

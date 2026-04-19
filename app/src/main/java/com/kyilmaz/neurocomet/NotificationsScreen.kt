@@ -30,7 +30,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.CheckCircle
@@ -76,8 +75,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -85,8 +82,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import com.kyilmaz.neurocomet.ui.design.M3EAvatar
+import com.kyilmaz.neurocomet.ui.design.M3EDesignSystem
+import com.kyilmaz.neurocomet.ui.design.M3ESurface
+import com.kyilmaz.neurocomet.ui.design.M3ESurfaceVariant
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -328,7 +327,7 @@ private fun AnimatedUnreadBadge(count: Int) {
                 brush = Brush.linearGradient(
                     colors = listOf(primaryColor, tertiaryColor)
                 ),
-                shape = RoundedCornerShape(20.dp)
+                shape = M3EDesignSystem.Shapes.Chip
             )
             .padding(horizontal = 10.dp, vertical = 4.dp)
     ) {
@@ -352,12 +351,14 @@ private fun MarkAllReadButton(
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
 
-    Surface(
+    M3ESurface(
         modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
+            .clip(M3EDesignSystem.Shapes.Button)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        color = primaryColor.copy(alpha = 0.15f)
+        shape = M3EDesignSystem.Shapes.Button,
+        variant = M3ESurfaceVariant.Settings,
+        shadowElevation = M3EDesignSystem.Elevation.level1,
+        containerColor = primaryColor.copy(alpha = 0.12f),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
@@ -429,6 +430,7 @@ private fun FilterPill(
     count: Int?,
     isSelected: Boolean,
     onClick: () -> Unit,
+    @Suppress("UNUSED_PARAMETER")
     isDark: Boolean
 ) {
     val label = stringResource(filter.labelRes)
@@ -436,13 +438,13 @@ private fun FilterPill(
 
     Surface(
         modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
+            .clip(M3EDesignSystem.Shapes.Chip)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(20.dp),
+        shape = M3EDesignSystem.Shapes.Chip,
         color = if (isSelected) {
             primaryColor
         } else {
-            MaterialTheme.colorScheme.surfaceVariant
+            MaterialTheme.colorScheme.surfaceContainerLow
         },
         border = if (!isSelected) {
             BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -473,7 +475,7 @@ private fun FilterPill(
                     modifier = Modifier
                         .background(
                             color = if (isSelected) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f) else primaryColor.copy(alpha = 0.15f),
-                            shape = RoundedCornerShape(10.dp)
+                            shape = M3EDesignSystem.Shapes.Chip
                         )
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
@@ -532,7 +534,7 @@ private fun AnimatedSectionHeader(
                     brush = Brush.verticalGradient(
                         colors = listOf(primaryColor, tertiaryColor)
                     ),
-                    shape = RoundedCornerShape(2.dp)
+                    shape = M3EDesignSystem.Shapes.ExtraSmallShape
                 )
         )
         Spacer(Modifier.width(10.dp))
@@ -547,8 +549,8 @@ private fun AnimatedSectionHeader(
         Box(
             modifier = Modifier
                 .background(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(10.dp)
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    shape = M3EDesignSystem.Shapes.Chip
                 )
                 .padding(horizontal = 8.dp, vertical = 2.dp)
         ) {
@@ -593,19 +595,21 @@ private fun EnhancedNotificationTile(
     val (icon, iconColor) = getNotificationStyle(notification.type)
     val hasUnread = !notification.isRead
 
-    Surface(
+    M3ESurface(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .alpha(alpha)
-            .clip(RoundedCornerShape(16.dp))
+            .clip(M3EDesignSystem.Shapes.LargeShape)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        color = if (hasUnread) {
+        shape = M3EDesignSystem.Shapes.LargeShape,
+        variant = M3ESurfaceVariant.Feed,
+        shadowElevation = if (hasUnread) M3EDesignSystem.Elevation.level2 else M3EDesignSystem.Elevation.level1,
+        containerColor = if (hasUnread) {
             primaryColor.copy(alpha = 0.08f)
         } else {
-            MaterialTheme.colorScheme.surface
-        }
+            MaterialTheme.colorScheme.surfaceContainerLow
+        },
     ) {
         Row(
             modifier = Modifier.padding(start = 12.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
@@ -631,16 +635,10 @@ private fun EnhancedNotificationTile(
                     contentAlignment = Alignment.Center
                 ) {
                     if (notification.avatarUrl != null) {
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(notification.avatarUrl)
-                                .crossfade(true)
-                                .build(),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(50.dp)
-                                .clip(CircleShape)
+                        M3EAvatar(
+                            imageUrl = notification.avatarUrl,
+                            size = 50.dp,
+                            showGradientRing = hasUnread,
                         )
                         Box(
                             modifier = Modifier
@@ -755,6 +753,7 @@ private fun EnhancedNotificationTile(
 private fun NotificationsEmptyState(
     filter: NotificationFilter,
     onRefresh: (() -> Unit)?,
+    @Suppress("UNUSED_PARAMETER")
     isDark: Boolean
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
@@ -805,10 +804,18 @@ private fun NotificationsEmptyState(
             .padding(32.dp),
         contentAlignment = Alignment.Center
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        M3ESurface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = M3EDesignSystem.Shapes.ExtraLargeShape,
+            variant = M3ESurfaceVariant.Settings,
+            shadowElevation = M3EDesignSystem.Elevation.level2,
+            contentPadding = PaddingValues(24.dp),
         ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
             // Emoji
             Text(
                 text = emoji as String,
@@ -857,6 +864,7 @@ private fun NotificationsEmptyState(
                 Button(onClick = onRefresh) {
                     Text(stringResource(R.string.notifications_refresh))
                 }
+            }
             }
         }
     }

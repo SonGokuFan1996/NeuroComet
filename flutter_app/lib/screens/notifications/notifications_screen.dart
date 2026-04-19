@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/notification.dart';
 import '../../providers/notifications_provider.dart';
 import '../../widgets/common/neuro_avatar.dart';
@@ -16,6 +17,14 @@ enum NotificationFilter {
   likes,
   follows,
 }
+
+const _notificationShellRoutes = <String>{
+  '/',
+  '/explore',
+  '/messages',
+  '/notifications',
+  '/settings',
+};
 
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
@@ -289,8 +298,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
     HapticFeedback.lightImpact();
     ref.read(notificationsProvider.notifier).markAsRead(notification.id);
 
-    if (notification.actionUrl != null) {
-      Navigator.pushNamed(context, notification.actionUrl!);
+    final normalizedActionUrl = _normalizeNotificationRoute(notification.actionUrl);
+    if (normalizedActionUrl != null) {
+      _openNotificationRoute(context, normalizedActionUrl);
       return;
     }
 
@@ -299,33 +309,67 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen>
       case NotificationType.comment:
       case NotificationType.repost:
         if (notification.targetId != null) {
-          Navigator.pushNamed(context, '/post', arguments: notification.targetId);
+          context.push('/post/${notification.targetId}');
         } else if (notification.relatedPostId != null) {
-          Navigator.pushNamed(context, '/post', arguments: notification.relatedPostId.toString());
+          context.push('/post/${notification.relatedPostId}');
         }
         break;
       case NotificationType.follow:
         if (notification.actorId != null) {
-          Navigator.pushNamed(context, '/profile', arguments: notification.actorId);
+          context.push('/profile/${notification.actorId}');
         }
         break;
       case NotificationType.message:
-        Navigator.pushNamed(context, '/messages');
+        context.go('/messages');
         break;
       case NotificationType.mention:
         if (notification.targetId != null) {
-          Navigator.pushNamed(context, '/post', arguments: notification.targetId);
+          context.push('/post/${notification.targetId}');
         }
         break;
       case NotificationType.badge:
       case NotificationType.achievement:
-        Navigator.pushNamed(context, '/profile');
+        context.push('/profile');
         break;
       case NotificationType.welcome:
+        context.go('/');
+        break;
       case NotificationType.system:
       case NotificationType.safetyAlert:
+        context.go('/settings');
         break;
     }
+  }
+
+  String? _normalizeNotificationRoute(String? route) {
+    if (route == null) return null;
+    final trimmed = route.trim();
+    if (trimmed.isEmpty) return null;
+
+    final normalized = trimmed.startsWith('/') ? trimmed : '/$trimmed';
+    if (normalized == '/feed') return '/';
+
+    if (_notificationShellRoutes.contains(normalized) ||
+        normalized.startsWith('/post/') ||
+        normalized.startsWith('/profile/') ||
+        normalized.startsWith('/chat/') ||
+        normalized.startsWith('/category/') ||
+        normalized.startsWith('/settings/') ||
+        normalized.startsWith('/followers/') ||
+        normalized.startsWith('/following/') ||
+        normalized.startsWith('/feedback/')) {
+      return normalized;
+    }
+
+    return null;
+  }
+
+  void _openNotificationRoute(BuildContext context, String route) {
+    if (_notificationShellRoutes.contains(route)) {
+      context.go(route);
+      return;
+    }
+    context.push(route);
   }
 }
 
@@ -353,37 +397,51 @@ class _NotificationHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        l10n.notificationsTitle,
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: -0.5,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            l10n.notificationsTitle,
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: -0.5,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            textHeightBehavior: const TextHeightBehavior(
+                              applyHeightToFirstAscent: false,
+                              applyHeightToLastDescent: false,
+                            ),
+                          ),
                         ),
-                      ),
-                      if (unreadCount > 0) ...[
-                        const SizedBox(width: 12),
-                        _UnreadBadge(count: unreadCount),
+                        if (unreadCount > 0) ...[
+                          const SizedBox(width: 12),
+                          _UnreadBadge(count: unreadCount),
+                        ],
                       ],
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    unreadCount > 0
-                        ? 'You have $unreadCount new ${unreadCount == 1 ? 'notification' : 'notifications'}'
-                        : 'You\'re all caught up! ✨',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 4),
+                    Text(
+                      unreadCount > 0
+                          ? 'You have $unreadCount new ${unreadCount == 1 ? 'notification' : 'notifications'}'
+                          : 'You\'re all caught up! ✨',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-              if (onMarkAllRead != null)
+              if (onMarkAllRead != null) ...[
+                const SizedBox(width: 12),
                 _MarkAllReadButton(onPressed: onMarkAllRead!),
+              ],
             ],
           ),
         ],
@@ -442,13 +500,6 @@ class _UnreadBadgeState extends State<_UnreadBadge>
             colors: [Color(0xFF7C4DFF), Color(0xFF00BFA5)],
           ),
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF7C4DFF).withValues(alpha: 0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
         child: Text(
           widget.count > 99 ? '99+' : widget.count.toString(),
@@ -1033,7 +1084,7 @@ class _EnhancedNotificationTileState extends State<_EnhancedNotificationTile>
       child: SlideTransition(
         position: _slideAnimation,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
           child: Material(
             color: notification.isRead
                 ? (isDark ? Colors.white.withValues(alpha: 0.03) : Colors.white)

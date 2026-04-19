@@ -1485,9 +1485,9 @@ class BackupViewModel(application: Application) : AndroidViewModel(application) 
         } catch (_: Exception) { }
 
         // Fall back to the local mock user when running in debug/mock mode.
-        // In debug builds the user logs in via skipAuth() which sets a local
+        // On authorized developer devices, skipAuth() also creates a local-only
         // User object but does not create a Supabase session.
-        return if (BuildConfig.DEBUG) CURRENT_USER.id else null
+        return if (BuildConfig.DEBUG || DeviceAuthority.isAuthorizedDevice(getApplication())) CURRENT_USER.id else null
     }
 
     private fun updateProgress(stage: String, progress: Float) {

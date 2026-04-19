@@ -167,26 +167,32 @@ class _NeuroButtonState extends State<NeuroButton>
                 const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
             decoration: BoxDecoration(
               color: widget.backgroundColor ?? theme.colorScheme.primary,
-              borderRadius: widget.borderRadius ?? BorderRadius.circular(12),
+              borderRadius: widget.borderRadius ?? BorderRadius.circular(14),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.10),
+                width: 0.5,
+              ),
               boxShadow: effectiveEnabled
                   ? [
                       BoxShadow(
                         color: (widget.backgroundColor ?? theme.colorScheme.primary)
-                            .withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                            .withValues(alpha: 0.18),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
                       ),
                     ]
                   : null,
             ),
             child: widget.isLoading
-                ? SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation(
-                        widget.foregroundColor ?? Colors.white,
+                ? Center(
+                    child: SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        valueColor: AlwaysStoppedAnimation(
+                          widget.foregroundColor ?? Colors.white,
+                        ),
                       ),
                     ),
                   )
@@ -581,11 +587,28 @@ class NeuroSectionHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 20,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [AppColors.primaryPurple, AppColors.secondaryTeal],
+                  ),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
           if (actionLabel != null)
             TextButton(

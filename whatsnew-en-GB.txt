@@ -1,0 +1,6 @@
+What's New (v2.0.0-rc13)
+- Less battery drain: call setup deferred until needed.
+- Faster cold launch: messaging and ad SDK load later.
+- Fewer widget wake-ups (energy, spoon, mood, stim-break).
+- Better call history lazy loading.
+- Stability and performance polish.

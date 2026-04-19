@@ -2,6 +2,7 @@ package com.kyilmaz.neurocomet.calling
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -111,10 +112,13 @@ private fun ActiveCallContent(
     val isVideo = call.callType == CallType.VIDEO
 
     // Permission launcher
-    val permissions = if (isVideo) {
-        arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
-    } else {
-        arrayOf(Manifest.permission.RECORD_AUDIO)
+    val permissions = remember {
+        val list = mutableListOf(Manifest.permission.RECORD_AUDIO)
+        if (isVideo) list.add(Manifest.permission.CAMERA)
+        if (Build.VERSION.SDK_INT >= 37) {
+            list.add("android.permission.ACCESS_LOCAL_NETWORK")
+        }
+        list.toTypedArray()
     }
     var permissionsGranted by remember {
         mutableStateOf(permissions.all {

@@ -118,9 +118,10 @@ private fun PersonaCard(persona: NeurodivergentPersona, onClick: () -> Unit) {
 @Composable
 fun PracticeCallScreen(persona: NeurodivergentPersona, onEndCall: () -> Unit) {
     val context = LocalContext.current
-    val audioManager = remember { CallAudioManager(context) }
-    val isSpeaking by audioManager.isSpeaking.collectAsState()
-    val isTtsReady by audioManager.isReady.collectAsState()
+    val isInspectionMode = androidx.compose.ui.platform.LocalInspectionMode.current
+    val audioManager = remember(isInspectionMode) { if (isInspectionMode) null else CallAudioManager(context) }
+    val isSpeaking = audioManager?.isSpeaking?.collectAsState()?.value ?: false
+    val isTtsReady = audioManager?.isReady?.collectAsState()?.value ?: false
     val state by GeminiCallSimulator.state.collectAsState()
     val currentResponse by GeminiCallSimulator.currentResponse.collectAsState()
     val messages by GeminiCallSimulator.messagesFlow.collectAsState()
@@ -130,18 +131,18 @@ fun PracticeCallScreen(persona: NeurodivergentPersona, onEndCall: () -> Unit) {
     var audioEnabled by remember { mutableStateOf(true) }
     var lastSpokenMessageId by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(persona) { GeminiCallSimulator.startCall(persona) }
-    LaunchedEffect(isTtsReady, persona) { if (isTtsReady) audioManager.setVoiceForGender(persona.isMale) }
+    LaunchedEffect(isTtsReady, persona) { if (isTtsReady) audioManager?.setVoiceForGender(persona.isMale) }
     LaunchedEffect(messages) {
         if (audioEnabled && isTtsReady) {
             val lastMessage = messages.lastOrNull()
             if (lastMessage != null && !lastMessage.isFromUser && lastMessage.id != lastSpokenMessageId) {
-                audioManager.speak(lastMessage.content, lastMessage.id)
+                audioManager?.speak(lastMessage.content, lastMessage.id)
                 lastSpokenMessageId = lastMessage.id
             }
         }
     }
     LaunchedEffect(messages.size, currentResponse) { if (messages.isNotEmpty()) try { listState.animateScrollToItem(messages.size) } catch (e: Exception) {} }
-    DisposableEffect(Unit) { onDispose { audioManager.shutdown(); GeminiCallSimulator.endCall() } }
+    DisposableEffect(Unit) { onDispose { audioManager?.shutdown(); GeminiCallSimulator.endCall() } }
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val pulseScale by infiniteTransition.animateFloat(initialValue = 1f, targetValue = 1.1f, animationSpec = infiniteRepeatable(animation = tween(800), repeatMode = RepeatMode.Reverse), label = "pulseScale")
     Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(colors = listOf(Color(0xFF1a1a2e), Color(0xFF16213e), Color(0xFF0f3460))))) {
@@ -167,12 +168,12 @@ fun PracticeCallScreen(persona: NeurodivergentPersona, onEndCall: () -> Unit) {
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { audioManager.stop(); GeminiCallSimulator.endCall(); onEndCall() }) {
+                    IconButton(onClick = { audioManager?.stop(); GeminiCallSimulator.endCall(); onEndCall() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.call_end), tint = Color.White)
                     }
                 },
                 actions = {
-                    IconButton(onClick = { audioEnabled = !audioEnabled; if (!audioEnabled) audioManager.stop() }) {
+                    IconButton(onClick = { audioEnabled = !audioEnabled; if (!audioEnabled) audioManager?.stop() }) {
                         Icon(
                             if (audioEnabled) Icons.AutoMirrored.Filled.VolumeUp else Icons.AutoMirrored.Filled.VolumeOff,
                             contentDescription = stringResource(if (audioEnabled) R.string.call_mute_audio else R.string.call_unmute_audio),
@@ -236,8 +237,8 @@ fun PracticeCallScreen(persona: NeurodivergentPersona, onEndCall: () -> Unit) {
                                 }
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            AnimatedVisibility(visible = messageText.isNotBlank(), enter = scaleIn() + fadeIn(), exit = scaleOut() + fadeOut()) { IconButton(onClick = { if (messageText.isNotBlank()) { audioManager.stop(); GeminiCallSimulator.sendMessage(messageText); messageText = "" } }, modifier = Modifier.size(44.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary)) { Icon(Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(R.string.dm_send), tint = Color.White, modifier = Modifier.size(20.dp)) } }
-                            AnimatedVisibility(visible = messageText.isBlank(), enter = scaleIn() + fadeIn(), exit = scaleOut() + fadeOut()) { IconButton(onClick = { audioManager.stop(); GeminiCallSimulator.endCall(); onEndCall() }, modifier = Modifier.size(44.dp).clip(CircleShape).background(Color(0xFFE53935))) { Icon(Icons.Filled.CallEnd, contentDescription = stringResource(R.string.call_end), tint = Color.White, modifier = Modifier.size(20.dp)) } }
+                            AnimatedVisibility(visible = messageText.isNotBlank(), enter = scaleIn() + fadeIn(), exit = scaleOut() + fadeOut()) { IconButton(onClick = { if (messageText.isNotBlank()) { audioManager?.stop(); GeminiCallSimulator.sendMessage(messageText); messageText = "" } }, modifier = Modifier.size(44.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary)) { Icon(Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(R.string.dm_send), tint = Color.White, modifier = Modifier.size(20.dp)) } }
+                            AnimatedVisibility(visible = messageText.isBlank(), enter = scaleIn() + fadeIn(), exit = scaleOut() + fadeOut()) { IconButton(onClick = { audioManager?.stop(); GeminiCallSimulator.endCall(); onEndCall() }, modifier = Modifier.size(44.dp).clip(CircleShape).background(Color(0xFFE53935))) { Icon(Icons.Filled.CallEnd, contentDescription = stringResource(R.string.call_end), tint = Color.White, modifier = Modifier.size(20.dp)) } }
                         }
                     }
                 }

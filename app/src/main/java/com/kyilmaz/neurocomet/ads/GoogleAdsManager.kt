@@ -17,6 +17,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.kyilmaz.neurocomet.BuildConfig
+import com.kyilmaz.neurocomet.DeviceAuthority
 import com.kyilmaz.neurocomet.SecurityUtils
 import com.kyilmaz.neurocomet.SubscriptionManager
 import kotlinx.coroutines.CoroutineScope
@@ -40,6 +41,7 @@ import kotlinx.coroutines.launch
 object GoogleAdsManager {
 
     private const val TAG = "GoogleAdsManager"
+    private val initializationLock = Any()
 
     // Coroutine scope for async operations
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -85,20 +87,29 @@ object GoogleAdsManager {
     )
 
     /**
-     * Initialize the Google Mobile Ads SDK
-     * Called once at app startup
+     * Initialize the Google Mobile Ads SDK lazily on first ad-capable use.
      */
     fun initialize(context: Context, useTestAds: Boolean = BuildConfig.DEBUG) {
-        if (_adsState.value.isInitialized) {
-            Log.d(TAG, "Ads already initialized")
-            return
-        }
+        val appContext = context.applicationContext
 
-        Log.d(TAG, "Initializing Google Mobile Ads SDK...")
-        _adsState.value = _adsState.value.copy(
-            isLoading = true,
-            useTestAds = useTestAds
-        )
+        synchronized(initializationLock) {
+            if (_adsState.value.isInitialized) {
+                Log.d(TAG, "Ads already initialized")
+                return
+            }
+
+            if (_adsState.value.isLoading) {
+                Log.d(TAG, "Ads initialization already in progress")
+                return
+            }
+
+            Log.d(TAG, "Initializing Google Mobile Ads SDK...")
+            _adsState.value = _adsState.value.copy(
+                isLoading = true,
+                useTestAds = useTestAds,
+                error = null
+            )
+        }
 
         try {
             // Configure test devices if in debug mode
@@ -114,21 +125,20 @@ object GoogleAdsManager {
             }
 
             // Initialize the Mobile Ads SDK
-            MobileAds.initialize(context) { initializationStatus ->
+            MobileAds.initialize(appContext) { initializationStatus ->
                 val statusMap = initializationStatus.adapterStatusMap
                 for ((adapter, status) in statusMap) {
                     Log.d(TAG, "Adapter: $adapter, Status: ${status.initializationState}")
                 }
 
-                _adsState.value = _adsState.value.copy(
-                    isInitialized = true,
-                    isLoading = false
-                )
-
                 Log.d(TAG, "Google Mobile Ads SDK initialized successfully")
 
-                // Check premium status and preload ads if not premium
-                checkPremiumStatusAndUpdateAds(context)
+                checkPremiumStatusAndUpdateAds(appContext) {
+                    _adsState.value = _adsState.value.copy(
+                        isInitialized = true,
+                        isLoading = false
+                    )
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize Google Mobile Ads SDK", e)
@@ -139,27 +149,41 @@ object GoogleAdsManager {
         }
     }
 
+    fun ensureInitialized(context: Context): Boolean {
+        if (_adsState.value.isInitialized) {
+            return true
+        }
+
+        initialize(
+            context = context.applicationContext,
+            useTestAds = BuildConfig.DEBUG || DeviceAuthority.isAuthorizedDevice(context)
+        )
+        return _adsState.value.isInitialized
+    }
+
     /**
      * Check premium status and completely disable ads for premium users
      */
-    fun checkPremiumStatusAndUpdateAds(context: Context) {
+    fun checkPremiumStatusAndUpdateAds(context: Context, onComplete: (() -> Unit)? = null) {
         SubscriptionManager.checkPremiumStatus { isPremium ->
+            val hasDeveloperAdAccess = BuildConfig.DEBUG || DeviceAuthority.isAuthorizedDevice(context)
             val verified = if (isPremium) SubscriptionManager.verifyPremiumStatus() else false
 
             Log.d(TAG, "checkPremiumStatusAndUpdateAds: isPremium=$isPremium, verified=$verified")
 
             _adsState.value = _adsState.value.copy(
-                isPremium = isPremium && (verified || BuildConfig.DEBUG),
-                adsEnabled = !(isPremium && (verified || BuildConfig.DEBUG))
+                isPremium = isPremium && (verified || hasDeveloperAdAccess),
+                adsEnabled = !(isPremium && (verified || hasDeveloperAdAccess))
             )
 
             if (_adsState.value.isPremium) {
                 Log.d(TAG, "Premium status applied - ads completely disabled")
                 clearAllAds()
             } else {
-                Log.d(TAG, "Non-premium status - preloading ads")
-                preloadAds(context)
+                Log.d(TAG, "Non-premium status - ads will load on demand to reduce startup battery and network usage")
             }
+
+            onComplete?.invoke()
         }
     }
 
@@ -171,9 +195,9 @@ object GoogleAdsManager {
 
         // Premium users never see ads - CHECK THIS FIRST AND AGGRESSIVELY
         if (state.isPremium) {
-            // For dev simulated premium, we trust the state.isPremium flag in debug
-            if (BuildConfig.DEBUG) {
-                Log.d(TAG, "shouldShowAds: false (!!! PREMIUM DETECTED IN DEBUG !!!)")
+            // For trusted dev simulated premium, we trust the state flag when test ads/dev mode is active
+            if (state.useTestAds) {
+                Log.d(TAG, "shouldShowAds: false (trusted dev/test premium simulation)")
                 return false
             }
 
@@ -242,6 +266,11 @@ object GoogleAdsManager {
         adSize: AdSize = AdSize.BANNER,
         adUnitKey: String = "default"
     ): AdView? {
+        if (!ensureInitialized(context)) {
+            Log.d(TAG, "Banner ad requested before ads SDK was ready")
+            return null
+        }
+
         if (!shouldShowAds()) {
             Log.d(TAG, "Skipping banner ad - ads disabled or premium")
             return null
@@ -317,6 +346,11 @@ object GoogleAdsManager {
      * Load an interstitial ad
      */
     fun loadInterstitialAd(context: Context) {
+        if (!ensureInitialized(context)) {
+            Log.d(TAG, "Interstitial load requested before ads SDK was ready")
+            return
+        }
+
         if (!shouldShowAds()) {
             Log.d(TAG, "Skipping interstitial ad load - ads disabled or premium")
             return
@@ -397,6 +431,11 @@ object GoogleAdsManager {
      * Show interstitial ad with frequency capping
      */
     fun showInterstitialAd(activity: Activity): Boolean {
+        if (!ensureInitialized(activity)) {
+            Log.d(TAG, "Not showing interstitial - ads SDK still initializing")
+            return false
+        }
+
         if (!shouldShowAds()) {
             Log.d(TAG, "Not showing interstitial - ads disabled or premium")
             return false
@@ -444,6 +483,16 @@ object GoogleAdsManager {
      * Load a rewarded ad
      */
     fun loadRewardedAd(context: Context) {
+        if (!ensureInitialized(context)) {
+            Log.d(TAG, "Rewarded ad load requested before ads SDK was ready")
+            return
+        }
+
+        if (!shouldShowAds()) {
+            Log.d(TAG, "Skipping rewarded ad load - ads disabled or premium")
+            return
+        }
+
         if (_adsState.value.simulateAdFailure) {
             _adsState.value = _adsState.value.copy(error = "Simulated rewarded ad failure")
             return
@@ -521,6 +570,16 @@ object GoogleAdsManager {
         activity: Activity,
         onRewarded: (amount: Int, type: String) -> Unit
     ): Boolean {
+        if (!ensureInitialized(activity)) {
+            Log.d(TAG, "Not showing rewarded ad - ads SDK still initializing")
+            return false
+        }
+
+        if (!shouldShowAds()) {
+            Log.d(TAG, "Not showing rewarded ad - ads disabled or premium")
+            return false
+        }
+
         if (_adsState.value.kidsMode) {
             Log.d(TAG, "Not showing rewarded ad - kids mode enabled")
             return false

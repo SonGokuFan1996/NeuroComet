@@ -11,17 +11,9 @@ object SecurityUtils {
 
     private const val TAG = "SecurityUtils"
 
-    // XOR key loaded from BuildConfig — never hardcoded in source.
-    // The value is injected at build time from local.properties / env.
-    private val XOR_KEY: String by lazy {
-        try {
-            val field = BuildConfig::class.java.getField("OBFUSCATION_KEY")
-            field.get(null) as? String ?: ""
-        } catch (_: Exception) {
-            // Fallback: BuildConfig field not yet generated (pre-sync)
-            ""
-        }
-    }
+    // XOR key loaded from BuildConfig and injected at build time.
+    private val xorKey: String
+        get() = BuildConfig.OBFUSCATION_KEY
 
     /**
      * De-obfuscates a string that was obfuscated with XOR and Hex encoded.
@@ -31,12 +23,17 @@ object SecurityUtils {
             return ""
         }
 
+        if (xorKey.isBlank()) {
+            Log.w(TAG, "Missing obfuscation key; refusing to decrypt build-time secrets")
+            return ""
+        }
+
         return try {
             val result = StringBuilder()
             for (i in 0 until obfuscated.length step 2) {
                 val hex = obfuscated.substring(i, i + 2)
                 val byte = hex.toInt(16)
-                val keyChar = XOR_KEY[(i / 2) % XOR_KEY.length].code
+                val keyChar = xorKey[(i / 2) % xorKey.length].code
                 result.append((byte xor keyChar).toChar())
             }
             result.toString()
@@ -50,10 +47,15 @@ object SecurityUtils {
      * Obfuscates a string using XOR and Hex encoding.
      */
     fun encrypt(plain: String): String {
+        if (xorKey.isBlank()) {
+            Log.w(TAG, "Missing obfuscation key; refusing to encrypt runtime value")
+            return ""
+        }
+
         val bytes = plain.toByteArray(Charsets.UTF_8)
         val result = StringBuilder()
         for (i in bytes.indices) {
-            val obfuscatedByte = bytes[i].toInt() xor XOR_KEY[i % XOR_KEY.length].code
+            val obfuscatedByte = bytes[i].toInt() xor xorKey[i % xorKey.length].code
             result.append(String.format("%02x", obfuscatedByte and 0xFF))
         }
         return result.toString()

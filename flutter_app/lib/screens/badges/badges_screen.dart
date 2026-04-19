@@ -2,14 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/badge_service.dart';
 
-/// Provider for badge progress
-final badgeProgressProvider = FutureProvider<Map<String, BadgeProgress>>((ref) async {
-  return BadgeManager.getAllProgress();
-});
-
-/// Provider for total XP
-final totalXpProvider = FutureProvider<int>((ref) async {
-  return BadgeManager.getTotalXp();
+/// Provider for the full rewards snapshot.
+final rewardSnapshotProvider = FutureProvider<RewardSnapshot>((ref) async {
+  return BadgeManager.getRewardSnapshot();
 });
 
 /// Screen to display all badges and achievements
@@ -19,27 +14,32 @@ class BadgesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final progressAsync = ref.watch(badgeProgressProvider);
-    final xpAsync = ref.watch(totalXpProvider);
+    final snapshotAsync = ref.watch(rewardSnapshotProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Achievements'),
         actions: [
           // XP display
-          xpAsync.when(
-            data: (xp) => Center(
+          snapshotAsync.when(
+            data: (snapshot) => Center(
               child: Padding(
                 padding: const EdgeInsets.only(right: 16),
-                child: Row(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const Text('⭐', style: TextStyle(fontSize: 18)),
-                    const SizedBox(width: 4),
                     Text(
-                      '$xp XP',
-                      style: theme.textTheme.titleMedium?.copyWith(
+                      'Level ${snapshot.levelInfo.level}',
+                      style: theme.textTheme.labelLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    Text(
+                      '⭐ ${snapshot.totalXp} XP',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -51,23 +51,24 @@ class BadgesScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: progressAsync.when(
+      body: snapshotAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error: $error')),
-        data: (progress) => _buildBadgesList(context, progress),
+        data: (snapshot) => _buildBadgesList(context, snapshot),
       ),
     );
   }
 
-  Widget _buildBadgesList(BuildContext context, Map<String, BadgeProgress> progress) {
+  Widget _buildBadgesList(BuildContext context, RewardSnapshot snapshot) {
     final theme = Theme.of(context);
+    final progress = snapshot.progress;
 
     // Group badges by category
     final categories = BadgeCategory.values;
 
     // Calculate stats
-    final totalBadges = BadgeRegistry.allBadges.length;
-    final unlockedBadges = progress.values.where((p) => p.isUnlocked).length;
+    final totalBadges = snapshot.totalBadges;
+    final unlockedBadges = snapshot.unlockedCount;
 
     return CustomScrollView(
       slivers: [
@@ -106,6 +107,26 @@ class BadgesScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    _RewardStatChip(
+                      icon: Icons.auto_awesome,
+                      label: 'Level ${snapshot.levelInfo.level}',
+                    ),
+                    _RewardStatChip(
+                      icon: Icons.star_rounded,
+                      label: '${snapshot.totalXp} XP',
+                    ),
+                    _RewardStatChip(
+                      icon: Icons.trending_up,
+                      label: '${snapshot.levelInfo.xpNeededForNextLevel} XP to next',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
                 // Progress bar
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
@@ -115,6 +136,33 @@ class BadgesScreen extends ConsumerWidget {
                     backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.5),
                   ),
                 ),
+                const SizedBox(height: 10),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: snapshot.levelInfo.progress,
+                    minHeight: 6,
+                    backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.35),
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${snapshot.levelInfo.xpIntoLevel}/${snapshot.levelInfo.xpSpan} XP in current level',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                if (snapshot.recentlyUnlocked.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    'Recent unlocks: ${snapshot.recentlyUnlocked.map((badge) => badge.name).join(' • ')}',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -204,6 +252,33 @@ class BadgesScreen extends ConsumerWidget {
       builder: (context) => BadgeDetailDialog(
         badge: badge,
         progress: progress,
+      ),
+    );
+  }
+}
+
+class _RewardStatChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _RewardStatChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: theme.colorScheme.primary),
+          const SizedBox(width: 6),
+          Text(label, style: theme.textTheme.labelMedium),
+        ],
       ),
     );
   }

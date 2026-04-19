@@ -166,7 +166,6 @@ class _DmPrivacySettingsScreenState extends State<DmPrivacySettingsScreen> {
 
   Widget _buildDmPermissionTile(
       ThemeData theme, String title, String value, String description) {
-    final isSelected = _dmPermission == value;
 
     return RadioListTile<String>(
       title: Text(title),

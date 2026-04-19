@@ -102,9 +102,8 @@ fun ParentalControlsScreen(
     var showChangePinDialog by remember { mutableStateOf(false) }
     var showRemoveDialog by remember { mutableStateOf(false) }
 
-    // Developer bypass: Auto-authenticate in debug builds
-    val isDevDevice = remember { ParentalControlsSettings.isDevDevice(context) }
-    var isAuthenticated by remember { mutableStateOf(isDevDevice) }
+    // Parental controls should always require real PIN verification when configured.
+    var isAuthenticated by remember { mutableStateOf(false) }
 
     // Refresh state periodically
     LaunchedEffect(Unit) {

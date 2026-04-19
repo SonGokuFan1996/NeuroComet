@@ -16,9 +16,11 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 
 /**
  * Safe Supabase REST helpers that bypass kotlin-reflect's typeOf<T>() crash on Android.
@@ -35,6 +37,12 @@ import kotlinx.serialization.json.JsonObject
  */
 
 private const val TAG = "SupabaseREST"
+
+private data class RestAuthContext(
+    val bearerToken: String,
+    val usingUserJwt: Boolean,
+    val userId: String?
+)
 
 /** Shared JSON parser (lenient to handle Supabase responses). */
 private val supabaseJson = Json { ignoreUnknownKeys = true; isLenient = true }
@@ -64,13 +72,96 @@ private val rawSupabaseKey: String by lazy {
  * reject (or silently skip) the operation, leading to 500 / empty-result
  * errors.
  */
-private fun currentBearerToken(): String {
+private suspend fun resolveAuthContext(client: SupabaseClient? = null): RestAuthContext {
     return try {
-        AppSupabaseClient.client?.auth?.currentSessionOrNull()?.accessToken
-            ?.takeIf { it.isNotBlank() }
-            ?: rawSupabaseKey
-    } catch (_: Exception) {
-        rawSupabaseKey
+        val authClient = client ?: AppSupabaseClient.client
+        var session = authClient?.auth?.currentSessionOrNull()
+        var accessToken = session?.accessToken?.takeIf { it.isNotBlank() }
+        val currentUserId = authClient?.auth?.currentUserOrNull()?.id
+
+        if (accessToken == null && currentUserId != null) {
+            repeat(5) { attempt ->
+                if (accessToken != null) return@repeat
+                delay(150)
+                session = authClient.auth.currentSessionOrNull()
+                accessToken = session?.accessToken?.takeIf { it.isNotBlank() }
+                if (accessToken != null) {
+                    Log.d(TAG, "Recovered user JWT for ${currentUserId.take(8)}… after auth propagation delay (${'$'}{attempt + 1}/5)")
+                    return@repeat
+                }
+                if (attempt == 4) {
+                    Log.w(TAG, "Authenticated user ${currentUserId.take(8)}… still has no session JWT; falling back to anon key")
+                }
+            }
+        }
+
+        if (accessToken != null) {
+            RestAuthContext(
+                bearerToken = accessToken,
+                usingUserJwt = true,
+                userId = session?.user?.id
+            )
+        } else {
+            RestAuthContext(
+                bearerToken = rawSupabaseKey,
+                usingUserJwt = false,
+                userId = authClient?.auth?.currentUserOrNull()?.id
+            )
+        }
+    } catch (e: Exception) {
+        Log.w(TAG, "Falling back to anon key for REST request", e)
+        RestAuthContext(
+            bearerToken = rawSupabaseKey,
+            usingUserJwt = false,
+            userId = null
+        )
+    }
+}
+
+private fun buildRestFailureMessage(
+    operation: String,
+    table: String,
+    status: Int,
+    body: String,
+    authContext: RestAuthContext
+): String {
+    val normalizedBody = body.replace('\n', ' ').trim()
+    val authMode = if (authContext.usingUserJwt) "user-jwt" else "anon"
+    val hint = when {
+        status == 401 -> {
+            if (authContext.usingUserJwt) {
+                "The authenticated session may be expired; sign in again to refresh the JWT."
+            } else {
+                "No active user JWT was available, so the request was sent with the anon key."
+            }
+        }
+        normalizedBody.contains("row-level security", ignoreCase = true) || normalizedBody.contains("\"42501\"") -> {
+            if (authContext.usingUserJwt) {
+                "The table's RLS policy rejected this authenticated user for `$table`."
+            } else {
+                "RLS evaluated the request as anonymous because no user JWT was attached."
+            }
+        }
+        normalizedBody.contains("violates foreign key constraint", ignoreCase = true) &&
+            normalizedBody.contains("user", ignoreCase = true) -> {
+            "A related `public.users` row is missing for this account; backfill the user row and retry."
+        }
+        normalizedBody.contains("relation", ignoreCase = true) &&
+            normalizedBody.contains("does not exist", ignoreCase = true) -> {
+            "The required Supabase table/schema is missing; run the setup SQL migration."
+        }
+        normalizedBody.contains("schema cache", ignoreCase = true) &&
+            normalizedBody.contains("could not find the", ignoreCase = true) -> {
+            "The deployed Supabase table is older than this app expects; run `supabase/setup_required_now.sql` (or add the missing columns) and retry."
+        }
+        else -> null
+    }
+
+    return buildString {
+        append("$operation failed ($status, auth=$authMode")
+        authContext.userId?.takeIf { it.isNotBlank() }?.let { append(", user=${it.take(8)}…") }
+        append(") on `$table`: $normalizedBody")
+        hint?.let { append(" Hint: $it") }
     }
 }
 
@@ -80,23 +171,38 @@ private fun currentBearerToken(): String {
 
 /**
  * Insert a single [JsonObject] row into a Supabase table.
+ * @return the inserted row if [returnRepresentation] is true, null otherwise.
  */
-suspend fun SupabaseClient.safeInsert(table: String, value: JsonObject) {
+suspend fun SupabaseClient.safeInsert(
+    table: String,
+    value: JsonObject,
+    returnRepresentation: Boolean = false
+): JsonObject? {
     val url = "$rawSupabaseUrl/rest/v1/$table"
-    val token = currentBearerToken()
-    Log.d(TAG, "INSERT → $table")
+    val authContext = resolveAuthContext(this)
+    Log.d(TAG, "INSERT → $table (auth=${if (authContext.usingUserJwt) "user-jwt" else "anon"})")
     val response = rawHttpClient.post(url) {
         contentType(ContentType.Application.Json)
         header("apikey", rawSupabaseKey)
-        header("Authorization", "Bearer $token")
-        header("Prefer", "return=minimal")
+        header("Authorization", "Bearer ${authContext.bearerToken}")
+        if (returnRepresentation) {
+            header("Prefer", "return=representation")
+        } else {
+            header("Prefer", "return=minimal")
+        }
         setBody(value.toString())
     }
     if (response.status.value !in 200..299) {
         val body = response.bodyAsText()
-        Log.e(TAG, "INSERT $table failed (${response.status}): $body")
-        throw Exception("Insert failed (${response.status}): $body")
+        val message = buildRestFailureMessage("Insert", table, response.status.value, body, authContext)
+        Log.e(TAG, message)
+        throw Exception(message)
     }
+    return if (returnRepresentation) {
+        val text = response.bodyAsText()
+        // representation returns an array of 1 element if single insert
+        supabaseJson.decodeFromString<JsonArray>(text).firstOrNull()?.jsonObject
+    } else null
 }
 
 /**
@@ -105,20 +211,50 @@ suspend fun SupabaseClient.safeInsert(table: String, value: JsonObject) {
 suspend fun SupabaseClient.safeInsertList(table: String, values: List<JsonObject>) {
     val body = JsonArray(values)
     val url = "$rawSupabaseUrl/rest/v1/$table"
-    val token = currentBearerToken()
-    Log.d(TAG, "BULK INSERT → $table (${values.size} rows)")
+    val authContext = resolveAuthContext(this)
+    Log.d(TAG, "BULK INSERT → $table (${values.size} rows, auth=${if (authContext.usingUserJwt) "user-jwt" else "anon"})")
     val response = rawHttpClient.post(url) {
         contentType(ContentType.Application.Json)
         header("apikey", rawSupabaseKey)
-        header("Authorization", "Bearer $token")
+        header("Authorization", "Bearer ${authContext.bearerToken}")
         header("Prefer", "return=minimal")
         setBody(body.toString())
     }
     if (response.status.value !in 200..299) {
         val respBody = response.bodyAsText()
-        Log.e(TAG, "BULK INSERT $table failed (${response.status}): $respBody")
-        throw Exception("Bulk insert failed (${response.status}): $respBody")
+        val message = buildRestFailureMessage("Bulk insert", table, response.status.value, respBody, authContext)
+        Log.e(TAG, message)
+        throw Exception(message)
     }
+}
+
+/**
+ * Upsert a single [JsonObject] row into a Supabase table.
+ * Uses PostgREST `resolution=merge-duplicates` to perform INSERT … ON CONFLICT DO UPDATE.
+ * Requires the table to have a primary key or unique constraint on the conflicting columns.
+ */
+suspend fun SupabaseClient.safeUpsert(
+    table: String,
+    value: JsonObject,
+    onConflict: String = "id"
+): JsonObject? {
+    val url = "$rawSupabaseUrl/rest/v1/$table?on_conflict=$onConflict"
+    val authContext = resolveAuthContext(this)
+    Log.d(TAG, "UPSERT → $table (on_conflict=$onConflict, auth=${if (authContext.usingUserJwt) "user-jwt" else "anon"})")
+    val response = rawHttpClient.post(url) {
+        contentType(ContentType.Application.Json)
+        header("apikey", rawSupabaseKey)
+        header("Authorization", "Bearer ${authContext.bearerToken}")
+        header("Prefer", "return=minimal,resolution=merge-duplicates")
+        setBody(value.toString())
+    }
+    if (response.status.value !in 200..299) {
+        val body = response.bodyAsText()
+        val message = buildRestFailureMessage("Upsert", table, response.status.value, body, authContext)
+        Log.e(TAG, message)
+        throw Exception(message)
+    }
+    return null
 }
 
 // =============================================================================
@@ -141,17 +277,18 @@ suspend fun safeSelect(
         append("$rawSupabaseUrl/rest/v1/$table?select=$columns")
         if (filters.isNotEmpty()) append("&$filters")
     }
-    val token = currentBearerToken()
-    Log.d(TAG, "SELECT → $table (columns=$columns)")
+    val authContext = resolveAuthContext()
+    Log.d(TAG, "SELECT → $table (columns=$columns, auth=${if (authContext.usingUserJwt) "user-jwt" else "anon"})")
     val response = rawHttpClient.get(url) {
         header("apikey", rawSupabaseKey)
-        header("Authorization", "Bearer $token")
+        header("Authorization", "Bearer ${authContext.bearerToken}")
         header("Accept", "application/json")
     }
     if (response.status.value !in 200..299) {
         val body = response.bodyAsText()
-        Log.e(TAG, "SELECT $table failed (${response.status}): $body")
-        throw Exception("Select failed (${response.status}): $body")
+        val message = buildRestFailureMessage("Select", table, response.status.value, body, authContext)
+        Log.e(TAG, message)
+        throw Exception(message)
     }
     val text = response.bodyAsText()
     return supabaseJson.decodeFromString<JsonArray>(text)
@@ -174,19 +311,20 @@ suspend fun safeUpdate(
     filters: String
 ) {
     val url = "$rawSupabaseUrl/rest/v1/$table?$filters"
-    val token = currentBearerToken()
-    Log.d(TAG, "UPDATE → $table ($filters)")
+    val authContext = resolveAuthContext()
+    Log.d(TAG, "UPDATE → $table ($filters, auth=${if (authContext.usingUserJwt) "user-jwt" else "anon"})")
     val response = rawHttpClient.patch(url) {
         contentType(ContentType.Application.Json)
         header("apikey", rawSupabaseKey)
-        header("Authorization", "Bearer $token")
+        header("Authorization", "Bearer ${authContext.bearerToken}")
         header("Prefer", "return=minimal")
         setBody(body.toString())
     }
     if (response.status.value !in 200..299) {
         val respBody = response.bodyAsText()
-        Log.e(TAG, "UPDATE $table failed (${response.status}): $respBody")
-        throw Exception("Update failed (${response.status}): $respBody")
+        val message = buildRestFailureMessage("Update", table, response.status.value, respBody, authContext)
+        Log.e(TAG, message)
+        throw Exception(message)
     }
 }
 
@@ -205,15 +343,16 @@ suspend fun safeDelete(
     filters: String
 ) {
     val url = "$rawSupabaseUrl/rest/v1/$table?$filters"
-    val token = currentBearerToken()
-    Log.d(TAG, "DELETE → $table ($filters)")
+    val authContext = resolveAuthContext()
+    Log.d(TAG, "DELETE → $table ($filters, auth=${if (authContext.usingUserJwt) "user-jwt" else "anon"})")
     val response = rawHttpClient.delete(url) {
         header("apikey", rawSupabaseKey)
-        header("Authorization", "Bearer $token")
+        header("Authorization", "Bearer ${authContext.bearerToken}")
     }
     if (response.status.value !in 200..299) {
         val body = response.bodyAsText()
-        Log.e(TAG, "DELETE $table failed (${response.status}): $body")
-        throw Exception("Delete failed (${response.status}): $body")
+        val message = buildRestFailureMessage("Delete", table, response.status.value, body, authContext)
+        Log.e(TAG, message)
+        throw Exception(message)
     }
 }

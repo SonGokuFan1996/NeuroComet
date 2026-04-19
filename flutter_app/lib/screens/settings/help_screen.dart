@@ -36,11 +36,11 @@ class HelpScreen extends ConsumerWidget {
                 ListTile(
                   leading: const Icon(Icons.email_outlined),
                   title: const Text('Email Support'),
-                  subtitle: const Text('support@neurocomet.app'),
+                  subtitle: const Text('support@getneurocomet.com'),
                   trailing: const Icon(Icons.copy),
                   onTap: () {
                     Clipboard.setData(
-                      const ClipboardData(text: 'support@neurocomet.app'),
+                      const ClipboardData(text: 'support@getneurocomet.com'),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -84,21 +84,21 @@ class HelpScreen extends ConsumerWidget {
                   leading: const Icon(Icons.menu_book_outlined),
                   title: const Text('User Guide'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () => _openUrl('https://neurocomet.app/guide'),
+                  onTap: () => _openUrl('https://getneurocomet.com/guide'),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.video_library_outlined),
                   title: const Text('Video Tutorials'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () => _openUrl('https://neurocomet.app/tutorials'),
+                  onTap: () => _openUrl('https://getneurocomet.com/tutorials'),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.groups_outlined),
                   title: const Text('Community Forum'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () => _openUrl('https://community.neurocomet.app'),
+                  onTap: () => _openUrl('https://community.getneurocomet.com'),
                 ),
               ],
             ),
@@ -580,7 +580,7 @@ class _LiveChatSheetState extends State<_LiveChatSheet> {
     } else if (lower.contains('game') || lower.contains('play')) {
       return 'Our sensory games can be found in the Games Hub! You unlock more games by earning achievements. Each game is designed to help with regulation, focus, or relaxation. 🎮';
     } else {
-      return 'Thank you for reaching out! Our support team is available 9am-6pm EST on weekdays. For faster help, you can also email us at support@neurocomet.app. Is there anything else I can assist with? 😊';
+      return 'Thank you for reaching out! Our support team is available 9am-6pm EST on weekdays. For faster help, you can also email us at support@getneurocomet.com. Is there anything else I can assist with? 😊';
     }
   }
 

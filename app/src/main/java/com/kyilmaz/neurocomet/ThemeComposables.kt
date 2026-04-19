@@ -40,23 +40,68 @@ import com.kyilmaz.neurocomet.ui.design.rememberM3EPhysics
  * @return Typography object with scaled font sizes
  */
 fun scaledTypography(scale: Float): Typography {
-    val defaultTypography = Typography()
+    val defaultTypography = com.kyilmaz.neurocomet.ui.theme.Typography
     return Typography(
-        displayLarge = defaultTypography.displayLarge.copy(fontSize = defaultTypography.displayLarge.fontSize * scale),
-        displayMedium = defaultTypography.displayMedium.copy(fontSize = defaultTypography.displayMedium.fontSize * scale),
-        displaySmall = defaultTypography.displaySmall.copy(fontSize = defaultTypography.displaySmall.fontSize * scale),
-        headlineLarge = defaultTypography.headlineLarge.copy(fontSize = defaultTypography.headlineLarge.fontSize * scale),
-        headlineMedium = defaultTypography.headlineMedium.copy(fontSize = defaultTypography.headlineMedium.fontSize * scale),
-        headlineSmall = defaultTypography.headlineSmall.copy(fontSize = defaultTypography.headlineSmall.fontSize * scale),
-        titleLarge = defaultTypography.titleLarge.copy(fontSize = defaultTypography.titleLarge.fontSize * scale),
-        titleMedium = defaultTypography.titleMedium.copy(fontSize = defaultTypography.titleMedium.fontSize * scale),
-        titleSmall = defaultTypography.titleSmall.copy(fontSize = defaultTypography.titleSmall.fontSize * scale),
-        bodyLarge = defaultTypography.bodyLarge.copy(fontSize = defaultTypography.bodyLarge.fontSize * scale),
-        bodyMedium = defaultTypography.bodyMedium.copy(fontSize = defaultTypography.bodyMedium.fontSize * scale),
-        bodySmall = defaultTypography.bodySmall.copy(fontSize = defaultTypography.bodySmall.fontSize * scale),
-        labelLarge = defaultTypography.labelLarge.copy(fontSize = defaultTypography.labelLarge.fontSize * scale),
-        labelMedium = defaultTypography.labelMedium.copy(fontSize = defaultTypography.labelMedium.fontSize * scale),
-        labelSmall = defaultTypography.labelSmall.copy(fontSize = defaultTypography.labelSmall.fontSize * scale)
+        displayLarge = defaultTypography.displayLarge.copy(
+            fontSize = defaultTypography.displayLarge.fontSize * scale,
+            lineHeight = defaultTypography.displayLarge.lineHeight * scale,
+        ),
+        displayMedium = defaultTypography.displayMedium.copy(
+            fontSize = defaultTypography.displayMedium.fontSize * scale,
+            lineHeight = defaultTypography.displayMedium.lineHeight * scale,
+        ),
+        displaySmall = defaultTypography.displaySmall.copy(
+            fontSize = defaultTypography.displaySmall.fontSize * scale,
+            lineHeight = defaultTypography.displaySmall.lineHeight * scale,
+        ),
+        headlineLarge = defaultTypography.headlineLarge.copy(
+            fontSize = defaultTypography.headlineLarge.fontSize * scale,
+            lineHeight = defaultTypography.headlineLarge.lineHeight * scale,
+        ),
+        headlineMedium = defaultTypography.headlineMedium.copy(
+            fontSize = defaultTypography.headlineMedium.fontSize * scale,
+            lineHeight = defaultTypography.headlineMedium.lineHeight * scale,
+        ),
+        headlineSmall = defaultTypography.headlineSmall.copy(
+            fontSize = defaultTypography.headlineSmall.fontSize * scale,
+            lineHeight = defaultTypography.headlineSmall.lineHeight * scale,
+        ),
+        titleLarge = defaultTypography.titleLarge.copy(
+            fontSize = defaultTypography.titleLarge.fontSize * scale,
+            lineHeight = defaultTypography.titleLarge.lineHeight * scale,
+        ),
+        titleMedium = defaultTypography.titleMedium.copy(
+            fontSize = defaultTypography.titleMedium.fontSize * scale,
+            lineHeight = defaultTypography.titleMedium.lineHeight * scale,
+        ),
+        titleSmall = defaultTypography.titleSmall.copy(
+            fontSize = defaultTypography.titleSmall.fontSize * scale,
+            lineHeight = defaultTypography.titleSmall.lineHeight * scale,
+        ),
+        bodyLarge = defaultTypography.bodyLarge.copy(
+            fontSize = defaultTypography.bodyLarge.fontSize * scale,
+            lineHeight = defaultTypography.bodyLarge.lineHeight * scale,
+        ),
+        bodyMedium = defaultTypography.bodyMedium.copy(
+            fontSize = defaultTypography.bodyMedium.fontSize * scale,
+            lineHeight = defaultTypography.bodyMedium.lineHeight * scale,
+        ),
+        bodySmall = defaultTypography.bodySmall.copy(
+            fontSize = defaultTypography.bodySmall.fontSize * scale,
+            lineHeight = defaultTypography.bodySmall.lineHeight * scale,
+        ),
+        labelLarge = defaultTypography.labelLarge.copy(
+            fontSize = defaultTypography.labelLarge.fontSize * scale,
+            lineHeight = defaultTypography.labelLarge.lineHeight * scale,
+        ),
+        labelMedium = defaultTypography.labelMedium.copy(
+            fontSize = defaultTypography.labelMedium.fontSize * scale,
+            lineHeight = defaultTypography.labelMedium.lineHeight * scale,
+        ),
+        labelSmall = defaultTypography.labelSmall.copy(
+            fontSize = defaultTypography.labelSmall.fontSize * scale,
+            lineHeight = defaultTypography.labelSmall.lineHeight * scale,
+        )
     )
 }
 
@@ -792,7 +837,7 @@ fun NeuroThemeApplication(
         MaterialTheme(
             colorScheme = colorScheme,
             typography = typography,
-            shapes = MaterialTheme.shapes,
+            shapes = M3EShapes.shapes,
             content = content
         )
     }

@@ -100,6 +100,85 @@ class AuthViewModel : ViewModel() {
     private val _fido2Credentials = MutableStateFlow<List<Fido2Credential>>(emptyList())
     val fido2Credentials: StateFlow<List<Fido2Credential>> = _fido2Credentials.asStateFlow()
 
+    // Dev-only: transient status text for the in-app Supabase auth gate in Developer Options.
+    private val _devAuthStatus = MutableStateFlow<String?>(null)
+    val devAuthStatus: StateFlow<String?> = _devAuthStatus.asStateFlow()
+
+    /**
+     * Developer-only helper used by the Supabase auth gate in Developer Options.
+     * Attempts to sign in with a fixed dev password; if the user does not exist,
+     * signs them up. Status updates are surfaced through [devAuthStatus].
+     *
+     * Only runs in debug builds and only when a real Supabase client is configured.
+     */
+    fun devSignInForTesting(email: String) {
+        if (!BuildConfig.DEBUG) {
+            _devAuthStatus.value = "Dev sign-in is only available in debug builds."
+            return
+        }
+        val trimmed = email.trim()
+        if (trimmed.isBlank() || !trimmed.contains("@") || !trimmed.contains(".")) {
+            _devAuthStatus.value = "Enter a valid email."
+            return
+        }
+        val client = AppSupabaseClient.client
+        if (client == null) {
+            _devAuthStatus.value = "Supabase client unavailable in this build."
+            return
+        }
+        val devPassword = "DevPassword!123"
+        viewModelScope.launch {
+            _devAuthStatus.value = "Signing in\u2026"
+            try {
+                client.auth.signInWith(Email) {
+                    this.email = trimmed
+                    this.password = devPassword
+                }
+                val restored = userFromCurrentSession(trimmed.substringBefore("@"))
+                if (restored != null) {
+                    _user.value = restored
+                    refreshCurrentAccountStatus(restored.id)
+                    _devAuthStatus.value = "Signed in as ${restored.id.take(8)}\u2026"
+                } else {
+                    _devAuthStatus.value = "Signed in (no session user resolved)."
+                }
+            } catch (signInErr: Exception) {
+                Log.w(TAG, "Dev sign-in failed, attempting sign-up", signInErr)
+                _devAuthStatus.value = "Sign-in failed, trying sign-up\u2026"
+                try {
+                    val displayName = trimmed.substringBefore("@")
+                    client.auth.signUpWith(Email) {
+                        this.email = trimmed
+                        this.password = devPassword
+                        this.data = kotlinx.serialization.json.buildJsonObject {
+                            put("display_name", kotlinx.serialization.json.JsonPrimitive(displayName))
+                            put("username", kotlinx.serialization.json.JsonPrimitive("dev_${System.currentTimeMillis() % 100000}"))
+                        }
+                    }
+                    // After sign-up, try sign-in to guarantee a session (works if email confirmation is disabled).
+                    try {
+                        client.auth.signInWith(Email) {
+                            this.email = trimmed
+                            this.password = devPassword
+                        }
+                    } catch (_: Throwable) { /* ignored – confirmation may be required */ }
+
+                    val restored = userFromCurrentSession(displayName)
+                    if (restored != null) {
+                        _user.value = restored
+                        refreshCurrentAccountStatus(restored.id)
+                        _devAuthStatus.value = "Signed up as ${restored.id.take(8)}\u2026"
+                    } else {
+                        _devAuthStatus.value = "Signed up. If confirmation is required, check email."
+                    }
+                } catch (signUpErr: Exception) {
+                    Log.e(TAG, "Dev sign-up failed", signUpErr)
+                    _devAuthStatus.value = "Auth failed: ${signUpErr.message ?: signInErr.message ?: "unknown error"}"
+                }
+            }
+        }
+    }
+
     /**
      * Initialize the AuthenticationManager with context
      */

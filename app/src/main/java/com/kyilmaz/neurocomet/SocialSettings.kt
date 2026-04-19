@@ -1,7 +1,15 @@
 package com.kyilmaz.neurocomet
 
+import android.Manifest
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -30,8 +38,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
+import androidx.core.app.ActivityCompat
 import androidx.core.content.edit
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.kyilmaz.neurocomet.ui.design.M3ETopAppBar
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.launch
 
 /**
  * Social media settings that fit the neurodivergent-friendly vibe of NeuroComet.
@@ -484,6 +500,7 @@ private fun SocialSettingsScaffold(
                 Modifier
                     .fillMaxSize()
                     .widthIn(max = contentMaxWidth)
+                    .padding(bottom = androidx.compose.foundation.layout.WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
             )
         }
     }
@@ -699,16 +716,7 @@ fun PrivacySettingsScreen(
             }
 
             item {
-                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text("Contact sync helps you find people you already know.", style = MaterialTheme.typography.bodyMedium)
-                        Text(
-                            "This build keeps contact import local until you opt into a real backend sync.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
+                ContactsAccessSettingsCard()
             }
 
             // Blocked & Muted Section
@@ -903,6 +911,332 @@ fun PrivacySettingsScreen(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun ContactsAccessSettingsCard() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    var hasContactsPermission by remember { mutableStateOf(ContactsManager.hasContactsPermission(context)) }
+    var isLoading by remember { mutableStateOf(false) }
+    var deviceContacts by remember { mutableStateOf<List<ContactsManager.DeviceContact>>(emptyList()) }
+    var matchedContacts by remember { mutableStateOf<List<ContactsManager.MatchedContact>>(emptyList()) }
+    var syncEnabled by remember { mutableStateOf(ContactsManager.isContactsSyncEnabled(context)) }
+    var syncedCount by remember { mutableIntStateOf(ContactsManager.getSyncedContactCount(context)) }
+    var lastSyncTimestamp by remember { mutableLongStateOf(ContactsManager.getLastSyncTimestamp(context)) }
+    var showAllContacts by remember { mutableStateOf(false) }
+
+    fun refreshSyncMetadata() {
+        syncEnabled = ContactsManager.isContactsSyncEnabled(context)
+        syncedCount = ContactsManager.getSyncedContactCount(context)
+        lastSyncTimestamp = ContactsManager.getLastSyncTimestamp(context)
+    }
+
+    fun loadContacts(enableSync: Boolean = syncEnabled) {
+        scope.launch {
+            isLoading = true
+            val snapshot = ContactsManager.loadContactsSnapshot(context)
+            deviceContacts = snapshot.deviceContacts
+            matchedContacts = snapshot.matchedContacts
+            if (enableSync) {
+                ContactsManager.setContactsSyncEnabled(context, true)
+            }
+            refreshSyncMetadata()
+            isLoading = false
+        }
+    }
+
+    val contactsPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        hasContactsPermission = granted
+        if (granted) {
+            loadContacts(enableSync = true)
+        } else {
+            deviceContacts = emptyList()
+            matchedContacts = emptyList()
+            Toast.makeText(context, "Contacts access was not granted.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    LaunchedEffect(hasContactsPermission) {
+        if (hasContactsPermission && deviceContacts.isEmpty()) {
+            loadContacts()
+        } else if (!hasContactsPermission) {
+            deviceContacts = emptyList()
+            matchedContacts = emptyList()
+            refreshSyncMetadata()
+        }
+    }
+
+    DisposableEffect(lifecycleOwner, syncEnabled, deviceContacts) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                val granted = ContactsManager.hasContactsPermission(context)
+                hasContactsPermission = granted
+                if (granted) {
+                    if (deviceContacts.isEmpty() || syncEnabled) {
+                        loadContacts(enableSync = syncEnabled)
+                    }
+                } else {
+                    deviceContacts = emptyList()
+                    matchedContacts = emptyList()
+                    refreshSyncMetadata()
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    val isPermanentlyDenied = remember(hasContactsPermission) {
+        isContactsPermissionPermanentlyDenied(context)
+    }
+    val visibleContacts = if (showAllContacts) deviceContacts else deviceContacts.take(8)
+
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                "Let NeuroComet read the contacts stored on this device so it can show your contacts list and help find people you already know.",
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                AssistChip(
+                    onClick = {},
+                    enabled = false,
+                    label = { Text(if (hasContactsPermission) "Permission granted" else "Permission needed") }
+                )
+                AssistChip(
+                    onClick = {},
+                    enabled = false,
+                    label = { Text(if (syncEnabled) "Sync enabled" else "Sync off") }
+                )
+            }
+
+            if (hasContactsPermission) {
+                Text(
+                    "${deviceContacts.size} contacts visible on this device • ${matchedContacts.size} possible NeuroComet matches",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (lastSyncTimestamp > 0L) {
+                    Text(
+                        "Last synced ${formatContactsSyncTimestamp(lastSyncTimestamp)}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else if (syncedCount > 0) {
+                    Text(
+                        "Last local sync included $syncedCount contacts.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                Text(
+                    if (isPermanentlyDenied) {
+                        "Contacts permission was denied in Android. Open App Settings to enable it for this device."
+                    } else {
+                        "Grant contacts access to let the app see and list the contacts saved on this device."
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = {
+                        trackPermissionAsked(context, Manifest.permission.READ_CONTACTS)
+                        contactsPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+                    },
+                    enabled = !isLoading && !hasContactsPermission,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(if (hasContactsPermission) "Allowed" else "Allow contacts")
+                }
+
+                OutlinedButton(
+                    onClick = {
+                        if (hasContactsPermission) {
+                            loadContacts(enableSync = true)
+                        } else {
+                            openAppSettings(context)
+                        }
+                    },
+                    enabled = !isLoading,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(if (hasContactsPermission) "Refresh list" else "Open settings")
+                }
+            }
+
+            if (hasContactsPermission) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            ContactsManager.setContactsSyncEnabled(context, true)
+                            syncEnabled = true
+                            loadContacts(enableSync = true)
+                        },
+                        enabled = !isLoading,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Keep synced")
+                    }
+                    TextButton(
+                        onClick = {
+                            ContactsManager.clearSyncData(context)
+                            syncEnabled = false
+                            syncedCount = 0
+                            lastSyncTimestamp = 0L
+                            deviceContacts = emptyList()
+                            matchedContacts = emptyList()
+                            showAllContacts = false
+                        },
+                        enabled = !isLoading,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Clear local data")
+                    }
+                }
+            }
+
+            when {
+                isLoading -> {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(28.dp), strokeWidth = 3.dp)
+                    }
+                }
+
+                hasContactsPermission && visibleContacts.isNotEmpty() -> {
+                    HorizontalDivider()
+                    Text(
+                        if (!showAllContacts && deviceContacts.size > visibleContacts.size) {
+                            "Contacts on this device • showing ${visibleContacts.size} of ${deviceContacts.size}"
+                        } else {
+                            "Contacts on this device"
+                        },
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        visibleContacts.forEach { contact ->
+                            ContactPreviewRow(contact)
+                        }
+                    }
+                    if (deviceContacts.size > 8) {
+                        TextButton(onClick = { showAllContacts = !showAllContacts }) {
+                            Text(if (showAllContacts) "Show fewer contacts" else "Show all ${deviceContacts.size} contacts")
+                        }
+                    }
+                }
+
+                hasContactsPermission -> {
+                    Text(
+                        "No contacts were found on this device yet.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ContactPreviewRow(contact: ContactsManager.DeviceContact) {
+    val subtitle = when {
+        contact.phoneNumbers.isNotEmpty() -> contact.phoneNumbers.first()
+        contact.emails.isNotEmpty() -> contact.emails.first()
+        else -> "No phone or email saved"
+    }
+
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surface
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                modifier = Modifier.size(40.dp),
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = contact.displayName.take(1).uppercase(),
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(contact.displayName, fontWeight = FontWeight.Medium)
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+private fun formatContactsSyncTimestamp(timestamp: Long): String {
+    return try {
+        DateTimeFormatter.ofPattern("MMM d, h:mm a")
+            .withZone(ZoneId.systemDefault())
+            .format(Instant.ofEpochMilli(timestamp))
+    } catch (_: Exception) {
+        "recently"
+    }
+}
+
+private fun isContactsPermissionPermanentlyDenied(context: Context): Boolean {
+    val activity = context.findActivity() ?: return false
+    return !ContactsManager.hasContactsPermission(context) &&
+        !ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.READ_CONTACTS) &&
+        context.getSharedPreferences("permission_tracking", Context.MODE_PRIVATE)
+            .getBoolean("asked_${Manifest.permission.READ_CONTACTS}", false)
+}
+
+private fun openAppSettings(context: Context) {
+    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+        data = Uri.parse("package:${context.packageName}")
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    context.startActivity(intent)
+}
+
+private tailrec fun Context.findActivity(): Activity? {
+    return when (this) {
+        is Activity -> this
+        is ContextWrapper -> baseContext.findActivity()
+        else -> null
     }
 }
 

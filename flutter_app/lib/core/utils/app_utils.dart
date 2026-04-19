@@ -102,6 +102,11 @@ class StringUtils {
   }
 }
 
+extension StringExtension on String {
+  String ifEmpty(String Function() defaultValue) =>
+      isEmpty || this == 'null' ? defaultValue() : this;
+}
+
 /// Number utilities
 class NumberUtils {
   NumberUtils._();

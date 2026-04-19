@@ -1,40 +1,64 @@
 import '../models/custom_avatar.dart';
 
 /// Audience levels for content filtering
-enum Audience {
-  under13,
-  teen,
-  adult,
-}
+enum Audience { under13, teen, adult }
 
 /// Moderation override options
-enum ModerationOverride {
-  off,
-  clean,
-  flagged,
-  blocked,
-}
+enum ModerationOverride { off, clean, flagged, blocked }
 
 /// Kids filter levels
-enum KidsFilterLevel {
-  strict,
-  moderate,
-  relaxed,
-}
+enum KidsFilterLevel { strict, moderate, relaxed }
 
 /// Environment targets for backend configuration
-enum DevEnvironmentTarget {
-  production,
-  staging,
-  local,
-}
+enum DevEnvironmentTarget { production, staging, local }
 
 /// A/B test variant options for experimental UI
 enum ABTestVariant {
   control,
-  liquidGlass,
+  liquidGlassFrosted,
+  liquidGlassAurora,
   compactCards,
   boldTypography,
+  semiSkeumorphic,
+  fullSkeumorphic,
+}
+
+/// Convenience helpers so call-sites can check for any Liquid Glass variant
+/// and retrieve the variant name string ('frosted' / 'aurora').
+extension ABTestVariantX on ABTestVariant {
+  bool get isLiquidGlass =>
+      this == ABTestVariant.liquidGlassFrosted ||
+      this == ABTestVariant.liquidGlassAurora;
+
+  bool get isSkeumorphic =>
+      this == ABTestVariant.semiSkeumorphic ||
+      this == ABTestVariant.fullSkeumorphic;
+
+  bool get usesExperimentalSurfaceChrome => isLiquidGlass || isSkeumorphic;
+
+  bool get isFullSkeumorphic => this == ABTestVariant.fullSkeumorphic;
+
+  /// Returns `'frosted'` or `'aurora'` (falls back to `'frosted'`).
+  String get glassVariantName =>
+      this == ABTestVariant.liquidGlassAurora ? 'aurora' : 'frosted';
+
+  /// Returns the active shared chrome surface variant name.
+  String get surfaceVariantName {
+    switch (this) {
+      case ABTestVariant.liquidGlassFrosted:
+        return 'frosted';
+      case ABTestVariant.liquidGlassAurora:
+        return 'aurora';
+      case ABTestVariant.semiSkeumorphic:
+        return 'semi_skeumorphic';
+      case ABTestVariant.fullSkeumorphic:
+        return 'full_skeumorphic';
+      case ABTestVariant.control:
+      case ABTestVariant.compactCards:
+      case ABTestVariant.boldTypography:
+        return 'control';
+    }
+  }
 }
 
 /// Developer options state
@@ -56,6 +80,7 @@ class DevOptions {
   final bool enableStoryReactions;
   final bool enableAdvancedSearch;
   final bool enableAiSuggestions;
+  final bool enableHandoff;
 
   // ── Content & Safety ───────────────────────────────────
   final Audience? forcedAudience;
@@ -117,10 +142,23 @@ class DevOptions {
   final bool bypassFeedbackRateLimit;
   final bool forceFeedbackSubmitFailure;
 
+  // ── Ads Testing ─────────────────────────────────────────
+  final bool isAdsPremium;
+  final bool forceShowAds;
+  final bool simulateAdFailure;
+  final bool useTestAds;
+  final int totalAdsShown;
+
   const DevOptions({
     // General
     this.showDebugOverlay = false,
     this.enableVerboseLogging = false,
+    // Ads Testing
+    this.isAdsPremium = false,
+    this.forceShowAds = false,
+    this.simulateAdFailure = false,
+    this.useTestAds = true,
+    this.totalAdsShown = 0,
     // Environment
     this.environment = DevEnvironmentTarget.production,
     // Feature Flags
@@ -129,6 +167,7 @@ class DevOptions {
     this.enableStoryReactions = false,
     this.enableAdvancedSearch = false,
     this.enableAiSuggestions = false,
+    this.enableHandoff = true,
     // Content & Safety
     this.forcedAudience,
     this.bypassAgeVerification = false,
@@ -144,7 +183,7 @@ class DevOptions {
     // Content Moderation
     this.moderationOverride = ModerationOverride.off,
     // Rendering & Performance
-    this.isMockInterfaceEnabled = true,
+    this.isMockInterfaceEnabled = false,
     this.showStories = true,
     this.isVideoAutoplayEnabled = true,
     this.isFallbackUiEnabled = false,
@@ -183,12 +222,17 @@ class DevOptions {
     int count = 0;
     if (showDebugOverlay != d.showDebugOverlay) count++;
     if (enableVerboseLogging != d.enableVerboseLogging) count++;
+    if (isAdsPremium != d.isAdsPremium) count++;
+    if (forceShowAds != d.forceShowAds) count++;
+    if (simulateAdFailure != d.simulateAdFailure) count++;
+    if (useTestAds != d.useTestAds) count++;
     if (environment != d.environment) count++;
     if (enableNewFeedLayout != d.enableNewFeedLayout) count++;
     if (enableVideoChat != d.enableVideoChat) count++;
     if (enableStoryReactions != d.enableStoryReactions) count++;
     if (enableAdvancedSearch != d.enableAdvancedSearch) count++;
     if (enableAiSuggestions != d.enableAiSuggestions) count++;
+    if (enableHandoff != d.enableHandoff) count++;
     if (forcedAudience != d.forcedAudience) count++;
     if (bypassAgeVerification != d.bypassAgeVerification) count++;
     if (forcePinSet != d.forcePinSet) count++;
@@ -216,12 +260,18 @@ class DevOptions {
   DevOptions copyWith({
     bool? showDebugOverlay,
     bool? enableVerboseLogging,
+    bool? isAdsPremium,
+    bool? forceShowAds,
+    bool? simulateAdFailure,
+    bool? useTestAds,
+    int? totalAdsShown,
     DevEnvironmentTarget? environment,
     bool? enableNewFeedLayout,
     bool? enableVideoChat,
     bool? enableStoryReactions,
     bool? enableAdvancedSearch,
     bool? enableAiSuggestions,
+    bool? enableHandoff,
     Audience? forcedAudience,
     bool? clearForcedAudience,
     bool? bypassAgeVerification,
@@ -265,16 +315,26 @@ class DevOptions {
     return DevOptions(
       showDebugOverlay: showDebugOverlay ?? this.showDebugOverlay,
       enableVerboseLogging: enableVerboseLogging ?? this.enableVerboseLogging,
+      isAdsPremium: isAdsPremium ?? this.isAdsPremium,
+      forceShowAds: forceShowAds ?? this.forceShowAds,
+      simulateAdFailure: simulateAdFailure ?? this.simulateAdFailure,
+      useTestAds: useTestAds ?? this.useTestAds,
+      totalAdsShown: totalAdsShown ?? this.totalAdsShown,
       environment: environment ?? this.environment,
       enableNewFeedLayout: enableNewFeedLayout ?? this.enableNewFeedLayout,
       enableVideoChat: enableVideoChat ?? this.enableVideoChat,
       enableStoryReactions: enableStoryReactions ?? this.enableStoryReactions,
       enableAdvancedSearch: enableAdvancedSearch ?? this.enableAdvancedSearch,
       enableAiSuggestions: enableAiSuggestions ?? this.enableAiSuggestions,
-      forcedAudience: clearForcedAudience == true ? null : (forcedAudience ?? this.forcedAudience),
-      bypassAgeVerification: bypassAgeVerification ?? this.bypassAgeVerification,
+      enableHandoff: enableHandoff ?? this.enableHandoff,
+      forcedAudience: clearForcedAudience == true
+          ? null
+          : (forcedAudience ?? this.forcedAudience),
+      bypassAgeVerification:
+          bypassAgeVerification ?? this.bypassAgeVerification,
       forcePinSet: forcePinSet ?? this.forcePinSet,
-      forcePinVerifySuccess: forcePinVerifySuccess ?? this.forcePinVerifySuccess,
+      forcePinVerifySuccess:
+          forcePinVerifySuccess ?? this.forcePinVerifySuccess,
       isKidsMode: isKidsMode ?? this.isKidsMode,
       kidsFilterLevel: kidsFilterLevel ?? this.kidsFilterLevel,
       showDmDebugOverlay: showDmDebugOverlay ?? this.showDmDebugOverlay,
@@ -282,13 +342,16 @@ class DevOptions {
       disableRateLimit: disableRateLimit ?? this.disableRateLimit,
       artificialDelayMs: artificialDelayMs ?? this.artificialDelayMs,
       moderationOverride: moderationOverride ?? this.moderationOverride,
-      isMockInterfaceEnabled: isMockInterfaceEnabled ?? this.isMockInterfaceEnabled,
+      isMockInterfaceEnabled:
+          isMockInterfaceEnabled ?? this.isMockInterfaceEnabled,
       showStories: showStories ?? this.showStories,
-      isVideoAutoplayEnabled: isVideoAutoplayEnabled ?? this.isVideoAutoplayEnabled,
+      isVideoAutoplayEnabled:
+          isVideoAutoplayEnabled ?? this.isVideoAutoplayEnabled,
       isFallbackUiEnabled: isFallbackUiEnabled ?? this.isFallbackUiEnabled,
       simulateLoadingError: simulateLoadingError ?? this.simulateLoadingError,
       infiniteLoading: infiniteLoading ?? this.infiniteLoading,
-      showPerformanceOverlay: showPerformanceOverlay ?? this.showPerformanceOverlay,
+      showPerformanceOverlay:
+          showPerformanceOverlay ?? this.showPerformanceOverlay,
       forceLoggedOut: forceLoggedOut ?? this.forceLoggedOut,
       bypassBiometric: bypassBiometric ?? this.bypassBiometric,
       force2FA: force2FA ?? this.force2FA,
@@ -297,18 +360,25 @@ class DevOptions {
       simulateOffline: simulateOffline ?? this.simulateOffline,
       networkLatencyMs: networkLatencyMs ?? this.networkLatencyMs,
       enableWebStressTest: enableWebStressTest ?? this.enableWebStressTest,
-      stressTestWidgetCount: stressTestWidgetCount ?? this.stressTestWidgetCount,
+      stressTestWidgetCount:
+          stressTestWidgetCount ?? this.stressTestWidgetCount,
       stressTestAnimations: stressTestAnimations ?? this.stressTestAnimations,
       stressTestScrolling: stressTestScrolling ?? this.stressTestScrolling,
       stressTestMemory: stressTestMemory ?? this.stressTestMemory,
-      stressTestRapidNavigation: stressTestRapidNavigation ?? this.stressTestRapidNavigation,
-      stressTestConcurrentRequests: stressTestConcurrentRequests ?? this.stressTestConcurrentRequests,
-      stressTestLargeImages: stressTestLargeImages ?? this.stressTestLargeImages,
-      stressTestLocalStorage: stressTestLocalStorage ?? this.stressTestLocalStorage,
+      stressTestRapidNavigation:
+          stressTestRapidNavigation ?? this.stressTestRapidNavigation,
+      stressTestConcurrentRequests:
+          stressTestConcurrentRequests ?? this.stressTestConcurrentRequests,
+      stressTestLargeImages:
+          stressTestLargeImages ?? this.stressTestLargeImages,
+      stressTestLocalStorage:
+          stressTestLocalStorage ?? this.stressTestLocalStorage,
       mockCustomAvatar: mockCustomAvatar ?? this.mockCustomAvatar,
       abTestVariant: abTestVariant ?? this.abTestVariant,
-      bypassFeedbackRateLimit: bypassFeedbackRateLimit ?? this.bypassFeedbackRateLimit,
-      forceFeedbackSubmitFailure: forceFeedbackSubmitFailure ?? this.forceFeedbackSubmitFailure,
+      bypassFeedbackRateLimit:
+          bypassFeedbackRateLimit ?? this.bypassFeedbackRateLimit,
+      forceFeedbackSubmitFailure:
+          forceFeedbackSubmitFailure ?? this.forceFeedbackSubmitFailure,
     );
   }
 
@@ -316,12 +386,18 @@ class DevOptions {
   Map<String, dynamic> toMap() => {
     'showDebugOverlay': showDebugOverlay,
     'enableVerboseLogging': enableVerboseLogging,
+    'isAdsPremium': isAdsPremium,
+    'forceShowAds': forceShowAds,
+    'simulateAdFailure': simulateAdFailure,
+    'useTestAds': useTestAds,
+    'totalAdsShown': totalAdsShown,
     'environment': environment.index,
     'enableNewFeedLayout': enableNewFeedLayout,
     'enableVideoChat': enableVideoChat,
     'enableStoryReactions': enableStoryReactions,
     'enableAdvancedSearch': enableAdvancedSearch,
     'enableAiSuggestions': enableAiSuggestions,
+    'enableHandoff': enableHandoff,
     'forcedAudience': forcedAudience?.index,
     'bypassAgeVerification': bypassAgeVerification,
     'forcePinSet': forcePinSet,
@@ -353,23 +429,43 @@ class DevOptions {
     return DevOptions(
       showDebugOverlay: map['showDebugOverlay'] as bool? ?? false,
       enableVerboseLogging: map['enableVerboseLogging'] as bool? ?? false,
-      environment: DevEnvironmentTarget.values.elementAtOrNull(map['environment'] as int? ?? 0) ?? DevEnvironmentTarget.production,
+      isAdsPremium: map['isAdsPremium'] as bool? ?? false,
+      forceShowAds: map['forceShowAds'] as bool? ?? false,
+      simulateAdFailure: map['simulateAdFailure'] as bool? ?? false,
+      useTestAds: map['useTestAds'] as bool? ?? true,
+      totalAdsShown: map['totalAdsShown'] as int? ?? 0,
+      environment:
+          DevEnvironmentTarget.values.elementAtOrNull(
+            map['environment'] as int? ?? 0,
+          ) ??
+          DevEnvironmentTarget.production,
       enableNewFeedLayout: map['enableNewFeedLayout'] as bool? ?? false,
       enableVideoChat: map['enableVideoChat'] as bool? ?? false,
       enableStoryReactions: map['enableStoryReactions'] as bool? ?? false,
       enableAdvancedSearch: map['enableAdvancedSearch'] as bool? ?? false,
       enableAiSuggestions: map['enableAiSuggestions'] as bool? ?? false,
-      forcedAudience: (map['forcedAudience'] as int?) != null ? Audience.values.elementAtOrNull(map['forcedAudience'] as int) : null,
+      enableHandoff: map['enableHandoff'] as bool? ?? true,
+      forcedAudience: (map['forcedAudience'] as int?) != null
+          ? Audience.values.elementAtOrNull(map['forcedAudience'] as int)
+          : null,
       bypassAgeVerification: map['bypassAgeVerification'] as bool? ?? false,
       forcePinSet: map['forcePinSet'] as bool? ?? false,
       forcePinVerifySuccess: map['forcePinVerifySuccess'] as bool? ?? false,
       isKidsMode: map['isKidsMode'] as bool? ?? false,
-      kidsFilterLevel: KidsFilterLevel.values.elementAtOrNull(map['kidsFilterLevel'] as int? ?? 1) ?? KidsFilterLevel.moderate,
+      kidsFilterLevel:
+          KidsFilterLevel.values.elementAtOrNull(
+            map['kidsFilterLevel'] as int? ?? 1,
+          ) ??
+          KidsFilterLevel.moderate,
       showDmDebugOverlay: map['showDmDebugOverlay'] as bool? ?? false,
       forceSendFailure: map['forceSendFailure'] as bool? ?? false,
       disableRateLimit: map['disableRateLimit'] as bool? ?? false,
       artificialDelayMs: map['artificialDelayMs'] as int? ?? 0,
-      moderationOverride: ModerationOverride.values.elementAtOrNull(map['moderationOverride'] as int? ?? 0) ?? ModerationOverride.off,
+      moderationOverride:
+          ModerationOverride.values.elementAtOrNull(
+            map['moderationOverride'] as int? ?? 0,
+          ) ??
+          ModerationOverride.off,
       simulateLoadingError: map['simulateLoadingError'] as bool? ?? false,
       infiniteLoading: map['infiniteLoading'] as bool? ?? false,
       showPerformanceOverlay: map['showPerformanceOverlay'] as bool? ?? false,
@@ -380,9 +476,14 @@ class DevOptions {
       networkLatencyMs: map['networkLatencyMs'] as int? ?? 0,
       mockPostCount: map['mockPostCount'] as int? ?? 10,
       showSponsoredPosts: map['showSponsoredPosts'] as bool? ?? true,
-      abTestVariant: ABTestVariant.values.elementAtOrNull(map['abTestVariant'] as int? ?? 0) ?? ABTestVariant.control,
+      abTestVariant:
+          ABTestVariant.values.elementAtOrNull(
+            map['abTestVariant'] as int? ?? 0,
+          ) ??
+          ABTestVariant.control,
       bypassFeedbackRateLimit: map['bypassFeedbackRateLimit'] as bool? ?? false,
-      forceFeedbackSubmitFailure: map['forceFeedbackSubmitFailure'] as bool? ?? false,
+      forceFeedbackSubmitFailure:
+          map['forceFeedbackSubmitFailure'] as bool? ?? false,
     );
   }
 }

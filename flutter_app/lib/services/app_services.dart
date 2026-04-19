@@ -1,9 +1,18 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/notification.dart' as model;
+import '../providers/notifications_provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:crypto/crypto.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Background message handler (must be top-level function)
 @pragma('vm:entry-point')
@@ -14,6 +23,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 /// Notification service for managing push notifications
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
+  static const String _queueFormatVersion = 'nc_notification_v2';
+  static const String _pendingNotificationsKey = 'pending_notifications';
   factory NotificationService() => _instance;
   NotificationService._internal();
 
@@ -27,7 +38,7 @@ class NotificationService {
   void Function(RemoteMessage)? onMessageOpenedApp;
 
   /// Initialize notification service
-  Future<void> initialize() async {
+  Future<void> initialize(WidgetRef ref) async {
     if (_initialized) return;
 
     try {
@@ -65,6 +76,10 @@ class NotificationService {
       // Handle foreground messages
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         debugPrint('Foreground message received: ${message.notification?.title}');
+        
+        // Inject into the notification provider so it shows up in the UI immediately
+        _injectIntoProvider(ref, message);
+        
         onMessageReceived?.call(message);
       });
 
@@ -85,6 +100,44 @@ class NotificationService {
       _initialized = true;
     } catch (e) {
       debugPrint('Failed to initialize notifications: $e');
+    }
+  }
+
+  /// Inject FCM message into Riverpod provider
+  void _injectIntoProvider(WidgetRef ref, RemoteMessage message) {
+    try {
+      final notification = message.notification;
+      if (notification == null) return;
+
+      final data = message.data;
+      final typeStr = data['type'] as String? ?? 'system';
+      
+      // Map string type to enum
+      model.NotificationType type = model.NotificationType.system;
+      try {
+        type = model.NotificationType.values.firstWhere(
+          (e) => e.toString().split('.').last == typeStr,
+          orElse: () => model.NotificationType.system,
+        );
+      } catch (_) {}
+
+      final appNotif = model.AppNotification(
+        id: message.messageId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        type: type,
+        title: notification.title,
+        message: notification.body ?? '',
+        actorName: data['actor_name'] as String?,
+        actorAvatarUrl: data['actor_avatar_url'] as String?,
+        actionUrl: data['action_url'] as String?,
+        targetId: data['target_id'] as String?,
+        targetType: data['target_type'] as String?,
+        createdAt: DateTime.now(),
+        isRead: false,
+      );
+
+      ref.read(notificationsProvider.notifier).injectDevNotification(appNotif);
+    } catch (e) {
+      debugPrint('Error injecting FCM into provider: $e');
     }
   }
 
@@ -158,15 +211,86 @@ class NotificationService {
     String? payload,
   }) async {
     try {
+      final payloadData = _decodeNotificationPayload(payload);
+      final createdAt = DateTime.now();
+      final queueItem = <String, dynamic>{
+        'format': _queueFormatVersion,
+        'id': payloadData['id'] ?? 'queued_${createdAt.microsecondsSinceEpoch}',
+        'title': title,
+        'body': body,
+        'createdAt': createdAt.toIso8601String(),
+        ...payloadData,
+      };
+
       // Store notification for later display via UI
       final prefs = await SharedPreferences.getInstance();
-      final notifications = prefs.getStringList('pending_notifications') ?? [];
-      notifications.add('$title|$body|${DateTime.now().toIso8601String()}');
-      await prefs.setStringList('pending_notifications', notifications);
+      final notifications = prefs.getStringList(_pendingNotificationsKey) ?? [];
+      notifications.add(jsonEncode(queueItem));
+      await prefs.setStringList(_pendingNotificationsKey, notifications);
       debugPrint('Local notification queued: $title - $body');
     } catch (e) {
       debugPrint('Failed to queue notification: $e');
     }
+  }
+
+  Future<void> clearQueuedNotifications() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_pendingNotificationsKey);
+    } catch (e) {
+      debugPrint('Failed to clear queued notifications: $e');
+    }
+  }
+
+  Future<int> getQueuedNotificationCount() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return (prefs.getStringList(_pendingNotificationsKey) ?? const <String>[]).length;
+    } catch (e) {
+      debugPrint('Failed to read queued notifications: $e');
+      return 0;
+    }
+  }
+
+  String encodeNotificationPayload({
+    String? id,
+    model.NotificationType type = model.NotificationType.system,
+    String? actionUrl,
+    String? actorId,
+    String? actorName,
+    String? actorAvatarUrl,
+    String? targetId,
+    String? targetType,
+    int? relatedPostId,
+    String? title,
+    String? message,
+  }) {
+    return jsonEncode({
+      'id': ?id,
+      'type': type.name,
+      'actionUrl': ?actionUrl,
+      'actorId': ?actorId,
+      'actorName': ?actorName,
+      'actorAvatarUrl': ?actorAvatarUrl,
+      'targetId': ?targetId,
+      'targetType': ?targetType,
+      'relatedPostId': ?relatedPostId,
+      'title': ?title,
+      'message': ?message,
+    });
+  }
+
+  Map<String, dynamic> _decodeNotificationPayload(String? payload) {
+    if (payload == null || payload.trim().isEmpty) return const <String, dynamic>{};
+    try {
+      final decoded = jsonDecode(payload);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+    } catch (_) {
+      // Fall through to empty map for legacy/plain payloads.
+    }
+    return const <String, dynamic>{};
   }
 
   /// Update FCM token on server (Supabase profiles)
@@ -174,10 +298,32 @@ class NotificationService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('fcm_token', token);
-      debugPrint('FCM token saved locally: ${token.substring(0, 20)}...');
-      // In production, call: SupabaseService.updateProfile(fcmToken: token)
+
+      // Persist to Supabase user profile
+      final userId = _currentUserId;
+      if (userId != null) {
+        try {
+          final supabase = Supabase.instance.client;
+          await supabase.from('users').update({
+            'fcm_token': token,
+            'updated_at': DateTime.now().toIso8601String(),
+          }).eq('id', userId);
+          debugPrint('FCM token synced to Supabase');
+        } catch (e) {
+          debugPrint('FCM token Supabase sync failed: $e');
+        }
+      }
     } catch (e) {
       debugPrint('Failed to update FCM token: $e');
+    }
+  }
+
+  /// Helper to get current Supabase user ID
+  String? get _currentUserId {
+    try {
+      return Supabase.instance.client.auth.currentUser?.id;
+    } catch (_) {
+      return null;
     }
   }
 }
@@ -349,16 +495,40 @@ class SecurityManager {
     return result;
   }
 
-  /// Hash a PIN for storage
+  /// Hash a PIN for storage using SHA-256
   String hashPin(String pin) {
-    // In production, use a proper hashing algorithm
-    // For now, simple base64 encoding (NOT SECURE - just for demo)
+    final bytes = utf8.encode(pin);
+    return sha256.convert(bytes).toString();
+  }
+
+  /// Legacy hash format (code-unit concatenation) used before v2.0
+  String _legacyHashPin(String pin) {
     return pin.codeUnits.map((c) => c.toString()).join('');
   }
 
-  /// Verify a PIN
+  /// Verify a PIN. Supports both new SHA-256 and legacy formats.
+  /// If legacy format matches, re-hashes with SHA-256 for migration.
   bool verifyPin(String inputPin, String storedHash) {
-    return hashPin(inputPin) == storedHash;
+    // Try SHA-256 first
+    if (hashPin(inputPin) == storedHash) return true;
+    // Fallback: check legacy format for migration
+    if (_legacyHashPin(inputPin) == storedHash) {
+      // Migration: re-hash with SHA-256 and save asynchronously
+      _migratePin(inputPin);
+      return true;
+    }
+    return false;
+  }
+
+  /// Migrate a legacy-hashed PIN to SHA-256 format
+  Future<void> _migratePin(String pin) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('parental_pin', hashPin(pin));
+      debugPrint('SecurityManager: PIN migrated to SHA-256');
+    } catch (e) {
+      debugPrint('SecurityManager: PIN migration failed: $e');
+    }
   }
 
   /// Generate a session token
@@ -501,25 +671,62 @@ class LocationService {
     }
 
     try {
-      // Location retrieval requires the geolocator package for production use.
-      // For now, we check permission and return the last known or a default location.
-      // To enable real GPS: add geolocator to pubspec.yaml and call
-      // Geolocator.getCurrentPosition() here.
-      debugPrint('Location permission granted. Returning cached/default location.');
-
-      // Try to load cached location from SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      final cachedLat = prefs.getDouble('last_known_latitude');
-      final cachedLng = prefs.getDouble('last_known_longitude');
-
-      if (cachedLat != null && cachedLng != null) {
-        return LocationData(latitude: cachedLat, longitude: cachedLng, accuracy: 50.0);
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        debugPrint('Location services are disabled');
+        return null;
       }
 
-      // Default location (San Francisco) when no cached location exists
-      return LocationData(latitude: 37.7749, longitude: -122.4194, accuracy: 100.0);
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.medium,
+        ),
+      );
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble('last_known_latitude', position.latitude);
+      await prefs.setDouble('last_known_longitude', position.longitude);
+
+      return LocationData(
+        latitude: position.latitude,
+        longitude: position.longitude,
+        accuracy: position.accuracy,
+        altitude: position.altitude,
+        timestamp: position.timestamp,
+      );
     } catch (e) {
       debugPrint('Failed to get location: $e');
+      return null;
+    }
+  }
+
+  /// Resolve the current GPS position into a human-friendly post location tag.
+  Future<String?> getCurrentLocationTag() async {
+    final location = await getCurrentLocation();
+    if (location == null) return null;
+
+    try {
+      final placemarks = await placemarkFromCoordinates(
+        location.latitude,
+        location.longitude,
+      );
+      if (placemarks.isEmpty) return null;
+
+      final placemark = placemarks.first;
+      final locality = [
+        placemark.locality,
+        placemark.subAdministrativeArea,
+        placemark.administrativeArea,
+        placemark.country,
+      ].where((part) => part != null && part.trim().isNotEmpty).cast<String>().toList();
+
+      if (locality.isEmpty) return null;
+      if (locality.length >= 2) {
+        return '${locality[0]}, ${locality[1]}';
+      }
+      return locality.first;
+    } catch (e) {
+      debugPrint('Failed to reverse geocode current location: $e');
       return null;
     }
   }
@@ -680,10 +887,15 @@ class AnalyticsService {
   factory AnalyticsService() => _instance;
   AnalyticsService._internal();
 
+  final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
+
   /// Log a screen view
   Future<void> logScreenView(String screenName) async {
     try {
-      // analytics.logScreenView(screenName: screenName);
+      await _analytics.logScreenView(
+        screenName: screenName,
+        screenClass: screenName,
+      );
       debugPrint('Analytics: Screen view - $screenName');
     } catch (e) {
       debugPrint('Failed to log screen view: $e');
@@ -693,7 +905,10 @@ class AnalyticsService {
   /// Log a custom event
   Future<void> logEvent(String name, {Map<String, dynamic>? parameters}) async {
     try {
-      // analytics.logEvent(name: name, parameters: parameters);
+      await _analytics.logEvent(
+        name: name,
+        parameters: parameters?.map((k, v) => MapEntry(k, v as Object)),
+      );
       debugPrint('Analytics: Event - $name ${parameters ?? ''}');
     } catch (e) {
       debugPrint('Failed to log event: $e');
@@ -715,8 +930,15 @@ class AnalyticsService {
     String? accountAge,
   }) async {
     try {
-      // analytics.setUserId(id: userId);
-      // analytics.setUserProperty(name: 'user_type', value: userType);
+      if (userId != null) {
+        await _analytics.setUserId(id: userId);
+      }
+      if (userType != null) {
+        await _analytics.setUserProperty(name: 'user_type', value: userType);
+      }
+      if (accountAge != null) {
+        await _analytics.setUserProperty(name: 'account_age', value: accountAge);
+      }
       debugPrint('Analytics: Set user properties');
     } catch (e) {
       debugPrint('Failed to set user properties: $e');
@@ -725,20 +947,39 @@ class AnalyticsService {
 
   /// Log sign up
   Future<void> logSignUp(String method) async {
-    await logEvent('sign_up', parameters: {'method': method});
+    try {
+      await _analytics.logSignUp(signUpMethod: method);
+      debugPrint('Analytics: Sign up - $method');
+    } catch (e) {
+      await logEvent('sign_up', parameters: {'method': method});
+    }
   }
 
   /// Log login
   Future<void> logLogin(String method) async {
-    await logEvent('login', parameters: {'method': method});
+    try {
+      await _analytics.logLogin(loginMethod: method);
+      debugPrint('Analytics: Login - $method');
+    } catch (e) {
+      await logEvent('login', parameters: {'method': method});
+    }
   }
 
   /// Log share
   Future<void> logShare(String contentType, String itemId) async {
-    await logEvent('share', parameters: {
-      'content_type': contentType,
-      'item_id': itemId,
-    });
+    try {
+      await _analytics.logShare(
+        contentType: contentType,
+        itemId: itemId,
+        method: 'in_app',
+      );
+      debugPrint('Analytics: Share - $contentType $itemId');
+    } catch (e) {
+      await logEvent('share', parameters: {
+        'content_type': contentType,
+        'item_id': itemId,
+      });
+    }
   }
 
   /// Log post creation

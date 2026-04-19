@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../models/backup_metadata.dart';
 import '../../providers/backup_provider.dart';
 import '../../services/backup_service.dart';
+import '../../services/device_authorization_service.dart';
 import '../../services/google_drive_backup_service.dart';
 
 /// WhatsApp-style Backup & Storage settings screen.
@@ -24,17 +25,13 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
+  bool _isCheckingAccess = !kDebugMode;
+  bool _hasAccess = kDebugMode;
 
   @override
   void initState() {
     super.initState();
-
-    // SECURITY: Block access in release builds
-    if (!kDebugMode) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) Navigator.of(context).pop();
-      });
-    }
+    _checkAccess();
 
     _animController = AnimationController(
       duration: const Duration(milliseconds: 600),
@@ -47,6 +44,17 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen>
     _animController.forward();
   }
 
+  Future<void> _checkAccess() async {
+    if (kDebugMode) return;
+
+    final hasAccess = await DeviceAuthorizationService.canUseDeveloperTools();
+    if (!mounted) return;
+    setState(() {
+      _hasAccess = hasAccess;
+      _isCheckingAccess = false;
+    });
+  }
+
   @override
   void dispose() {
     _animController.dispose();
@@ -56,6 +64,44 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    if (_isCheckingAccess) {
+      return Scaffold(
+        backgroundColor: theme.colorScheme.surface,
+        appBar: AppBar(title: const Text('Backup & Storage')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (!_hasAccess) {
+      return Scaffold(
+        backgroundColor: theme.colorScheme.surface,
+        appBar: AppBar(title: const Text('Backup & Storage')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.lock_outline, size: 40),
+                    SizedBox(height: 12),
+                    Text(
+                      'Backup tools are restricted to authorized developer devices.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final backupState = ref.watch(backupProvider);
 
     // Listen for error/success messages
@@ -158,12 +204,13 @@ class _BackupSettingsScreenState extends ConsumerState<BackupSettingsScreen>
                       HapticFeedback.lightImpact();
                       final success = await ref.read(backupProvider.notifier).connectGoogleDrive();
                       if (!success && context.mounted) {
+                        final errorDetail = GoogleDriveBackupService.lastError
+                            ?? 'Could not connect to Google Drive. Please check your network connection and try again.';
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: const Text(
-                              'Google Drive integration coming soon! Use local backup for now.',
-                            ),
+                            content: Text(errorDetail),
                             behavior: SnackBarBehavior.floating,
+                            duration: const Duration(seconds: 5),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                         );

@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -116,7 +117,16 @@ fun DevOptionsScreen(
     onNavigateToBackup: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val isPreview = LocalInspectionMode.current
     val application = context.applicationContext as Application
+    // Gracefully render an "unauthorized" screen instead of throwing a
+    // SecurityException during composition (which previously force-closed
+    // the whole app). Device fingerprints change after OTA updates, so
+    // even previously-authorized devices can end up blocked here.
+    if (!isPreview && !DeviceAuthority.canUseDeveloperTools(application)) {
+        DevOptionsUnauthorizedScreen(onBack = onBack, context = application)
+        return
+    }
     val contentMaxWidth = canonicalSettingsPaneMaxWidth()
     val listState = rememberLazyListState()
     var searchQuery by remember { mutableStateOf("") }
@@ -143,7 +153,13 @@ fun DevOptionsScreen(
             DevSectionGroup("contact_picker", "Contact Picker", Icons.Filled.Contacts, "contact picker android 17 cinnamonbun cinnamon bun session privacy contacts api 36.1") { ContactPickerDevSection() },
             DevSectionGroup("storage", "Local Storage", Icons.Filled.Storage, "storage preferences credentials") { LocalStorageDevSection() },
             DevSectionGroup("supabase_test", "Supabase DB Testing", Icons.Filled.CloudSync, "supabase database posts users tables test") { SupabaseDbTestDevSection() },
-            DevSectionGroup("supabase", "Supabase", Icons.Filled.CloudUpload, "supabase database posts") { SupabaseTestDataSection() },
+            DevSectionGroup("supabase", "Supabase", Icons.Filled.CloudUpload, "supabase database posts") {
+                if (authViewModel != null) {
+                    SupabaseTestDataSection(authViewModel)
+                } else {
+                    Text("AuthViewModel is not available.", modifier = Modifier.padding(16.dp))
+                }
+            },
             DevSectionGroup("games", "Games", Icons.Filled.SportsEsports, "games achievements") { GamesTestingSection(onNavigateToGame) },
             DevSectionGroup("language", "Language", Icons.Filled.Language, "language locale translation") { LanguageTestingSection(themeViewModel) },
             DevSectionGroup("backup", "Backup & Restore", Icons.Filled.CloudUpload, "backup restore export import data") { BackupDevTestSection(onNavigateToBackup) },
@@ -486,5 +502,81 @@ private fun rememberDevLiveSessionRemaining(session: RegulationLiveSession): Sta
         value = RegulationLiveSessionManager.remainingMillis(session)
         if (session.isPaused || (value <= 0L)) break
         kotlinx.coroutines.delay(1_000L)
+    }
+}
+// --- Graceful unauthorized screen ----------------------------
+// Shown when DeviceAuthority rejects the current device (e.g. the device
+// hash changed after an OTA). Displays the current device hash and app
+// signature so they can be copied into local.properties to re-authorize
+// the device, or added to HOUSEHOLD_DEVICE_HASHES in DeviceAuthority.kt.
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DevOptionsUnauthorizedScreen(
+    onBack: () -> Unit,
+    context: android.content.Context,
+) {
+    val deviceHash = remember { runCatching { DeviceAuthority.computeDeviceHash(context) }.getOrDefault("<error>") }
+    val signatureHash = remember { runCatching { DeviceAuthority.getAppSignatureHash(context) }.getOrDefault("<error>") }
+    val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
+    Scaffold(
+        topBar = {
+            M3ETopAppBar(
+                title = { Text("Developer Options") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .padding(horizontal = 20.dp, vertical = 16.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.width(8.dp))
+                Text("Device not authorized", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            }
+            Text(
+                "Developer Options are restricted to authorized devices. If your device fingerprint changed " +
+                        "(for example after an OS update), add the values below to local.properties and rebuild " +
+                        "the debug APK, or add the device hash to HOUSEHOLD_DEVICE_HASHES in DeviceAuthority.kt.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("DEVELOPER_DEVICE_HASH", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(deviceHash, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
+                    TextButton(onClick = {
+                        clipboard.setText(androidx.compose.ui.text.AnnotatedString(deviceHash))
+                        Toast.makeText(context, "Device hash copied", Toast.LENGTH_SHORT).show()
+                    }) { Text("Copy hash") }
+                }
+            }
+            OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("INTERNAL_SIGNATURE_HASH", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(signatureHash, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
+                    TextButton(onClick = {
+                        clipboard.setText(androidx.compose.ui.text.AnnotatedString(signatureHash))
+                        Toast.makeText(context, "Signature hash copied", Toast.LENGTH_SHORT).show()
+                    }) { Text("Copy signature") }
+                }
+            }
+            Text(
+                "Once added to local.properties (or HOUSEHOLD_DEVICE_HASHES), rebuild and reinstall the app.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
+                Text("Go back")
+            }
+        }
     }
 }

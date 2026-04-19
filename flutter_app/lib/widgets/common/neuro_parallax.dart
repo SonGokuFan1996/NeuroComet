@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 
 /// Neurodivergent-friendly parallax scroll effect.
 /// Mirrors the Kotlin NeuroParallax.kt

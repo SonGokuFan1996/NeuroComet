@@ -4,9 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/notifications_provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../../screens/settings/dev_options_screen.dart';
 import '../../utils/responsive.dart';
 import '../../widgets/layout/web_scaffold.dart';
 import '../../widgets/navigation/neuro_navigation_bar.dart';
+import '../../widgets/brand/liquid_glass.dart';
+import '../../services/last_tab_service.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final Widget child;
@@ -28,23 +31,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _onDestinationSelected(int index) {
-    switch (index) {
-      case 0:
-        context.go('/');
-        break;
-      case 1:
-        context.go('/explore');
-        break;
-      case 2:
-        context.go('/messages');
-        break;
-      case 3:
-        context.go('/notifications');
-        break;
-      case 4:
-        context.go('/settings');
-        break;
-    }
+    const routes = [
+      '/',
+      '/explore',
+      '/messages',
+      '/notifications',
+      '/settings',
+    ];
+    if (index == _calculateSelectedIndex(context)) return; // already here
+    final route = routes[index];
+    LastTabService.save(route); // fire-and-forget
+    context.go(route);
   }
 
   @override
@@ -52,6 +49,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final l10n = context.l10n;
     final unreadCount = ref.watch(unreadNotificationCountProvider);
     final selectedIndex = _calculateSelectedIndex(context);
+    final abVariant = ref.watch(devOptionsProvider).abTestVariant;
+    final isLiquidGlass = abVariant.isLiquidGlass;
+    final isSkeumorphic = abVariant.isSkeumorphic;
     final responsive = context.responsive;
 
     // Navigation items matching Android version - 5 tabs: Feed, Explore, Messages, Notifications, Settings
@@ -96,7 +96,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         selectedIndex: selectedIndex,
         onNavigationChanged: _onDestinationSelected,
         showAppBar: false,
-        rightPanel: responsive.isDesktop ? _buildRightPanel(context) : null,
+        rightPanel: null,
         floatingActionButton: selectedIndex == 0
             ? FloatingActionButton.extended(
                 onPressed: () => context.push('/create-post'),
@@ -108,6 +108,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
 
     return Scaffold(
+      extendBody: abVariant.usesExperimentalSurfaceChrome,
       body: widget.child,
       bottomNavigationBar: _buildBottomNavigation(
         context,
@@ -115,11 +116,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         navigationItems,
       ),
       floatingActionButton: selectedIndex == 0
-          ? FloatingActionButton(
-              onPressed: () => context.push('/create-post'),
-              tooltip: l10n.createPost,
-              child: const Icon(Icons.add),
-            )
+          ? isLiquidGlass
+                ? LiquidGlassFAB(
+                    icon: Icons.add,
+                    onPressed: () => context.push('/create-post'),
+                    tooltip: l10n.createPost,
+                    variant: abVariant.surfaceVariantName,
+                  )
+                : isSkeumorphic
+                ? _SkeuomorphicFab(
+                    icon: Icons.add,
+                    tooltip: l10n.createPost,
+                    isFull: abVariant.isFullSkeumorphic,
+                    onPressed: () => context.push('/create-post'),
+                  )
+                : FloatingActionButton(
+                    onPressed: () => context.push('/create-post'),
+                    tooltip: l10n.createPost,
+                    child: const Icon(Icons.add),
+                  )
           : null,
     );
   }
@@ -129,10 +144,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     int selectedIndex,
     List<WebNavigationItem> items,
   ) {
+    final abVariant = ref.watch(devOptionsProvider).abTestVariant;
+
     return NeuroNavigationBar(
       selectedIndex: selectedIndex,
       onDestinationSelected: _onDestinationSelected,
-      height: 80,
+      height: 56,
+      isLiquidGlass: abVariant.usesExperimentalSurfaceChrome,
+      glassVariant: abVariant.surfaceVariantName,
       destinations: items.map((item) {
         Widget icon = Icon(item.icon);
         Widget selectedIcon = Icon(item.selectedIcon ?? item.icon);
@@ -147,295 +166,88 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }).toList(),
     );
   }
-
-  Widget _buildRightPanel(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-
-    return Container(
-      color: theme.colorScheme.surface,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _RightPanelCard(
-            title: l10n.get('howAreYouFeeling'),
-            icon: Icons.emoji_emotions_outlined,
-            onTap: () => context.push('/settings/neuro-state'),
-            child: Wrap(
-              spacing: 8,
-              children: [
-                _MoodChip(emoji: '😊', label: l10n.get('moodGreat')),
-                _MoodChip(emoji: '😐', label: l10n.get('okay')),
-                _MoodChip(emoji: '😔', label: l10n.get('struggling')),
-                _MoodChip(emoji: '😰', label: l10n.get('anxious')),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          _RightPanelCard(
-            title: l10n.quickActions,
-            icon: Icons.flash_on_outlined,
-            child: Column(
-              children: [
-                _QuickActionTile(
-                  icon: Icons.self_improvement,
-                  label: l10n.breathingExercise,
-                  onTap: () => context.push('/games/breathing_bubbles'),
-                ),
-                _QuickActionTile(
-                  icon: Icons.phone,
-                  label: l10n.practiceCall,
-                  onTap: () => context.push('/practice-calls'),
-                ),
-                _QuickActionTile(
-                  icon: Icons.add_circle_outline,
-                  label: l10n.createStory,
-                  onTap: () => context.push('/create-story'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          _RightPanelCard(
-            title: l10n.trendingTopics,
-            icon: Icons.trending_up,
-            child: Column(
-              children: [
-                _TrendingTopic(
-                  tag: '#ADHDTips',
-                  count: l10n.trendingPostsCount('2.4k'),
-                ),
-                _TrendingTopic(
-                  tag: '#SensoryFriendly',
-                  count: l10n.trendingPostsCount('1.8k'),
-                ),
-                _TrendingTopic(
-                  tag: '#NeurodivergentWins',
-                  count: l10n.trendingPostsCount('1.2k'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.appName,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.outline,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  l10n.safeSpace,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.outline,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
-class _RightPanelCard extends StatelessWidget {
-  final String title;
+class _SkeuomorphicFab extends StatelessWidget {
   final IconData icon;
-  final Widget child;
-  final VoidCallback? onTap;
+  final String tooltip;
+  final bool isFull;
+  final VoidCallback onPressed;
 
-  const _RightPanelCard({
-    required this.title,
+  const _SkeuomorphicFab({
     required this.icon,
-    required this.child,
-    this.onTap,
+    required this.tooltip,
+    required this.isFull,
+    required this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final base = Color.alphaBlend(
+      theme.colorScheme.primary.withValues(alpha: isFull ? 0.20 : 0.12),
+      theme.colorScheme.surface,
+    );
+    final top = Color.alphaBlend(
+      Colors.white.withValues(alpha: isDark ? 0.10 : 0.22),
+      base,
+    );
+    final bottom = Color.alphaBlend(
+      theme.colorScheme.primary.withValues(alpha: isFull ? 0.28 : 0.16),
+      base,
+    );
 
-    return Card(
-      elevation: 0,
-      color: theme.colorScheme.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(icon, size: 20, color: theme.colorScheme.primary),
-                  const SizedBox(width: 8),
-                  Text(
-                    title,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              child,
-            ],
-          ),
+    return Tooltip(
+      message: tooltip,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.26 : 0.12),
+              blurRadius: isFull ? 26 : 18,
+              offset: Offset(0, isFull ? 14 : 10),
+            ),
+            BoxShadow(
+              color: Colors.white.withValues(alpha: isDark ? 0.05 : 0.55),
+              blurRadius: isFull ? 12 : 8,
+              offset: const Offset(-4, -4),
+            ),
+          ],
         ),
-      ),
-    );
-  }
-}
-
-class _MoodChip extends StatelessWidget {
-  final String emoji;
-  final String label;
-
-  const _MoodChip({required this.emoji, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return ActionChip(
-      avatar: Text(emoji, style: const TextStyle(fontSize: 16)),
-      label: Text(label),
-      onPressed: () => context.push('/settings/neuro-state'),
-    );
-  }
-}
-
-class _QuickActionTile extends StatefulWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _QuickActionTile({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  State<_QuickActionTile> createState() => _QuickActionTileState();
-}
-
-class _QuickActionTileState extends State<_QuickActionTile> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 100),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: _isHovered
-                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.5)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                widget.icon,
-                size: 18,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  widget.label,
-                  style: theme.textTheme.bodyMedium,
+        child: Material(
+          color: Colors.transparent,
+          shape: const CircleBorder(),
+          child: InkWell(
+            onTap: onPressed,
+            customBorder: const CircleBorder(),
+            child: Ink(
+              width: 58,
+              height: 58,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [top, base, bottom],
+                  stops: const [0.0, 0.45, 1.0],
+                ),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: isDark ? 0.10 : 0.42),
+                  width: 1,
                 ),
               ),
-              Icon(
-                Icons.chevron_right,
-                size: 18,
-                color: theme.colorScheme.outline,
+              child: Icon(
+                icon,
+                color: isFull
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface,
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 }
-
-class _TrendingTopic extends StatefulWidget {
-  final String tag;
-  final String count;
-
-  const _TrendingTopic({required this.tag, required this.count});
-
-  @override
-  State<_TrendingTopic> createState() => _TrendingTopicState();
-}
-
-class _TrendingTopicState extends State<_TrendingTopic> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: () => context.push('/explore'),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 100),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: _isHovered
-                ? theme.colorScheme.surfaceContainerHighest
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.tag,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                    Text(
-                      widget.count,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.outline,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-

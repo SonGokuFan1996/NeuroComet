@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.hotswan.compiler)
 }
 
 // Load properties from multiple potential secret files
@@ -22,14 +23,31 @@ listOf("local.properties", "secrets.properties").forEach { fileName ->
     }
 }
 
+val requestedTaskNames = gradle.startParameter.taskNames
+val isBundleTaskRequested = requestedTaskNames.any { taskName ->
+    taskName.contains("bundle", ignoreCase = true)
+}
+val isReleaseStyleBuildRequested = requestedTaskNames.any { taskName ->
+    taskName.contains("release", ignoreCase = true) ||
+        taskName.contains("bundle", ignoreCase = true) ||
+        taskName.contains("publish", ignoreCase = true)
+}
+
 /**
  * Basic obfuscation to hide keys from simple string searches in the binary.
  * Uses XOR with a key and hex encoding.
  * The key is read from local.properties (OBFUSCATION_KEY) so it never
  * appears in committed source.
  */
-val obfuscationKey: String = combinedProperties.getProperty("OBFUSCATION_KEY")
-    ?: "neurocomet_internal_security_key_2025"   // fallback so builds don't break
+val configuredObfuscationKey = combinedProperties.getProperty("OBFUSCATION_KEY")?.trim().orEmpty()
+if (isReleaseStyleBuildRequested && configuredObfuscationKey.isBlank()) {
+    throw GradleException(
+        "OBFUSCATION_KEY is required for release-style builds. Add it to local.properties or secrets.properties before building."
+    )
+}
+val obfuscationKey: String = configuredObfuscationKey.ifBlank {
+    "debug-local-obfuscation-key"
+}
 
 fun obfuscate(value: String?): String {
     if (value.isNullOrEmpty()) return ""
@@ -54,35 +72,46 @@ android {
         applicationId = "com.kyilmaz.neurocomet"
         minSdk = 26
         targetSdk = 36
-        versionCode = 148
-        versionName = "2.0.0-beta06"
+        versionCode = 192
+        versionName = "2.0.0-rc36"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Load credentials from combined properties
         val supabaseUrl = combinedProperties.getProperty("SUPABASE_URL") ?: ""
         val supabaseKey = combinedProperties.getProperty("SUPABASE_KEY") ?: ""
-        val devHash = combinedProperties.getProperty("DEVELOPER_DEVICE_HASH") ?: ""
+        val devHash = combinedProperties.getProperty("DEVELOPER_DEVICE_HASH") ?: "4d18ac796abdb71814159e41a7e5fdd5b63b4ba659d3a5be66cea9ee8dcef1b3"
         val geminiApiKey = combinedProperties.getProperty("GEMINI_API_KEY") ?: ""
         val revenueCatKey = combinedProperties.getProperty("REVENUECAT_API_KEY") ?: ""
         val admobAppId = combinedProperties.getProperty("ADMOB_APP_ID") ?: "ca-app-pub-3940256099942544~3347511713"
-        
+        val turnUrl = combinedProperties.getProperty("TURN_URL") ?: ""
+        val turnUsername = combinedProperties.getProperty("TURN_USERNAME") ?: ""
+        val turnPassword = combinedProperties.getProperty("TURN_PASSWORD") ?: ""
+
         // AdMob Unit IDs
         val bannerAdId = combinedProperties.getProperty("ADMOB_BANNER_ID") ?: "ca-app-pub-3940256099942544/6300978111"
         val interstitialAdId = combinedProperties.getProperty("ADMOB_INTERSTITIAL_ID") ?: "ca-app-pub-3940256099942544/1033173712"
         val rewardedAdId = combinedProperties.getProperty("ADMOB_REWARDED_ID") ?: "ca-app-pub-3940256099942544/5224354917"
 
+        val internalSignature = combinedProperties.getProperty("INTERNAL_SIGNATURE_HASH") ?: ""
+
         // Inject obfuscated keys into BuildConfig
         buildConfigField("String", "SUPABASE_URL", "\"${obfuscate(supabaseUrl)}\"")
         buildConfigField("String", "SUPABASE_KEY", "\"${obfuscate(supabaseKey)}\"")
+        buildConfigField("String", "DEVELOPER_DEVICE_HASH", "\"$devHash\"")
         buildConfigField("String", "GEMINI_API_KEY", "\"${obfuscate(geminiApiKey)}\"")
         buildConfigField("String", "REVENUECAT_API_KEY", "\"${obfuscate(revenueCatKey)}\"")
         buildConfigField("String", "ADMOB_BANNER_ID", "\"${obfuscate(bannerAdId)}\"")
         buildConfigField("String", "ADMOB_INTERSTITIAL_ID", "\"${obfuscate(interstitialAdId)}\"")
         buildConfigField("String", "ADMOB_REWARDED_ID", "\"${obfuscate(rewardedAdId)}\"")
-        
+        buildConfigField("String", "TURN_URL", "\"${obfuscate(turnUrl)}\"")
+        buildConfigField("String", "TURN_USERNAME", "\"${obfuscate(turnUsername)}\"")
+        buildConfigField("String", "TURN_PASSWORD", "\"${obfuscate(turnPassword)}\"")
+
         // Non-secret but device-specific config
         buildConfigField("String", "DEVELOPER_DEVICE_HASH", "\"$devHash\"")
+        buildConfigField("String", "INTERNAL_SIGNATURE_HASH", "\"$internalSignature\"")
+        buildConfigField("Boolean", "ALLOW_GUEST_ACCESS", "false")
         buildConfigField("String", "ADMOB_APP_ID", "\"${obfuscate(admobAppId)}\"")
 
         // Obfuscation key — injected so SecurityUtils can decrypt at runtime
@@ -90,6 +119,10 @@ android {
 
         // Add AdMob App ID as a manifest placeholder
         manifestPlaceholders["admobAppId"] = admobAppId
+
+        ndk {
+            debugSymbolLevel = "FULL"
+        }
     }
 
     signingConfigs {
@@ -104,6 +137,17 @@ android {
         }
     }
 
+    flavorDimensions.add("version")
+    productFlavors {
+        create("prod") {
+            dimension = "version"
+        }
+        create("bypass") {
+            dimension = "version"
+            buildConfigField("Boolean", "ALLOW_GUEST_ACCESS", "true")
+        }
+    }
+
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
@@ -114,17 +158,16 @@ android {
                 "proguard-rules.pro"
             )
             ndk {
-                debugSymbolLevel = "SYMBOL_TABLE"
+                debugSymbolLevel = "FULL"
             }
             isDebuggable = false
             isCrunchPngs = true
         }
         debug {
-            // applicationIdSuffix = ".debug"
+            // Removed .debug suffix to match RevenueCat dashboard package name
             versionNameSuffix = "-debug"
             isDebuggable = true
             isMinifyEnabled = false
-            isShrinkResources = false
             isCrunchPngs = false
         }
     }
@@ -132,8 +175,7 @@ android {
     splits {
         abi {
             // AAB handles ABI splitting natively — only enable for APK builds
-            val isBundle = gradle.startParameter.taskNames.any { it.contains("bundle", ignoreCase = true) }
-            isEnable = !isBundle
+            isEnable = !isBundleTaskRequested
             reset()
             include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
             isUniversalApk = true
@@ -200,7 +242,7 @@ val googleServicesConfigFiles = listOf(
     file("src/release/google-services.json")
 )
 val hasGoogleServicesConfig = googleServicesConfigFiles.any { it.exists() }
-val requestedTasks = gradle.startParameter.taskNames.map { it.lowercase() }
+val requestedTasks = requestedTaskNames.map { it.lowercase() }
 val requiresGoogleServices = requestedTasks.any {
     it.contains("release") || it.contains("bundle")
 }
@@ -226,6 +268,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation("io.github.kyant0:backdrop:2.0.0-alpha03")
     implementation(libs.google.material)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.biometric)
@@ -247,6 +290,7 @@ dependencies {
     implementation(libs.supabase.postgrest)
     implementation(libs.supabase.auth)
     implementation(libs.supabase.realtime)
+    implementation(libs.supabase.storage)
 
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)

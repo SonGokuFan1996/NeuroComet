@@ -13,6 +13,37 @@ import 'neuro_color_schemes.dart';
 class AppTheme {
   AppTheme._();
 
+  static const List<String> _emojiFontFallback = [
+    'Noto Color Emoji',
+    'Segoe UI Emoji',
+    'Apple Color Emoji',
+    'Segoe UI Symbol',
+  ];
+
+  static TextStyle? _withEmojiFallback(TextStyle? style) {
+    return style?.copyWith(fontFamilyFallback: _emojiFontFallback);
+  }
+
+  static TextTheme _applyEmojiFallback(TextTheme textTheme) {
+    return textTheme.copyWith(
+      displayLarge: _withEmojiFallback(textTheme.displayLarge),
+      displayMedium: _withEmojiFallback(textTheme.displayMedium),
+      displaySmall: _withEmojiFallback(textTheme.displaySmall),
+      headlineLarge: _withEmojiFallback(textTheme.headlineLarge),
+      headlineMedium: _withEmojiFallback(textTheme.headlineMedium),
+      headlineSmall: _withEmojiFallback(textTheme.headlineSmall),
+      titleLarge: _withEmojiFallback(textTheme.titleLarge),
+      titleMedium: _withEmojiFallback(textTheme.titleMedium),
+      titleSmall: _withEmojiFallback(textTheme.titleSmall),
+      bodyLarge: _withEmojiFallback(textTheme.bodyLarge),
+      bodyMedium: _withEmojiFallback(textTheme.bodyMedium),
+      bodySmall: _withEmojiFallback(textTheme.bodySmall),
+      labelLarge: _withEmojiFallback(textTheme.labelLarge),
+      labelMedium: _withEmojiFallback(textTheme.labelMedium),
+      labelSmall: _withEmojiFallback(textTheme.labelSmall),
+    );
+  }
+
 
   // M3E shape constants - more expressive rounded corners
   static const double shapeExtraSmall = 4.0;
@@ -24,7 +55,7 @@ class AppTheme {
 
   /// Get the primary text theme using Inter font (clean, accessible, modern)
   static TextTheme _getTextTheme({double textScale = 1.0}) {
-    return GoogleFonts.interTextTheme().copyWith(
+    return _applyEmojiFallback(GoogleFonts.interTextTheme().copyWith(
       displayLarge: GoogleFonts.inter(
         fontSize: 57 * textScale,
         fontWeight: FontWeight.w400,
@@ -100,12 +131,12 @@ class AppTheme {
         fontWeight: FontWeight.w600,
         letterSpacing: 0.5,
       ),
-    );
+    ));
   }
 
   /// Get dyslexia-friendly text theme using Lexend Deca
   static TextTheme _getDyslexicTextTheme({double textScale = 1.0}) {
-    return GoogleFonts.lexendDecaTextTheme().copyWith(
+    return _applyEmojiFallback(GoogleFonts.lexendDecaTextTheme().copyWith(
       displayLarge: GoogleFonts.lexendDeca(fontSize: 57 * textScale, fontWeight: FontWeight.w400),
       displayMedium: GoogleFonts.lexendDeca(fontSize: 45 * textScale, fontWeight: FontWeight.w400),
       displaySmall: GoogleFonts.lexendDeca(fontSize: 36 * textScale, fontWeight: FontWeight.w400),
@@ -121,7 +152,7 @@ class AppTheme {
       labelLarge: GoogleFonts.lexendDeca(fontSize: 14 * textScale, fontWeight: FontWeight.w600),
       labelMedium: GoogleFonts.lexendDeca(fontSize: 12 * textScale, fontWeight: FontWeight.w600),
       labelSmall: GoogleFonts.lexendDeca(fontSize: 11 * textScale, fontWeight: FontWeight.w600),
-    );
+    ));
   }
 
   /// Get theme for a specific NeuroState and brightness
@@ -418,7 +449,7 @@ class AppTheme {
 
       navigationBarTheme: NavigationBarThemeData(
         elevation: 0,
-        height: 80,
+        height: 64,
         backgroundColor: isDark ? const Color(0xFF1C1B1F) : const Color(0xFFFFFBFE),
         surfaceTintColor: Colors.transparent,
         indicatorColor: colorScheme.secondaryContainer,

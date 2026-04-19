@@ -102,8 +102,58 @@ class BadgeProgress {
   );
 }
 
+class BadgeLevelInfo {
+  final int level;
+  final int totalXp;
+  final int currentLevelBaseXp;
+  final int nextLevelXp;
+
+  const BadgeLevelInfo({
+    required this.level,
+    required this.totalXp,
+    required this.currentLevelBaseXp,
+    required this.nextLevelXp,
+  });
+
+  int get xpIntoLevel => totalXp - currentLevelBaseXp;
+  int get xpNeededForNextLevel => nextLevelXp - totalXp;
+  int get xpSpan => nextLevelXp - currentLevelBaseXp;
+  double get progress => xpSpan <= 0 ? 1 : (xpIntoLevel / xpSpan).clamp(0, 1);
+}
+
+class RewardSnapshot {
+  final Map<String, BadgeProgress> progress;
+  final int totalXp;
+  final int unlockedCount;
+  final int totalBadges;
+  final BadgeLevelInfo levelInfo;
+  final List<AchievementBadge> recentlyUnlocked;
+
+  const RewardSnapshot({
+    required this.progress,
+    required this.totalXp,
+    required this.unlockedCount,
+    required this.totalBadges,
+    required this.levelInfo,
+    required this.recentlyUnlocked,
+  });
+
+  double get completionPercent => totalBadges == 0 ? 0 : unlockedCount / totalBadges;
+}
+
 /// All available badges in the app
 class BadgeRegistry {
+  static const Map<String, String> _legacyAliases = {
+    'early_adopter': 'founding_member',
+    'first_post': 'first_post',
+    'community_helper': 'community_hero',
+    'verified': 'social_butterfly',
+    'premium': 'rainbow_brain',
+    'game_master': 'game_lover',
+    'streak_7': 'week_one',
+    'streak_30': 'month_one',
+  };
+
   static const List<AchievementBadge> allBadges = [
     // === SOCIAL BADGES ===
     AchievementBadge(
@@ -332,9 +382,16 @@ class BadgeRegistry {
     ),
   ];
 
+  static String? normalizeBadgeId(String id) {
+    if (allBadges.any((badge) => badge.id == id)) return id;
+    return _legacyAliases[id];
+  }
+
   static AchievementBadge? getBadgeById(String id) {
+    final normalizedId = normalizeBadgeId(id);
+    if (normalizedId == null) return null;
     try {
-      return allBadges.firstWhere((b) => b.id == id);
+      return allBadges.firstWhere((b) => b.id == normalizedId);
     } catch (_) {
       return null;
     }
@@ -349,34 +406,35 @@ class BadgeRegistry {
 class BadgeManager {
   static const String _prefsKey = 'badge_progress';
   static const String _xpKey = 'total_xp';
+  static const String _legacyMigrationKey = 'badge_progress_legacy_migrated_v2';
+  static const int _xpPerLevelStep = 100;
 
   static Future<Map<String, BadgeProgress>> getAllProgress() async {
     final prefs = await SharedPreferences.getInstance();
-    final json = prefs.getString(_prefsKey);
-    if (json == null) return {};
-
-    final Map<String, dynamic> data = jsonDecode(json);
-    return data.map((key, value) =>
-        MapEntry(key, BadgeProgress.fromJson(value as Map<String, dynamic>)));
+    await _importLegacyBadges(prefs);
+    return _decodeProgressMap(prefs.getString(_prefsKey));
   }
 
   static Future<BadgeProgress> getProgress(String badgeId) async {
     final all = await getAllProgress();
-    return all[badgeId] ?? BadgeProgress(badgeId: badgeId);
+    final normalizedId = BadgeRegistry.normalizeBadgeId(badgeId) ?? badgeId;
+    return all[normalizedId] ?? BadgeProgress(badgeId: normalizedId);
   }
 
-  static Future<void> updateProgress(String badgeId, int progress) async {
+  static Future<bool> addProgress(String badgeId, [int progress = 1]) async {
     final prefs = await SharedPreferences.getInstance();
-    final all = await getAllProgress();
-    final badge = BadgeRegistry.getBadgeById(badgeId);
+    await _importLegacyBadges(prefs);
 
-    if (badge == null) return;
+    final resolvedBadge = BadgeRegistry.getBadgeById(badgeId);
+    if (resolvedBadge == null) return false;
+    final AchievementBadge badge = resolvedBadge;
 
-    final current = all[badgeId] ?? BadgeProgress(badgeId: badgeId);
+    final all = _decodeProgressMap(prefs.getString(_prefsKey));
+    final current = all[badge.id] ?? BadgeProgress(badgeId: badge.id);
     final newProgress = current.currentProgress + progress;
     final shouldUnlock = newProgress >= badge.maxProgress && !current.isUnlocked;
 
-    all[badgeId] = current.copyWith(
+    all[badge.id] = current.copyWith(
       currentProgress: newProgress.clamp(0, badge.maxProgress),
       isUnlocked: shouldUnlock || current.isUnlocked,
       unlockedAt: shouldUnlock ? DateTime.now() : current.unlockedAt,
@@ -386,17 +444,21 @@ class BadgeManager {
       all.map((key, value) => MapEntry(key, value.toJson())),
     ));
 
-    // Award XP if newly unlocked
     if (shouldUnlock) {
       await _addXp(badge.xpReward);
     }
+    return shouldUnlock;
+  }
+
+  static Future<void> updateProgress(String badgeId, int progress) async {
+    await addProgress(badgeId, progress);
   }
 
   static Future<void> unlockBadge(String badgeId) async {
     final badge = BadgeRegistry.getBadgeById(badgeId);
     if (badge == null) return;
 
-    await updateProgress(badgeId, badge.maxProgress);
+    await addProgress(badge.id, badge.maxProgress);
   }
 
   static Future<int> getTotalXp() async {
@@ -421,6 +483,110 @@ class BadgeManager {
   static Future<int> getUnlockedCount() async {
     final unlocked = await getUnlockedBadges();
     return unlocked.length;
+  }
+
+  static BadgeLevelInfo getLevelInfo(int totalXp) {
+    var level = 1;
+    while (_xpThresholdForLevel(level + 1) <= totalXp) {
+      level++;
+    }
+    return BadgeLevelInfo(
+      level: level,
+      totalXp: totalXp,
+      currentLevelBaseXp: _xpThresholdForLevel(level),
+      nextLevelXp: _xpThresholdForLevel(level + 1),
+    );
+  }
+
+  static Future<RewardSnapshot> getRewardSnapshot() async {
+    final progress = await getAllProgress();
+    final totalXp = await getTotalXp();
+    final unlockedEntries = progress.entries
+        .where((entry) => entry.value.isUnlocked)
+        .toList()
+      ..sort((a, b) {
+        final aTime = a.value.unlockedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        final bTime = b.value.unlockedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+        return bTime.compareTo(aTime);
+      });
+
+    return RewardSnapshot(
+      progress: progress,
+      totalXp: totalXp,
+      unlockedCount: unlockedEntries.length,
+      totalBadges: BadgeRegistry.allBadges.length,
+      levelInfo: getLevelInfo(totalXp),
+      recentlyUnlocked: unlockedEntries
+          .map((entry) => BadgeRegistry.getBadgeById(entry.key))
+          .whereType<AchievementBadge>()
+          .take(3)
+          .toList(),
+    );
+  }
+
+  static Future<void> resetAll() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_prefsKey);
+    await prefs.remove(_xpKey);
+    await prefs.remove(_legacyMigrationKey);
+  }
+
+  static int _xpThresholdForLevel(int level) {
+    if (level <= 1) return 0;
+    final priorLevel = level - 1;
+    return (_xpPerLevelStep * priorLevel * level) ~/ 2;
+  }
+
+  static Map<String, BadgeProgress> _decodeProgressMap(String? json) {
+    if (json == null || json.isEmpty) return {};
+
+    final Map<String, dynamic> data = jsonDecode(json) as Map<String, dynamic>;
+    return data.map((key, value) => MapEntry(
+          key,
+          BadgeProgress.fromJson(Map<String, dynamic>.from(value as Map)),
+        ));
+  }
+
+  static Future<void> _importLegacyBadges(SharedPreferences prefs) async {
+    if (prefs.getBool(_legacyMigrationKey) ?? false) return;
+
+    final legacyKeys = prefs.getKeys().where((key) => key.startsWith('earned_badges_')).toList();
+    if (legacyKeys.isEmpty) {
+      await prefs.setBool(_legacyMigrationKey, true);
+      return;
+    }
+
+    final all = _decodeProgressMap(prefs.getString(_prefsKey));
+    var totalXp = prefs.getInt(_xpKey) ?? 0;
+    var changed = false;
+
+    for (final key in legacyKeys) {
+      for (final legacyBadgeId in prefs.getStringList(key) ?? const <String>[]) {
+        final normalizedId = BadgeRegistry.normalizeBadgeId(legacyBadgeId);
+        final badge = normalizedId == null ? null : BadgeRegistry.getBadgeById(normalizedId);
+        if (badge == null) continue;
+
+        final current = all[badge.id] ?? BadgeProgress(badgeId: badge.id);
+        if (current.isUnlocked) continue;
+
+        all[badge.id] = current.copyWith(
+          currentProgress: badge.maxProgress,
+          isUnlocked: true,
+          unlockedAt: DateTime.now(),
+        );
+        totalXp += badge.xpReward;
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      await prefs.setString(_prefsKey, jsonEncode(
+        all.map((key, value) => MapEntry(key, value.toJson())),
+      ));
+      await prefs.setInt(_xpKey, totalXp);
+    }
+
+    await prefs.setBool(_legacyMigrationKey, true);
   }
 }
 

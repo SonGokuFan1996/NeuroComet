@@ -161,6 +161,11 @@ data class ContentItemData(
 @Composable
 fun ExploreScreen(
     posts: List<Post> = emptyList(),
+    stories: List<Story> = emptyList(),
+    bookmarkedPostIds: Set<Long> = emptySet(),
+    followingUserIds: Set<String> = emptySet(),
+    blockedUserIds: Set<String> = emptySet(),
+    mutedUserIds: Set<String> = emptySet(),
     safetyState: SafetyState = SafetyState(),
     modifier: Modifier = Modifier,
     onTopicClick: (String) -> Unit = {},
@@ -168,7 +173,14 @@ fun ExploreScreen(
     onLikePost: (Long) -> Unit = {},
     onSharePost: (Context, Post) -> Unit = { _, _ -> },
     onCommentPost: (Post) -> Unit = {},
-    onProfileClick: (String) -> Unit = {}
+    onProfileClick: (String) -> Unit = {},
+    onViewStory: (Story) -> Unit = {},
+    onAddStoryClick: () -> Unit = {},
+    onBookmarkToggle: (Long) -> Unit = {},
+    onFollowToggle: (String) -> Unit = {},
+    onReportPost: (Long, String) -> Unit = { _, _ -> },
+    onHidePost: (Long) -> Unit = {},
+    onBlockUser: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
@@ -179,6 +191,9 @@ fun ExploreScreen(
     var showFilterSheet by remember { mutableStateOf(false) }
 
     val focusRequester = remember { FocusRequester() }
+
+    // Local state for hidden posts in Explore (since many are mock and not in FeedViewModel)
+    var hiddenPostIds by remember { mutableStateOf(emptySet<Long>()) }
     val focusManager = LocalFocusManager.current
 
     // Header animation
@@ -258,14 +273,46 @@ fun ExploreScreen(
                         onCommentClick = onCommentPost,
                         onShareClick = onSharePost,
                         onProfileClick = onProfileClick,
-                        onTopicClick = onTopicClick
+                        onTopicClick = onTopicClick,
+                        onViewStory = onViewStory,
+                        onAddStoryClick = onAddStoryClick,
+                        stories = stories,
+                        onBookmarkToggle = onBookmarkToggle,
+                        onFollowToggle = onFollowToggle,
+                        onReportPost = onReportPost,
+                        onHidePost = { id ->
+                            hiddenPostIds = hiddenPostIds + id
+                            onHidePost(id)
+                        },
+                        onBlockUser = onBlockUser,
+                        bookmarkedPostIds = bookmarkedPostIds,
+                        followingUserIds = followingUserIds,
+                        blockedUserIds = blockedUserIds,
+                        mutedUserIds = mutedUserIds,
+                        hiddenPostIds = hiddenPostIds
                     )
                     1 -> TrendingTab(
                         onLikeClick = onLikePost,
                         onCommentClick = onCommentPost,
                         onShareClick = onSharePost,
                         onProfileClick = onProfileClick,
-                        onTopicClick = onTopicClick
+                        onTopicClick = onTopicClick,
+                        onViewStory = onViewStory,
+                        onAddStoryClick = onAddStoryClick,
+                        stories = stories,
+                        onBookmarkToggle = onBookmarkToggle,
+                        onFollowToggle = onFollowToggle,
+                        onReportPost = onReportPost,
+                        onHidePost = { id ->
+                            hiddenPostIds = hiddenPostIds + id
+                            onHidePost(id)
+                        },
+                        onBlockUser = onBlockUser,
+                        bookmarkedPostIds = bookmarkedPostIds,
+                        followingUserIds = followingUserIds,
+                        blockedUserIds = blockedUserIds,
+                        mutedUserIds = mutedUserIds,
+                        hiddenPostIds = hiddenPostIds
                     )
                     2 -> PeopleTab(
                         onProfileClick = onProfileClick
@@ -313,18 +360,18 @@ private fun ExploreFilterSheet(
     modifier: Modifier = Modifier
 ) {
     val categories = listOf(
-        Triple("🎯", "ADHD Hacks", "Tips & strategies"),
-        Triple("🧩", "Autism Community", "Connection & support"),
-        Triple("✨", "Sensory Tips", "Sensory-friendly living"),
-        Triple("🧠", "Mental Health", "Wellness & recovery"),
-        Triple("💪", "Executive Function", "Planning & focus"),
-        Triple("🎨", "Creative Arts", "Art therapy & expression"),
-        Triple("🎮", "Gaming", "ND-friendly gaming"),
-        Triple("💼", "Career Paths", "Workplace tips"),
-        Triple("🍽️", "Safe Foods", "ARFID & food support"),
-        Triple("🤝", "Relationships", "Communication & bonds"),
-        Triple("🎓", "College Transition", "Academic support"),
-        Triple("🏠", "Independent Living", "Life skills")
+        Triple("\uD83C\uDFAF", "ADHD Hacks", "Tips & strategies"),
+        Triple("\uD83E\uDDE9", "Autism Community", "Connection & support"),
+        Triple("\u2728", "Sensory Tips", "Sensory-friendly living"),
+        Triple("\uD83E\uDDE0", "Mental Health", "Wellness & recovery"),
+        Triple("\uD83D\uDCAA", "Executive Function", "Planning & focus"),
+        Triple("\uD83C\uDFA8", "Creative Arts", "Art therapy & expression"),
+        Triple("\uD83C\uDFAE", "Gaming", "ND-friendly gaming"),
+        Triple("\uD83D\uDCBC", "Career Paths", "Workplace tips"),
+        Triple("\uD83C\uDF7D\uFE0F", "Safe Foods", "ARFID & food support"),
+        Triple("\uD83E\uDD1D", "Relationships", "Communication & bonds"),
+        Triple("\uD83C\uDF93", "College Transition", "Academic support"),
+        Triple("\uD83C\uDFE0", "Independent Living", "Life skills")
     )
 
     Column(
@@ -408,13 +455,14 @@ private fun ExploreHeader(
     val context = LocalContext.current
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background)
-            .statusBarsPadding()
-            .padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 8.dp)
-    ) {
+    val headerContent: @Composable () -> Unit = {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .statusBarsPadding()
+                .padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 8.dp)
+        ) {
         // Title Row (hidden when searching)
         AnimatedVisibility(
             visible = !isSearching,
@@ -437,9 +485,9 @@ private fun ExploreHeader(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Discover amazing content ✨",
+                        text = "Find topics you love without the noise. \u2728",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = if (isDark) Color.White.copy(alpha = 0.7f) else Color(0xFF666680)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -522,6 +570,12 @@ private fun ExploreHeader(
             }
         }
     }
+    }
+
+    // ── Render: glass panel or plain ────────────────
+    Box(modifier = modifier.fillMaxWidth()) {
+        headerContent()
+    }
 }
 
 /**
@@ -596,9 +650,12 @@ private fun ExploreFilterTabs(
             .fillMaxWidth()
             .padding(top = 8.dp),
         contentPadding = PaddingValues(horizontal = 20.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(tabs.size) { index ->
+        items(
+            count = tabs.size,
+            key = { tabs[it].third }
+        ) { index ->
             val (icon, label, tabIndex) = tabs[index]
             val isSelected = selectedIndex == tabIndex
 
@@ -644,7 +701,7 @@ private fun ExploreFilterPill(
         } else null
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -660,7 +717,7 @@ private fun ExploreFilterPill(
             Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelLarge,
+                style = MaterialTheme.typography.labelMedium,
                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
                 color = if (isSelected) {
                     MaterialTheme.colorScheme.onPrimary
@@ -857,7 +914,20 @@ private fun ForYouTab(
     onCommentClick: (Post) -> Unit = {},
     onShareClick: (Context, Post) -> Unit = { _, _ -> },
     onProfileClick: (String) -> Unit = {},
-    onTopicClick: (String) -> Unit = {}
+    onTopicClick: (String) -> Unit = {},
+    onViewStory: (Story) -> Unit = {},
+    onAddStoryClick: () -> Unit = {},
+    stories: List<Story> = emptyList(),
+    onBookmarkToggle: (Long) -> Unit = {},
+    onFollowToggle: (String) -> Unit = {},
+    onReportPost: (Long, String) -> Unit = { _, _ -> },
+    onHidePost: (Long) -> Unit = {},
+    onBlockUser: (String) -> Unit = {},
+    bookmarkedPostIds: Set<Long> = emptySet(),
+    followingUserIds: Set<String> = emptySet(),
+    blockedUserIds: Set<String> = emptySet(),
+    mutedUserIds: Set<String> = emptySet(),
+    hiddenPostIds: Set<Long> = emptySet()
 ) {
     val context = LocalContext.current
     var selectedChip by remember { mutableStateOf<String?>(null) }
@@ -1044,10 +1114,14 @@ private fun ForYouTab(
         )
     }
 
-    // Filter posts based on selected chip
-    val filteredPosts = remember(selectedChip, forYouPosts) {
-        if (selectedChip == null) forYouPosts
-        else forYouPosts.filter { it.category == selectedChip }
+    // Filter posts based on selected chip, blocked users, and hidden posts
+    val filteredPosts = remember(selectedChip, forYouPosts, blockedUserIds, mutedUserIds, hiddenPostIds) {
+        forYouPosts.filter { post ->
+            val matchesCategory = if (selectedChip == null) true else post.category == selectedChip
+            val isNotBlocked = !blockedUserIds.contains(post.username) && !mutedUserIds.contains(post.username)
+            val isNotHidden = !hiddenPostIds.contains(post.id.toLong())
+            matchesCategory && isNotBlocked && isNotHidden
+        }
     }
 
     LazyColumn(
@@ -1063,7 +1137,11 @@ private fun ForYouTab(
                     icon = Icons.Outlined.AutoAwesome
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                StoriesRow()
+                StoriesRow(
+                    stories = stories,
+                    onViewStory = onViewStory,
+                    onAddStoryClick = onAddStoryClick
+                )
             }
         }
 
@@ -1103,7 +1181,7 @@ private fun ForYouTab(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "🔍",
+                            text = "\uD83D\uDD0D",
                             fontSize = 48.sp
                         )
                         Spacer(Modifier.height(16.dp))
@@ -1125,10 +1203,13 @@ private fun ForYouTab(
             }
         }
 
-        itemsIndexed(filteredPosts) { index, post ->
+        items(
+            items = filteredPosts,
+            key = { it.id }
+        ) { post ->
             ExplorePostCard(
                 post = post,
-                animationDelay = index * 80,
+                animationDelay = filteredPosts.indexOf(post) * 80,
                 onLikeClick = {
                     hapticFeedback(context)
                     onLikeClick(post.id.toLong())
@@ -1145,7 +1226,14 @@ private fun ForYouTab(
                     hapticFeedback(context)
                     onProfileClick(post.username)
                 },
-                onTagClick = { tag -> onTopicClick(tag) }
+                onTagClick = { tag -> onTopicClick(tag) },
+                onBookmarkClick = { onBookmarkToggle(post.id.toLong()) },
+                onFollowClick = { onFollowToggle(post.username) },
+                onReportClick = { onReportPost(post.id.toLong(), "Reported from Explore") },
+                onHideClick = { onHidePost(post.id.toLong()) },
+                onBlockClick = { onBlockUser(post.username) },
+                isBookmarked = bookmarkedPostIds.contains(post.id.toLong()),
+                isFollowing = followingUserIds.contains(post.username)
             )
         }
 
@@ -1174,7 +1262,20 @@ private fun TrendingTab(
     onCommentClick: (Post) -> Unit = {},
     onShareClick: (Context, Post) -> Unit = { _, _ -> },
     onProfileClick: (String) -> Unit = {},
-    onTopicClick: (String) -> Unit = {}
+    onTopicClick: (String) -> Unit = {},
+    onViewStory: (Story) -> Unit = {},
+    onAddStoryClick: () -> Unit = {},
+    stories: List<Story> = emptyList(),
+    onBookmarkToggle: (Long) -> Unit = {},
+    onFollowToggle: (String) -> Unit = {},
+    onReportPost: (Long, String) -> Unit = { _, _ -> },
+    onHidePost: (Long) -> Unit = {},
+    onBlockUser: (String) -> Unit = {},
+    bookmarkedPostIds: Set<Long> = emptySet(),
+    followingUserIds: Set<String> = emptySet(),
+    blockedUserIds: Set<String> = emptySet(),
+    mutedUserIds: Set<String> = emptySet(),
+    hiddenPostIds: Set<Long> = emptySet()
 ) {
     val context = LocalContext.current
 
@@ -1239,6 +1340,15 @@ private fun TrendingTab(
         )
     }
 
+    // Filter viral posts based on blocked users and hidden posts
+    val filteredViralPosts = remember(viralPosts, blockedUserIds, mutedUserIds, hiddenPostIds) {
+        viralPosts.filter { post ->
+            val isNotBlocked = !blockedUserIds.contains(post.username) && !mutedUserIds.contains(post.username)
+            val isNotHidden = !hiddenPostIds.contains(post.id.toLong())
+            isNotBlocked && isNotHidden
+        }
+    }
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
@@ -1282,10 +1392,13 @@ private fun TrendingTab(
             )
         }
 
-        itemsIndexed(viralPosts) { index, post ->
+        items(
+            items = filteredViralPosts,
+            key = { it.id }
+        ) { post ->
             ExplorePostCard(
                 post = post,
-                animationDelay = index * 80,
+                animationDelay = filteredViralPosts.indexOf(post) * 80,
                 onLikeClick = {
                     hapticFeedback(context)
                     onLikeClick(post.id.toLong())
@@ -1303,6 +1416,13 @@ private fun TrendingTab(
                     onProfileClick(post.username)
                 },
                 onTagClick = { tag -> onTopicClick(tag) },
+                onBookmarkClick = { onBookmarkToggle(post.id.toLong()) },
+                onFollowClick = { onFollowToggle(post.username) },
+                onReportClick = { onReportPost(post.id.toLong(), "Reported from Explore") },
+                onHideClick = { onHidePost(post.id.toLong()) },
+                onBlockClick = { onBlockUser(post.username) },
+                isBookmarked = bookmarkedPostIds.contains(post.id.toLong()),
+                isFollowing = followingUserIds.contains(post.username),
                 showTrendingBadge = true
             )
         }
@@ -1435,10 +1555,13 @@ private fun PeopleTab(
             )
         }
 
-        itemsIndexed(suggestedPeople) { index, person ->
+        items(
+            items = suggestedPeople,
+            key = { it.username }
+        ) { person ->
             EnhancedPersonCard(
                 person = person,
-                animationDelay = index * 60,
+                animationDelay = suggestedPeople.indexOf(person) * 60,
                 onFollowClick = { hapticFeedback(context) },
                 onProfileClick = {
                     hapticFeedback(context)
@@ -1503,10 +1626,10 @@ private fun TopicsTab(
                 icon = Icons.Outlined.Psychology,
                 color = tertiaryColor,
                 topics = listOf(
-                    SimpleTopicData("Anxiety Support", "12.3K members", "💙"),
-                    SimpleTopicData("Depression Recovery", "9.8K members", "🌱"),
-                    SimpleTopicData("Therapy Talk", "15.6K members", "🗣️"),
-                    SimpleTopicData("Mindfulness", "21.2K members", "🧘")
+                    SimpleTopicData("Anxiety Support", "12.3K members", "\uD83D\uDC99"),
+                    SimpleTopicData("Depression Recovery", "9.8K members", "\uD83C\uDF31"),
+                    SimpleTopicData("Therapy Talk", "15.6K members", "\uD83D\uDDE3\uFE0F"),
+                    SimpleTopicData("Mindfulness", "21.2K members", "\uD83E\uDDD8")
                 )
             ),
             TopicCategory(
@@ -1514,10 +1637,10 @@ private fun TopicsTab(
                 icon = Icons.Outlined.Hub,
                 color = primaryColor,
                 topics = listOf(
-                    SimpleTopicData("ADHD Tips", "34.5K members", "⚡"),
-                    SimpleTopicData("Autism Life", "28.9K members", "🌈"),
-                    SimpleTopicData("Dyslexia Support", "8.2K members", "📚"),
-                    SimpleTopicData("Executive Function", "11.4K members", "🧠")
+                    SimpleTopicData("ADHD Tips", "34.5K members", "\u26A1"),
+                    SimpleTopicData("Autism Life", "28.9K members", "\uD83C\uDF08"),
+                    SimpleTopicData("Dyslexia Support", "8.2K members", "\uD83D\uDCDA"),
+                    SimpleTopicData("Executive Function", "11.4K members", "\uD83E\uDDE0")
                 )
             ),
             TopicCategory(
@@ -1525,10 +1648,10 @@ private fun TopicsTab(
                 icon = Icons.Outlined.Spa,
                 color = secondaryColor,
                 topics = listOf(
-                    SimpleTopicData("Sleep Routines", "18.7K members", "😴"),
-                    SimpleTopicData("Movement & Exercise", "14.2K members", "🏃"),
-                    SimpleTopicData("Nutrition Tips", "9.6K members", "🥗"),
-                    SimpleTopicData("Hobby Corner", "22.1K members", "🎨")
+                    SimpleTopicData("Sleep Routines", "18.7K members", "\uD83D\uDCA4"),
+                    SimpleTopicData("Movement & Exercise", "14.2K members", "\uD83C\uDFC3"),
+                    SimpleTopicData("Nutrition Tips", "9.6K members", "\uD83E\uDD57"),
+                    SimpleTopicData("Hobby Corner", "22.1K members", "\uD83C\uDFA8")
                 )
             ),
             TopicCategory(
@@ -1536,10 +1659,10 @@ private fun TopicsTab(
                 icon = Icons.Outlined.Bolt,
                 color = inversePrimaryColor,
                 topics = listOf(
-                    SimpleTopicData("Focus Hacks", "25.3K members", "🎯"),
-                    SimpleTopicData("Body Doubling", "16.8K members", "👥"),
-                    SimpleTopicData("Time Management", "19.4K members", "⏰"),
-                    SimpleTopicData("Organization", "12.7K members", "📋")
+                    SimpleTopicData("Focus Hacks", "25.3K members", "\uD83C\uDFAF"),
+                    SimpleTopicData("Body Doubling", "16.8K members", "\uD83D\uDC65"),
+                    SimpleTopicData("Time Management", "19.4K members", "\u23F0"),
+                    SimpleTopicData("Organization", "12.7K members", "\uD83D\uDCCB")
                 )
             )
         )
@@ -1700,7 +1823,7 @@ private fun SearchChip(
         color = MaterialTheme.colorScheme.surfaceContainerHighest
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -1712,7 +1835,7 @@ private fun SearchChip(
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.labelMedium
             )
         }
     }
@@ -1738,10 +1861,10 @@ private fun TopicChip(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.SemiBold,
             color = primaryColor,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
         )
     }
 }
@@ -2696,7 +2819,8 @@ private data class ExploreMockPost(
     val isVerified: Boolean,
     val imageUrl: String? = null,
     val tags: List<String> = emptyList(),
-    val category: String = ""
+    val category: String = "",
+    val backgroundColor: Long? = null
 ) {
     /** Convert to a [Post] for sharing/commenting callbacks. */
     fun toPost(): Post = Post(
@@ -2709,7 +2833,8 @@ private data class ExploreMockPost(
         shares = shares,
         imageUrl = imageUrl,
         createdAt = java.time.Instant.now().toString(),
-        isLikedByMe = isLiked
+        isLikedByMe = isLiked,
+        backgroundColor = backgroundColor
     )
 }
 
@@ -2759,26 +2884,6 @@ private data class TopicCategory(
 // Stories Row Component
 // ============================================================================
 
-@Composable
-private fun StoriesRow() {
-    val stories = listOf(
-        StoryData("Your Story", "https://i.pravatar.cc/150?u=you", true, false),
-        StoryData("ADHDCoach", "https://i.pravatar.cc/150?u=coach", false, true),
-        StoryData("SensoryTips", "https://i.pravatar.cc/150?u=sensory", false, true),
-        StoryData("MindfulMom", "https://i.pravatar.cc/150?u=mom", false, true),
-        StoryData("NeuroDoc", "https://i.pravatar.cc/150?u=doc", false, false),
-        StoryData("FocusHacks", "https://i.pravatar.cc/150?u=focus", false, true)
-    )
-
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(stories.size) { index ->
-            StoryItem(story = stories[index])
-        }
-    }
-}
-
 private data class StoryData(
     val username: String,
     val avatar: String,
@@ -2787,19 +2892,105 @@ private data class StoryData(
 )
 
 @Composable
-private fun StoryItem(story: StoryData) {
+private fun StoriesRow(
+    stories: List<Story> = emptyList(),
+    onViewStory: (Story) -> Unit = {},
+    onAddStoryClick: () -> Unit = {}
+) {
+    if (stories.isNotEmpty()) {
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item(key = "add_moment") {
+                StoryItem(
+                    username = "Add Story",
+                    avatar = avatarUrl("me"),
+                    isYourStory = true,
+                    hasNewStory = false,
+                    onClick = onAddStoryClick
+                )
+            }
+            items(stories.size) { index ->
+                val story = stories[index]
+                if (story.userId != "me") { // "me" already handled by add_moment item
+                    StoryItem(
+                        username = story.userName,
+                        avatar = story.userAvatar,
+                        isYourStory = false,
+                        hasNewStory = !story.isViewed,
+                        onClick = { onViewStory(story) }
+                    )
+                }
+            }
+        }
+    } else {
+        val mockStories = listOf(
+            StoryData("Your Story", "https://i.pravatar.cc/150?u=you", true, false),
+            StoryData("ADHDCoach", "https://i.pravatar.cc/150?u=coach", false, true),
+            StoryData("SensoryTips", "https://i.pravatar.cc/150?u=sensory", false, true),
+            StoryData("MindfulMom", "https://i.pravatar.cc/150?u=mom", false, true),
+            StoryData("NeuroDoc", "https://i.pravatar.cc/150?u=doc", false, false),
+            StoryData("FocusHacks", "https://i.pravatar.cc/150?u=focus", false, true)
+        )
+
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(mockStories.size) { index ->
+                val storyData = mockStories[index]
+                StoryItem(
+                    username = if (storyData.isYourStory) "Add Story" else storyData.username,
+                    avatar = storyData.avatar,
+                    isYourStory = storyData.isYourStory,
+                    hasNewStory = storyData.hasNewStory,
+                    onClick = {
+                        if (storyData.isYourStory) {
+                            onAddStoryClick()
+                        } else {
+                            onViewStory(
+                                Story(
+                                    id = "mock_${storyData.username}",
+                                    userAvatar = storyData.avatar,
+                                    userName = storyData.username,
+                                    items = listOf(
+                                        StoryItem(
+                                            id = "mock_item_${storyData.username}",
+                                            imageUrl = storyData.avatar,
+                                            textOverlay = "Hello from ${storyData.username}!"
+                                        )
+                                    )
+                                )
+                            )
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StoryItem(
+    username: String,
+    avatar: String,
+    isYourStory: Boolean,
+    hasNewStory: Boolean,
+    onClick: () -> Unit = {}
+) {
     val primaryColor = MaterialTheme.colorScheme.primary
     val tertiaryColor = MaterialTheme.colorScheme.tertiary
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(72.dp)
+        modifier = Modifier
+            .width(72.dp)
+            .clickable { onClick() }
     ) {
         Box(
             contentAlignment = Alignment.Center
         ) {
             // Gradient ring for new stories
-            if (story.hasNewStory && !story.isYourStory) {
+            if (hasNewStory && !isYourStory) {
                 Box(
                     modifier = Modifier
                         .size(68.dp)
@@ -2810,7 +3001,7 @@ private fun StoryItem(story: StoryData) {
                             )
                         )
                 )
-            } else if (!story.isYourStory) {
+            } else if (!isYourStory) {
                 Box(
                     modifier = Modifier
                         .size(68.dp)
@@ -2827,7 +3018,7 @@ private fun StoryItem(story: StoryData) {
                     .padding(2.dp)
             ) {
                 AsyncImage(
-                    model = story.avatar,
+                    model = avatar,
                     contentDescription = "Story",
                     modifier = Modifier
                         .fillMaxSize()
@@ -2837,7 +3028,7 @@ private fun StoryItem(story: StoryData) {
             }
 
             // Add button for your story
-            if (story.isYourStory) {
+            if (isYourStory) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
@@ -2860,7 +3051,7 @@ private fun StoryItem(story: StoryData) {
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = if (story.isYourStory) "Add Story" else story.username,
+            text = username,
             style = MaterialTheme.typography.labelSmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -2879,17 +3070,20 @@ private fun QuickAccessChips(
     onChipSelected: (String) -> Unit = {}
 ) {
     val chips = listOf(
-        QuickChipData("ADHD Tips", "🎯", Color(0xFFFF7043)),
-        QuickChipData("Mindfulness", "🧘", Color(0xFF66BB6A)),
-        QuickChipData("Anxiety", "💙", Color(0xFF42A5F5)),
-        QuickChipData("Autism", "🌈", Color(0xFF7C4DFF)),
-        QuickChipData("Sleep", "😴", Color(0xFFAB47BC))
+        QuickChipData("Autism", "\uD83C\uDF08", Color(0xFF7C4DFF)),
+        QuickChipData("ADHD Tips", "\uD83C\uDFAF", Color(0xFFFF7043)),
+        QuickChipData("Mindfulness", "\uD83E\uDDD8", Color(0xFF66BB6A)),
+        QuickChipData("Anxiety", "\uD83D\uDC99", Color(0xFF42A5F5)),
+        QuickChipData("Sleep", "\uD83D\uDCA4", Color(0xFFAB47BC))
     )
 
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(chips.size) { index ->
+        items(
+            count = chips.size,
+            key = { chips[it].label }
+        ) { index ->
             val chip = chips[index]
             val isSelected = selectedChip == chip.label
 
@@ -2910,7 +3104,7 @@ private fun QuickAccessChips(
                 shadowElevation = if (isSelected) 4.dp else 0.dp
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
@@ -2920,7 +3114,7 @@ private fun QuickAccessChips(
                     )
                     Text(
                         text = chip.label,
-                        style = MaterialTheme.typography.labelLarge,
+                        style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = if (isSelected) Color.White else chip.color
                     )
@@ -2953,13 +3147,19 @@ private fun ExplorePostCard(
     onShareClick: () -> Unit,
     onProfileClick: () -> Unit,
     onTagClick: (String) -> Unit = {},
+    onBookmarkClick: () -> Unit = {},
+    onFollowClick: () -> Unit = {},
+    onReportClick: () -> Unit = {},
+    onHideClick: () -> Unit = {},
+    onBlockClick: () -> Unit = {},
+    isBookmarked: Boolean = false,
+    isFollowing: Boolean = false,
     modifier: Modifier = Modifier,
     showTrendingBadge: Boolean = false
 ) {
     var visible by remember { mutableStateOf(false) }
-    var isLiked by remember { mutableStateOf(post.isLiked) }
-    var likeCount by remember { mutableIntStateOf(post.likes) }
-    var isBookmarked by remember { mutableStateOf(false) }
+    var isLiked by remember(post.id) { mutableStateOf(post.isLiked) }
+    var likeCount by remember(post.id) { mutableIntStateOf(post.likes) }
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -2974,14 +3174,8 @@ private fun ExplorePostCard(
             animationSpec = tween(300)
         )
     ) {
-        Card(
-            modifier = modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-        ) {
+        val cardShape = RoundedCornerShape(20.dp)
+        val cardContent: @Composable () -> Unit = {
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
@@ -3079,32 +3273,53 @@ private fun ExplorePostCard(
                             onDismissRequest = { showPostMenu = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text(stringResource(R.string.post_save)) },
+                                text = { Text(if (isBookmarked) stringResource(R.string.post_unsave) else stringResource(R.string.post_save)) },
                                 onClick = {
                                     showPostMenu = false
-                                    android.widget.Toast.makeText(context, context.getString(R.string.toast_post_saved), android.widget.Toast.LENGTH_SHORT).show()
+                                    onBookmarkClick()
                                 },
-                                leadingIcon = { Icon(Icons.Outlined.BookmarkBorder, null) }
+                                leadingIcon = { Icon(if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder, null) }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(if (isFollowing) stringResource(R.string.post_unfollow_user, post.username) else stringResource(R.string.post_follow_user, post.username)) },
+                                onClick = {
+                                    showPostMenu = false
+                                    onFollowClick()
+                                },
+                                leadingIcon = { Icon(if (isFollowing) Icons.Filled.PersonRemove else Icons.Filled.PersonAdd, null) }
                             )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.post_share)) },
                                 onClick = {
                                     showPostMenu = false
-                                    val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                                        type = "text/plain"
-                                        putExtra(android.content.Intent.EXTRA_TEXT, "Check out this post on NeuroComet: \"${post.content.take(100)}\"")
-                                    }
-                                    context.startActivity(android.content.Intent.createChooser(shareIntent, context.getString(R.string.post_share)))
+                                    onShareClick()
                                 },
                                 leadingIcon = { Icon(Icons.Outlined.Share, null) }
                             )
                             DropdownMenuItem(
+                                text = { Text(stringResource(R.string.post_hide)) },
+                                onClick = {
+                                    showPostMenu = false
+                                    onHideClick()
+                                },
+                                leadingIcon = { Icon(Icons.Outlined.VisibilityOff, null) }
+                            )
+                            HorizontalDivider()
+                            DropdownMenuItem(
                                 text = { Text(stringResource(R.string.post_report), color = MaterialTheme.colorScheme.error) },
                                 onClick = {
                                     showPostMenu = false
-                                    android.widget.Toast.makeText(context, context.getString(R.string.toast_report_submitted), android.widget.Toast.LENGTH_SHORT).show()
+                                    onReportClick()
                                 },
                                 leadingIcon = { Icon(Icons.Outlined.Flag, null, tint = MaterialTheme.colorScheme.error) }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.post_block_user, post.username), color = MaterialTheme.colorScheme.error) },
+                                onClick = {
+                                    showPostMenu = false
+                                    onBlockClick()
+                                },
+                                leadingIcon = { Icon(Icons.Outlined.Block, null, tint = MaterialTheme.colorScheme.error) }
                             )
                         }
                     }
@@ -3239,16 +3454,24 @@ private fun ExplorePostCard(
                         modifier = Modifier
                             .size(22.dp)
                             .clickable {
-                                isBookmarked = !isBookmarked
-                                android.widget.Toast.makeText(
-                                    context,
-                                    if (isBookmarked) "Bookmarked" else "Removed bookmark",
-                                    android.widget.Toast.LENGTH_SHORT
-                                ).show()
+                                onBookmarkClick()
                             }
                     )
                 }
             }
+        }
+
+        // ── Render: standard card ─────────────────────────
+        Card(
+            modifier = modifier.fillMaxWidth(),
+            shape = cardShape,
+            colors = CardDefaults.cardColors(
+                containerColor = post.backgroundColor?.let { Color(it.toInt()) }
+                    ?: MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            cardContent()
         }
     }
 }

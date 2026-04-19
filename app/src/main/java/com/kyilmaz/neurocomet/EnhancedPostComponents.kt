@@ -1,7 +1,13 @@
 package com.kyilmaz.neurocomet
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
@@ -9,9 +15,11 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,12 +32,14 @@ import androidx.compose.material.icons.automirrored.outlined.Comment
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -44,12 +54,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import java.time.Instant
 import java.time.Duration
+import java.time.Instant
+import kotlinx.coroutines.launch
 
 /**
  * Production-ready enhanced post card with:
@@ -439,7 +451,7 @@ fun EnhancedPostCard(
                         val clipboardManager = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                         val clip = android.content.ClipData.newPlainText(
                             "NeuroComet Post",
-                            "https://neurocomet.app/post/${post.id}"
+                            "https://getneurocomet.com/post/${post.id}"
                         )
                         clipboardManager.setPrimaryClip(clip)
                         android.widget.Toast.makeText(context, context.getString(R.string.toast_link_copied), android.widget.Toast.LENGTH_SHORT).show()
@@ -847,7 +859,7 @@ fun ReportPostDialog(
 /**
  * Enhanced create post dialog with:
  * - Character count
- * - Media preview
+ * - Media preview (Camera, Image, Video)
  * - Mood/feeling selector
  * - Accessibility options
  * - Content warning toggle
@@ -856,272 +868,422 @@ fun ReportPostDialog(
 @Composable
 fun EnhancedCreatePostDialog(
     onDismiss: () -> Unit,
-    onPost: (String, String, String?, String?) -> Unit,
+    onPost: (String, String, String?, String?, Long?, String?) -> Unit,
     isPremium: Boolean = false,
     @Suppress("UNUSED_PARAMETER") safetyState: SafetyState = SafetyState()
 ) {
-    var text by remember { mutableStateOf("") }
-    var imageUrl by remember { mutableStateOf("") }
-    var videoUrl by remember { mutableStateOf("") }
-    var selectedMood by remember { mutableStateOf<String?>(null) }
-    var hasContentWarning by remember { mutableStateOf(false) }
-    var showMediaOptions by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val prefs = context.getSharedPreferences("post_drafts", android.content.Context.MODE_PRIVATE)
+    var text by remember { mutableStateOf(prefs.getString("draft_text", "") ?: "") }
+    var imageUrl by remember { mutableStateOf<String?>(prefs.getString("draft_image_url", null)) }
+    var videoUrl by remember { mutableStateOf<String?>(prefs.getString("draft_video_url", null)) }
+    var selectedMood by remember { mutableStateOf<String?>(prefs.getString("draft_mood", null)) }
+    var hasContentWarning by remember { mutableStateOf(prefs.getBoolean("draft_cw", false)) }
+    var selectedBackgroundColor by remember { 
+        val bg = prefs.getInt("draft_bg", -1)
+        mutableStateOf<Color?>(if (bg != -1) Color(bg) else null) 
+    }
+    var locationTag by remember { mutableStateOf<String?>(prefs.getString("draft_location", null)) }
+    var isResolvingLocation by remember { mutableStateOf(false) }
+
+    LaunchedEffect(text, imageUrl, videoUrl, selectedMood, hasContentWarning, selectedBackgroundColor, locationTag) {
+        prefs.edit()
+            .putString("draft_text", text)
+            .putString("draft_image_url", imageUrl)
+            .putString("draft_video_url", videoUrl)
+            .putString("draft_mood", selectedMood)
+            .putBoolean("draft_cw", hasContentWarning)
+            .putInt("draft_bg", selectedBackgroundColor?.toArgb() ?: -1)
+            .putString("draft_location", locationTag)
+            .apply()
+    }
+    val scope = rememberCoroutineScope()
+
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    val resolveCurrentLocation = {
+        if (!isResolvingLocation) {
+            scope.launch {
+                isResolvingLocation = true
+                val resolved = LocationHelper.getLocationTag(context)
+                if (resolved == null) {
+                    Toast.makeText(
+                        context,
+                        "Unable to get your current location right now.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    locationTag = resolved
+                }
+                isResolvingLocation = false
+            }
+        }
+    }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { grants ->
+        if (grants.values.any { it }) {
+            resolveCurrentLocation()
+        } else {
+            Toast.makeText(
+                context,
+                "Location permission is needed to tag posts with your current location.",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    val attachmentState = rememberAttachmentState { attachment ->
+        when (attachment.type) {
+            AttachmentType.IMAGE -> {
+                imageUrl = attachment.uri?.toString()
+                videoUrl = null
+            }
+            AttachmentType.VIDEO -> {
+                videoUrl = attachment.uri?.toString()
+                imageUrl = null
+            }
+            AttachmentType.LOCATION -> {
+                // Not supported yet for posts attachment type
+            }
+            else -> {}
+        }
+    }
+
+    val backgroundColors = listOf(
+        Color(0xFF1a1a2e), Color(0xFF16213e), Color(0xFF0f3460),
+        Color(0xFF4ECDC4), Color(0xFF6BCB77), Color(0xFFFFB347),
+        Color(0xFFFF6B6B), Color(0xFF9B59B6), Color(0xFFE91E63),
+        Color(0xFF3F51B5), Color(0xFF009688), Color(0xFF795548)
+    )
 
     val maxCharacters = if (isPremium) 1000 else 500
     val remainingCharacters = maxCharacters - text.length
 
     val moods = listOf(
-        "😊" to stringResource(R.string.mood_happy),
-        "🤔" to stringResource(R.string.mood_thoughtful),
-        "😴" to stringResource(R.string.mood_tired),
-        "🎉" to stringResource(R.string.mood_celebrating),
-        "💪" to stringResource(R.string.mood_motivated),
-        "😌" to stringResource(R.string.mood_calm),
-        "🤯" to stringResource(R.string.mood_mind_blown),
-        "💡" to stringResource(R.string.mood_inspired)
+        "\uD83D\uDE0A" to stringResource(R.string.mood_happy),
+        "\uD83E\uDD14" to stringResource(R.string.mood_thoughtful),
+        "\uD83D\uDE34" to stringResource(R.string.mood_tired),
+        "\uD83C\uDF89" to stringResource(R.string.mood_celebrating),
+        "\uD83D\uDCAA" to stringResource(R.string.mood_motivated),
+        "\uD83D\uDE0C" to stringResource(R.string.mood_calm),
+        "\uD83E\uDD2F" to stringResource(R.string.mood_mind_blown),
+        "\uD83D\uDCA1" to stringResource(R.string.mood_inspired)
     )
 
-    Dialog(
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        sheetState = sheetState,
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentWindowInsets = { WindowInsets(0, 0, 0, 0) }
     ) {
-        Card(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            shape = RoundedCornerShape(24.dp)
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(20.dp)
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Header
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Filled.Create,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.create_post_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                    IconButton(onClick = onDismiss) {
-                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.create_post_close))
-                    }
-                }
-
-                Spacer(Modifier.height(16.dp))
-
-                // Mood selector
-                Text(
-                    text = stringResource(R.string.create_post_how_feeling),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.height(8.dp))
-
-                // First row of moods (centered)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
-                ) {
-                    moods.take(4).forEach { (emoji, _) ->
-                        FilterChip(
-                            selected = selectedMood == emoji,
-                            onClick = {
-                                selectedMood = if (selectedMood == emoji) null else emoji
-                            },
-                            label = { Text(emoji) }
-                        )
-                    }
-                }
-
-                Spacer(Modifier.height(6.dp))
-
-                // Second row of moods (centered)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
-                ) {
-                    moods.drop(4).forEach { (emoji, _) ->
-                        FilterChip(
-                            selected = selectedMood == emoji,
-                            onClick = {
-                                selectedMood = if (selectedMood == emoji) null else emoji
-                            },
-                            label = { Text(emoji) }
-                        )
-                    }
-                }
-
-                Spacer(Modifier.height(16.dp))
-
-                // Text input with character count
-                val creativePrompts = stringArrayResource(R.array.create_post_prompts)
-                val placeholderText = remember { creativePrompts.random() }
-
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = { if (it.length <= maxCharacters) text = it },
-                    placeholder = {
-                        Text(
-                            if (selectedMood != null) "$placeholderText $selectedMood"
-                            else placeholderText
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(min = 120.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    maxLines = 8,
-                    supportingText = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            Text(
-                                text = stringResource(R.string.create_post_chars_remaining, remainingCharacters),
-                                color = if (remainingCharacters < 50)
-                                    MaterialTheme.colorScheme.error
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                )
-
-                Spacer(Modifier.height(12.dp))
-
-                // Content warning toggle
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { hasContentWarning = !hasContentWarning }
-                        .padding(vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        checked = hasContentWarning,
-                        onCheckedChange = { hasContentWarning = it }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Filled.Create,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(28.dp)
                     )
-                    Spacer(Modifier.width(8.dp))
-                    Column {
-                        Text(
-                            text = stringResource(R.string.create_post_content_warning),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Text(
-                            text = stringResource(R.string.create_post_content_warning_desc),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = stringResource(R.string.create_post_title),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
-                // Media options
-                AnimatedVisibility(visible = showMediaOptions) {
-                    Column {
-                        Spacer(Modifier.height(12.dp))
-                        OutlinedTextField(
-                            value = imageUrl,
-                            onValueChange = { imageUrl = it },
-                            label = { Text(stringResource(R.string.create_post_image_url)) },
-                            placeholder = { Text(stringResource(R.string.create_story_url_placeholder)) },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            leadingIcon = { Icon(Icons.Filled.Image, null) },
-                            singleLine = true
-                        )
+                Button(
+                    onClick = {
+                        scope.launch {
+                            val content = if (selectedMood != null) {
+                                "$selectedMood $text"
+                            } else text
 
-                        Spacer(Modifier.height(8.dp))
+                            val finalContent = if (hasContentWarning) {
+                                "⚠️ Content Warning\n\n$content"
+                            } else content
 
-                        OutlinedTextField(
-                            value = videoUrl,
-                            onValueChange = { videoUrl = it },
-                            label = { Text(stringResource(R.string.create_post_video_url)) },
-                            placeholder = { Text(stringResource(R.string.create_story_url_placeholder)) },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            leadingIcon = { Icon(Icons.Filled.VideoLibrary, null) },
-                            singleLine = true
-                        )
-
-                        // Image preview
-                        if (imageUrl.isNotBlank()) {
-                            Spacer(Modifier.height(8.dp))
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(150.dp),
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                AsyncImage(
-                                    model = imageUrl,
-                                    contentDescription = "Image preview",
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
-                            }
+                            onPost(
+                                finalContent,
+                                "/gen",
+                                imageUrl,
+                                videoUrl,
+                                selectedBackgroundColor?.toArgb()?.toLong()?.and(0xFFFFFFFFL),
+                                locationTag
+                            )
+                            prefs.edit().clear().apply()
+                            sheetState.hide()
+                            onDismiss()
                         }
-                    }
-                }
-
-                Spacer(Modifier.height(16.dp))
-
-                // Bottom action bar
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    },
+                    enabled = text.isNotBlank() || imageUrl != null || videoUrl != null,
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
                 ) {
-                    // Media button
-                    IconButton(onClick = { showMediaOptions = !showMediaOptions }) {
-                        Icon(
-                            if (showMediaOptions) Icons.Filled.ExpandLess else Icons.Filled.AttachFile,
-                            contentDescription = stringResource(R.string.create_post_add_media),
-                            tint = if (showMediaOptions)
-                                MaterialTheme.colorScheme.primary
+                    Text(stringResource(R.string.create_post_post), fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.width(8.dp))
+                    Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, modifier = Modifier.size(18.dp))
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            // Text input
+            val creativePrompts = stringArrayResource(R.array.create_post_prompts)
+            val placeholderText = remember { creativePrompts.random() }
+
+            OutlinedTextField(
+                value = text,
+                onValueChange = { if (it.length <= maxCharacters) text = it },
+                placeholder = {
+                    Text(
+                        if (selectedMood != null) "$placeholderText $selectedMood"
+                        else placeholderText,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 150.dp, max = 250.dp),
+                textStyle = MaterialTheme.typography.bodyLarge,
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = Color.Transparent,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f)
+                ),
+                maxLines = 10,
+                supportingText = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Text(
+                            text = "$remainingCharacters",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (remainingCharacters < 50)
+                                MaterialTheme.colorScheme.error
                             else
                                 MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                }
+            )
 
-                    Row {
-                        TextButton(onClick = onDismiss) {
-                            Text(stringResource(R.string.create_post_cancel))
+            Spacer(Modifier.height(16.dp))
+
+            // Media preview
+            if (imageUrl != null || videoUrl != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    if (imageUrl != null) {
+                        AsyncImage(
+                            model = imageUrl,
+                            contentDescription = "Attached Image",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else if (videoUrl != null) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                            Icon(Icons.Filled.Videocam, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
-                        Spacer(Modifier.width(8.dp))
-                        Button(
-                            onClick = {
-                                val content = if (selectedMood != null) {
-                                    "$selectedMood $text"
-                                } else text
+                    }
 
-                                val finalContent = if (hasContentWarning) {
-                                    "⚠️ Content Warning\n\n$content"
-                                } else content
+                    IconButton(
+                        onClick = {
+                            imageUrl = null
+                            videoUrl = null
+                        },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                            .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                            .size(32.dp)
+                    ) {
+                        Icon(Icons.Filled.Close, contentDescription = "Remove Media", tint = Color.White, modifier = Modifier.size(18.dp))
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
+            }
 
-                                onPost(
-                                    finalContent,
-                                    "/gen",
-                                    imageUrl.ifBlank { null },
-                                    videoUrl.ifBlank { null }
-                                )
-                            },
-                            enabled = text.isNotBlank(),
-                            shape = RoundedCornerShape(12.dp)
+            // Quick Actions Row
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                item {
+                    FilledTonalIconButton(
+                        onClick = { attachmentState.onTakePhoto() },
+                        modifier = Modifier.size(48.dp),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        Icon(Icons.Filled.CameraAlt, contentDescription = "Take Photo")
+                    }
+                }
+                item {
+                    FilledTonalIconButton(
+                        onClick = { attachmentState.onPickImage() },
+                        modifier = Modifier.size(48.dp),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        Icon(Icons.Filled.Image, contentDescription = "Upload Image")
+                    }
+                }
+                item {
+                    FilledTonalIconButton(
+                        onClick = {
+                            if (locationTag != null) locationTag = null
+                            else {
+                                val hasLocationPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                                    ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                                if (hasLocationPermission) resolveCurrentLocation()
+                                else locationPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+                            }
+                        },
+                        modifier = Modifier.size(48.dp),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        if (isResolvingLocation) {
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                        } else {
+                            Icon(if (locationTag == null) Icons.Outlined.LocationOn else Icons.Filled.LocationOff, contentDescription = "Location")
+                        }
+                    }
+                }
+
+                item {
+                    // Content Warning Toggle
+                    Surface(
+                        color = if (hasContentWarning) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier
+                            .height(48.dp)
+                            .clickable { hasContentWarning = !hasContentWarning }
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null)
-                            Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.create_post_post))
+                            Icon(Icons.Filled.Warning, contentDescription = null, tint = if (hasContentWarning) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("CW", fontWeight = FontWeight.Medium, color = if (hasContentWarning) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+            }
+
+            if (locationTag != null) {
+                Spacer(Modifier.height(12.dp))
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Outlined.LocationOn,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = locationTag.orEmpty(),
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // Moods
+            Text(
+                text = "How are you feeling?",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(8.dp))
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(moods.size) { index ->
+                    val (emoji, _) = moods[index]
+                    FilterChip(
+                        selected = selectedMood == emoji,
+                        onClick = { selectedMood = if (selectedMood == emoji) null else emoji },
+                        label = { Text(emoji, fontSize = 18.sp) },
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // Background Colors (for text-only)
+            AnimatedVisibility(visible = imageUrl == null && videoUrl == null) {
+                Column {
+                    Text(
+                        text = "Post Background",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .then(if (selectedBackgroundColor == null) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape) else Modifier)
+                                    .clickable { selectedBackgroundColor = null },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Block, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                        items(backgroundColors.size) { index ->
+                            val color = backgroundColors[index]
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(color)
+                                    .then(if (selectedBackgroundColor == color) Modifier.border(3.dp, MaterialTheme.colorScheme.primary, CircleShape) else Modifier)
+                                    .clickable { selectedBackgroundColor = color }
+                            )
                         }
                     }
                 }
@@ -1129,4 +1291,3 @@ fun EnhancedCreatePostDialog(
         }
     }
 }
-

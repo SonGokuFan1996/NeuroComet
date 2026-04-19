@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/user.dart';
+import '../../services/supabase_service.dart';
 import '../../widgets/common/neuro_avatar.dart';
 import '../../widgets/common/neuro_loading.dart';
 import '../../services/moderation_service.dart';
@@ -118,7 +119,7 @@ class BlockedUsersScreen extends ConsumerWidget {
     if (confirmed == true) {
       try {
         await ModerationService().unblockUser(
-          userId: 'current_user',
+          userId: SupabaseService.currentUser?.id ?? 'current_user',
           blockedUserId: user.id,
         );
         ref.invalidate(blockedUsersProvider);
@@ -183,22 +184,38 @@ class _BlockedUserTile extends StatelessWidget {
 
 // Provider for blocked users
 final blockedUsersProvider = FutureProvider<List<User>>((ref) async {
-  await Future.delayed(const Duration(milliseconds: 500));
+  // Try Supabase first
+  try {
+    if (SupabaseService.isInitialized && SupabaseService.isAuthenticated) {
+      final currentUserId = SupabaseService.currentUser?.id;
+      if (currentUserId != null) {
+        final response = await SupabaseService.client
+            .from('blocked_users')
+            .select('blocked:users!blocked_id(id, display_name, username, avatar_url)')
+            .eq('blocker_id', currentUserId);
 
-  // Mock data - in production, fetch from Supabase
-  return [
-    const User(
-      id: 'blocked_1',
-      displayName: 'Blocked User 1',
-      username: 'blockeduser1',
-      avatarUrl: 'https://i.pravatar.cc/150?img=60',
-    ),
-    const User(
-      id: 'blocked_2',
-      displayName: 'Blocked User 2',
-      username: 'blockeduser2',
-      avatarUrl: 'https://i.pravatar.cc/150?img=61',
-    ),
-  ];
+        final rows = response as List;
+        if (rows.isNotEmpty) {
+          return rows.map((row) {
+            final u = row['blocked'] as Map<String, dynamic>? ?? {};
+            return User(
+              id: u['id']?.toString() ?? '',
+              displayName: u['display_name']?.toString() ?? 'Blocked User',
+              username: u['username']?.toString(),
+              avatarUrl: u['avatar_url']?.toString(),
+            );
+          }).toList();
+        }
+
+        // Empty list from Supabase is valid — user hasn't blocked anyone
+        return [];
+      }
+    }
+  } catch (e) {
+    debugPrint('Blocked users Supabase fetch failed: $e');
+  }
+
+  // Not authenticated — no blocked users to show
+  return [];
 });
 

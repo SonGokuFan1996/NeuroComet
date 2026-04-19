@@ -124,6 +124,7 @@ class WebRTCCallService extends ChangeNotifier {
   RealtimeChannel? _signalingChannel;
   Timer? _durationTimer;
   DateTime? _callStartTime;
+  bool _renderersInitialized = false;
 
   // ICE servers
   final Map<String, dynamic> _iceConfig = {
@@ -138,10 +139,46 @@ class WebRTCCallService extends ChangeNotifier {
   /// Initialize with current user ID and start listening for incoming calls
   Future<void> initialize(String userId) async {
     _currentUserId = userId;
-    await localRenderer.initialize();
-    await remoteRenderer.initialize();
+    await _ensureRenderersInitialized();
     _setupSignalingListener();
     _loadCallHistory();
+  }
+
+  Future<void> _ensureRenderersInitialized() async {
+    if (_renderersInitialized) return;
+    await localRenderer.initialize();
+    await remoteRenderer.initialize();
+    _renderersInitialized = true;
+  }
+
+  Future<void> prepareDebugPreviewCall({
+    String recipientId = 'dev_preview_contact',
+    String recipientName = 'Taylor Kim',
+    String recipientAvatar = 'https://i.pravatar.cc/150?u=flutter_call_preview_taylor',
+    CallType callType = CallType.video,
+    bool isOutgoing = true,
+    CallState initialState = CallState.connected,
+    int initialDurationSeconds = 94,
+  }) async {
+    await _ensureRenderersInitialized();
+    _cleanup();
+    _currentCall = ActiveCall(
+      callId: 'debug_call_${DateTime.now().millisecondsSinceEpoch}',
+      recipientId: recipientId,
+      recipientName: recipientName,
+      recipientAvatar: recipientAvatar,
+      callType: callType,
+      isOutgoing: isOutgoing,
+    );
+    _callState = initialState;
+    _callDuration = initialState == CallState.connected ? initialDurationSeconds : 0;
+    _callStartTime = initialState == CallState.connected
+        ? DateTime.now().subtract(Duration(seconds: initialDurationSeconds))
+        : DateTime.now();
+    if (initialState == CallState.connected) {
+      _startDurationTimer();
+    }
+    notifyListeners();
   }
 
   void _setupSignalingListener() {

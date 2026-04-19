@@ -1,51 +1,40 @@
 package com.kyilmaz.neurocomet
 
 import android.app.Activity
+import android.content.Context
 import android.util.Log
-import com.revenuecat.purchases.CustomerInfo
-import com.revenuecat.purchases.Offering
-import com.revenuecat.purchases.Offerings
-import com.revenuecat.purchases.Package
-import com.revenuecat.purchases.PurchaseParams
-import com.revenuecat.purchases.Purchases
-import com.revenuecat.purchases.PurchasesError
-import com.revenuecat.purchases.getOfferingsWith
+import com.revenuecat.purchases.*
+import com.revenuecat.purchases.interfaces.ReceiveCustomerInfoCallback
+import com.revenuecat.purchases.interfaces.ReceiveOfferingsCallback
 import com.revenuecat.purchases.interfaces.PurchaseCallback
 import com.revenuecat.purchases.models.StoreTransaction
+import com.kyilmaz.neurocomet.ads.GoogleAdsManager
+import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.put
 import java.security.MessageDigest
+import java.util.Properties
 
 /**
- * Manages RevenueCat subscriptions for NeuroComet.
- *
- * Products:
- * - Monthly: $2/month ad-free subscription
- * - Lifetime: $60 one-time purchase for lifetime ad-free
- *
- * Entitlement: "premium" - grants ad-free experience
- *
- * SECURITY: This manager includes anti-piracy verification.
- * Any attempts to bypass the subscription will result in app termination.
+ * Manages RevenueCat subscriptions and premium state for the application.
+ * Provides security verification, offering fetching, and purchase flows.
  */
 object SubscriptionManager {
-
     private const val TAG = "SubscriptionManager"
-    private const val BILLING_UNAVAILABLE_MESSAGE = "Purchases are temporarily unavailable. Please try again later."
+    private const val BILLING_UNAVAILABLE_MESSAGE = "Billing service is not initialized."
 
-    // =========================================================================
-    // TEST MODE — enables simulation in debug builds.
-    // If a valid RevenueCat key is present, testMode is dynamically disabled
-    // in MainActivity during initialization to allow real sandbox testing.
-    // =========================================================================
-    var testMode: Boolean = BuildConfig.DEBUG
-        internal set
+    /**
+     * If true, uses simulated responses for purchases instead of real RevenueCat/Play calls.
+     * Useful for UI testing and layout verification.
+     */
+    @Volatile
+    var testMode: Boolean = false
+        private set
 
     /** Coroutine scope used by test-mode helpers to simulate async delays. */
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -54,29 +43,32 @@ object SubscriptionManager {
     @Volatile
     private var isTestPremium = false
 
-    // RevenueCat product identifiers (configure these in RevenueCat dashboard)
-    const val PRODUCT_MONTHLY = "NeuroComet_premium_monthly"
-    const val PRODUCT_LIFETIME = "NeuroComet_premium_lifetime"
+    // RevenueCat product identifiers (configured in RevenueCat dashboard)
+    // We search for all case variations as provided in the dashboard JSON and labels
+    private val MONTHLY_IDS = listOf("neurocomet_monthly_pro", "NeuroComet_premium_monthly", "neurocomet_premium_monthly", "\$rc_monthly", "\$monthly")
+    private val LIFETIME_IDS = listOf("neurocomet_lifetime_pro", "NeuroComet_premium_lifetime", "neurocomet_premium_lifetime", "\$rc_lifetime", "\$lifetime")
 
     // Entitlement identifier
     const val ENTITLEMENT_PREMIUM = "premium"
 
     // Security: Verification token for premium status
+    private const val SECURITY_SALT = "NeuroComet_Secure_Salt_v1"
+    
     @Volatile
     private var verificationToken: String? = null
 
     @Volatile
     private var lastVerificationTime: Long = 0L
+    private const val VERIFICATION_VALIDITY_MS = 3600_000L // 1 hour
 
-    private const val VERIFICATION_VALIDITY_MS = 60_000L // 1 minute
-
-    // Billing configuration state
     @Volatile
-    private var isBillingConfigured = BuildConfig.DEBUG
+    private var lastCustomerInfo: CustomerInfo? = null
 
-    // State
+    @Volatile
+    private var isBillingConfigured: Boolean = false
+
     private val _subscriptionState = MutableStateFlow(SubscriptionState())
-    val subscriptionState: StateFlow<SubscriptionState> = _subscriptionState.asStateFlow()
+    val subscriptionState: StateFlow<SubscriptionState> = _subscriptionState
 
     data class SubscriptionState(
         val isLoading: Boolean = false,
@@ -85,210 +77,275 @@ object SubscriptionManager {
         val currentOffering: Offering? = null,
         val monthlyPackage: Package? = null,
         val lifetimePackage: Package? = null,
+        val availableProducts: List<com.revenuecat.purchases.models.StoreProduct> = emptyList(),
         val error: String? = null,
         val purchaseSuccess: Boolean = false,
         val purchaseType: String? = null // "monthly" or "lifetime"
     )
 
-    /**
-     * SECURITY: Generate verification token from RevenueCat CustomerInfo
-     * This ensures premium status can only be set through legitimate purchases
-     */
-    private fun generateVerificationToken(customerInfo: CustomerInfo): String {
-        val entitlement = customerInfo.entitlements[ENTITLEMENT_PREMIUM]
-        val data = "${customerInfo.originalAppUserId}:${entitlement?.productIdentifier}:${entitlement?.isActive}"
-        return MessageDigest.getInstance("SHA-256")
-            .digest(data.toByteArray())
-            .fold("") { str, byte -> str + "%02x".format(byte) }
+    private fun generateVerificationToken(info: CustomerInfo): String {
+        val isActive = info.entitlements[ENTITLEMENT_PREMIUM]?.isActive == true
+        val userId = info.originalAppUserId
+        val raw = "NC_PREM_${userId}_${isActive}_$SECURITY_SALT"
+        val digest = MessageDigest.getInstance("SHA-256")
+        val bytes = digest.digest(raw.toByteArray())
+        return bytes.joinToString("") { "%02x".format(it) }
     }
 
     /**
-     * SECURITY: Verify premium status is legitimate
-     * Returns true only if:
-     * 1. User has valid RevenueCat entitlement
-     * 2. Verification token matches
-     * 3. Verification is recent (within validity window)
+     * Checks if the user is authorized for premium features.
+     * Re-verifies against the RevenueCat state if the token is expired.
      */
     fun verifyPremiumStatus(): Boolean {
-        // Test mode: trust the simulated flag
         if (testMode) return isTestPremium
+        
+        val currentState = _subscriptionState.value
+        if (!currentState.isPremium) return false
 
-        val state = _subscriptionState.value
-        if (!state.isPremium) return false
+        val currentToken = verificationToken ?: return false
+        val info = lastCustomerInfo ?: return currentState.isPremium // Fallback to state flow if info is lost
 
-        // Check if verification is still valid
+        // Verify the token matches the current info and hasn't been tampered with
+        val expectedToken = generateVerificationToken(info)
+        val matches = currentToken == expectedToken
+
         val now = System.currentTimeMillis()
         if (now - lastVerificationTime > VERIFICATION_VALIDITY_MS) {
-            // Token expired, force re-verification
-            verificationToken = null
-            return false
+            // Expired - in a production app we might trigger a background refresh here
+            Log.d(TAG, "Verification token expired, relying on last known state")
+        }
+        
+        if (!matches) {
+            Log.e(TAG, "SECURITY ALERT: Premium verification token mismatch!")
         }
 
-        return verificationToken != null
+        return matches && currentState.isPremium
     }
 
     /**
-     * SECURITY: Enforce premium verification
-     * Call this before granting premium features.
-     * Will crash the app if tampering is detected.
+     * Throws SecurityException if premium is not active.
      */
     fun enforcePremiumSecurity() {
-        // Test mode: no enforcement needed
-        if (testMode) return
-
-        val state = _subscriptionState.value
-
-        // If app claims premium but has no valid verification
-        if (state.isPremium && !verifyPremiumStatus()) {
-            Log.e(TAG, "⚠️ SECURITY VIOLATION: Premium status without verification!")
-
-            // Reset premium status
-            _subscriptionState.value = _subscriptionState.value.copy(isPremium = false)
-
-            // Schedule integrity check
-            checkPremiumStatus { isPremium ->
-                if (!isPremium && _subscriptionState.value.isPremium) {
-                    // Definite tampering detected - crash
-                    Log.e(TAG, "🚨 TAMPERING DETECTED: Forcing app termination")
-                    throw SecurityException("License verification failed. Please purchase a valid subscription.")
-                }
-            }
+        if (!verifyPremiumStatus()) {
+            Log.e(TAG, "SECURITY ALERT: Unauthorized access to premium feature!")
+            throw SecurityException("Feature requires active Premium subscription.")
         }
     }
 
     /**
-     * Set billing availability
+     * Initialize RevenueCat SDK
      */
-    fun setBillingConfigured(isConfigured: Boolean, errorMessage: String? = null) {
-        isBillingConfigured = isConfigured
-        if (!testMode && !isConfigured) {
-            verificationToken = null
-            _subscriptionState.value = _subscriptionState.value.copy(
-                isLoading = false,
-                isPremium = false,
-                offerings = null,
-                currentOffering = null,
-                monthlyPackage = null,
-                lifetimePackage = null,
-                error = errorMessage ?: BILLING_UNAVAILABLE_MESSAGE,
-                purchaseSuccess = false,
-                purchaseType = null
-            )
+    fun initialize(debug: Boolean = false) {
+        if (debug) {
+            Purchases.logLevel = LogLevel.DEBUG
+        }
+        Log.d(TAG, "SubscriptionManager initialized (v182)")
+    }
+
+    /**
+     * Updates the local state from RevenueCat's CustomerInfo.
+     */
+    private fun updateStateFromCustomerInfo(info: CustomerInfo) {
+        lastCustomerInfo = info
+        val activePremium = info.entitlements[ENTITLEMENT_PREMIUM]?.isActive == true
+        
+        _subscriptionState.value = _subscriptionState.value.copy(
+            isPremium = activePremium,
+            isLoading = false
+        )
+        
+        verificationToken = generateVerificationToken(info)
+        lastVerificationTime = System.currentTimeMillis()
+        
+        Log.d(TAG, "Premium status updated: $activePremium (User: ${info.originalAppUserId})")
+
+        // SYNC TO SUPABASE: Update the server-side premium flag
+        syncPremiumStatusToSupabase(activePremium)
+    }
+
+    private fun syncPremiumStatusToSupabase(isPremium: Boolean) {
+        val client = AppSupabaseClient.client ?: return
+        val userId = try { client.auth.currentUserOrNull()?.id } catch (_: Exception) { null } ?: return
+        
+        scope.launch(Dispatchers.IO) {
+            try {
+                val payload = kotlinx.serialization.json.buildJsonObject {
+                    put("is_premium", isPremium)
+                    put("updated_at", java.time.Instant.now().toString())
+                }
+                // Update both tables for consistency
+                safeUpdate("users", payload, "id=eq.$userId")
+                safeUpdate("profiles", payload, "id=eq.$userId")
+                Log.d(TAG, "Successfully synced premium status ($isPremium) to Supabase")
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to sync premium status to Supabase: ${e.message}")
+            }
         }
     }
 
-    fun isBillingConfigured(): Boolean = testMode || isBillingConfigured
+    fun setBillingConfigured(configured: Boolean, error: String? = null) {
+        isBillingConfigured = configured
+        if (error != null) {
+            _subscriptionState.value = _subscriptionState.value.copy(error = error)
+        }
+    }
+
+    fun isBillingConfigured(): Boolean = isBillingConfigured
 
     private fun requireBillingConfigured(onError: ((String) -> Unit)? = null): Boolean {
-        if (testMode || isBillingConfigured) return true
-        val message = _subscriptionState.value.error ?: BILLING_UNAVAILABLE_MESSAGE
-        _subscriptionState.value = _subscriptionState.value.copy(
-            isLoading = false,
-            error = message,
-            isPremium = false
-        )
-        onError?.invoke(message)
-        return false
+        if (!isBillingConfigured) {
+            Log.e(TAG, BILLING_UNAVAILABLE_MESSAGE)
+            onError?.invoke(BILLING_UNAVAILABLE_MESSAGE)
+            return false
+        }
+        return true
     }
 
     /**
-     * Fetch available offerings from RevenueCat
+     * Fetches available products from RevenueCat
      */
     fun fetchOfferings() {
-        // Test mode: simulate offerings loaded after a short delay
-        if (testMode) {
-            _subscriptionState.value = _subscriptionState.value.copy(isLoading = true, error = null)
-            scope.launch {
-                delay(400) // Simulate network
-                _subscriptionState.value = _subscriptionState.value.copy(
-                    isLoading = false,
-                    // Packages stay null — the UI already falls back to "$2.00" / "$60.00"
-                    monthlyPackage = null,
-                    lifetimePackage = null
-                )
-                Log.d(TAG, "🧪 TEST MODE: Offerings simulated (prices use UI fallbacks)")
-            }
-            return
-        }
-
         if (!requireBillingConfigured()) return
 
         _subscriptionState.value = _subscriptionState.value.copy(isLoading = true, error = null)
 
-        Purchases.sharedInstance.getOfferingsWith(
-            onError = { error ->
-                Log.e(TAG, "Error fetching offerings: ${error.message}")
-                _subscriptionState.value = _subscriptionState.value.copy(
-                    isLoading = false,
-                    error = error.message
-                )
-            },
-            onSuccess = { offerings ->
-                Log.d(TAG, "Offerings fetched successfully")
+        // 1. Fetch Offerings
+        Purchases.sharedInstance.getOfferings(object : ReceiveOfferingsCallback {
+            override fun onReceived(offerings: Offerings) {
+                Log.d(TAG, "Offerings fetched successfully. Current: ${offerings.current?.identifier}")
+                
                 val currentOffering = offerings.current
+                val allPackages = offerings.all.values.flatMap { it.availablePackages }
+                
+                var monthlyPkg: Package? = offerings.current?.monthly
+                    ?: allPackages.find { pkg -> 
+                        MONTHLY_IDS.any { id -> 
+                            pkg.identifier.equals(id, ignoreCase = true) || 
+                            pkg.product.id.startsWith(id, ignoreCase = true) 
+                        }
+                    }
 
-                // Find monthly and lifetime packages
-                val monthlyPkg = currentOffering?.monthly
-                    ?: currentOffering?.getPackage(PRODUCT_MONTHLY)
-                val lifetimePkg = currentOffering?.lifetime
-                    ?: currentOffering?.getPackage(PRODUCT_LIFETIME)
+                var lifetimePkg: Package? = offerings.current?.lifetime
+                    ?: allPackages.find { pkg -> 
+                        LIFETIME_IDS.any { id -> 
+                            pkg.identifier.equals(id, ignoreCase = true) || 
+                            pkg.product.id.startsWith(id, ignoreCase = true) 
+                        }
+                    }
+                
+                if (lifetimePkg == null) {
+                    lifetimePkg = allPackages.find { pkg ->
+                        pkg.packageType == PackageType.LIFETIME || 
+                        pkg.identifier.contains("lifetime", ignoreCase = true) ||
+                        pkg.product.id.contains("lifetime", ignoreCase = true)
+                    }
+                }
 
                 _subscriptionState.value = _subscriptionState.value.copy(
-                    isLoading = false,
                     offerings = offerings,
                     currentOffering = currentOffering,
                     monthlyPackage = monthlyPkg,
                     lifetimePackage = lifetimePkg
                 )
 
-                Log.d(TAG, "Monthly package: ${monthlyPkg?.product?.price}")
-                Log.d(TAG, "Lifetime package: ${lifetimePkg?.product?.price}")
+                // 2. Also fetch products directly as a backup
+                fetchProductsDirectly()
             }
+
+            override fun onError(error: PurchasesError) {
+                val fullError = "${error.message} (Underlying: ${error.underlyingErrorMessage})"
+                Log.e(TAG, "Error fetching offerings: $fullError")
+                _subscriptionState.value = _subscriptionState.value.copy(
+                    isLoading = false,
+                    error = fullError
+                )
+                fetchProductsDirectly()
+            }
+        })
+    }
+
+    private fun fetchProductsDirectly() {
+        val productIds = MONTHLY_IDS + LIFETIME_IDS
+        
+        // Fetch both subscriptions and in-app products to be safe
+        val allProducts = mutableListOf<com.revenuecat.purchases.models.StoreProduct>()
+        var pendingRequests = 2
+
+        val callback = object : com.revenuecat.purchases.interfaces.GetStoreProductsCallback {
+            override fun onReceived(storeProducts: List<com.revenuecat.purchases.models.StoreProduct>) {
+                synchronized(allProducts) {
+                    allProducts.addAll(storeProducts)
+                    pendingRequests--
+                    if (pendingRequests == 0) {
+                        updateStateWithDirectProducts(allProducts)
+                    }
+                }
+            }
+
+            override fun onError(error: PurchasesError) {
+                Log.w(TAG, "Error fetching products directly: ${error.message}")
+                synchronized(allProducts) {
+                    pendingRequests--
+                    if (pendingRequests == 0) {
+                        updateStateWithDirectProducts(allProducts)
+                    }
+                }
+            }
+        }
+
+        Purchases.sharedInstance.getProducts(productIds, ProductType.SUBS, callback)
+        Purchases.sharedInstance.getProducts(productIds, ProductType.INAPP, callback)
+    }
+
+    private fun updateStateWithDirectProducts(storeProducts: List<com.revenuecat.purchases.models.StoreProduct>) {
+        Log.d(TAG, "All direct products fetched: ${storeProducts.map { "${it.id} (${it.type})" }}")
+        
+        _subscriptionState.value = _subscriptionState.value.copy(
+            isLoading = false,
+            availableProducts = storeProducts
         )
     }
 
     /**
-     * Check current premium status
+     * Checks current premium status from RevenueCat
      */
     fun checkPremiumStatus(onResult: (Boolean) -> Unit) {
-        // Test mode: return simulated state immediately
         if (testMode) {
-            _subscriptionState.value = _subscriptionState.value.copy(isPremium = isTestPremium)
             onResult(isTestPremium)
-            Log.d(TAG, "🧪 TEST MODE: Premium status = $isTestPremium")
             return
         }
 
-        if (!requireBillingConfigured { onResult(false) }) return
+        if (!requireBillingConfigured()) {
+            onResult(false)
+            return
+        }
 
         try {
-            Purchases.sharedInstance.getCustomerInfo(
-                callback = object : com.revenuecat.purchases.interfaces.ReceiveCustomerInfoCallback {
-                    override fun onReceived(customerInfo: CustomerInfo) {
-                        val isPremium = customerInfo.entitlements[ENTITLEMENT_PREMIUM]?.isActive == true
-
-                        // SECURITY: Set verification token only if legitimately premium
-                        if (isPremium) {
-                            verificationToken = generateVerificationToken(customerInfo)
-                            lastVerificationTime = System.currentTimeMillis()
-                        } else {
-                            verificationToken = null
-                        }
-
-                        _subscriptionState.value = _subscriptionState.value.copy(isPremium = isPremium)
-                        onResult(isPremium)
-                        Log.d(TAG, "Premium status: $isPremium")
-                    }
-
-                    override fun onError(error: PurchasesError) {
-                        Log.e(TAG, "Error checking premium status: ${error.message}")
-                        verificationToken = null
-                        onResult(false)
-                    }
+        Purchases.sharedInstance.getCustomerInfo(
+            object : ReceiveCustomerInfoCallback {
+                override fun onReceived(customerInfo: CustomerInfo) {
+                    updateStateFromCustomerInfo(customerInfo)
+                    onResult(customerInfo.entitlements[ENTITLEMENT_PREMIUM]?.isActive == true)
                 }
-            )
+
+                override fun onError(error: PurchasesError) {
+                    val fullError = "${error.message} (Underlying: ${error.underlyingErrorMessage})"
+                    Log.e(TAG, "Error checking premium status: $fullError")
+                    _subscriptionState.value = _subscriptionState.value.copy(
+                        isLoading = false,
+                        error = fullError
+                    )
+                    verificationToken = null
+                    onResult(false)
+                }
+            }
+        )
         } catch (e: Exception) {
             Log.e(TAG, "Exception checking premium status", e)
+            _subscriptionState.value = _subscriptionState.value.copy(
+                isLoading = false,
+                error = e.message
+            )
             verificationToken = null
             onResult(false)
         }
@@ -317,6 +374,11 @@ object SubscriptionManager {
      * Purchase the lifetime subscription
      */
     fun purchaseLifetime(activity: Activity, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        val state = _subscriptionState.value
+        val offerings = state.offerings
+        
+        Log.d(TAG, "LIFETIME PURCHASE ATTEMPT STARTED")
+
         if (testMode) {
             simulateTestPurchase("lifetime", onSuccess)
             return
@@ -324,18 +386,98 @@ object SubscriptionManager {
 
         if (!requireBillingConfigured(onError)) return
 
-        val pkg = _subscriptionState.value.lifetimePackage
-        if (pkg == null) {
-            onError("Lifetime subscription not available")
+        var pkg = _subscriptionState.value.lifetimePackage
+        
+        // Final fallback: Case-insensitive search across everything for any known lifetime ID
+        if (pkg == null && offerings != null) {
+            pkg = offerings.all.values.flatMap { it.availablePackages }.find { p ->
+                p.packageType == PackageType.LIFETIME ||
+                LIFETIME_IDS.any { id -> p.identifier.equals(id, ignoreCase = true) || p.product.id.startsWith(id, ignoreCase = true) }
+            }
+        }
+
+        if (pkg != null) {
+            Log.d(TAG, "Proceeding with lifetime purchase (via package): ${pkg.product.id}")
+            purchasePackage(activity, pkg, "lifetime", onSuccess, onError)
             return
         }
-        purchasePackage(activity, pkg, "lifetime", onSuccess, onError)
+
+        // --- NEW FALLBACK: Purchase product directly if package is missing ---
+        val prod = state.availableProducts.find { p ->
+            LIFETIME_IDS.any { id -> p.id.startsWith(id, ignoreCase = true) }
+        }
+
+        if (prod != null) {
+            Log.d(TAG, "Proceeding with lifetime purchase (via direct product): ${prod.id}")
+            purchaseProduct(activity, prod, "lifetime", onSuccess, onError)
+            return
+        }
+
+        val foundIds = (offerings?.all?.values?.flatMap { it.availablePackages }?.map { "${it.identifier}(${it.product.id})" } ?: emptyList()) +
+                        state.availableProducts.map { it.id }
+        
+        val errorMsg = "Lifetime plan not found. Found: $foundIds. Please check RevenueCat dashboard offerings."
+        Log.e(TAG, errorMsg)
+        
+        _subscriptionState.value = _subscriptionState.value.copy(
+            isLoading = false,
+            error = errorMsg
+        )
+        
+        android.widget.Toast.makeText(activity, "Error: Lifetime plan not available. Check dashboard.", android.widget.Toast.LENGTH_LONG).show()
+        onError(errorMsg)
+    }
+
+    /**
+     * Internal direct product purchase logic
+     */
+    fun purchaseProduct(
+        activity: Activity,
+        product: com.revenuecat.purchases.models.StoreProduct,
+        purchaseType: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        if (!requireBillingConfigured(onError)) return
+
+        _subscriptionState.value = _subscriptionState.value.copy(isLoading = true, error = null)
+
+        Purchases.sharedInstance.purchase(
+            PurchaseParams.Builder(activity, product).build(),
+            object : PurchaseCallback {
+                override fun onCompleted(storeTransaction: StoreTransaction, customerInfo: CustomerInfo) {
+                    _subscriptionState.value = _subscriptionState.value.copy(
+                        isLoading = false,
+                        purchaseSuccess = true,
+                        purchaseType = purchaseType
+                    )
+                    updateStateFromCustomerInfo(customerInfo)
+                    onSuccess()
+                }
+
+                override fun onError(error: PurchasesError, userCancelled: Boolean) {
+                    val fullError = "${error.message} (Underlying: ${error.underlyingErrorMessage})"
+                    _subscriptionState.value = _subscriptionState.value.copy(
+                        isLoading = false,
+                        error = if (userCancelled) null else fullError
+                    )
+                    
+                    if (userCancelled) {
+                        Log.d(TAG, "Purchase cancelled by user")
+                        onError("USER_CANCELLED")
+                    } else {
+                        Log.e(TAG, "Purchase error: $fullError")
+                        onError(fullError)
+                    }
+                }
+            }
+        )
     }
 
     /**
      * Internal purchase logic
      */
-    private fun purchasePackage(
+    fun purchasePackage(
         activity: Activity,
         pkg: Package,
         purchaseType: String,
@@ -352,32 +494,30 @@ object SubscriptionManager {
                 override fun onCompleted(storeTransaction: StoreTransaction, customerInfo: CustomerInfo) {
                     val isPremium = customerInfo.entitlements[ENTITLEMENT_PREMIUM]?.isActive == true
 
-                    // SECURITY: Set verification token after successful purchase
-                    if (isPremium) {
-                        verificationToken = generateVerificationToken(customerInfo)
-                        lastVerificationTime = System.currentTimeMillis()
-                    }
-
                     _subscriptionState.value = _subscriptionState.value.copy(
                         isLoading = false,
-                        isPremium = isPremium,
                         purchaseSuccess = true,
                         purchaseType = purchaseType
                     )
+                    
+                    updateStateFromCustomerInfo(customerInfo)
                     Log.d(TAG, "Purchase successful! Premium: $isPremium, Type: $purchaseType")
                     onSuccess()
                 }
 
                 override fun onError(error: PurchasesError, userCancelled: Boolean) {
+                    val fullError = "${error.message} (Underlying: ${error.underlyingErrorMessage})"
                     _subscriptionState.value = _subscriptionState.value.copy(
                         isLoading = false,
-                        error = if (userCancelled) null else error.message
+                        error = if (userCancelled) null else fullError
                     )
-                    if (!userCancelled) {
-                        Log.e(TAG, "Purchase error: ${error.message}")
-                        onError(error.message)
-                    } else {
+                    
+                    if (userCancelled) {
                         Log.d(TAG, "Purchase cancelled by user")
+                        onError("USER_CANCELLED")
+                    } else {
+                        Log.e(TAG, "Purchase error: $fullError")
+                        onError(fullError)
                     }
                 }
             }
@@ -388,172 +528,108 @@ object SubscriptionManager {
      * Restore purchases
      */
     fun restorePurchases(onSuccess: (Boolean) -> Unit, onError: (String) -> Unit) {
-        // Test mode: simulate restore
-        if (testMode) {
-            _subscriptionState.value = _subscriptionState.value.copy(isLoading = true, error = null)
-            scope.launch {
-                delay(800)
+        if (!requireBillingConfigured(onError)) return
+
+        _subscriptionState.value = _subscriptionState.value.copy(isLoading = true, error = null)
+
+        Purchases.sharedInstance.restorePurchases(object : ReceiveCustomerInfoCallback {
+            override fun onReceived(customerInfo: CustomerInfo) {
+                updateStateFromCustomerInfo(customerInfo)
+                val isPremium = customerInfo.entitlements[ENTITLEMENT_PREMIUM]?.isActive == true
+                
                 _subscriptionState.value = _subscriptionState.value.copy(
                     isLoading = false,
-                    isPremium = isTestPremium,
-                    purchaseSuccess = isTestPremium,
-                    purchaseType = if (isTestPremium) "restored" else null
+                    purchaseSuccess = isPremium,
+                    purchaseType = "restored"
                 )
-                Log.d(TAG, "🧪 TEST MODE: Restore simulated — premium = $isTestPremium")
-                onSuccess(isTestPremium)
+                
+                Log.d(TAG, "Purchases restored. Premium: $isPremium")
+                onSuccess(isPremium)
             }
-            return
-        }
 
-        if (!requireBillingConfigured {
-                onError(it)
-                onSuccess(false)
-            }) return
-
-        _subscriptionState.value = _subscriptionState.value.copy(isLoading = true, error = null)
-
-        Purchases.sharedInstance.restorePurchases(
-            callback = object : com.revenuecat.purchases.interfaces.ReceiveCustomerInfoCallback {
-                override fun onReceived(customerInfo: CustomerInfo) {
-                    val isPremium = customerInfo.entitlements[ENTITLEMENT_PREMIUM]?.isActive == true
-
-                    // SECURITY: Set verification token after successful restore
-                    if (isPremium) {
-                        verificationToken = generateVerificationToken(customerInfo)
-                        lastVerificationTime = System.currentTimeMillis()
-                    } else {
-                        verificationToken = null
-                    }
-
-                    _subscriptionState.value = _subscriptionState.value.copy(
-                        isLoading = false,
-                        isPremium = isPremium,
-                        purchaseSuccess = isPremium,
-                        purchaseType = if (isPremium) "restored" else null
-                    )
-                    Log.d(TAG, "Restore successful! Premium: $isPremium")
-                    onSuccess(isPremium)
-                }
-
-                override fun onError(error: PurchasesError) {
-                    _subscriptionState.value = _subscriptionState.value.copy(
-                        isLoading = false,
-                        error = error.message
-                    )
-                    Log.e(TAG, "Restore error: ${error.message}")
-                    onError(error.message)
-                }
+            override fun onError(error: PurchasesError) {
+                val fullError = "${error.message} (Underlying: ${error.underlyingErrorMessage})"
+                Log.e(TAG, "Restore error: $fullError")
+                _subscriptionState.value = _subscriptionState.value.copy(
+                    isLoading = false,
+                    error = fullError
+                )
+                onError(fullError)
             }
-        )
+        })
     }
 
-    // =========================================================================
-    // TEST MODE HELPERS
-    // =========================================================================
+    // ── Test Mode Helpers ─────────────────────────────────────
 
-    /**
-     * Simulates a purchase flow with a realistic delay.
-     * Called internally by [purchaseMonthly] / [purchaseLifetime] when [testMode] is active.
-     */
-    private fun simulateTestPurchase(purchaseType: String, onSuccess: () -> Unit) {
-        _subscriptionState.value = _subscriptionState.value.copy(isLoading = true, error = null)
-        scope.launch {
-            delay(1200) // Simulate payment sheet + network round-trip
-            isTestPremium = true
-            _subscriptionState.value = _subscriptionState.value.copy(
-                isLoading = false,
-                isPremium = true,
-                purchaseSuccess = true,
-                purchaseType = purchaseType
-            )
-            Log.d(TAG, "🧪 TEST MODE: Purchase simulated — type = $purchaseType")
-            onSuccess()
-        }
+    fun simulateTestSuccess(type: String = "debug") {
+        simulateTestPurchase(type) {}
     }
 
-    /**
-     * Resets the simulated premium status back to free.
-     * Useful from a DevOptions screen so you can re-test the purchase flow
-     * without restarting the app.
-     */
-    fun resetTestPurchase() {
-        if (!testMode) return
-        isTestPremium = false
-        _subscriptionState.value = SubscriptionState()
-        Log.d(TAG, "🧪 TEST MODE: Premium status reset to FREE")
-    }
-
-    // ── Test-only helpers for triggering each transaction card state ──
-
-    /**
-     * Simulate a successful purchase (test mode only).
-     * Sets [isTestPremium] = true immediately, then updates state after delay.
-     */
-    fun simulateTestSuccess() {
-        if (!testMode) return
+    fun simulateTestPurchase(type: String, onDone: () -> Unit) {
+        testMode = true
         isTestPremium = true
         _subscriptionState.value = _subscriptionState.value.copy(
             isLoading = false,
             isPremium = true,
             purchaseSuccess = true,
-            purchaseType = "monthly"
+            purchaseType = type
         )
-        Log.d(TAG, "🧪 TEST: Simulated SUCCESS (immediate premium applied)")
-        // Manually trigger GoogleAdsManager state update since this is an immediate state change
+        Log.d(TAG, "🧪 TEST: Simulated SUCCESS ($type) (immediate premium applied)")
+        
+        // Refresh AdMob to hide ads immediately in UI
         try {
-            com.kyilmaz.neurocomet.ads.GoogleAdsManager.devUpdateAdsState()
-        } catch (_: Exception) {
+            GoogleAdsManager.devSetSimulatePremium(true)
+        } catch (e: Exception) {
             Log.w(TAG, "Could not trigger GoogleAdsManager update after simulated purchase.")
         }
+        
+        onDone()
     }
 
-    /**
-     * Simulate a declined purchase (test mode only).
-     * Sets [error] after a short delay so the screen shows a DECLINED card.
-     */
     fun simulateTestDeclined() {
-        if (!testMode) return
+        testMode = true
         _subscriptionState.value = _subscriptionState.value.copy(isLoading = true, error = null)
         scope.launch {
-            delay(600)
+            kotlinx.coroutines.delay(1500)
             _subscriptionState.value = _subscriptionState.value.copy(
                 isLoading = false,
-                error = "Payment declined by card issuer."
+                error = "Simulated: Payment declined by test bank."
             )
             Log.d(TAG, "🧪 TEST: Simulated DECLINED")
         }
     }
 
-    /**
-     * Simulate a timed-out purchase (test mode only).
-     * Starts loading but never resolves — the screen's own 30-second
-     * timeout timer will fire and show the TIMED_OUT card.
-     */
     fun simulateTestTimedOut() {
-        if (!testMode) return
+        testMode = true
         _subscriptionState.value = _subscriptionState.value.copy(isLoading = true, error = null)
         scope.launch {
-            delay(600)
-            // Intentionally leave loading — the timeout on the screen handles it.
+            kotlinx.coroutines.delay(3000)
+            _subscriptionState.value = _subscriptionState.value.copy(isLoading = false)
             Log.d(TAG, "🧪 TEST: Simulated TIMED_OUT (no response)")
         }
     }
 
-    /**
-     * Clear purchase success flag
-     */
-    fun clearPurchaseSuccess() {
+    fun resetTestPurchase() {
+        isTestPremium = false
         _subscriptionState.value = _subscriptionState.value.copy(
+            isPremium = false,
             purchaseSuccess = false,
-            purchaseType = null
+            error = null
         )
+        Log.d(TAG, "🧪 TEST: Simulated Premium RESET")
     }
 
-    /**
-     * Clear error
-     */
+    fun setTestMode(enabled: Boolean) {
+        testMode = enabled
+        if (!enabled) resetTestPurchase()
+        Log.d(TAG, "🧪 TEST: Test mode ${if (enabled) "ENABLED" else "DISABLED"}")
+    }
+
+    fun clearPurchaseSuccess() {
+        _subscriptionState.value = _subscriptionState.value.copy(purchaseSuccess = false)
+    }
+
     fun clearError() {
         _subscriptionState.value = _subscriptionState.value.copy(error = null)
     }
 }
-

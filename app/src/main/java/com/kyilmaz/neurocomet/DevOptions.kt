@@ -66,6 +66,7 @@ data class DevOptions(
     val simulateLoadingError: Boolean = false,
     val infiniteLoading: Boolean = false,
     val showFallbackUi: Boolean = false,
+    val publicReleaseMockUiEnabled: Boolean = false,
     val networkLatencyMs: Long = 0L,
 
     // ── Auth Overrides ──────────────────────────────────────
@@ -79,4 +80,12 @@ data class DevOptions(
     // ── Feedback & Beta Testing ────────────────────────────
     val bypassFeedbackRateLimit: Boolean = false,
     val forceFeedbackSubmitFailure: Boolean = false,
+
+    // ── Supabase & Cloud Sync ──────────────────────────────
+    val forcePremiumCloudSync: Boolean = false,
+    val forceGameAchievementsSync: Boolean = false,
+    val forceSettingsCloudSync: Boolean = false,
+    val forceAiPracticeLogSync: Boolean = false,
+    val forceAbTestSync: Boolean = false,
+    val showCloudSyncDebug: Boolean = false,
 )

@@ -9,7 +9,7 @@ class GeminiPracticeCallService {
         'You are a professional language practice assistant. Keep your responses short, natural, and helpful for a user practicing conversation.';
 
     _model = GenerativeModel(
-      model: 'gemini-2.0-flash-lite-preview-02-05',
+      model: 'gemini-2.0-flash',
       apiKey: apiKey,
       systemInstruction: Content.system(prompt),
     );
@@ -20,10 +20,12 @@ class GeminiPracticeCallService {
   Future<String?> sendMessage(String message) async {
     try {
       final response = await _chat.sendMessage(Content.text(message));
+      if (response.text == null || response.text!.isEmpty) {
+        return 'Error: AI returned an empty response.';
+      }
       return response.text;
     } catch (e) {
-      print('Error communicating with Gemini: $e');
-      return null;
+      return 'Error: $e';
     }
   }
 }

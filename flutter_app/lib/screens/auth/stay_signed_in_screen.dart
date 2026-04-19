@@ -5,7 +5,6 @@ import '../../core/theme/app_colors.dart';
 /// Manages the "Stay Signed In" preference persistence.
 /// Mirrors the Kotlin StaySignedInScreen.kt
 class StaySignedInSettings {
-  static const _prefsAuth = 'auth_prefs';
   static const _keyStaySignedIn = 'stay_signed_in';
   static const _keyDontShowAgain = 'stay_signed_in_dont_show';
   static const _keyShownOnce = 'stay_signed_in_shown';

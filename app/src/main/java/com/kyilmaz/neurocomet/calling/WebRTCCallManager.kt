@@ -10,8 +10,12 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.kyilmaz.neurocomet.BuildConfig
+import com.kyilmaz.neurocomet.SecurityUtils
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.realtime.RealtimeChannel
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
 import io.github.jan.supabase.realtime.PostgresAction
@@ -19,6 +23,7 @@ import io.github.jan.supabase.realtime.PostgresChangeFilter
 import io.github.jan.supabase.realtime.realtime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
@@ -26,7 +31,10 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import com.kyilmaz.neurocomet.safeInsert
 import com.kyilmaz.neurocomet.AttachmentHelper
@@ -87,13 +95,22 @@ data class CallQualityMetrics(
 @Serializable
 data class CallHistoryEntry(
     val id: String = "call_${System.currentTimeMillis()}",
+    @kotlinx.serialization.SerialName("caller_id")
+    val userId: String, // The user this history belongs to
+    @kotlinx.serialization.SerialName("recipient_id")
     val recipientId: String,
+    @kotlinx.serialization.SerialName("recipient_name")
     val recipientName: String,
+    @kotlinx.serialization.SerialName("recipient_avatar")
     val recipientAvatar: String,
+    @kotlinx.serialization.SerialName("call_type")
     val callType: String, // "VOICE" or "VIDEO"
+    @kotlinx.serialization.SerialName("is_outgoing")
     val isOutgoing: Boolean,
     val outcome: String,
+    @kotlinx.serialization.SerialName("created_at")
     val timestamp: String = Instant.now().toString(),
+    @kotlinx.serialization.SerialName("duration_seconds")
     val durationSeconds: Long = 0
 ) {
     val formattedDuration: String
@@ -218,6 +235,17 @@ class WebRTCCallManager private constructor() {
     private var appContext: Context? = null
     private var supabaseClient: SupabaseClient? = null
     private var currentUserId: String? = null
+    private var signalingChannel: RealtimeChannel? = null
+    private var signalingSetupJob: Job? = null
+    private var signalingEventsJob: Job? = null
+    private var signalingUserId: String? = null
+    private var callHistoryLoadedForUserId: String? = null
+    private var isWebRtcInitialized = false
+    private var pendingRemoteOfferCallId: String? = null
+    private var pendingRemoteOfferSdp: String? = null
+    private val pendingIceCandidateSignals = mutableListOf<Pair<String, String>>()
+    private var lastOutgoingCallAttemptAtMs: Long = 0L
+    private val recentIncomingCallers = mutableMapOf<String, Long>()
 
     // Coroutine scope
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -226,15 +254,37 @@ class WebRTCCallManager private constructor() {
 
     // JSON parser
     private val json = Json { ignoreUnknownKeys = true }
+    private val minCallIntervalMs = 10_000L
 
-    // ICE servers for STUN/TURN
-    private val iceServers = listOf(
-        PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer(),
-        PeerConnection.IceServer.builder("stun:stun1.l.google.com:19302").createIceServer(),
-        PeerConnection.IceServer.builder("stun:stun2.l.google.com:19302").createIceServer(),
-        PeerConnection.IceServer.builder("stun:stun3.l.google.com:19302").createIceServer(),
-        PeerConnection.IceServer.builder("stun:stun4.l.google.com:19302").createIceServer()
-    )
+    // ICE servers for STUN/TURN. TURN credentials can be supplied via
+    // local.properties / secrets.properties using TURN_URL, TURN_USERNAME,
+    // and TURN_PASSWORD for better connectivity across restrictive NATs.
+    private val iceServers: List<PeerConnection.IceServer> by lazy {
+        buildList {
+            add(PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer())
+            add(PeerConnection.IceServer.builder("stun:stun1.l.google.com:19302").createIceServer())
+            add(PeerConnection.IceServer.builder("stun:stun2.l.google.com:19302").createIceServer())
+            add(PeerConnection.IceServer.builder("stun:stun3.l.google.com:19302").createIceServer())
+            add(PeerConnection.IceServer.builder("stun:stun4.l.google.com:19302").createIceServer())
+
+            val turnUrl = SecurityUtils.decrypt(BuildConfig.TURN_URL)
+            val turnUsername = SecurityUtils.decrypt(BuildConfig.TURN_USERNAME)
+            val turnPassword = SecurityUtils.decrypt(BuildConfig.TURN_PASSWORD)
+            if (turnUrl.isNotBlank()) {
+                val builder = PeerConnection.IceServer.builder(turnUrl)
+                if (turnUsername.isNotBlank()) {
+                    builder.setUsername(turnUsername)
+                }
+                if (turnPassword.isNotBlank()) {
+                    builder.setPassword(turnPassword)
+                }
+                add(builder.createIceServer())
+                Log.d(TAG, "TURN server configured for WebRTC connectivity")
+            } else {
+                Log.w(TAG, "No TURN server configured; calls may fail on strict NAT/firewall networks")
+            }
+        }
+    }
 
     /**
      * Whether the local network permission is missing on API 37+ (CinnamonBun).
@@ -248,6 +298,7 @@ class WebRTCCallManager private constructor() {
      * Initialize the call manager with context and Supabase client
      */
     fun initialize(context: Context, supabase: SupabaseClient?, userId: String?) {
+        val previousUserId = currentUserId
         appContext = context.applicationContext
         supabaseClient = supabase
         currentUserId = userId
@@ -256,21 +307,29 @@ class WebRTCCallManager private constructor() {
         if (!AttachmentHelper.hasLocalNetworkPermission(context)) {
             Log.w(TAG, "ACCESS_LOCAL_NETWORK not granted — WebRTC local ICE candidates may be unavailable")
             localNetworkPermissionNeeded = true
+        } else {
+            localNetworkPermissionNeeded = false
         }
 
-        initializeWebRTC(context)
+        if (previousUserId != null && previousUserId != userId) {
+            clearSessionStateForUserChange()
+        }
+
         setupSignalingListener()
-        loadCallHistory()
     }
 
     private fun initializeWebRTC(context: Context) {
+        if (isWebRtcInitialized && peerConnectionFactory != null && eglBase != null) {
+            return
+        }
+
         try {
             // Initialize EGL context for video rendering
             eglBase = EglBase.create()
 
             // Initialize PeerConnectionFactory
             val options = PeerConnectionFactory.InitializationOptions.builder(context)
-                .setEnableInternalTracer(true)
+                .setEnableInternalTracer(BuildConfig.DEBUG)
                 .createInitializationOptions()
             PeerConnectionFactory.initialize(options)
 
@@ -286,30 +345,45 @@ class WebRTCCallManager private constructor() {
                 .setVideoDecoderFactory(decoderFactory)
                 .setOptions(PeerConnectionFactory.Options())
                 .createPeerConnectionFactory()
+            isWebRtcInitialized = true
 
             Log.d(TAG, "WebRTC initialized successfully")
         } catch (e: Exception) {
+            isWebRtcInitialized = false
             Log.e(TAG, "Failed to initialize WebRTC", e)
         }
+    }
+
+    private fun ensureWebRtcInitialized() {
+        val context = appContext ?: return
+        initializeWebRTC(context)
     }
 
     private fun setupSignalingListener() {
         val client = supabaseClient ?: return
         val userId = currentUserId ?: return
 
-        scope.launch {
+        if (signalingUserId == userId && signalingChannel != null) {
+            return
+        }
+
+        stopSignalingListener()
+
+        signalingSetupJob = scope.launch {
             try {
                 val channel = client.realtime.channel("calls:$userId")
+                signalingChannel = channel
+                signalingUserId = userId
 
                 // Subscribe to call signals for this user
                 // Note: Server-side filter removed - we'll filter client-side by to_user_id
-                channel.postgresChangeFlow<PostgresAction.Insert>(
+                signalingEventsJob = channel.postgresChangeFlow<PostgresAction.Insert>(
                     schema = "public"
                 ) {
                     table = "call_signals"
                 }.onEach { change ->
                     // Client-side filter: only handle signals for this user
-                    val toUserId = change.record["to_user_id"] as? String
+                    val toUserId = change.record["to_user_id"]?.jsonPrimitive?.contentOrNull
                     if (toUserId == userId) {
                         handleSignalingMessage(change.record)
                     }
@@ -318,26 +392,65 @@ class WebRTCCallManager private constructor() {
                 channel.subscribe()
                 Log.d(TAG, "Signaling listener setup for user: $userId")
             } catch (e: Exception) {
+                signalingChannel = null
+                signalingUserId = null
                 Log.e(TAG, "Failed to setup signaling listener", e)
             }
         }
     }
 
-    private suspend fun handleSignalingMessage(record: Map<String, Any?>) {
+    private fun stopSignalingListener() {
+        signalingSetupJob?.cancel()
+        signalingSetupJob = null
+        signalingEventsJob?.cancel()
+        signalingEventsJob = null
+
+        val existingChannel = signalingChannel
+        signalingChannel = null
+        signalingUserId = null
+
+        if (existingChannel != null) {
+            scope.launch {
+                try {
+                    existingChannel.unsubscribe()
+                } catch (e: Exception) {
+                    Log.d(TAG, "Failed to unsubscribe signaling channel cleanly", e)
+                }
+            }
+        }
+    }
+
+    private fun clearSessionStateForUserChange() {
+        stopSignalingListener()
+        callHistoryLoadedForUserId = null
+        _callHistory.clear()
+        clearPendingSignals()
+        if (callState == CallState.IDLE) {
+            cleanupCall()
+        }
+    }
+
+    private fun clearPendingSignals() {
+        pendingRemoteOfferCallId = null
+        pendingRemoteOfferSdp = null
+        pendingIceCandidateSignals.clear()
+    }
+
+    private suspend fun handleSignalingMessage(record: JsonObject) {
         try {
-            val type = record["type"] as? String ?: return
-            val callId = record["call_id"] as? String ?: return
-            val fromUserId = record["from_user_id"] as? String ?: return
-            val payload = record["payload"] as? String ?: ""
-            val callTypeStr = record["call_type"] as? String ?: "VOICE"
+            val type = record["type"]?.jsonPrimitive?.contentOrNull ?: return
+            val callId = record["call_id"]?.jsonPrimitive?.contentOrNull ?: return
+            val fromUserId = record["from_user_id"]?.jsonPrimitive?.contentOrNull ?: return
+            val payload = record["payload"]?.jsonPrimitive?.contentOrNull ?: ""
+            val callTypeStr = record["call_type"]?.jsonPrimitive?.contentOrNull ?: "VOICE"
 
             Log.d(TAG, "Received signaling message: type=$type, callId=$callId")
 
             when (type) {
                 "call_request" -> {
                     // Incoming call
-                    val callerName = record["caller_name"] as? String ?: "Unknown"
-                    val callerAvatar = record["caller_avatar"] as? String ?: ""
+                    val callerName = record["caller_name"]?.jsonPrimitive?.contentOrNull ?: "Unknown"
+                    val callerAvatar = record["caller_avatar"]?.jsonPrimitive?.contentOrNull ?: ""
 
                     handleIncomingCall(
                         callId = callId,
@@ -369,10 +482,10 @@ class WebRTCCallManager private constructor() {
                     handleOffer(callId, payload)
                 }
                 "answer" -> {
-                    handleAnswer(payload)
+                    handleAnswer(callId, payload)
                 }
                 "ice_candidate" -> {
-                    handleIceCandidate(payload)
+                    handleIceCandidate(callId, payload)
                 }
             }
         } catch (e: Exception) {
@@ -389,10 +502,25 @@ class WebRTCCallManager private constructor() {
         recipientAvatar: String,
         callType: CallType
     ) {
+        val callerId = currentUserId
+        if (callerId.isNullOrBlank() || callerId == "guest_user") {
+            Log.w(TAG, "Cannot start call without a real authenticated caller")
+            return
+        }
+        if (recipientId.isBlank() || recipientId == callerId) {
+            Log.w(TAG, "Blocked invalid or self-call attempt: recipientId=$recipientId callerId=$callerId")
+            return
+        }
         if (callState != CallState.IDLE) {
             Log.w(TAG, "Cannot start call - already in call state: $callState")
             return
         }
+        val now = System.currentTimeMillis()
+        if (now - lastOutgoingCallAttemptAtMs < minCallIntervalMs) {
+            Log.w(TAG, "Outgoing call throttled to reduce spam/abuse")
+            return
+        }
+        lastOutgoingCallAttemptAtMs = now
 
         val callId = "call_${System.currentTimeMillis()}_${java.util.UUID.randomUUID()}"
 
@@ -409,9 +537,23 @@ class WebRTCCallManager private constructor() {
         callDuration = 0L
         callStartTime = System.currentTimeMillis()
 
+        // Start dial tone for the caller
+        startDialTone()
+
         // Setup WebRTC and send offer
         scope.launch {
             try {
+                ensureWebRtcInitialized()
+
+                // Send call request first to trigger incoming call UI on receiver
+                sendSignalingMessage(
+                    toUserId = recipientId,
+                    callId = callId,
+                    type = "call_request",
+                    payload = "",
+                    callType = callType
+                )
+
                 setupPeerConnection(callType)
                 createAndSendOffer(recipientId, callId, callType)
 
@@ -436,6 +578,22 @@ class WebRTCCallManager private constructor() {
         callerAvatar: String,
         callType: CallType
     ) {
+        val now = System.currentTimeMillis()
+        val previousCallAt = recentIncomingCallers[callerId] ?: 0L
+        if (now - previousCallAt < minCallIntervalMs) {
+            scope.launch {
+                sendSignalingMessage(
+                    toUserId = callerId,
+                    callId = callId,
+                    type = "call_decline",
+                    payload = ""
+                )
+            }
+            Log.w(TAG, "Incoming call throttled for callerId=$callerId")
+            return
+        }
+        recentIncomingCallers[callerId] = now
+
         if (callState != CallState.IDLE) {
             // Already in a call, auto-decline
             scope.launch {
@@ -461,15 +619,67 @@ class WebRTCCallManager private constructor() {
         callState = CallState.INCOMING
         callDuration = 0L
 
-        // Start ringtone/vibration here if needed
+        // Start ringtone for incoming call
+        startIncomingRingtone()
 
         Log.d(TAG, "Incoming ${callType.name} call from $callerName")
+    }
+
+    private var incomingRingtonePlayer: android.media.MediaPlayer? = null
+    private var toneGenerator: android.media.ToneGenerator? = null
+
+    private fun startIncomingRingtone() {
+        try {
+            val context = appContext ?: return
+            val uri = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_RINGTONE)
+            incomingRingtonePlayer = android.media.MediaPlayer().apply {
+                setDataSource(context, uri)
+                setAudioAttributes(
+                    android.media.AudioAttributes.Builder()
+                        .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+                        .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+                isLooping = true
+                prepare()
+                start()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to play incoming ringtone", e)
+        }
+    }
+
+    private fun startDialTone() {
+        try {
+            // Use ToneGenerator for a standard "ringing" sound for the caller
+            if (toneGenerator == null) {
+                toneGenerator = android.media.ToneGenerator(android.media.AudioManager.STREAM_VOICE_CALL, 80)
+            }
+            toneGenerator?.startTone(android.media.ToneGenerator.TONE_SUP_RINGTONE)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start dial tone", e)
+        }
+    }
+
+    private fun stopRingtones() {
+        try {
+            incomingRingtonePlayer?.stop()
+            incomingRingtonePlayer?.release()
+            incomingRingtonePlayer = null
+            
+            toneGenerator?.stopTone()
+            toneGenerator?.release()
+            toneGenerator = null
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to stop ringtones", e)
+        }
     }
 
     /**
      * Answer an incoming call
      */
     fun answerCall() {
+        stopRingtones()
         val call = currentCall ?: return
         if (callState != CallState.INCOMING) return
 
@@ -478,7 +688,16 @@ class WebRTCCallManager private constructor() {
 
         scope.launch {
             try {
+                ensureWebRtcInitialized()
                 setupPeerConnection(call.callType)
+
+                pendingRemoteOfferSdp
+                    ?.takeIf { pendingRemoteOfferCallId == call.callId }
+                    ?.let { sdp ->
+                        pendingRemoteOfferCallId = null
+                        pendingRemoteOfferSdp = null
+                        handleOffer(call.callId, sdp)
+                    }
 
                 // Send accept signal
                 sendSignalingMessage(
@@ -500,6 +719,7 @@ class WebRTCCallManager private constructor() {
      * Decline an incoming call
      */
     fun declineCall() {
+        stopRingtones()
         val call = currentCall ?: return
 
         scope.launch {
@@ -518,6 +738,7 @@ class WebRTCCallManager private constructor() {
      * End the current call
      */
     fun endCall(outcome: CallOutcome = CallOutcome.COMPLETED) {
+        stopRingtones()
         val call = currentCall ?: return
 
         // Calculate duration
@@ -542,6 +763,7 @@ class WebRTCCallManager private constructor() {
         // Add to history
         val historyEntry = CallHistoryEntry(
             id = call.callId,
+            userId = currentUserId ?: "unknown",
             recipientId = call.recipientId,
             recipientName = call.recipientName,
             recipientAvatar = call.recipientAvatar,
@@ -555,6 +777,7 @@ class WebRTCCallManager private constructor() {
 
         // Cleanup WebRTC
         cleanupCall()
+        clearPendingSignals()
 
         // Reset state
         callState = CallState.ENDED
@@ -573,12 +796,13 @@ class WebRTCCallManager private constructor() {
     }
 
     private fun setupPeerConnection(callType: CallType) {
+        ensureWebRtcInitialized()
         val factory = peerConnectionFactory ?: return
         val context = appContext ?: return
 
         val rtcConfig = PeerConnection.RTCConfiguration(iceServers).apply {
             sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
-            continualGatheringPolicy = PeerConnection.ContinualGatheringPolicy.GATHER_CONTINUALLY
+            continualGatheringPolicy = PeerConnection.ContinualGatheringPolicy.GATHER_ONCE
         }
 
         peerConnection = factory.createPeerConnection(rtcConfig, object : PeerConnection.Observer {
@@ -590,6 +814,7 @@ class WebRTCCallManager private constructor() {
                 Log.d(TAG, "ICE connection state: $state")
                 when (state) {
                     PeerConnection.IceConnectionState.CONNECTED -> {
+                        stopRingtones()
                         callState = CallState.CONNECTED
                         startDurationTimer()
                     }
@@ -759,13 +984,25 @@ class WebRTCCallManager private constructor() {
     }
 
     private fun handleOffer(callId: String, sdpDescription: String) {
-        val pc = peerConnection ?: return
-        val call = currentCall ?: return
+        val call = currentCall
+        if (call != null && call.callId != callId) {
+            Log.w(TAG, "Ignoring offer for stale callId=$callId (active=${call.callId})")
+            return
+        }
+
+        val pc = peerConnection
+        if (pc == null || call == null) {
+            pendingRemoteOfferCallId = callId
+            pendingRemoteOfferSdp = sdpDescription
+            Log.d(TAG, "Buffered remote offer until peer connection is ready for callId=$callId")
+            return
+        }
 
         val sdp = SessionDescription(SessionDescription.Type.OFFER, sdpDescription)
 
         pc.setRemoteDescription(object : SdpObserver {
             override fun onSetSuccess() {
+                flushPendingIceCandidates(callId)
                 createAndSendAnswer(call.recipientId, callId)
             }
             override fun onSetFailure(error: String?) {
@@ -815,7 +1052,13 @@ class WebRTCCallManager private constructor() {
         }, constraints)
     }
 
-    private fun handleAnswer(sdpDescription: String) {
+    private fun handleAnswer(callId: String, sdpDescription: String) {
+        val activeCallId = currentCall?.callId
+        if (activeCallId != null && activeCallId != callId) {
+            Log.w(TAG, "Ignoring answer for stale callId=$callId (active=$activeCallId)")
+            return
+        }
+
         val pc = peerConnection ?: return
 
         val sdp = SessionDescription(SessionDescription.Type.ANSWER, sdpDescription)
@@ -823,6 +1066,7 @@ class WebRTCCallManager private constructor() {
         pc.setRemoteDescription(object : SdpObserver {
             override fun onSetSuccess() {
                 Log.d(TAG, "Remote description set successfully")
+                flushPendingIceCandidates(callId)
             }
             override fun onSetFailure(error: String?) {
                 Log.e(TAG, "Failed to set remote description: $error")
@@ -853,21 +1097,71 @@ class WebRTCCallManager private constructor() {
         }
     }
 
-    private fun handleIceCandidate(candidateJson: String) {
-        val pc = peerConnection ?: return
+    private fun handleIceCandidate(callId: String, candidateJson: String) {
+        val activeCallId = currentCall?.callId
+        if (activeCallId != null && activeCallId != callId) {
+            Log.w(TAG, "Ignoring ICE candidate for stale callId=$callId (active=$activeCallId)")
+            return
+        }
+
+        val pc = peerConnection
+        if (pc == null || pc.remoteDescription == null) {
+            pendingIceCandidateSignals.add(callId to candidateJson)
+            Log.d(TAG, "Buffered ICE candidate until remote description is ready for callId=$callId")
+            return
+        }
 
         try {
-            // Parse the JSON manually for simplicity
-            val sdpMid = Regex(""""sdpMid":\s*"([^"]+)"""").find(candidateJson)?.groupValues?.get(1)
-            val sdpMLineIndex = Regex(""""sdpMLineIndex":\s*(\d+)""").find(candidateJson)?.groupValues?.get(1)?.toIntOrNull()
-            val sdp = Regex(""""sdp":\s*"([^"]+)"""").find(candidateJson)?.groupValues?.get(1)
-
-            if (sdpMid != null && sdpMLineIndex != null && sdp != null) {
-                val candidate = IceCandidate(sdpMid, sdpMLineIndex, sdp)
-                pc.addIceCandidate(candidate)
-            }
+            @Serializable
+            data class IceCandidateJson(val sdpMid: String, val sdpMLineIndex: Int, val sdp: String)
+            val data = json.decodeFromString<IceCandidateJson>(candidateJson)
+            val candidate = IceCandidate(data.sdpMid, data.sdpMLineIndex, data.sdp)
+            pc.addIceCandidate(candidate)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse ICE candidate", e)
+            Log.e(TAG, "Failed to parse ICE candidate: $candidateJson", e)
+        }
+    }
+
+    private fun flushPendingIceCandidates(callId: String) {
+        val pc = peerConnection ?: return
+        if (pc.remoteDescription == null) return
+
+        val iterator = pendingIceCandidateSignals.iterator()
+        while (iterator.hasNext()) {
+            val (queuedCallId, payload) = iterator.next()
+            if (queuedCallId != callId) continue
+            try {
+                @Serializable
+                data class IceCandidateJson(val sdpMid: String, val sdpMLineIndex: Int, val sdp: String)
+                val data = json.decodeFromString<IceCandidateJson>(payload)
+                val candidate = IceCandidate(data.sdpMid, data.sdpMLineIndex, data.sdp)
+                pc.addIceCandidate(candidate)
+                iterator.remove()
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to flush queued ICE candidate", e)
+                iterator.remove()
+            }
+        }
+    }
+
+    private fun resolveCallerName(): String {
+        return try {
+            val user = supabaseClient?.auth?.currentUserOrNull()
+            user?.userMetadata?.get("display_name")?.jsonPrimitive?.contentOrNull
+                ?: user?.userMetadata?.get("username")?.jsonPrimitive?.contentOrNull
+                ?: currentUserId
+                ?: "Unknown"
+        } catch (_: Exception) {
+            currentUserId ?: "Unknown"
+        }
+    }
+
+    private fun resolveCallerAvatar(): String {
+        return try {
+            val user = supabaseClient?.auth?.currentUserOrNull()
+            user?.userMetadata?.get("avatar_url")?.jsonPrimitive?.contentOrNull ?: ""
+        } catch (_: Exception) {
+            ""
         }
     }
 
@@ -888,6 +1182,8 @@ class WebRTCCallManager private constructor() {
         val call = currentCall
 
         try {
+            val callerName = resolveCallerName()
+            val callerAvatar = resolveCallerAvatar()
             client.safeInsert("call_signals", buildJsonObject {
                 put("call_id", callId)
                 put("from_user_id", userId)
@@ -895,8 +1191,8 @@ class WebRTCCallManager private constructor() {
                 put("type", type)
                 put("payload", payload)
                 put("call_type", callType.name)
-                put("caller_name", call?.recipientName ?: "Unknown")
-                put("caller_avatar", call?.recipientAvatar ?: "")
+                put("caller_name", callerName)
+                put("caller_avatar", callerAvatar)
             })
             Log.d(TAG, "Sent signaling message: type=$type, to=$toUserId")
         } catch (e: Exception) {
@@ -1036,15 +1332,23 @@ class WebRTCCallManager private constructor() {
 
     // ==================== CALL HISTORY ====================
 
-    private fun loadCallHistory() {
-        val client = supabaseClient ?: return
+    fun loadCallHistoryIfNeeded(force: Boolean = false) {
+        if (supabaseClient == null) return
         val userId = currentUserId ?: return
+
+        if (!force && callHistoryLoadedForUserId == userId) {
+            return
+        }
+
+        callHistoryLoadedForUserId = userId
 
         scope.launch {
             try {
+                // Ensure we only load history for the current user
                 val rows = com.kyilmaz.neurocomet.safeSelect(
                     table = "call_history",
-                    columns = "*"
+                    columns = "*",
+                    filters = "or=(caller_id.eq.$userId,recipient_id.eq.$userId)"
                 )
                 val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
                 val history = rows.map { json.decodeFromJsonElement(CallHistoryEntry.serializer(), it) }
@@ -1053,6 +1357,7 @@ class WebRTCCallManager private constructor() {
                 _callHistory.addAll(history.sortedByDescending { it.timestamp })
                 Log.d(TAG, "Loaded ${history.size} call history entries")
             } catch (e: Exception) {
+                callHistoryLoadedForUserId = null
                 Log.e(TAG, "Failed to load call history", e)
             }
         }
@@ -1076,6 +1381,7 @@ class WebRTCCallManager private constructor() {
 
     fun clearCallHistory() {
         _callHistory.clear()
+        callHistoryLoadedForUserId = currentUserId
 
         val client = supabaseClient ?: return
         val userId = currentUserId ?: return
@@ -1085,7 +1391,7 @@ class WebRTCCallManager private constructor() {
                 client.from("call_history")
                     .delete {
                         filter {
-                            // Delete user's call history
+                            eq("caller_id", userId)
                         }
                     }
                 Log.d(TAG, "Cleared call history")
@@ -1102,6 +1408,7 @@ class WebRTCCallManager private constructor() {
         val mockEntries = listOf(
             CallHistoryEntry(
                 id = "mock_1",
+                userId = "me",
                 recipientId = "luna",
                 recipientName = "Luna",
                 recipientAvatar = "https://api.dicebear.com/7.x/avataaars/png?seed=luna",
@@ -1113,6 +1420,7 @@ class WebRTCCallManager private constructor() {
             ),
             CallHistoryEntry(
                 id = "mock_2",
+                userId = "me",
                 recipientId = "alex",
                 recipientName = "Alex",
                 recipientAvatar = "https://api.dicebear.com/7.x/avataaars/png?seed=alex",
@@ -1124,6 +1432,7 @@ class WebRTCCallManager private constructor() {
             ),
             CallHistoryEntry(
                 id = "mock_3",
+                userId = "me",
                 recipientId = "jamie",
                 recipientName = "Jamie",
                 recipientAvatar = "https://api.dicebear.com/7.x/avataaars/png?seed=jamie",
@@ -1135,6 +1444,7 @@ class WebRTCCallManager private constructor() {
             ),
             CallHistoryEntry(
                 id = "mock_4",
+                userId = "me",
                 recipientId = "sam",
                 recipientName = "Sam",
                 recipientAvatar = "https://api.dicebear.com/7.x/avataaars/png?seed=sam",
@@ -1157,6 +1467,7 @@ class WebRTCCallManager private constructor() {
      * Cleanup resources
      */
     fun dispose() {
+        stopSignalingListener()
         cleanupCall()
 
         peerConnectionFactory?.dispose()
@@ -1167,6 +1478,8 @@ class WebRTCCallManager private constructor() {
 
         eglBase?.release()
         eglBase = null
+        isWebRtcInitialized = false
+        callHistoryLoadedForUserId = null
     }
 }
 

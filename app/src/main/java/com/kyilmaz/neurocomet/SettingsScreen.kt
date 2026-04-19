@@ -1,9 +1,9 @@
 package com.kyilmaz.neurocomet
 
 import android.app.Application
-import android.content.Intent
+import android.content.Context
+import android.util.Log
 import android.widget.Toast
-import androidx.core.net.toUri
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -21,6 +21,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -259,6 +262,7 @@ fun SettingsScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             M3ETopAppBar(
                 title = {
@@ -284,8 +288,8 @@ fun SettingsScreen(
                 contentPadding = PaddingValues(
                     start = M3EDesignSystem.Spacing.screenHorizontal,
                     end = M3EDesignSystem.Spacing.screenHorizontal,
-                    top = M3EDesignSystem.Spacing.sm,
-                    bottom = 16.dp
+                    top = 0.dp,
+                    bottom = M3EDesignSystem.Spacing.bottomNavPadding
                 ),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -662,12 +666,35 @@ fun SettingsScreen(
 
                                     if (versionTapCount >= 7) {
                                         versionTapCount = 0
-                                        devOptionsViewModel.setDevMenuEnabled(true)
-                                        Toast.makeText(
-                                            context,
-                                            context.getString(R.string.settings_developer_mode_activated),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        try {
+                                            devOptionsViewModel.setDevMenuEnabled(true)
+                                            Toast.makeText(
+                                                context,
+                                                context.getString(R.string.settings_developer_mode_activated),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        } catch (e: SecurityException) {
+                                            // Handle unauthorized device
+                                            DeviceAuthority.logDevAccessInfo(context)
+                                            
+                                            // Automatically copy the formatted info to clipboard for convenience
+                                            runCatching {
+                                                val dHash = DeviceAuthority.computeDeviceHash(context)
+                                                val sHash = DeviceAuthority.getAppSignatureHash(context)
+                                                val text = "DEVELOPER_DEVICE_HASH=$dHash\nINTERNAL_SIGNATURE_HASH=$sHash"
+                                                val clipboard = context.getSystemService(android.content.ClipboardManager::class.java)
+                                                clipboard?.setPrimaryClip(android.content.ClipData.newPlainText("Dev Access Info", text))
+                                                
+                                                Toast.makeText(
+                                                    context,
+                                                    "Device not authorized. Info copied to clipboard and printed to Logcat.",
+                                                    Toast.LENGTH_LONG
+                                                ).show()
+                                            }.onFailure {
+                                                Log.e("Settings", "Failed to copy dev info to clipboard", it)
+                                                Toast.makeText(context, "Device not authorized. See Logcat for info.", Toast.LENGTH_LONG).show()
+                                            }
+                                        }
                                     }
                                 },
                                 showChevron = false
@@ -681,8 +708,11 @@ fun SettingsScreen(
                                 title = policyTitle,
                                 subtitle = policyDesc,
                                 onClick = {
-                                    val intent = Intent(Intent.ACTION_VIEW, "https://neurocomet.github.io/NeuroComet/privacy.html".toUri())
-                                    context.startActivity(intent)
+                                    openTrustedExternalUrl(
+                                        context = context,
+                                        url = "https://getneurocomet.com/privacy",
+                                        allowedHosts = setOf("getneurocomet.com")
+                                    )
                                 }
                             )
                         }
@@ -694,8 +724,11 @@ fun SettingsScreen(
                                 title = termsTitle,
                                 subtitle = termsDesc,
                                 onClick = {
-                                    val intent = Intent(Intent.ACTION_VIEW, "https://neurocomet.github.io/NeuroComet/terms.html".toUri())
-                                    context.startActivity(intent)
+                                    openTrustedExternalUrl(
+                                        context = context,
+                                        url = "https://getneurocomet.com/terms",
+                                        allowedHosts = setOf("getneurocomet.com")
+                                    )
                                 }
                             )
                         }
@@ -708,7 +741,7 @@ fun SettingsScreen(
                 val devGroupDesc = context.getString(R.string.settings_dev_options_desc)
                 val fakePremTitle = context.getString(R.string.settings_fake_premium)
                 val fakePremSubtitle = if (isFakePremiumEnabled) context.getString(R.string.settings_fake_premium_enabled) else context.getString(R.string.settings_fake_premium_disabled)
-                val devVisible = devOptions.devMenuEnabled && (matchesSearch(devGroupTitle, devGroupDesc) || matchesSearch(fakePremTitle, fakePremSubtitle))
+                val devVisible = canShowDevOptions && (matchesSearch(devGroupTitle, devGroupDesc) || matchesSearch(fakePremTitle, fakePremSubtitle))
 
                 if (devVisible) {
                     item(key = "section_dev") {
@@ -776,6 +809,7 @@ fun ThemeSettingsScreen(
     val contentMaxWidth = canonicalSettingsPaneMaxWidth()
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             M3ETopAppBar(
                 title = {
@@ -803,8 +837,10 @@ fun ThemeSettingsScreen(
                     .fillMaxWidth()
                     .widthIn(max = contentMaxWidth),
                 contentPadding = PaddingValues(
-                    horizontal = M3EDesignSystem.Spacing.screenHorizontal,
-                    vertical = M3EDesignSystem.Spacing.sm
+                    start = M3EDesignSystem.Spacing.screenHorizontal,
+                    end = M3EDesignSystem.Spacing.screenHorizontal,
+                    top = 0.dp,
+                    bottom = 0.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -906,7 +942,7 @@ private fun SettingsSearchBar(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = M3EDesignSystem.Shapes.ExtraLargeShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         ),
@@ -957,15 +993,15 @@ private fun SettingsIconGlyph(
 
     Box(
         modifier = Modifier
-            .size(40.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .size(M3EDesignSystem.AvatarSize.md)
+            .clip(M3EDesignSystem.Shapes.SmallShape)
             .background(resolvedBg),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            modifier = Modifier.size(22.dp),
+            modifier = Modifier.size(M3EDesignSystem.IconSize.md),
             tint = resolvedTint
         )
     }
@@ -990,8 +1026,8 @@ private fun SettingsNavRow(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 2.dp),
-        shape = RoundedCornerShape(20.dp),
+            .padding(vertical = M3EDesignSystem.Spacing.xxxs),
+        shape = M3EDesignSystem.Shapes.MediumShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
@@ -1003,12 +1039,12 @@ private fun SettingsNavRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(enabled = enabled, onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                .padding(horizontal = M3EDesignSystem.Spacing.md, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             SettingsIconGlyph(icon = icon, enabled = enabled)
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(modifier = Modifier.width(M3EDesignSystem.Spacing.sm))
 
             Column(
                 modifier = Modifier.weight(1f),
@@ -1070,8 +1106,8 @@ private fun SettingsSwitchRow(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 2.dp),
-        shape = RoundedCornerShape(20.dp),
+            .padding(vertical = M3EDesignSystem.Spacing.xxxs),
+        shape = M3EDesignSystem.Shapes.MediumShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
@@ -1081,12 +1117,12 @@ private fun SettingsSwitchRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onCheckedChange(!checked) }
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                .padding(horizontal = M3EDesignSystem.Spacing.md, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             SettingsIconGlyph(icon = icon, tint = iconTint)
 
-            Spacer(modifier = Modifier.width(14.dp))
+            Spacer(modifier = Modifier.width(M3EDesignSystem.Spacing.sm))
 
             Column(
                 modifier = Modifier.weight(1f),

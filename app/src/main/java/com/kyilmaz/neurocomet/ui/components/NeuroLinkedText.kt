@@ -2,6 +2,7 @@ package com.kyilmaz.neurocomet.ui.components
 
 import android.content.Intent
 import android.net.Uri
+import com.kyilmaz.neurocomet.openSafeExternalUrl
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -422,35 +423,26 @@ private fun handleLinkClick(
 ) {
     when (link.type) {
         LinkType.URL -> {
-            try {
-                uriHandler.openUri(link.url)
-            } catch (e: Exception) {
-                // Fallback to intent
-                try {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link.url))
-                    context.startActivity(intent)
-                } catch (_: Exception) { }
-            }
+            openSafeExternalUrl(context, link.url)
         }
         LinkType.EMAIL -> {
             try {
                 val intent = Intent(Intent.ACTION_SENDTO, Uri.parse(link.url))
-                context.startActivity(intent)
+                if (intent.resolveActivity(context.packageManager) != null) {
+                    context.startActivity(intent)
+                }
             } catch (_: Exception) { }
         }
         LinkType.PHONE -> {
             try {
                 val intent = Intent(Intent.ACTION_DIAL, Uri.parse(link.url))
-                context.startActivity(intent)
+                if (intent.resolveActivity(context.packageManager) != null) {
+                    context.startActivity(intent)
+                }
             } catch (_: Exception) { }
         }
         LinkType.MENTION, LinkType.HASHTAG, LinkType.INTERNAL -> {
-            // These would typically be handled by the app's navigation
-            // The onLinkClick callback should be used for custom handling
-            try {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link.url))
-                context.startActivity(intent)
-            } catch (_: Exception) { }
+            // These should be handled only by in-app navigation via onLinkClick.
         }
     }
 }

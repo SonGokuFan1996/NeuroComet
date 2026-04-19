@@ -1,0 +1,6 @@
+Yenilikler (v2.0.0-rc13)
+- Pil tasarrufu: arama kurulumu yalnızca gerektiğinde başlatılıyor.
+- Daha hızlı açılış: mesajlaşma ve reklam SDK'sı sonra yükleniyor.
+- Daha az widget uyandırması (enerji, kaşık, ruh hâli, stim molası).
+- Arama geçmişi tembel yüklemesi iyileştirildi.
+- Kararlılık ve performans iyileştirmeleri.

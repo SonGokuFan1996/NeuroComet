@@ -64,7 +64,7 @@ class TransactionStatusCard extends StatelessWidget {
                   height: 40,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: data.iconTint.withAlpha(30),
+                    color: data.iconTint.withAlpha(50),
                   ),
                   child: Icon(data.icon, color: data.iconTint, size: 22),
                 ),
@@ -147,8 +147,8 @@ class TransactionStatusCard extends StatelessWidget {
         return _TransactionCardData(
           icon: Icons.cancel,
           iconTint: theme.colorScheme.error,
-          containerColor: theme.colorScheme.errorContainer.withAlpha(90),
-          borderColor: theme.colorScheme.error.withAlpha(82),
+          containerColor: theme.colorScheme.errorContainer.withAlpha(180),
+          borderColor: theme.colorScheme.error.withAlpha(160),
           title: 'Payment Declined',
           description:
               'Your payment could not be processed. Please check your payment method and try again.',
@@ -157,8 +157,8 @@ class TransactionStatusCard extends StatelessWidget {
         return _TransactionCardData(
           icon: Icons.schedule,
           iconTint: const Color(0xFFE65100),
-          containerColor: const Color(0xFFFFF3E0),
-          borderColor: const Color(0xFFE65100).withAlpha(82),
+          containerColor: const Color(0xFFFFE0B2),
+          borderColor: const Color(0xFFE65100).withAlpha(160),
           title: 'Transaction Timed Out',
           description:
               'We didn\'t receive a response in time. Please check your connection and try again.',

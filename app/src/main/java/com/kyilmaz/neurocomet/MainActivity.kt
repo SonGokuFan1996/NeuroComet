@@ -36,10 +36,13 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.revenuecat.purchases.*
 import kotlinx.coroutines.launch
 import com.revenuecat.purchases.interfaces.ReceiveCustomerInfoCallback
@@ -82,6 +85,9 @@ sealed class Screen(val route: String, val labelId: Int, val iconFilled: ImageVe
     data object Profile : Screen("profile/{userId}", R.string.nav_settings, Icons.Filled.Person, Icons.Outlined.Person) {
         fun route(userId: String) = "profile/$userId"
     }
+    data object PostDetail : Screen("post/{postId}", R.string.nav_feed, Icons.Filled.Home, Icons.Outlined.Home) {
+        fun route(postId: Long) = "post/$postId"
+    }
     data object MyProfile : Screen("my_profile", R.string.settings_my_profile, Icons.Filled.Person, Icons.Outlined.Person)
     data object GamesHub : Screen("games_hub", R.string.games_hub_title, Icons.Filled.Games, Icons.Outlined.Games)
     data object GamePlay : Screen("game/{gameId}", R.string.games_hub_title, Icons.Filled.Games, Icons.Outlined.Games) {
@@ -94,6 +100,20 @@ sealed class Screen(val route: String, val labelId: Int, val iconFilled: ImageVe
 }
 
 open class MainActivity : AppCompatActivity() {
+
+    /**
+     * Stream of inbound deep-link intents. Updated on launch and on each
+     * `onNewIntent` so the Compose layer can forward them to NavController.
+     * Cleared to `null` after consumption.
+     */
+    internal val deepLinkIntent: kotlinx.coroutines.flow.MutableStateFlow<android.content.Intent?> =
+        kotlinx.coroutines.flow.MutableStateFlow(null)
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        deepLinkIntent.value = intent
+    }
 
     private fun configureOrientationForDevice() {
         val displayMetrics = resources.displayMetrics
@@ -110,7 +130,10 @@ open class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
+        // Seed deep-link flow with the launch intent (if any).
+        intent?.let { if (it.data != null) deepLinkIntent.value = it }
+
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(
                 android.graphics.Color.TRANSPARENT,
@@ -158,29 +181,29 @@ open class MainActivity : AppCompatActivity() {
         }
 
         // RevenueCat: Automagically configure if a valid API key is present.
-        // Even in debug builds, if the developer supplied a real key, we should allow
-        // them to test real sandbox transactions rather than forcing simulated UI testing.
         val revenueCatKey = SecurityUtils.decrypt(BuildConfig.REVENUECAT_API_KEY)
         val billingConfigured = if (revenueCatKey.isNotBlank() && !revenueCatKey.startsWith("goog_your_")) {
             Purchases.logLevel = LogLevel.DEBUG
             Purchases.configure(PurchasesConfiguration.Builder(this, revenueCatKey).build())
             
-            // Explicitly disable test mode since we have a real key configured
-            SubscriptionManager.testMode = false
-            Log.d("MainActivity", "💰 RevenueCat configured with real key. Simulated test mode disabled.")
+            // Initialize the manager
+            SubscriptionManager.initialize(debug = true)
+            Log.d("MainActivity", "💰 RevenueCat configured with real key. Real-time billing active.")
             true
         } else {
+            // Initialize the manager
+            SubscriptionManager.initialize(debug = false)
             if (!BuildConfig.DEBUG) {
                 Log.e("MainActivity", "🚨 RevenueCat key missing in release build; billing disabled!")
             } else {
-                Log.d("MainActivity", "🧪 TEST MODE: RevenueCat SDK skipped — purchases will be simulated. Add your real key to local.properties to test sandbox billing.")
+                Log.d("MainActivity", "🧪 TEST MODE: RevenueCat SDK skipped — purchases will be simulated.")
             }
             false
         }
 
         SubscriptionManager.setBillingConfigured(
-            isConfigured = billingConfigured,
-            errorMessage = if (!BuildConfig.DEBUG && !billingConfigured) {
+            configured = billingConfigured,
+            error = if (!BuildConfig.DEBUG && !billingConfigured) {
                 "Purchases are temporarily unavailable in this build."
             } else null
         )
@@ -363,6 +386,24 @@ fun NeuroCometApp(
     val safetyState by safetyViewModel.state.collectAsState()
     val themeState by themeViewModel.themeState.collectAsState()
     val canonicalLayout = LocalCanonicalLayout.current
+
+    // Route inbound Android App Link intents (https://getneurocomet.com/post/... or /u/...)
+    // into the NavController so the correct destination is opened.
+    val deepLinkActivity = LocalContext.current as? MainActivity
+    val pendingDeepLink by (
+        deepLinkActivity?.deepLinkIntent
+            ?: kotlinx.coroutines.flow.MutableStateFlow<android.content.Intent?>(null)
+    ).collectAsState()
+    LaunchedEffect(pendingDeepLink) {
+        val link = pendingDeepLink ?: return@LaunchedEffect
+        val uri = link.data
+        if (uri != null && uri.scheme == "https" &&
+            (uri.host == "getneurocomet.com" || uri.host == "www.getneurocomet.com")
+        ) {
+            navController.handleDeepLink(link)
+        }
+        deepLinkActivity?.deepLinkIntent?.value = null
+    }
 
     val authedUser = authState
     val isGuestUser = authedUser?.id == "guest_user"
@@ -873,8 +914,22 @@ fun NeuroCometApp(
                         onOpenCallHistory = {
                             navController.navigate(Screen.CallHistory.route)
                         },
-                        onOpenPracticeCall = {
-                            navController.navigate(Screen.PracticeCallSelection.route)
+                        onStartCall = { userId, displayName, avatarUrl, isVideo ->
+                            if (feedState.isMockInterfaceEnabled) {
+                                com.kyilmaz.neurocomet.MockCallManager.startCall(
+                                    recipientId = userId,
+                                    recipientName = displayName,
+                                    recipientAvatar = avatarUrl,
+                                    callType = if (isVideo) com.kyilmaz.neurocomet.CallType.VIDEO else com.kyilmaz.neurocomet.CallType.VOICE
+                                )
+                            } else {
+                                WebRTCCallManager.getInstance().startCall(
+                                    recipientId = userId,
+                                    recipientName = displayName,
+                                    recipientAvatar = avatarUrl,
+                                    callType = if (isVideo) com.kyilmaz.neurocomet.calling.CallType.VIDEO else com.kyilmaz.neurocomet.calling.CallType.VOICE
+                                )
+                            }
                         }
                     )
                 },
@@ -904,8 +959,8 @@ fun NeuroCometApp(
                             onReactToMessage = { messageId, emoji ->
                                 messagesViewModel.reactToMessage(activeConversation.id, messageId, emoji)
                             },
-                            isBlocked = { messagesViewModel.isUserBlocked(it) },
-                            isMuted = { messagesViewModel.isUserMuted(it) },
+                            isUserBlocked = (activeConversation.participants.firstOrNull { it != (authState?.id ?: "me") }?.let { messagesViewModel.isUserBlocked(it) } ?: false),
+                            isUserMuted = (activeConversation.participants.firstOrNull { it != (authState?.id ?: "me") }?.let { messagesViewModel.isUserMuted(it) } ?: false),
                             enableVideoChat = devOptions.enableVideoChat,
                             typingIndicatorVariant = dmTypingIndicatorVariant,
                             enableSimulatedReplies = BuildConfig.DEBUG && messagesState.currentUserId == "me",
@@ -1066,22 +1121,27 @@ fun NeuroCometApp(
                     ) {
                 composable(Screen.Feed.route) {
                     FeedScreen(
-                        posts = feedState.posts,
-                        stories = feedState.stories,
-                        currentUser = CURRENT_USER.copy(isVerified = isUserVerified),
-                        isLoading = feedState.isLoading,
+                        feedUiState = feedState,
+                        onAddPost = { content, tone, imageUrl, videoUrl, sourcePostId, sourcePostContent ->
+                            feedViewModel.createPost(content, tone, imageUrl, videoUrl)
+                        },
+                        onAddStory = { type, content, authorId, avatarUrl, duration, refPostId, linkData ->
+                            feedViewModel.createStory(
+                                imageUrl = if (type == StoryContentType.IMAGE || type == StoryContentType.VIDEO || type == StoryContentType.DOCUMENT || type == StoryContentType.AUDIO) content else "",
+                                duration = duration,
+                                contentType = type,
+                                textOverlay = if (type == StoryContentType.TEXT_ONLY || type == StoryContentType.LINK) content else null,
+                                linkPreview = linkData
+                            )
+                        },
                         onLikePost = { postId: Long -> feedViewModel.toggleLike(postId) },
                         onReplyPost = { post: Post -> feedViewModel.openCommentSheet(post) },
                         onSharePost = { ctx: Context, post: Post -> feedViewModel.sharePost(ctx, post) },
-                        onAddPost = { content: String, tone: String, imageUrl: String?, videoUrl: String? ->
-                            feedViewModel.createPost(content, tone, imageUrl, videoUrl)
-                        },
                         onDeletePost = { postId: Long -> feedViewModel.deletePost(postId) },
                         onProfileClick = { userId ->
                             navController.navigate(Screen.Profile.route(userId))
                         },
                         onViewStory = { story -> feedViewModel.viewStory(story) },
-                        onAddStory = { imageUrl, duration -> feedViewModel.createStory(imageUrl, duration) },
                         isPremium = feedState.isPremium,
                         onUpgradeClick = { showPremiumDialog = true },
                         isMockInterfaceEnabled = feedState.isMockInterfaceEnabled,
@@ -1154,8 +1214,22 @@ fun NeuroCometApp(
                             onOpenCallHistory = {
                                 navController.navigate(Screen.CallHistory.route)
                             },
-                            onOpenPracticeCall = {
-                                navController.navigate(Screen.PracticeCallSelection.route)
+                            onStartCall = { userId, displayName, avatarUrl, isVideo ->
+                                if (feedState.isMockInterfaceEnabled) {
+                                    com.kyilmaz.neurocomet.MockCallManager.startCall(
+                                        recipientId = userId,
+                                        recipientName = displayName,
+                                        recipientAvatar = avatarUrl,
+                                        callType = if (isVideo) com.kyilmaz.neurocomet.CallType.VIDEO else com.kyilmaz.neurocomet.CallType.VOICE
+                                    )
+                                } else {
+                                    WebRTCCallManager.getInstance().startCall(
+                                        recipientId = userId,
+                                        recipientName = displayName,
+                                        recipientAvatar = avatarUrl,
+                                        callType = if (isVideo) com.kyilmaz.neurocomet.calling.CallType.VIDEO else com.kyilmaz.neurocomet.calling.CallType.VOICE
+                                    )
+                                }
                             }
                         )
                     }
@@ -1181,6 +1255,23 @@ fun NeuroCometApp(
                             },
                             onOpenPracticeCall = {
                                 navController.navigate(Screen.PracticeCallSelection.route)
+                            },
+                            onStartCall = { userId, displayName, avatarUrl, isVideo ->
+                                if (feedState.isMockInterfaceEnabled) {
+                                    com.kyilmaz.neurocomet.MockCallManager.startCall(
+                                        recipientId = userId,
+                                        recipientName = displayName,
+                                        recipientAvatar = avatarUrl,
+                                        callType = if (isVideo) com.kyilmaz.neurocomet.CallType.VIDEO else com.kyilmaz.neurocomet.CallType.VOICE
+                                    )
+                                } else {
+                                    WebRTCCallManager.getInstance().startCall(
+                                        recipientId = userId,
+                                        recipientName = displayName,
+                                        recipientAvatar = avatarUrl,
+                                        callType = if (isVideo) com.kyilmaz.neurocomet.calling.CallType.VIDEO else com.kyilmaz.neurocomet.calling.CallType.VOICE
+                                    )
+                                }
                             }
                         )
                     } else {
@@ -1202,8 +1293,8 @@ fun NeuroCometApp(
                             onReactToMessage = { messageId, emoji ->
                                 messagesViewModel.reactToMessage(conv.id, messageId, emoji)
                             },
-                            isBlocked = { messagesViewModel.isUserBlocked(it) },
-                            isMuted = { messagesViewModel.isUserMuted(it) },
+                            isUserBlocked = (conv.participants.firstOrNull { it != (authState?.id ?: "me") }?.let { messagesViewModel.isUserBlocked(it) } ?: false),
+                            isUserMuted = (conv.participants.firstOrNull { it != (authState?.id ?: "me") }?.let { messagesViewModel.isUserMuted(it) } ?: false),
                             enableVideoChat = devOptions.enableVideoChat,
                             typingIndicatorVariant = dmTypingIndicatorVariant,
                             enableSimulatedReplies = BuildConfig.DEBUG && messagesState.currentUserId == "me",
@@ -1484,7 +1575,13 @@ fun NeuroCometApp(
                         onEndCall = { navController.popBackStack() }
                     )
                 }
-                composable(Screen.Profile.route) { backStackEntry ->
+                composable(
+                    route = Screen.Profile.route,
+                    deepLinks = listOf(
+                        navDeepLink { uriPattern = "https://getneurocomet.com/u/{userId}" },
+                        navDeepLink { uriPattern = "https://www.getneurocomet.com/u/{userId}" },
+                    )
+                ) { backStackEntry ->
                     val userId = backStackEntry.arguments?.getString("userId") ?: ""
                     ProfileScreen(
                         userId = userId,
@@ -1512,6 +1609,40 @@ fun NeuroCometApp(
                         onEditProfile = {
                             navController.navigate(Screen.MyProfile.route)
                         }
+                    )
+                }
+                composable(
+                    route = Screen.PostDetail.route,
+                    arguments = listOf(navArgument("postId") { type = NavType.LongType }),
+                    deepLinks = listOf(
+                        navDeepLink { uriPattern = "https://getneurocomet.com/post/{postId}" },
+                        navDeepLink { uriPattern = "https://www.getneurocomet.com/post/{postId}" },
+                    )
+                ) { backStackEntry ->
+                    val postId = backStackEntry.arguments?.getLong("postId") ?: 0L
+                    PostDetailScreen(
+                        postId = postId,
+                        feedUiState = feedState,
+                        feedViewModel = feedViewModel,
+                        safetyState = safetyState,
+                        currentUserId = authState?.id ?: "",
+                        isMockInterfaceEnabled = feedState.isMockInterfaceEnabled,
+                        onBack = {
+                            if (!navController.popBackStack()) {
+                                // Deep-link launch: no backstack, so go to Feed.
+                                navController.navigate(Screen.Feed.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                }
+                            }
+                        },
+                        onProfileClick = { uid ->
+                            navController.navigate(Screen.Profile.route(uid))
+                        },
+                        onReplyPost = { /* reply handled inside FeedScreen flow */ },
+                        onSharePost = { ctx, post -> feedViewModel.sharePost(ctx, post) }
                     )
                 }
                 composable(Screen.MyProfile.route) {
@@ -1867,8 +1998,7 @@ private fun SettingsSupportPane(
                 Text(
                     text = user?.id ?: "Local session",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                    color = MaterialTheme.colorScheme.onSurfaceVariant                )
                 AssistChip(
                     onClick = {},
                     enabled = false,

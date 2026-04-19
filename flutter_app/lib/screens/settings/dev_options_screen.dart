@@ -4,6 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/dev_options.dart';
+import '../../providers/feed_provider.dart';
+import '../../providers/messages_provider.dart';
+import '../../providers/notifications_provider.dart';
+import '../../providers/stories_provider.dart';
+import '../../services/device_authorization_service.dart';
 import '../../services/supabase_service.dart';
 import '../../widgets/settings/dev_test_sections.dart';
 
@@ -54,6 +59,14 @@ class DevOptionsNotifier extends Notifier<DevOptions> {
   void setShowDebugOverlay(bool value) => _update((s) => s.copyWith(showDebugOverlay: value));
   void setEnableVerboseLogging(bool value) => _update((s) => s.copyWith(enableVerboseLogging: value));
 
+  // ── Ads Testing ──────────────────────────────────────────
+  void setIsAdsPremium(bool value) => _update((s) => s.copyWith(isAdsPremium: value));
+  void setForceShowAds(bool value) => _update((s) => s.copyWith(forceShowAds: value));
+  void setSimulateAdFailure(bool value) => _update((s) => s.copyWith(simulateAdFailure: value));
+  void setUseTestAds(bool value) => _update((s) => s.copyWith(useTestAds: value));
+  void setTotalAdsShown(int value) => _update((s) => s.copyWith(totalAdsShown: value));
+  void incrementAdsShown() => _update((s) => s.copyWith(totalAdsShown: s.totalAdsShown + 1));
+
   // ── Environment ──────────────────────────────────────
   void setEnvironment(DevEnvironmentTarget value) => _update((s) => s.copyWith(environment: value));
 
@@ -63,6 +76,7 @@ class DevOptionsNotifier extends Notifier<DevOptions> {
   void setEnableStoryReactions(bool value) => _update((s) => s.copyWith(enableStoryReactions: value));
   void setEnableAdvancedSearch(bool value) => _update((s) => s.copyWith(enableAdvancedSearch: value));
   void setEnableAiSuggestions(bool value) => _update((s) => s.copyWith(enableAiSuggestions: value));
+  void setEnableHandoff(bool value) => _update((s) => s.copyWith(enableHandoff: value));
 
   // ── Content & Safety ─────────────────────────────────
   void setForcedAudience(Audience? value) => _update((s) => s.copyWith(forcedAudience: value, clearForcedAudience: value == null));
@@ -132,13 +146,27 @@ class _DevOptionsScreenState extends ConsumerState<DevOptionsScreen> {
   int? _usersCount;
   final _searchController = TextEditingController();
   String _searchQuery = '';
+  bool _isCheckingAccess = !kDebugMode;
+  bool _hasDeveloperAccess = kDebugMode;
 
   @override
   void initState() {
     super.initState();
+    _checkDeveloperAccess();
     _refreshCounts();
     _searchController.addListener(() {
       setState(() => _searchQuery = _searchController.text.toLowerCase());
+    });
+  }
+
+  Future<void> _checkDeveloperAccess() async {
+    if (kDebugMode) return;
+
+    final hasAccess = await DeviceAuthorizationService.canUseDeveloperTools();
+    if (!mounted) return;
+    setState(() {
+      _hasDeveloperAccess = hasAccess;
+      _isCheckingAccess = false;
     });
   }
 
@@ -180,28 +208,91 @@ class _DevOptionsScreenState extends ConsumerState<DevOptionsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isCheckingAccess) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Developer Options', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (!_hasDeveloperAccess) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Developer Options', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.lock_outline, size: 42),
+                    SizedBox(height: 12),
+                    Text(
+                      'Developer tools are restricted to authorized devices.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Use the Android household-authorized build/device pairing to access parity diagnostics and internal testing tools.',
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final options = ref.watch(devOptionsProvider);
-    final notifier = ref.read(devOptionsProvider.notifier);
     final theme = Theme.of(context);
 
     final sections = <_SectionEntry>[
       _SectionEntry('App Info & Diagnostics', 'version build device os memory', Icons.info, const AppInfoDevSection()),
+      _SectionEntry('Notifications Testing', 'notifications push permission unread inject badge alert', Icons.notifications_active, const NotificationsDevSection()),
+      _SectionEntry('Profile & Edit Profile', 'profile avatar edit followers following bio user', Icons.person, const ProfileDevSection()),
+      _SectionEntry('Feed Interactions', 'feed post create like comment bookmark share delete', Icons.dynamic_feed, const FeedInteractionsDevSection()),
+      _SectionEntry('Accessibility & Theme', 'accessibility theme dark light contrast font dyslexic motion scale', Icons.accessibility_new, const AccessibilityThemeDevSection()),
+      _SectionEntry('Live Session Lab', 'live session handoff ongoing notification channels regulation', Icons.timer, const LiveSessionLabDevSection()),
       _SectionEntry('Environment', 'staging production local backend', Icons.cloud, EnvironmentPickerDevSection()),
-      _SectionEntry('A/B Testing', 'ab test variant liquid glass compact bold typography experiment', Icons.science, const ABTestingDevSection()),
-      _SectionEntry('Feature Flags', 'flags feed video chat story search ai', Icons.flag, const FeatureFlagsDevSection()),
-      _SectionEntry('Authentication', 'auth login sign in session user', Icons.lock, const AuthDevSection()),
-      _SectionEntry('Content Safety', 'content safety audience kids filter pin parental', Icons.security, const ContentSafetyDevSection()),
-      _SectionEntry('DM Delivery', 'dm message overlay send failure delay rate limit moderation', Icons.chat_bubble_outline, const DmDebugDevSection()),
+      _SectionEntry('Feature Flags', 'flags feed video chat story search ai handoff', Icons.flag, const FeatureFlagsDevSection()),
       _SectionEntry('Rendering & Network', 'rendering offline loading error latency fallback network', Icons.network_check, const RenderingNetworkDevSection()),
-      _SectionEntry('Auth Overrides', 'auth biometric 2fa logout bypass', Icons.admin_panel_settings, const AuthOverrideDevSection()),
-      _SectionEntry('Language & Locale', 'language locale translation i18n', Icons.language, const LocaleDevSection()),
-      _SectionEntry('Local Storage', 'storage preferences keys data', Icons.data_usage, const StorageDevSection()),
-      _SectionEntry('General Debug', 'debug overlay verbose logging', Icons.bug_report, const GeneralOptionsDevSection()),
-      _SectionEntry('Supabase', 'supabase database posts backend', Icons.storage,
+      _SectionEntry('Payments & Subs', 'subscription purchase premium billing transaction restore', Icons.payment, const PaymentsSubscriptionsDevSection()),
+      _SectionEntry('Moderation Heuristics', 'moderation heuristics flagged blocked kids filter sanitization content', Icons.gpp_good_outlined, const ModerationHeuristicsDevSection()),
+      _SectionEntry('Content Safety', 'content safety audience kids filter pin parental', Icons.security, const ContentSafetyDevSection()),
+      _SectionEntry('Privacy & Account', 'privacy account blocked muted data export deletion detox auth', Icons.shield, const PrivacyAccountDevSection()),
+      _SectionEntry('Wellbeing & Detox', 'wellbeing detox break reminders quiet hours bedtime positivity', Icons.self_improvement, const WellbeingDetoxDevSection()),
+      _SectionEntry('DM Delivery', 'dm message overlay send failure delay rate limit moderation', Icons.chat_bubble_outline, const DmDebugDevSection()),
+      _SectionEntry('Neurodivergent Widgets', 'widgets neurodivergent accessible typewriter parallax phone formatting', Icons.widgets, const WidgetsDevSection()),
+      _SectionEntry('Image Customization', 'images customization filters stories media', Icons.photo_filter, const ImagesDevSection()),
+      _SectionEntry('Explore Page Views', 'explore discover trending layout preview feed explore', Icons.explore, const ExploreViewsDevSection()),
+      _SectionEntry('Multi-Media Posts', 'multimedia video audio posts carousel media', Icons.collections, const MultiMediaDevSection()),
+      _SectionEntry('Adaptive Navigation', 'navigation adaptive drawer tabs routes responsive', Icons.dashboard, const NavigationDevSection()),
+      _SectionEntry('Deep Links & Routing', 'deep link routing navigation test route invalid url path', Icons.link, const DeepLinksRoutingDevSection()),
+      _SectionEntry('Dialogs', 'dialogs popup message input choice loading', Icons.chat, const DialogsDevSection()),
+      _SectionEntry('Location & Sensors', 'location gps sensors permission status', Icons.sensors, const LocationSensorsDevSection()),
+      _SectionEntry('Contact Picker', 'contacts picker permission android 17 privacy picker', Icons.contacts, const ContactPickerDevSection()),
+      _SectionEntry('Local Storage', 'storage preferences keys data credentials', Icons.storage, const StorageDevSection()),
+      _SectionEntry('Supabase DB Testing', 'supabase database posts users tables test', Icons.cloud_sync, const SupabaseDbTestingDevSection()),
+      _SectionEntry('Supabase', 'supabase database posts backend', Icons.cloud_upload,
         SupabaseDevSection(showResult: _showResult, postsCount: _postsCount, usersCount: _usersCount, onRefresh: _refreshCounts)),
-      _SectionEntry('Stress Testing', 'stress test performance widgets animations memory', Icons.speed, const StressTestingDevSection()),
+      _SectionEntry('Google Ads Testing', 'ads ad interstitial rewarded premium banner', Icons.tv, const GoogleAdsDevSection()),
+      _SectionEntry('A/B Testing', 'ab test experiment variant split traffic control liquid glass compact bold', Icons.science, const ABTestingDevSection()),
+      _SectionEntry('Biometric, FIDO2 & MFA', 'auth login biometric fido passkey mfa totp backup', Icons.fingerprint, const BiometricFidoDevSection()),
+      _SectionEntry('Stories Testing', 'stories story test inject flood text link preview multi-item kitchen sink', Icons.auto_stories, const StoriesTestingDevSection()),
+      _SectionEntry('Games', 'games achievements badges', Icons.sports_esports, const GamesDevSection()),
+      _SectionEntry('Language', 'language locale translation i18n', Icons.language, const LocaleDevSection()),
+      _SectionEntry('Backup & Restore', 'backup restore export import storage drive', Icons.backup_outlined, const BackupRestoreDevSection()),
       _SectionEntry('Feedback & Beta', 'feedback beta bug report feature request offline queue rate limit submission', Icons.feedback, const FeedbackBetaDevSection()),
-      _SectionEntry('Reset', 'reset clear defaults', Icons.restart_alt, const ResetDevSection()),
+      _SectionEntry('System Stress Testing', 'stress test performance widgets animations memory', Icons.speed, const StressTestingDevSection()),
     ];
 
     final filtered = sections.where((s) => _matchesSearch(s.title, s.searchTerms)).toList();
@@ -309,8 +400,16 @@ class _CollapsibleSectionState extends State<_CollapsibleSection>
   bool _expanded = false;
 
   @override
+  void didUpdateWidget(covariant _CollapsibleSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.forceExpanded && !oldWidget.forceExpanded) {
+      _expanded = true;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isExpanded = _expanded || widget.forceExpanded;
+    final isExpanded = _expanded;
     final theme = Theme.of(context);
 
     return Card(
@@ -373,17 +472,33 @@ class _QuickActionsBar extends ConsumerWidget {
         children: [
           ActionChip(
             avatar: const Icon(Icons.restart_alt, size: 16),
-            label: const Text('Reset All', style: TextStyle(fontSize: 11)),
+            label: const Text('Reset Overrides', style: TextStyle(fontSize: 11)),
             onPressed: () {
               notifier.resetAll();
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('All dev options reset')));
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('All settings reset')));
+            },
+          ),
+          const SizedBox(width: 8),
+          ActionChip(
+            avatar: const Icon(Icons.data_usage, size: 16),
+            label: const Text('Reset Mock Data', style: TextStyle(fontSize: 11)),
+            onPressed: () async {
+              ref.invalidate(feedProvider);
+              ref.invalidate(conversationsProvider);
+              ref.invalidate(chatMessagesProvider);
+              ref.invalidate(storiesProvider);
+              await ref.read(notificationsProvider.notifier).resetMockNotifications();
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Mock data and notifications reset')),
+              );
             },
           ),
           const SizedBox(width: 8),
           ActionChip(
             avatar: const Icon(Icons.layers, size: 16),
             label: const Text('Toggle Overlay', style: TextStyle(fontSize: 11)),
-            onPressed: () => notifier.setShowDebugOverlay(!options.showDebugOverlay),
+            onPressed: () => notifier.setShowDmDebugOverlay(!options.showDmDebugOverlay),
           ),
           const SizedBox(width: 8),
           ActionChip(

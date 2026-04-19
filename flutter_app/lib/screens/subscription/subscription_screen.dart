@@ -158,6 +158,8 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   }
 
   Future<void> _subscribe() async {
+    if (_purchaseInFlight) return; // Prevent double-clicks
+
     setState(() {
       _isLoading = true;
       _transactionResult = null; // reset previous result
@@ -170,23 +172,40 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
     try {
       if (planId == 'monthly') {
         await _subscriptionService.purchaseMonthly(
-          onSuccess: () {},
-          onError: (_) {},
+          onSuccess: () {
+            if (mounted) setState(() => _purchaseInFlight = false);
+          },
+          onError: (_) {
+            if (mounted) setState(() => _purchaseInFlight = false);
+          },
         );
       } else if (planId == 'lifetime') {
         await _subscriptionService.purchaseLifetime(
-          onSuccess: () {},
-          onError: (_) {},
+          onSuccess: () {
+            if (mounted) setState(() => _purchaseInFlight = false);
+          },
+          onError: (_) {
+            if (mounted) setState(() => _purchaseInFlight = false);
+          },
         );
       } else {
-        // Annual plan — treat as monthly for now (IAP will differentiate)
+        // Annual plan
         await _subscriptionService.purchaseMonthly(
-          onSuccess: () {},
-          onError: (_) {},
+          onSuccess: () {
+            if (mounted) setState(() => _purchaseInFlight = false);
+          },
+          onError: (_) {
+            if (mounted) setState(() => _purchaseInFlight = false);
+          },
         );
       }
     } catch (_) {
-      // Error is handled via listener
+      if (mounted) {
+        setState(() {
+          _purchaseInFlight = false;
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -383,12 +402,12 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       TextButton(
-                        onPressed: () => launchUrl(Uri.parse('https://neurocomet.app/terms')),
+                        onPressed: () => launchUrl(Uri.parse('https://getneurocomet.com/terms')),
                         child: Text(l10n.termsOfService),
                       ),
                       const Text('•'),
                       TextButton(
-                        onPressed: () => launchUrl(Uri.parse('https://neurocomet.app/privacy')),
+                        onPressed: () => launchUrl(Uri.parse('https://getneurocomet.com/privacy')),
                         child: Text(l10n.privacyPolicy),
                       ),
                     ],

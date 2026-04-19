@@ -180,7 +180,7 @@ class _PrivacySettingsScreenState extends ConsumerState<PrivacySettingsScreen> {
                   subtitle: const Text('Manage blocked accounts'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
-                    // Navigate to blocked users
+                    context.push('/settings/blocked');
                   },
                 ),
                 const Divider(),

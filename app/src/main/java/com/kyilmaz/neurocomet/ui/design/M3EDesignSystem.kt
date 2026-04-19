@@ -105,6 +105,17 @@ object M3EDesignSystem {
 
         /** Navigation bar indicator shape */
         val NavIndicator: Shape = RoundedCornerShape(full)
+
+        /**
+         * Material 3 Shapes object for theme integration.
+         */
+        val materialShapes: androidx.compose.material3.Shapes = androidx.compose.material3.Shapes(
+            extraSmall = RoundedCornerShape(extraSmall),
+            small = RoundedCornerShape(small),
+            medium = RoundedCornerShape(medium),
+            large = RoundedCornerShape(large),
+            extraLarge = RoundedCornerShape(extraLarge)
+        )
     }
 
     // ========================================================================
@@ -128,6 +139,9 @@ object M3EDesignSystem {
         val cardPadding: Dp = 16.dp
         val listItemPadding: Dp = 16.dp
         val chipPadding: Dp = 8.dp
+
+        /** Standard bottom spacing to clear the navigation bar/chrome */
+        val bottomNavPadding: Dp = 100.dp
     }
 
     // ========================================================================
@@ -221,7 +235,7 @@ object M3EDesignSystem {
 
     object ComponentHeight {
         val appBar: Dp = 64.dp
-        val navigationBar: Dp = 80.dp
+        val navigationBar: Dp = 56.dp
         val searchBar: Dp = 56.dp
         val chip: Dp = 32.dp
         val button: Dp = 48.dp

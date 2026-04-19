@@ -1,5 +1,6 @@
 package com.kyilmaz.neurocomet.widget
 
+import android.app.AlarmManager
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
@@ -8,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
+import android.os.SystemClock
 import android.util.Log
 import android.widget.RemoteViews
 import com.kyilmaz.neurocomet.MainActivity
@@ -141,6 +143,23 @@ object WidgetPreferences {
             .putBoolean(KEY_TIMER_RUNNING, isRunning)
             .putLong(KEY_TIMER_END_TIME, endTime)
             .apply()
+
+        if (isRunning) {
+            FocusTimerWidgetProvider.scheduleTimerCompletion(context, endTime)
+        } else {
+            FocusTimerWidgetProvider.cancelTimerCompletion(context)
+        }
+
+        updateAllWidgets(context)
+    }
+
+    fun completeFocusTimer(context: Context, resetMinutes: Int = 25) {
+        getPrefs(context).edit()
+            .putBoolean(KEY_TIMER_RUNNING, false)
+            .putLong(KEY_TIMER_END_TIME, 0L)
+            .putInt(KEY_FOCUS_MINUTES, resetMinutes)
+            .apply()
+        FocusTimerWidgetProvider.cancelTimerCompletion(context)
         updateAllWidgets(context)
     }
 
@@ -151,11 +170,7 @@ object WidgetPreferences {
             val endTime = prefs.getLong(KEY_TIMER_END_TIME, 0)
             val remainingMs = endTime - System.currentTimeMillis()
             if (remainingMs <= 0L) {
-                prefs.edit()
-                    .putBoolean(KEY_TIMER_RUNNING, false)
-                    .putLong(KEY_TIMER_END_TIME, 0L)
-                    .putInt(KEY_FOCUS_MINUTES, 25)
-                    .apply()
+                completeFocusTimer(context)
                 return 25
             }
             return ((remainingMs + 59_999L) / 60_000L).toInt()
@@ -170,14 +185,14 @@ object WidgetPreferences {
 
         val endTime = prefs.getLong(KEY_TIMER_END_TIME, 0L)
         if (endTime <= System.currentTimeMillis()) {
-            prefs.edit()
-                .putBoolean(KEY_TIMER_RUNNING, false)
-                .putLong(KEY_TIMER_END_TIME, 0L)
-                .putInt(KEY_FOCUS_MINUTES, 25)
-                .apply()
+            completeFocusTimer(context)
             return false
         }
         return true
+    }
+
+    fun getFocusTimerEndTime(context: Context): Long {
+        return getPrefs(context).getLong(KEY_TIMER_END_TIME, 0L)
     }
 
     // Tasks
@@ -496,6 +511,44 @@ class FocusTimerWidgetProvider : AppWidgetProvider() {
         const val ACTION_START_TIMER = "com.kyilmaz.neurocomet.START_TIMER"
         const val ACTION_PAUSE_TIMER = "com.kyilmaz.neurocomet.PAUSE_TIMER"
         const val ACTION_RESET_TIMER = "com.kyilmaz.neurocomet.RESET_TIMER"
+        const val ACTION_TIMER_FINISHED = "com.kyilmaz.neurocomet.TIMER_FINISHED"
+
+        fun scheduleTimerCompletion(context: Context, endTimeMillis: Long) {
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
+            val triggerAtMillis = endTimeMillis.coerceAtLeast(System.currentTimeMillis())
+            val pendingIntent = createBroadcastPendingIntent(context, ACTION_TIMER_FINISHED)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerAtMillis,
+                    pendingIntent
+                )
+            } else {
+                alarmManager.setExact(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerAtMillis,
+                    pendingIntent
+                )
+            }
+        }
+
+        fun cancelTimerCompletion(context: Context) {
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
+            alarmManager.cancel(createBroadcastPendingIntent(context, ACTION_TIMER_FINISHED))
+        }
+
+        private fun createBroadcastPendingIntent(context: Context, action: String): PendingIntent {
+            val intent = Intent(context, FocusTimerWidgetProvider::class.java).apply {
+                this.action = action
+            }
+            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            }
+            return PendingIntent.getBroadcast(context, action.hashCode(), intent, flags)
+        }
     }
 
     override fun onUpdate(
@@ -523,6 +576,9 @@ class FocusTimerWidgetProvider : AppWidgetProvider() {
             ACTION_RESET_TIMER -> {
                 WidgetPreferences.setFocusTimer(context, 25, false)
             }
+            ACTION_TIMER_FINISHED -> {
+                WidgetPreferences.completeFocusTimer(context)
+            }
         }
     }
 
@@ -533,11 +589,25 @@ class FocusTimerWidgetProvider : AppWidgetProvider() {
     ) {
         val minutes = WidgetPreferences.getFocusMinutes(context)
         val isRunning = WidgetPreferences.isTimerRunning(context)
+        val endTime = WidgetPreferences.getFocusTimerEndTime(context)
+        val remainingMs = if (isRunning) {
+            (endTime - System.currentTimeMillis()).coerceAtLeast(0L)
+        } else {
+            minutes * 60_000L
+        }
 
         val views = RemoteViews(context.packageName, R.layout.widget_focus_timer)
 
         // Set time display
-        views.setTextViewText(R.id.widget_timer_minutes, String.format(Locale.getDefault(), "%02d", minutes))
+        views.setChronometer(
+            R.id.widget_timer_minutes,
+            SystemClock.elapsedRealtime() + remainingMs,
+            null,
+            isRunning
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            views.setChronometerCountDown(R.id.widget_timer_minutes, true)
+        }
         views.setTextViewText(R.id.widget_timer_label, context.getString(if (isRunning) R.string.widget_focus_active else R.string.widget_focus_ready))
 
         // Set status emoji
@@ -567,15 +637,7 @@ class FocusTimerWidgetProvider : AppWidgetProvider() {
     }
 
     private fun createPendingIntent(context: Context, action: String): PendingIntent {
-        val intent = Intent(context, FocusTimerWidgetProvider::class.java).apply {
-            this.action = action
-        }
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        } else {
-            PendingIntent.FLAG_UPDATE_CURRENT
-        }
-        return PendingIntent.getBroadcast(context, action.hashCode(), intent, flags)
+        return createBroadcastPendingIntent(context, action)
     }
 }
 

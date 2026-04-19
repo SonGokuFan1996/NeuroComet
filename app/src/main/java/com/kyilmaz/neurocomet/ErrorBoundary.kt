@@ -511,7 +511,7 @@ fun FullScreenFallback(
                         } catch (_: Exception) {
                             android.widget.Toast.makeText(
                                 context,
-                                "Email support@neurocomet.app for help",
+                                "Email support@getneurocomet.com for help",
                                 android.widget.Toast.LENGTH_LONG
                             ).show()
                         }

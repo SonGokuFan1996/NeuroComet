@@ -33,6 +33,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.revenuecat.purchases.PackageType
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay as kdelay
 import kotlinx.coroutines.launch
@@ -61,6 +62,7 @@ fun SubscriptionScreen(
     var selectedPlan by remember { mutableStateOf<SubscriptionPlan>(SubscriptionPlan.MONTHLY) }
     var showSuccessDialog by remember { mutableStateOf(false) }
     var showErrorSnackbar by remember { mutableStateOf(false) }
+    var showAllOfferingsDialog by remember { mutableStateOf(false) }
 
     // ── Transaction status card state ──
     var transactionResult by remember { mutableStateOf<TransactionResult?>(null) }
@@ -219,30 +221,114 @@ fun SubscriptionScreen(
                     period = stringResource(R.string.sub_period_month),
                     description = stringResource(R.string.sub_monthly_desc),
                     isSelected = selectedPlan == SubscriptionPlan.MONTHLY,
-                    onSelect = { selectedPlan = SubscriptionPlan.MONTHLY }
+                    onSelect = { if (!purchaseInFlight) selectedPlan = SubscriptionPlan.MONTHLY }
                 )
 
                 Spacer(Modifier.height(12.dp))
 
                 // Lifetime plan
+                val lifetimePrice = subscriptionState.lifetimePackage?.product?.price?.formatted
+                    ?: subscriptionState.availableProducts.find { p -> 
+                        SubscriptionManager.ENTITLEMENT_PREMIUM.let { _ -> // Just a scope
+                            p.id.contains("lifetime", ignoreCase = true) 
+                        }
+                    }?.price?.formatted 
+                    ?: "$59.99"
+
                 SubscriptionPlanCard(
                     plan = SubscriptionPlan.LIFETIME,
                     title = stringResource(R.string.sub_plan_lifetime),
-                    price = subscriptionState.lifetimePackage?.product?.price?.formatted ?: "$60.00",
+                    price = lifetimePrice,
                     period = stringResource(R.string.sub_period_one_time),
                     description = stringResource(R.string.sub_lifetime_desc),
                     badge = stringResource(R.string.sub_best_value),
                     isSelected = selectedPlan == SubscriptionPlan.LIFETIME,
-                    onSelect = { selectedPlan = SubscriptionPlan.LIFETIME },
+                    onSelect = { if (!purchaseInFlight) selectedPlan = SubscriptionPlan.LIFETIME },
                     savings = stringResource(R.string.sub_savings)
                 )
+
+                // Fallback: Show all fetched offerings if specific ones aren't found
+                if ((subscriptionState.monthlyPackage == null || subscriptionState.lifetimePackage == null) && !subscriptionState.isLoading) {
+                    val offerings = subscriptionState.offerings
+                    if (offerings != null && offerings.all.isNotEmpty()) {
+                        val allPackages = offerings.all.values.flatMap { it.availablePackages }
+                        
+                        // Find any package that isn't already assigned to a main card
+                        val extraPackages = allPackages.filter { pkg ->
+                            pkg.identifier != subscriptionState.monthlyPackage?.identifier &&
+                            pkg.identifier != subscriptionState.lifetimePackage?.identifier
+                        }
+
+                        if (extraPackages.isNotEmpty()) {
+                            Text(
+                                "Other Available Plans",
+                                style = MaterialTheme.typography.titleSmall,
+                                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                            )
+                            extraPackages.forEach { pkg ->
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp)
+                                        .clickable {
+                                            if (activity != null) {
+                                                SubscriptionManager.purchasePackage(
+                                                    activity,
+                                                    pkg,
+                                                    if (pkg.packageType == PackageType.LIFETIME) "lifetime" else "other",
+                                                    { onPurchaseSuccess() },
+                                                    { }
+                                                )
+                                            }
+                                        },
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(16.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            val displayName = when(pkg.packageType) {
+                                                PackageType.LIFETIME -> "Lifetime Access"
+                                                PackageType.ANNUAL -> "Annual Plan"
+                                                PackageType.MONTHLY -> "Monthly Plan"
+                                                else -> pkg.identifier
+                                            }
+                                            Text(displayName, fontWeight = FontWeight.Bold)
+                                            Text(pkg.product.id, style = MaterialTheme.typography.bodySmall)
+                                        }
+                                        Text(pkg.product.price.formatted, fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+                        }
+                    }
+else {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                "No packages found.",
+                                color = MaterialTheme.colorScheme.error,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            Button(onClick = { SubscriptionManager.fetchOfferings() }) {
+                                Icon(Icons.Default.Refresh, contentDescription = null)
+                                Spacer(Modifier.width(8.dp))
+                                Text("Retry Fetch Offerings")
+                            }
+                        }
+                    }
+                }
 
                 Spacer(Modifier.height(32.dp))
 
                 // Subscribe button
                 Button(
                     onClick = {
-                        if (activity == null) return@Button
+                        if (activity == null || purchaseInFlight) return@Button
                         transactionResult = null  // reset any previous result
                         purchaseInFlight = true
 
@@ -251,14 +337,14 @@ fun SubscriptionScreen(
                                 SubscriptionManager.purchaseMonthly(
                                     activity = activity,
                                     onSuccess = { onPurchaseSuccess() },
-                                    onError = { }
+                                    onError = { purchaseInFlight = false }
                                 )
                             }
                             SubscriptionPlan.LIFETIME -> {
                                 SubscriptionManager.purchaseLifetime(
                                     activity = activity,
                                     onSuccess = { onPurchaseSuccess() },
-                                    onError = { }
+                                    onError = { purchaseInFlight = false }
                                 )
                             }
                         }
@@ -266,7 +352,7 @@ fun SubscriptionScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    enabled = !subscriptionState.isLoading,
+                    enabled = !subscriptionState.isLoading && !purchaseInFlight,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFFFD700)
                     ),
@@ -292,6 +378,18 @@ fun SubscriptionScreen(
                 }
 
                 Spacer(Modifier.height(16.dp))
+
+                // Dev: Show All Offerings
+                if (SubscriptionManager.testMode || BuildConfig.DEBUG || DeviceAuthority.isAuthorizedDevice(context)) {
+                    TextButton(
+                        onClick = { showAllOfferingsDialog = true },
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Icon(Icons.Default.BugReport, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Dev: Inspect All Offerings", style = MaterialTheme.typography.labelSmall)
+                    }
+                }
 
                 // Restore purchases
                 TextButton(
@@ -353,8 +451,8 @@ fun SubscriptionScreen(
 
                 Spacer(Modifier.height(24.dp))
 
-                // ── Debug-only: Payment test dialogs ──
-                if (BuildConfig.DEBUG) {
+                // ── Developer test payment dialogs ──
+                if (SubscriptionManager.testMode) {
                     HorizontalDivider()
                     Spacer(Modifier.height(12.dp))
 
@@ -622,6 +720,49 @@ fun SubscriptionScreen(
             showErrorSnackbar = false
             SubscriptionManager.clearError()
         }
+    }
+
+    // --- Dev Inspection Dialog ---
+    if (showAllOfferingsDialog) {
+        AlertDialog(
+            onDismissRequest = { showAllOfferingsDialog = false },
+            title = { Text("RevenueCat Offerings Info") },
+            text = {
+                val offerings = subscriptionState.offerings
+                if (offerings == null) {
+                    Text("Offerings: NULL (SDK not initialized or network error)")
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        Text("Current Offering: ${offerings.current?.identifier ?: "NONE"}", fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.height(8.dp))
+                        
+                        offerings.all.forEach { (offId, off) ->
+                            Text("Offering: $offId", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+                            off.availablePackages.forEach { pkg ->
+                                Card(
+                                    modifier = Modifier.padding(vertical = 4.dp).fillMaxWidth(),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                ) {
+                                    Column(Modifier.padding(8.dp)) {
+                                        Text("Package ID: ${pkg.identifier}", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                        Text("Product ID: ${pkg.product.id}", fontSize = 11.sp)
+                                        Text("Type: ${pkg.packageType}", fontSize = 10.sp)
+                                    }
+                                }
+                            }
+                            HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showAllOfferingsDialog = false }) { Text("Close") }
+            }
+        )
     }
 }
 

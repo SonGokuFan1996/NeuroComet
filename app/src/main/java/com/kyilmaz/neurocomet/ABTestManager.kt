@@ -251,13 +251,6 @@ enum class ABExperiment(
         trafficSplit = listOf(50, 50)
     ),
 
-    EXPLORE_LIQUID_GLASS(
-        key = "explore_liquid_glass",
-        displayName = "Liquid Glass Interface",
-        description = "Experimental translucent frosted-glass cards with blur and refraction effects",
-        variants = listOf("control", "frosted", "refraction"),
-        trafficSplit = listOf(34, 33, 33)
-    ),
 
     EXPLORE_STORIES_LAYOUT(
         key = "explore_stories_layout",
@@ -328,12 +321,34 @@ enum class ABExperiment(
     ),
 
     // ── Explore – Liquid Glass Header ───────────────────────────
+    @Deprecated("Use LIQUID_GLASS instead — this is kept for assignment migration only")
     EXPLORE_LIQUID_GLASS_HEADER(
         key = "explore_liquid_glass_header",
-        displayName = "Liquid Glass Header",
-        description = "Experimental translucent frosted-glass header with animated refraction highlights",
+        displayName = "Liquid Glass Header (legacy)",
+        description = "Superseded by the unified Liquid Glass experiment",
         variants = listOf("control", "frosted", "aurora"),
         trafficSplit = listOf(34, 33, 33)
+    ),
+
+    // ── Liquid Glass Navigation Bar (legacy) ──────────────────────
+    @Deprecated("Use LIQUID_GLASS instead — this is kept for assignment migration only")
+    LIQUID_GLASS_NAVBAR(
+        key = "liquid_glass_navbar",
+        displayName = "Liquid Glass Navbar (legacy)",
+        description = "Superseded by the unified Liquid Glass experiment",
+        variants = listOf("control", "frosted", "aurora"),
+        trafficSplit = listOf(34, 33, 33)
+    ),
+
+    // ── Unified Liquid Glass ─────────────────────────────────────
+    /** Single toggle for every Liquid Glass surface: navbar, top app bar,
+     *  FAB, bottom sheets, search bar. Matches iOS 26 glass treatment. */
+    LIQUID_GLASS(
+        key = "liquid_glass",
+        displayName = "Experimental Surface Chrome",
+        description = "Compare glass and skeumorphic chrome across navbar, headers, FAB, sheets, and search",
+        variants = listOf("control", "frosted", "aurora", "semi_skeumorphic", "full_skeumorphic"),
+        trafficSplit = listOf(20, 20, 20, 20, 20)
     ),
 
     // ── Explore – Engagement Prompt Cards ────────────────────────

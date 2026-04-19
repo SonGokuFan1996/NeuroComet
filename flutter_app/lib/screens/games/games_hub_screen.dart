@@ -134,6 +134,34 @@ class GamesHubScreen extends ConsumerWidget {
         icon: Icons.air,
         color: Colors.teal,
       ),
+      _GameInfo(
+        id: 'pattern_tap',
+        name: l10n.gamePatternTap,
+        description: l10n.gamePatternTapDesc,
+        icon: Icons.grid_on,
+        color: Colors.indigo,
+      ),
+      _GameInfo(
+        id: 'worry_jar',
+        name: l10n.gameWorryJar,
+        description: l10n.gameWorryJarDesc,
+        icon: Icons.water_drop_outlined,
+        color: Colors.lightBlue,
+      ),
+      _GameInfo(
+        id: 'mood_mixer',
+        name: l10n.gameMoodMixer,
+        description: l10n.gameMoodMixerDesc,
+        icon: Icons.palette,
+        color: Colors.deepPurple,
+      ),
+      _GameInfo(
+        id: 'safe_space',
+        name: l10n.gameSafeSpace,
+        description: l10n.gameSafeSpaceDesc,
+        icon: Icons.shield_moon,
+        color: Colors.blueGrey,
+      ),
     ];
   }
 
@@ -166,6 +194,34 @@ class GamesHubScreen extends ConsumerWidget {
         description: l10n.gameEmotionGardenDesc,
         icon: Icons.local_florist,
         color: Colors.green,
+      ),
+      _GameInfo(
+        id: 'texture_tiles',
+        name: l10n.gameTextureTiles,
+        description: l10n.gameTextureTilesDesc,
+        icon: Icons.view_module,
+        color: Colors.brown,
+      ),
+      _GameInfo(
+        id: 'sound_garden',
+        name: l10n.gameSoundGarden,
+        description: l10n.gameSoundGardenDesc,
+        icon: Icons.music_note,
+        color: Colors.lime,
+      ),
+      _GameInfo(
+        id: 'stim_sequencer',
+        name: l10n.gameStimSequencer,
+        description: l10n.gameStimSequencerDesc,
+        icon: Icons.equalizer,
+        color: Colors.deepOrange,
+      ),
+      _GameInfo(
+        id: 'constellation_connect',
+        name: l10n.gameConstellationConnect,
+        description: l10n.gameConstellationConnectDesc,
+        icon: Icons.auto_awesome,
+        color: Colors.indigo,
       ),
     ];
   }

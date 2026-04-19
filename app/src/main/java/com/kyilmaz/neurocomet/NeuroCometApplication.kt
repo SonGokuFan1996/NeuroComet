@@ -1,13 +1,10 @@
 package com.kyilmaz.neurocomet
 
 import android.app.Application
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import coil.Coil
-import com.kyilmaz.neurocomet.ads.GoogleAdsManager
 import java.util.concurrent.Executors
 
 private const val TAG = "NeuroCometApp"
@@ -57,15 +54,7 @@ class NeuroCometApplication : Application() {
                 }
             }
 
-            // Defer Ads SDK init to after the first frame renders (must run on main thread)
-            Handler(Looper.getMainLooper()).post {
-                try {
-                    GoogleAdsManager.initialize(this, useTestAds = BuildConfig.DEBUG)
-                    Log.d(TAG, "Application initialized successfully")
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error during ads initialization", e)
-                }
-            }
+            Log.d(TAG, "Application initialized successfully")
         } catch (e: Exception) {
             Log.e(TAG, "Error during application initialization", e)
         }

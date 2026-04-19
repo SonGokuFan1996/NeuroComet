@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/user.dart';
 import '../../providers/profile_provider.dart';
+import '../../services/supabase_service.dart';
 import '../../widgets/common/neuro_avatar.dart';
 import '../../widgets/common/neuro_loading.dart';
 import '../../widgets/post/post_card.dart';
@@ -468,7 +469,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           return _buildEmptyPostsPlaceholder();
         }
         return ListView.builder(
-          padding: const EdgeInsets.only(top: 8),
+          padding: const EdgeInsets.only(top: 8, bottom: 100),
           itemCount: posts.length,
           itemBuilder: (context, index) => PostCard(post: posts[index]),
         );
@@ -515,7 +516,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     final theme = Theme.of(context);
     final l10n = context.l10n;
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
       children: [
         // Bio section
         if (user.bio != null && user.bio!.isNotEmpty) ...[
@@ -614,7 +615,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     final theme = Theme.of(context);
     final l10n = context.l10n;
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
       children: [
         InterestsSection(interests: _interests),
         const SizedBox(height: 24),
@@ -678,7 +679,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     }
 
     return GridView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         mainAxisSpacing: 16,
@@ -745,19 +746,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   }
 
   void _toggleFollow(String userId) {
-    // Implement follow/unfollow
+    // Optimistic toggle – fire-and-forget backend call
+    try {
+      SupabaseService.isFollowing(userId).then((following) {
+        if (following) {
+          SupabaseService.unfollowUser(userId);
+        } else {
+          SupabaseService.followUser(userId);
+        }
+      });
+    } catch (e) {
+      debugPrint('Follow toggle error: $e');
+    }
   }
 
   void _startMessage(String userId) {
-    Navigator.pushNamed(context, '/chat', arguments: {'userId': userId});
+    context.push('/chat', extra: {'userId': userId});
   }
 
   void _showFollowers(String userId) {
-    Navigator.pushNamed(context, '/followers', arguments: userId);
+    context.push('/followers/$userId');
   }
 
   void _showFollowing(String userId) {
-    Navigator.pushNamed(context, '/following', arguments: userId);
+    context.push('/following/$userId');
   }
 
   void _showTraitInfo(NeuroDivergentTrait trait) {

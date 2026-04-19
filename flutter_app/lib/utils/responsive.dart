@@ -40,6 +40,12 @@ enum ScreenOrientation {
   landscape,
 }
 
+enum AuthLayout {
+  stacked,
+  balanced,
+  split,
+}
+
 /// Responsive utility class for determining device type and layout parameters
 class Responsive {
   final double screenWidth;
@@ -106,6 +112,13 @@ class Responsive {
   bool get isLargeDesktop =>
       deviceType == DeviceType.largeDesktop ||
       deviceType == DeviceType.ultrawide;
+
+  /// Auth layout variants matching Android
+  AuthLayout get authLayout {
+    if (screenWidth > 900) return AuthLayout.split;
+    if (screenWidth > 600) return AuthLayout.balanced;
+    return AuthLayout.stacked;
+  }
 
   /// Check if we're running on web platform
   bool get isWeb => kIsWeb;

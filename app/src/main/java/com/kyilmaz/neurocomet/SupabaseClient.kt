@@ -15,6 +15,7 @@ import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.realtime.Realtime
+import io.github.jan.supabase.storage.Storage
 
 /**
  * Supabase client wrapper that handles missing API keys gracefully.
@@ -86,6 +87,7 @@ object AppSupabaseClient {
                     install(Postgrest)
                     install(Auth)
                     install(Realtime)
+                    install(Storage)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to initialize Supabase client", e)
@@ -98,6 +100,15 @@ object AppSupabaseClient {
      * Check if we have a working Supabase connection.
      */
     fun isAvailable(): Boolean = client != null
+
+    /**
+     * Common JSON configuration for serialization.
+     */
+    val json = kotlinx.serialization.json.Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+        encodeDefaults = true
+    }
 }
 
 /**

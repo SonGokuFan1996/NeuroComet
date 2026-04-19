@@ -19,8 +19,6 @@ class NeuroLoading extends ConsumerStatefulWidget {
 class _NeuroLoadingState extends ConsumerState<NeuroLoading>
     with SingleTickerProviderStateMixin {
   AnimationController? _controller;
-  Animation<double>? _scaleAnimation;
-  Animation<double>? _opacityAnimation;
 
   @override
   void initState() {
@@ -31,17 +29,9 @@ class _NeuroLoadingState extends ConsumerState<NeuroLoading>
     if (_controller != null) return;
 
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1200),
       vsync: this,
-    )..repeat(reverse: true);
-
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _controller!, curve: Curves.easeInOut),
-    );
-
-    _opacityAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _controller!, curve: Curves.easeInOut),
-    );
+    )..repeat();
   }
 
   @override
@@ -60,51 +50,91 @@ class _NeuroLoadingState extends ConsumerState<NeuroLoading>
       _initAnimations();
     }
 
-    final loadingIcon = Container(
-      width: widget.size,
-      height: widget.size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          colors: [
-            theme.colorScheme.primary,
-            theme.colorScheme.secondary,
-          ],
-        ),
-      ),
-      child: Icon(
-        Icons.psychology,
-        color: theme.colorScheme.onPrimary,
-        size: widget.size * 0.5,
-      ),
-    );
+    final dotSize = widget.size * 0.22;
+    final dotSpacing = widget.size * 0.12;
+    final brandColors = [
+      theme.colorScheme.primary,
+      theme.colorScheme.secondary,
+      theme.colorScheme.tertiary,
+    ];
+
+    Widget loadingWidget;
+    if (reducedMotion || _controller == null) {
+      // Static fallback: three colored dots
+      loadingWidget = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(3, (i) => Container(
+          width: dotSize,
+          height: dotSize,
+          margin: EdgeInsets.symmetric(horizontal: dotSpacing / 2),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: brandColors[i % brandColors.length],
+          ),
+        )),
+      );
+    } else {
+      // Animated pulsing dots with staggered phase
+      loadingWidget = AnimatedBuilder(
+        animation: _controller!,
+        builder: (context, _) {
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(3, (i) {
+              // Stagger each dot by 0.2 of the animation cycle
+              final phase = (_controller!.value + i * 0.28) % 1.0;
+              // Smooth sine-like pulse: scale 0.6→1.0 and opacity 0.4→1.0
+              final t = (phase < 0.5) ? phase * 2 : 2 - phase * 2;
+              final ease = Curves.easeInOut.transform(t);
+              final scale = 0.6 + 0.4 * ease;
+              final opacity = 0.4 + 0.6 * ease;
+
+              return Container(
+                margin: EdgeInsets.symmetric(horizontal: dotSpacing / 2),
+                child: Transform.scale(
+                  scale: scale,
+                  child: Opacity(
+                    opacity: opacity,
+                    child: Container(
+                      width: dotSize,
+                      height: dotSize,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: brandColors[i % brandColors.length],
+                        boxShadow: [
+                          BoxShadow(
+                            color: brandColors[i % brandColors.length]
+                                .withValues(alpha: 0.3 * ease),
+                            blurRadius: 6 * ease,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          );
+        },
+      );
+    }
 
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          reducedMotion || _controller == null
-              ? loadingIcon
-              : AnimatedBuilder(
-                  animation: _controller!,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: _scaleAnimation!.value,
-                      child: Opacity(
-                        opacity: _opacityAnimation!.value,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: loadingIcon,
-                ),
+          SizedBox(
+            height: widget.size,
+            child: Center(child: loadingWidget),
+          ),
           if (widget.message != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
               widget.message!,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.outline,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
+              textAlign: TextAlign.center,
             ),
           ],
         ],
@@ -137,7 +167,7 @@ class _NeuroShimmerState extends State<NeuroShimmer>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1800),
       vsync: this,
     )..repeat();
   }
@@ -151,23 +181,29 @@ class _NeuroShimmerState extends State<NeuroShimmer>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final base = theme.colorScheme.surfaceContainerHighest;
+    final highlight = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35);
 
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
+        final v = _controller.value;
         return Container(
           width: widget.width,
           height: widget.height,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(widget.borderRadius),
             gradient: LinearGradient(
-              begin: Alignment(-1.0 + 2 * _controller.value, 0),
-              end: Alignment(-1.0 + 2 * _controller.value + 1, 0),
+              begin: Alignment(-1.5 + 3 * v, 0),
+              end: Alignment(-0.5 + 3 * v, 0),
               colors: [
-                theme.colorScheme.surfaceContainerHighest,
-                theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                theme.colorScheme.surfaceContainerHighest,
+                base,
+                base.withValues(alpha: base.a * 0.8),
+                highlight,
+                base.withValues(alpha: base.a * 0.8),
+                base,
               ],
+              stops: const [0.0, 0.3, 0.5, 0.7, 1.0],
             ),
           ),
         );
@@ -181,43 +217,64 @@ class PostCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    final theme = Theme.of(context);
+
+    return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const NeuroShimmer(width: 44, height: 44, borderRadius: 22),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    NeuroShimmer(width: 120, height: 16),
-                    SizedBox(height: 4),
-                    NeuroShimmer(width: 80, height: 12),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            const NeuroShimmer(width: double.infinity, height: 14),
-            const SizedBox(height: 8),
-            const NeuroShimmer(width: 200, height: 14),
-            const SizedBox(height: 12),
-            Row(
-              children: const [
-                NeuroShimmer(width: 60, height: 24),
-                SizedBox(width: 16),
-                NeuroShimmer(width: 60, height: 24),
-                SizedBox(width: 16),
-                NeuroShimmer(width: 60, height: 24),
-              ],
-            ),
-          ],
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.18),
+          width: 0.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.shadow.withValues(alpha: 0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const NeuroShimmer(width: 44, height: 44, borderRadius: 22),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  NeuroShimmer(width: 120, height: 14, borderRadius: 7),
+                  SizedBox(height: 6),
+                  NeuroShimmer(width: 80, height: 10, borderRadius: 5),
+                ],
+              ),
+              const Spacer(),
+              const NeuroShimmer(width: 24, height: 24, borderRadius: 12),
+            ],
+          ),
+          const SizedBox(height: 14),
+          const NeuroShimmer(width: double.infinity, height: 14, borderRadius: 7),
+          const SizedBox(height: 8),
+          const NeuroShimmer(width: 220, height: 14, borderRadius: 7),
+          const SizedBox(height: 8),
+          const NeuroShimmer(width: 160, height: 14, borderRadius: 7),
+          const SizedBox(height: 16),
+          Row(
+            children: const [
+              NeuroShimmer(width: 64, height: 28, borderRadius: 14),
+              SizedBox(width: 12),
+              NeuroShimmer(width: 64, height: 28, borderRadius: 14),
+              SizedBox(width: 12),
+              NeuroShimmer(width: 48, height: 28, borderRadius: 14),
+              Spacer(),
+              NeuroShimmer(width: 28, height: 28, borderRadius: 14),
+            ],
+          ),
+        ],
       ),
     );
   }

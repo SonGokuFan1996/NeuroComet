@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'badge_service.dart' as rewards;
 import 'supabase_service.dart';
 
 /// Content moderation service for filtering and reporting
@@ -160,6 +161,17 @@ class BadgeService {
   factory BadgeService() => _instance;
   BadgeService._internal();
 
+  static const Map<String, String> _rewardBridge = {
+    'early_adopter': 'founding_member',
+    'first_post': 'first_post',
+    'community_helper': 'community_hero',
+    'verified': 'social_butterfly',
+    'premium': 'rainbow_brain',
+    'game_master': 'game_lover',
+    'streak_7': 'week_one',
+    'streak_30': 'month_one',
+  };
+
   // Badge definitions
   final Map<String, Badge> _badges = {
     'early_adopter': Badge(
@@ -235,6 +247,10 @@ class BadgeService {
         earnedBadges.add(badgeId);
         await prefs.setStringList('earned_badges_$userId', earnedBadges);
       }
+      final rewardBadgeId = _rewardBridge[badgeId] ?? rewards.BadgeRegistry.normalizeBadgeId(badgeId);
+      if (rewardBadgeId != null) {
+        await rewards.BadgeManager.unlockBadge(rewardBadgeId);
+      }
       debugPrint('Awarded badge $badgeId to user $userId');
       return true;
     } catch (e) {
@@ -247,7 +263,17 @@ class BadgeService {
   Future<List<Badge>> getUserBadges(String userId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final earnedBadgeIds = prefs.getStringList('earned_badges_$userId') ?? ['early_adopter'];
+      final earnedBadgeIds = <String>{
+        ...(prefs.getStringList('earned_badges_$userId') ?? const ['early_adopter']),
+      };
+      final rewardSnapshot = await rewards.BadgeManager.getRewardSnapshot();
+      for (final badgeId in _rewardBridge.keys) {
+        final mapped = _rewardBridge[badgeId];
+        if (mapped != null && (rewardSnapshot.progress[mapped]?.isUnlocked ?? false)) {
+          earnedBadgeIds.add(badgeId);
+        }
+      }
+
       return earnedBadgeIds
           .map((id) => _badges[id])
           .whereType<Badge>()
@@ -282,6 +308,14 @@ class BadgeService {
 
     if (stats.currentStreak >= 30) {
       final badge = _badges['streak_30'];
+      if (badge != null && !stats.earnedBadges.contains(badge.id)) {
+        await awardBadge(userId, badge.id);
+        newBadges.add(badge);
+      }
+    }
+
+    if (stats.likeCount >= 50) {
+      final badge = _badges['community_helper'];
       if (badge != null && !stats.earnedBadges.contains(badge.id)) {
         await awardBadge(userId, badge.id);
         newBadges.add(badge);

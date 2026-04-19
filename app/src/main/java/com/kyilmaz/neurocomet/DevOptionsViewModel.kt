@@ -79,6 +79,7 @@ class DevOptionsViewModel : ViewModel() {
     fun setSimulateLoadingError(v: Boolean) { DevOptionsSettings.setSimulateLoadingError(context(), v); refresh() }
     fun setInfiniteLoading(v: Boolean) { DevOptionsSettings.setInfiniteLoading(context(), v); refresh() }
     fun setShowFallbackUi(v: Boolean) { DevOptionsSettings.setShowFallbackUi(context(), v); refresh() }
+    fun setPublicReleaseMockUiEnabled(v: Boolean) { DevOptionsSettings.setPublicReleaseMockUiEnabled(context(), v); refresh() }
     fun setNetworkLatencyMs(ms: Long) { DevOptionsSettings.setNetworkLatencyMs(context(), ms); refresh() }
 
     // ─── Auth Overrides ─────────────────────────────────────
@@ -93,9 +94,18 @@ class DevOptionsViewModel : ViewModel() {
     fun setBypassFeedbackRateLimit(v: Boolean) { DevOptionsSettings.setBypassFeedbackRateLimit(context(), v); refresh() }
     fun setForceFeedbackSubmitFailure(v: Boolean) { DevOptionsSettings.setForceFeedbackSubmitFailure(context(), v); refresh() }
 
+    // ─── Supabase & Cloud Sync ──────────────────────────────
+    fun setForcePremiumCloudSync(v: Boolean) { DevOptionsSettings.setForcePremiumCloudSync(context(), v); refresh() }
+    fun setForceGameAchievementsSync(v: Boolean) { DevOptionsSettings.setForceGameAchievementsSync(context(), v); refresh() }
+    fun setForceSettingsCloudSync(v: Boolean) { DevOptionsSettings.setForceSettingsCloudSync(context(), v); refresh() }
+    fun setForceAiPracticeLogSync(v: Boolean) { DevOptionsSettings.setForceAiPracticeLogSync(context(), v); refresh() }
+    fun setForceAbTestSync(v: Boolean) { DevOptionsSettings.setForceAbTestSync(context(), v); refresh() }
+    fun setShowCloudSyncDebug(v: Boolean) { DevOptionsSettings.setShowCloudSyncDebug(context(), v); refresh() }
+
     // ─── Reset ──────────────────────────────────────────────
     fun resetMockData(feedViewModel: FeedViewModel) {
         feedViewModel.resetMockData()
+        NotificationTester.clearAllTestNotifications(context())
     }
 
     fun resetAll() { DevOptionsSettings.resetAll(context()); refresh() }

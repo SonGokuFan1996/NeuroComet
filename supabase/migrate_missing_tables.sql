@@ -116,6 +116,23 @@ CREATE INDEX IF NOT EXISTS idx_comments_post ON post_comments(post_id);
 CREATE INDEX IF NOT EXISTS idx_comments_user ON post_comments(user_id);
 CREATE INDEX IF NOT EXISTS idx_comments_parent ON post_comments(parent_comment_id);
 
+CREATE TABLE IF NOT EXISTS stories (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    image_url TEXT,
+    video_url TEXT,
+    duration INTEGER DEFAULT 5000,
+    content_type TEXT DEFAULT 'IMAGE',
+    text_overlay TEXT,
+    background_color BIGINT DEFAULT 4279917102,
+    background_color_end BIGINT,
+    link_preview JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '24 hours')
+);
+CREATE INDEX IF NOT EXISTS idx_stories_user_id ON stories(user_id);
+CREATE INDEX IF NOT EXISTS idx_stories_expires_at ON stories(expires_at);
+
 -- ============================================================================
 -- 3. ENABLE ROW LEVEL SECURITY ON NEW TABLES
 -- ============================================================================

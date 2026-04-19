@@ -21,6 +21,7 @@ class MainActivity : FlutterActivity() {
     companion object {
         private const val TAG = "ContactsPicker"
         private const val CONTACTS_PICKER_CHANNEL = "com.kyilmaz.neurocomet/contacts_picker"
+        private const val DEVICE_AUTHORITY_CHANNEL = "com.kyilmaz.neurocomet/device_authority"
         private const val PICK_CONTACT_REQUEST_LEGACY = 9001
         private const val PICK_CONTACT_REQUEST_API37 = 9002
     }
@@ -57,6 +58,26 @@ class MainActivity : FlutterActivity() {
                         pendingResult = result
                         launchContactPicker()
                     }
+                    else -> result.notImplemented()
+                }
+            }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, DEVICE_AUTHORITY_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "canSkipAuth" -> result.success(FlutterDeviceAuthority.canSkipAuth(this))
+                    "canUseDeveloperTools" -> result.success(
+                        FlutterDeviceAuthority.canUseDeveloperTools(this)
+                    )
+                    "isHouseholdAuthorizedDevice" -> result.success(
+                        FlutterDeviceAuthority.isHouseholdAuthorizedDevice(this)
+                    )
+                    "getDeviceHash" -> result.success(
+                        FlutterDeviceAuthority.computeDeviceHash(this)
+                    )
+                    "getAppSignatureHash" -> result.success(
+                        FlutterDeviceAuthority.getAppSignatureHash(this)
+                    )
                     else -> result.notImplemented()
                 }
             }

@@ -49,9 +49,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kyilmaz.neurocomet.PerformanceOptimizations
 import com.kyilmaz.neurocomet.R
+import com.kyilmaz.neurocomet.AppSupabaseClient
+import com.kyilmaz.neurocomet.safeUpsert
+import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.put
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.random.Random
@@ -102,7 +106,30 @@ object GameUnlockManager {
         val current = try { prefs.getInt(KEY_ACHIEVEMENTS, 0) } catch (_: ClassCastException) {
             try { prefs.getLong(KEY_ACHIEVEMENTS, 0).toInt() } catch (_: Exception) { 0 }
         }
-        prefs.edit().putInt(KEY_ACHIEVEMENTS, current + count).apply()
+        val newCount = current + count
+        prefs.edit().putInt(KEY_ACHIEVEMENTS, newCount).apply()
+
+        // Sync to Supabase
+        syncAchievementsToSupabase(newCount)
+    }
+
+    private fun syncAchievementsToSupabase(count: Int) {
+        val client = AppSupabaseClient.client ?: return
+        val userId = try { client.auth.currentUserOrNull()?.id } catch (_: Exception) { null } ?: return
+
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            try {
+                val payload = kotlinx.serialization.json.buildJsonObject {
+                    put("user_id", userId)
+                    put("achievement_count", count)
+                    put("updated_at", java.time.Instant.now().toString())
+                }
+                // upsert by user_id
+                client.safeUpsert("user_game_achievements", payload, "user_id")
+            } catch (e: Exception) {
+                android.util.Log.w("NeuroGames", "Failed to sync achievements: ${e.message}")
+            }
+        }
     }
 
     fun isGameUnlocked(context: Context, game: NeuroGame): Boolean {

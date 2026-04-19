@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import '../../services/webrtc_call_service.dart';
-import '../../services/gemini_practice_call_service.dart';
 import '../../core/theme/app_colors.dart';
 
 /// Full-screen active call screen — Instagram-style voice/video calling UI.
@@ -19,7 +18,6 @@ class ActiveCallScreen extends StatefulWidget {
 class _ActiveCallScreenState extends State<ActiveCallScreen>
     with SingleTickerProviderStateMixin {
   final _callService = WebRTCCallService.instance;
-  GeminiPracticeCallService? _geminiService;
   late AnimationController _pulseController;
   bool _showControls = true;
   Timer? _controlsTimer;
@@ -27,12 +25,6 @@ class _ActiveCallScreenState extends State<ActiveCallScreen>
   @override
   void initState() {
     super.initState();
-    if (widget.isPracticeCall) {
-      const apiKey = String.fromEnvironment('GEMINI_API_KEY', defaultValue: '');
-      if (apiKey.isNotEmpty) {
-        _geminiService = GeminiPracticeCallService(apiKey);
-      }
-    }
     _callService.addListener(_onCallStateChanged);
     _pulseController = AnimationController(
       duration: const Duration(milliseconds: 1200),
@@ -69,10 +61,77 @@ class _ActiveCallScreenState extends State<ActiveCallScreen>
     }
   }
 
+  Future<void> _startPreviewCall(CallType callType) async {
+    await _callService.prepareDebugPreviewCall(
+      callType: callType,
+      initialState: CallState.connected,
+    );
+    if (mounted) {
+      setState(() {
+        _showControls = true;
+      });
+      _resetControlsTimer();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final call = _callService.currentCall;
-    if (call == null) return const SizedBox.shrink();
+    if (call == null) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.call_outlined, color: Colors.white70, size: 72),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'No active call yet',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Launch a quick preview call for the developer lab, or start a real call from Messages.',
+                    style: TextStyle(color: Colors.white70, fontSize: 15),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () => _startPreviewCall(CallType.video),
+                        icon: const Icon(Icons.videocam_outlined),
+                        label: const Text('Preview Video Call'),
+                      ),
+                      OutlinedButton.icon(
+                        onPressed: () => _startPreviewCall(CallType.voice),
+                        icon: const Icon(Icons.call_outlined),
+                        label: const Text('Preview Voice Call'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     final state = _callService.callState;
     final isVideo = call.callType == CallType.video;

@@ -142,7 +142,7 @@ class _FeatureTestScreenState extends ConsumerState<FeatureTestScreen>
               _buildTestItem(
                 'Feed Screen',
                 'Navigate to feed screen',
-                () => _testNavigation('/feed'),
+                () => _testNavigation('/'),
               ),
               _buildTestItem(
                 'Explore Screen',
@@ -542,7 +542,7 @@ class _FeatureTestScreenState extends ConsumerState<FeatureTestScreen>
             id: 'test_post',
             authorId: 'test_user',
             authorName: 'Test User',
-            authorAvatarUrl: 'https://i.pravatar.cc/150?img=1',
+            authorAvatarUrl: 'https://i.pravatar.cc/150?u=test_user',
             content: 'This is a test post for the feature test lab! 🧪 #testing @neurocomet',
             likeCount: 42,
             commentCount: 7,
@@ -586,7 +586,7 @@ class _FeatureTestScreenState extends ConsumerState<FeatureTestScreen>
       MapEntry('Haptic Feedback', _testHapticFeedback),
 
       // Navigation
-      MapEntry('Feed Screen', () => _testNavigation('/feed')),
+      MapEntry('Feed Screen', () => _testNavigation('/')),
       MapEntry('Explore Screen', () => _testNavigation('/explore')),
       MapEntry('Messages Screen', () => _testNavigation('/messages')),
       MapEntry('Notifications Screen', () => _testNavigation('/notifications')),

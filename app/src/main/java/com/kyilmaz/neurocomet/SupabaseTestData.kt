@@ -1,6 +1,7 @@
 package com.kyilmaz.neurocomet
 
 import android.util.Log
+import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -20,6 +21,30 @@ import kotlinx.serialization.json.put
 object SupabaseTestData {
 
     private const val TAG = "SupabaseTestData"
+    val REQUIRED_TABLES = listOf(
+        "users",
+        "posts",
+        "post_likes",
+        "post_comments",
+        "conversations",
+        "conversation_participants",
+        "dm_messages",
+        "profiles",
+        "follows",
+        "blocked_users",
+        "muted_users",
+        "bookmarks",
+        "notifications",
+        "reports",
+        "call_signals",
+        "call_history",
+        "stories",
+        "feedback",
+        "user_game_achievements",
+        "practice_call_logs",
+        "user_preferences",
+        "ab_test_assignments"
+    )
 
     // =========================================================================
     // Test Data Models (must match Supabase table schemas)
@@ -77,6 +102,31 @@ object SupabaseTestData {
         val duration: Int = 5000
     )
 
+    @Serializable
+    data class TestFeedback(
+        val user_id: String? = null,
+        val type: String,
+        val title: String? = null,
+        val description: String,
+        val severity: String? = null,
+        val category: String? = null,
+        val rating: Int? = null,
+        val device_info: String? = null,
+        val app_version: String? = null,
+        val status: String = "submitted",
+        val votes: Int = 0,
+        val submitted_at: String
+    )
+
+    @Serializable
+    data class TestPracticeCallLog(
+        val user_id: String,
+        val persona_id: String,
+        val duration_seconds: Int,
+        val message_count: Int,
+        val created_at: String
+    )
+
     /**
      * Get current timestamp in ISO 8601 format for Supabase
      */
@@ -119,21 +169,7 @@ object SupabaseTestData {
             return@withContext Result.failure(Exception("Supabase not configured"))
         }
 
-        val tablesToTest = listOf(
-            "users",
-            "profiles",
-            "posts",
-            "post_likes",
-            "post_comments",
-            "bookmarks",
-            "blocked_users",
-            "reports",
-            "conversations",
-            "dm_messages",
-            "call_signals",
-            "call_history",
-            "notifications"
-        )
+        val tablesToTest = REQUIRED_TABLES
 
         val results = mutableListOf<String>()
         var successCount = 0
@@ -188,6 +224,15 @@ object SupabaseTestData {
                 put("comments", (0..50).random())
                 put("shares", (0..20).random())
                 put("is_liked_by_me", false)
+                // New columns added by migrate_feedback_and_extras.sql / setup_required_now.sql
+                put("min_audience", listOf("UNDER_13", "TEEN", "ADULT").random())
+                put("background_color", 4279917102L)
+                put("media_items", kotlinx.serialization.json.buildJsonArray {
+                    add(buildJsonObject {
+                        put("type", "image")
+                        put("url", "https://picsum.photos/seed/${System.currentTimeMillis()}/600/400")
+                    })
+                })
                 put("created_at", nowTimestamp())
             }
 
@@ -302,16 +347,196 @@ object SupabaseTestData {
                     put("comments", (0..100).random())
                     put("shares", (0..50).random())
                     put("is_liked_by_me", false)
+                    put("min_audience", listOf("UNDER_13", "TEEN", "ADULT").random())
+                    put("background_color", 4279917102L)
                     put("created_at", nowTimestamp())
                 }
             }
 
             client.safeInsertList("posts", testPosts)
 
-            Log.d(TAG, "âœ… $count test posts sent successfully")
+            Log.d(TAG, "✅ $count test posts sent successfully")
             Result.success("$count test posts created!")
         } catch (e: Exception) {
-            Log.e(TAG, "âŒ Failed to send bulk test posts", e)
+            Log.e(TAG, "❌ Failed to send bulk test posts", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Send a test story to the stories table.
+     * Covers columns added by migrate_missing_tables.sql / setup_required_now.sql:
+     * image_url, duration, content_type, text_overlay, background_color, background_color_end, link_preview.
+     */
+    suspend fun sendTestStory(): Result<String> = withContext(Dispatchers.IO) {
+        val client = AppSupabaseClient.client
+            ?: return@withContext Result.failure(Exception("Supabase not configured"))
+
+        try {
+            val stamp = System.currentTimeMillis()
+            val storyData = buildJsonObject {
+                put("user_id", "test_user_story_$stamp")
+                put("image_url", "https://picsum.photos/seed/story$stamp/720/1280")
+                put("duration", 5000)
+                put("content_type", listOf("IMAGE", "TEXT", "LINK").random())
+                put("text_overlay", "\u2728 Dev test story #${stamp % 1000}")
+                put("background_color", 4279917102L)
+                put("background_color_end", 4284959014L)
+                put("link_preview", buildJsonObject {
+                    put("url", "https://getneurocomet.com")
+                    put("title", "NeuroComet")
+                    put("description", "Neurodivergent-friendly social app")
+                })
+                put("created_at", nowTimestamp())
+            }
+
+            client.safeInsert("stories", storyData)
+            Log.d(TAG, "\u2705 Test story sent")
+            Result.success("Test story sent!")
+        } catch (e: Exception) {
+            Log.e(TAG, "\u274C Failed to send test story", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Send a test feedback entry
+     */
+    suspend fun sendTestFeedback(): Result<String> = withContext(Dispatchers.IO) {
+        val client = AppSupabaseClient.client
+            ?: return@withContext Result.failure(Exception("Supabase not configured"))
+
+        try {
+            val feedbackData = buildJsonObject {
+                put("type", listOf("bug_report", "feature_request", "general_feedback").random())
+                put("title", "Dev Test Feedback")
+                put("description", "This is a test feedback from the developer options menu.")
+                put("severity", "low")
+                put("status", "submitted")
+                put("submitted_at", nowTimestamp())
+            }
+
+            client.safeInsert("feedback", feedbackData)
+            Result.success("Test feedback sent!")
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Resolve the currently-signed-in Supabase user id (UUID string).
+     * These sync tables all have `user_id UUID REFERENCES auth.users(id)` +
+     * RLS policies keyed on `auth.uid() = user_id`, so passing a made-up
+     * string results in PostgREST 400 ("invalid input syntax for type uuid")
+     * or 401/403 from RLS. If no user is signed in we bail with a clear
+     * message instead of hitting the network.
+     */
+    private fun requireAuthUserId(): Result<String> {
+        val client = AppSupabaseClient.client
+            ?: return Result.failure(Exception("Supabase not configured"))
+        val uid = try { client.auth.currentUserOrNull()?.id } catch (_: Throwable) { null }
+        return if (uid.isNullOrBlank()) {
+            Result.failure(Exception("Not signed in \u2014 sign in first so user_id resolves to a real auth.users row"))
+        } else Result.success(uid)
+    }
+
+    /**
+     * Send a test AI practice call log
+     */
+    suspend fun sendTestPracticeCall(): Result<String> = withContext(Dispatchers.IO) {
+        val client = AppSupabaseClient.client
+            ?: return@withContext Result.failure(Exception("Supabase not configured"))
+        val uid = requireAuthUserId().getOrElse { return@withContext Result.failure(it) }
+
+        try {
+            val callData = buildJsonObject {
+                put("user_id", uid)
+                put("persona_id", listOf("Alex", "Jordan", "Sam").random())
+                put("duration_seconds", (60..600).random())
+                put("message_count", (5..30).random())
+                put("created_at", nowTimestamp())
+            }
+
+            client.safeInsert("practice_call_logs", callData)
+            Result.success("Test practice call log sent!")
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Send a test game achievement (upsert — UNIQUE(user_id))
+     */
+    suspend fun sendTestGameAchievement(): Result<String> = withContext(Dispatchers.IO) {
+        val client = AppSupabaseClient.client
+            ?: return@withContext Result.failure(Exception("Supabase not configured"))
+        val uid = requireAuthUserId().getOrElse { return@withContext Result.failure(it) }
+
+        try {
+            val achievementData = buildJsonObject {
+                put("user_id", uid)
+                put("achievement_count", (1..50).random())
+                put("unlocked_game_ids", kotlinx.serialization.json.buildJsonArray {
+                    add(kotlinx.serialization.json.JsonPrimitive("mood_mixer"))
+                    add(kotlinx.serialization.json.JsonPrimitive("constellation_connect"))
+                })
+                put("last_played_at", nowTimestamp())
+                put("updated_at", nowTimestamp())
+            }
+
+            client.safeUpsert("user_game_achievements", achievementData, onConflict = "user_id")
+            Result.success("Test game achievement upserted!")
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Send test user preferences (upsert — UNIQUE(user_id))
+     */
+    suspend fun sendTestPreference(): Result<String> = withContext(Dispatchers.IO) {
+        val client = AppSupabaseClient.client
+            ?: return@withContext Result.failure(Exception("Supabase not configured"))
+        val uid = requireAuthUserId().getOrElse { return@withContext Result.failure(it) }
+
+        try {
+            val prefData = buildJsonObject {
+                put("user_id", uid)
+                put("theme_mode", listOf("light", "dark", "system").random())
+                put("is_high_contrast", listOf(true, false).random())
+                put("reduce_motion", listOf(true, false).random())
+                put("dyslexia_font", listOf(true, false).random())
+                put("text_scale_factor", 1.2f)
+                put("notifications_enabled", true)
+                put("updated_at", nowTimestamp())
+            }
+
+            client.safeUpsert("user_preferences", prefData, onConflict = "user_id")
+            Result.success("Test preference upserted!")
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Send test A/B assignment (upsert — UNIQUE(user_id, experiment_id))
+     */
+    suspend fun sendTestAbAssignment(): Result<String> = withContext(Dispatchers.IO) {
+        val client = AppSupabaseClient.client
+            ?: return@withContext Result.failure(Exception("Supabase not configured"))
+        val uid = requireAuthUserId().getOrElse { return@withContext Result.failure(it) }
+
+        try {
+            val assignmentData = buildJsonObject {
+                put("user_id", uid)
+                put("experiment_id", "feed_algorithm_v2")
+                put("variant_id", listOf("control", "variant_a", "variant_b").random())
+                put("assigned_at", nowTimestamp())
+            }
+
+            client.safeUpsert("ab_test_assignments", assignmentData, onConflict = "user_id,experiment_id")
+            Result.success("Test A/B assignment upserted!")
+        } catch (e: Exception) {
             Result.failure(e)
         }
     }
