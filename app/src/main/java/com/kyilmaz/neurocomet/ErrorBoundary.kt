@@ -503,7 +503,7 @@ fun FullScreenFallback(
                         // Open support via email
                         try {
                             val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
-                                data = "mailto:support@neurocomet.app".toUri()
+                                data = "mailto:${AppLinks.SUPPORT_EMAIL}".toUri()
                                 putExtra(android.content.Intent.EXTRA_SUBJECT, "NeuroComet Support Request")
                                 putExtra(android.content.Intent.EXTRA_TEXT, "I encountered an issue while using the app.\n\nDevice: ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}\nAndroid: ${android.os.Build.VERSION.RELEASE}\n\nPlease describe your issue:\n")
                             }
@@ -511,7 +511,7 @@ fun FullScreenFallback(
                         } catch (_: Exception) {
                             android.widget.Toast.makeText(
                                 context,
-                                "Email support@getneurocomet.com for help",
+                                "Email ${AppLinks.SUPPORT_EMAIL} for help",
                                 android.widget.Toast.LENGTH_LONG
                             ).show()
                         }

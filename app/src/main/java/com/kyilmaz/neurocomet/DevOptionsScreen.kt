@@ -149,6 +149,7 @@ fun DevOptionsScreen(
             DevSectionGroup("multimedia", "Multi-Media", Icons.Filled.PlayCircle, "multimedia video audio posts") { MultiMediaPostDevSection() },
             DevSectionGroup("nav", "Navigation", Icons.Filled.Navigation, "navigation adaptive drawer") { AdaptiveNavigationDevSection() },
             DevSectionGroup("dialogs", "Dialogs", Icons.Filled.ChatBubble, "dialogs popup message input choice") { NeurodivergentDialogsDevSection() },
+            DevSectionGroup("deep_links", "Deep Links / App Links", Icons.Filled.Link, "deep link app link domain getneurocomet share url post profile assetlinks verification manifest") { DeepLinkDiagnosticsDevSection() },
             DevSectionGroup("location", "Location & Sensors", Icons.Filled.Sensors, "location gps sensors pressure") { EnhancedLocationSensorsDevSection() },
             DevSectionGroup("contact_picker", "Contact Picker", Icons.Filled.Contacts, "contact picker android 17 cinnamonbun cinnamon bun session privacy contacts api 36.1") { ContactPickerDevSection() },
             DevSectionGroup("storage", "Local Storage", Icons.Filled.Storage, "storage preferences credentials") { LocalStorageDevSection() },

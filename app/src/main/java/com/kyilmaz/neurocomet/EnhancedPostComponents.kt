@@ -451,7 +451,7 @@ fun EnhancedPostCard(
                         val clipboardManager = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                         val clip = android.content.ClipData.newPlainText(
                             "NeuroComet Post",
-                            "https://getneurocomet.com/post/${post.id}"
+                            AppLinks.postUrl(post.id)
                         )
                         clipboardManager.setPrimaryClip(clip)
                         android.widget.Toast.makeText(context, context.getString(R.string.toast_link_copied), android.widget.Toast.LENGTH_SHORT).show()
