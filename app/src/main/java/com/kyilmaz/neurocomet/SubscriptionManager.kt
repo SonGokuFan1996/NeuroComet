@@ -45,8 +45,11 @@ object SubscriptionManager {
 
     // RevenueCat product identifiers (configured in RevenueCat dashboard)
     // We search for all case variations as provided in the dashboard JSON and labels
-    private val MONTHLY_IDS = listOf("neurocomet_monthly_pro", "NeuroComet_premium_monthly", "neurocomet_premium_monthly", "\$rc_monthly", "\$monthly")
-    private val LIFETIME_IDS = listOf("neurocomet_lifetime_pro", "NeuroComet_premium_lifetime", "neurocomet_premium_lifetime", "\$rc_lifetime", "\$lifetime")
+    const val PRODUCT_MONTHLY = "NeuroComet_premium_monthly"
+    const val PRODUCT_LIFETIME = "NeuroComet_premium_lifetime"
+
+    private val MONTHLY_IDS = listOf("neurocomet_monthly_pro", PRODUCT_MONTHLY, "neurocomet_premium_monthly", "\$rc_monthly", "\$monthly")
+    private val LIFETIME_IDS = listOf("neurocomet_lifetime_pro", PRODUCT_LIFETIME, "neurocomet_premium_lifetime", "\$rc_lifetime", "\$lifetime")
 
     // Entitlement identifier
     const val ENTITLEMENT_PREMIUM = "premium"
@@ -183,10 +186,10 @@ object SubscriptionManager {
         }
     }
 
-    fun setBillingConfigured(configured: Boolean, error: String? = null) {
-        isBillingConfigured = configured
-        if (error != null) {
-            _subscriptionState.value = _subscriptionState.value.copy(error = error)
+    fun setBillingConfigured(isConfigured: Boolean, errorMessage: String? = null) {
+        this.isBillingConfigured = isConfigured
+        if (errorMessage != null) {
+            _subscriptionState.value = _subscriptionState.value.copy(error = errorMessage)
         }
     }
 
@@ -631,5 +634,18 @@ object SubscriptionManager {
 
     fun clearError() {
         _subscriptionState.value = _subscriptionState.value.copy(error = null)
+    }
+
+    /**
+     * Resets the manager to its initial state. For use in unit tests only.
+     */
+    fun resetForTesting() {
+        testMode = false
+        isTestPremium = false
+        isBillingConfigured = false
+        verificationToken = null
+        lastVerificationTime = 0L
+        lastCustomerInfo = null
+        _subscriptionState.value = SubscriptionState()
     }
 }

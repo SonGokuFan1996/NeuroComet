@@ -710,8 +710,8 @@ fun SettingsScreen(
                                 onClick = {
                                     openTrustedExternalUrl(
                                         context = context,
-                                        url = "https://getneurocomet.com/privacy",
-                                        allowedHosts = setOf("getneurocomet.com")
+                                        url = AppLinks.legalUrl("privacy"),
+                                        allowedHosts = setOf(AppLinks.CANONICAL_DOMAIN)
                                     )
                                 }
                             )
@@ -726,8 +726,8 @@ fun SettingsScreen(
                                 onClick = {
                                     openTrustedExternalUrl(
                                         context = context,
-                                        url = "https://getneurocomet.com/terms",
-                                        allowedHosts = setOf("getneurocomet.com")
+                                        url = AppLinks.legalUrl("terms"),
+                                        allowedHosts = setOf(AppLinks.CANONICAL_DOMAIN)
                                     )
                                 }
                             )

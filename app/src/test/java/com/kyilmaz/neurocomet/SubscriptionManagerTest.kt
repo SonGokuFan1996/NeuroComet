@@ -36,14 +36,13 @@ class SubscriptionManagerTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         // Ensure clean slate — reset clears the singleton state
-        SubscriptionManager.testMode = true
-        SubscriptionManager.resetTestPurchase()
+        SubscriptionManager.resetForTesting()
     }
 
     @After
     fun tearDown() {
         Dispatchers.resetMain()
-        SubscriptionManager.resetTestPurchase()
+        SubscriptionManager.resetForTesting()
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -168,7 +167,7 @@ class SubscriptionManagerTest {
         assertTrue(SubscriptionManager.subscriptionState.value.isPremium)
 
         // Switch to production mode
-        SubscriptionManager.testMode = false
+        SubscriptionManager.setTestMode(false)
         SubscriptionManager.resetTestPurchase()
 
         // State should NOT have been reset (method is guarded by testMode)
@@ -178,7 +177,7 @@ class SubscriptionManagerTest {
         )
 
         // Clean up
-        SubscriptionManager.testMode = true
+        SubscriptionManager.setTestMode(true)
         SubscriptionManager.resetTestPurchase()
     }
 
@@ -304,7 +303,7 @@ class SubscriptionManagerTest {
 
     @Test
     fun setBillingConfigured_false_inProductionMode_setsErrorState() {
-        SubscriptionManager.testMode = false
+        SubscriptionManager.setTestMode(false)
 
         SubscriptionManager.setBillingConfigured(
             isConfigured = false,
@@ -318,7 +317,7 @@ class SubscriptionManagerTest {
         assertFalse("Non-configured: isBillingConfigured false", SubscriptionManager.isBillingConfigured())
 
         // Clean up
-        SubscriptionManager.testMode = true
+        SubscriptionManager.setTestMode(true)
     }
 
     // ═══════════════════════════════════════════════════════════════

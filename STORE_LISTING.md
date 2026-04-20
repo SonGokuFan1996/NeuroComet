@@ -48,12 +48,13 @@ Join thousands of others in the space where you can finally stop masking and sta
 
 ---
 
-## What's New (v2.0.0-rc08)
-*   🎙️ **AI Practice Calls:** Enhanced STT/TTS support for social practice.
-*   🛡️ **Privacy Controls:** Added Account Deletion and Detox mode support.
-*   📖 **Stories:** Fixed serialization bugs for smoother loading.
-*   💬 **Messaging:** New swipe/long-press gestures for easy deletion.
-*   ✨ **UI Polishing:** Refined layout and spacing for a calmer experience.
+## What's New (v2.0.0)
+*   🚀 **Milestone Release:** NeuroComet evolves with advanced security and better wellbeing tools.
+*   ✨ **Advanced 2FA:** Protect your account with Biometrics and Passkeys.
+*   🌿 **Detox Mode:** Step away from the noise without deleting your account.
+*   🛡️ **Privacy & Deletion:** Direct in-app support for account deletion with a safety grace period.
+*   ♿ **Refined Accessibility:** Improved Braille and Screen Reader support for a truly inclusive experience.
+*   🛠️ **Optimizations:** Massive battery life improvements and GitHub login support.
 
 ---
 

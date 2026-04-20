@@ -29,7 +29,7 @@ class SubscriptionScreenTest {
 
     @Before
     fun setUp() {
-        SubscriptionManager.testMode = true
+        SubscriptionManager.setTestMode(true)
         SubscriptionManager.resetTestPurchase()
     }
 

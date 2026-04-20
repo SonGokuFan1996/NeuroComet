@@ -709,9 +709,9 @@ fun PrivacySettingsScreen(
             item { Spacer(Modifier.height(8.dp)) }
             item {
                 SettingsSectionHeader(
-                    title = "Contacts & Friends",
+                    title = stringResource(R.string.social_contacts_friends),
                     icon = Icons.Default.Contacts,
-                    subtitle = "Find friends from your device contacts"
+                    subtitle = stringResource(R.string.social_contacts_friends_desc)
                 )
             }
 
@@ -723,18 +723,18 @@ fun PrivacySettingsScreen(
             item { Spacer(Modifier.height(8.dp)) }
             item {
                 SettingsSectionHeader(
-                    title = "Blocked & Muted",
+                    title = stringResource(R.string.social_blocked_muted),
                     icon = Icons.Default.Block,
-                    subtitle = "Manage who you've blocked or muted"
+                    subtitle = stringResource(R.string.social_blocked_muted_desc)
                 )
             }
 
             item {
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text("Blocked and muted account management is available in the conversation and profile flows.", style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.social_blocked_muted_hint), style = MaterialTheme.typography.bodyMedium)
                         Text(
-                            "This screen is a summary surface for that data.",
+                            stringResource(R.string.social_blocked_muted_summary),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -746,20 +746,20 @@ fun PrivacySettingsScreen(
             item { Spacer(Modifier.height(8.dp)) }
             item {
                 SettingsSectionHeader(
-                    title = "Muted Words",
+                    title = stringResource(R.string.social_muted_words),
                     icon = Icons.Default.TextFields,
-                    subtitle = "Hide posts containing specific words"
+                    subtitle = stringResource(R.string.social_muted_words_desc)
                 )
             }
 
             item {
                 val contentPrefs = SocialSettingsManager.getContentPreferences(context)
-                val mutedWordsSummary = contentPrefs.muteWords.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "No muted words yet."
+                val mutedWordsSummary = contentPrefs.muteWords.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: stringResource(R.string.social_no_muted_words)
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.25f))) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(mutedWordsSummary, style = MaterialTheme.typography.bodyMedium)
                         Text(
-                            "Muted word editing will be expanded in a later pass.",
+                            stringResource(R.string.social_muted_words_placeholder),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -793,9 +793,9 @@ fun PrivacySettingsScreen(
             item { Spacer(Modifier.height(8.dp)) }
             item {
                 SettingsSectionHeader(
-                    title = "Account Care",
+                    title = stringResource(R.string.social_account_care),
                     icon = Icons.Default.SelfImprovement,
-                    subtitle = "Take a break or schedule deletion with a safety window"
+                    subtitle = stringResource(R.string.social_account_care_subtitle)
                 )
             }
 
@@ -804,9 +804,9 @@ fun PrivacySettingsScreen(
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(
                             text = if (accountStatus?.hasDeletionScheduled == true)
-                                "Deletion is scheduled. Sign in again within the grace period to cancel it."
+                                stringResource(R.string.social_cancel_deletion_desc)
                             else
-                                "Need a real break? Try Detox Mode in Wellbeing before choosing account deletion.",
+                                stringResource(R.string.social_detox_mode_hint),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Button(
@@ -824,7 +824,7 @@ fun PrivacySettingsScreen(
                                     MaterialTheme.colorScheme.error
                             )
                         ) {
-                            Text(if (accountStatus?.hasDeletionScheduled == true) "Cancel scheduled deletion" else "Delete account")
+                            Text(if (accountStatus?.hasDeletionScheduled == true) stringResource(R.string.account_cancel_deletion) else stringResource(R.string.account_delete))
                         }
                         TextButton(
                             onClick = {
@@ -833,7 +833,7 @@ fun PrivacySettingsScreen(
                             },
                             modifier = Modifier.padding(top = 4.dp)
                         ) {
-                            Text("Learn more about account deletion", style = MaterialTheme.typography.labelLarge)
+                            Text(stringResource(R.string.social_learn_more_deletion), style = MaterialTheme.typography.labelLarge)
                         }
                     }
                 }
@@ -1014,7 +1014,7 @@ private fun ContactsAccessSettingsCard() {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                "Let NeuroComet read the contacts stored on this device so it can show your contacts list and help find people you already know.",
+                stringResource(R.string.social_contacts_friends_hint),
                 style = MaterialTheme.typography.bodyMedium
             )
 

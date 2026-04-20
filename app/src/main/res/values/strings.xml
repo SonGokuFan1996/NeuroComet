@@ -2093,6 +2093,10 @@
     <string name="social_content_media_title">Content &amp; Media</string>
     <string name="social_accessibility_title">Accessibility</string>
     <string name="social_neurobalance_title">NeuroBalance 🧠✨</string>
+    <string name="social_learn_more_deletion">Learn more about account deletion</string>
+    <string name="social_account_care_subtitle">Take a break or schedule deletion with a safety window</string>
+    <string name="social_detox_mode_hint">Need a real break? Try Detox Mode in Wellbeing before choosing account deletion.</string>
+    <string name="social_contacts_friends_hint">Let NeuroComet read the contacts stored on this device so it can show your contacts list and help find people you already know.</string>
 
     <!-- DM Permission -->
     <string name="dm_perm_everyone">Everyone</string>

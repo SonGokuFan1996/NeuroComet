@@ -16,7 +16,6 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.icons.automirrored.filled.MenuOpen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
@@ -43,8 +42,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import com.kyilmaz.neurocomet.BuildConfig
 import com.revenuecat.purchases.*
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.minutes
 import com.revenuecat.purchases.interfaces.ReceiveCustomerInfoCallback
 import com.kyilmaz.neurocomet.calling.NeurodivergentPersona
 import com.kyilmaz.neurocomet.calling.PracticeCallScreen
@@ -85,9 +86,7 @@ sealed class Screen(val route: String, val labelId: Int, val iconFilled: ImageVe
     data object Profile : Screen("profile/{userId}", R.string.nav_settings, Icons.Filled.Person, Icons.Outlined.Person) {
         fun route(userId: String) = "profile/$userId"
     }
-    data object PostDetail : Screen("post/{postId}", R.string.nav_feed, Icons.Filled.Home, Icons.Outlined.Home) {
-        fun route(postId: Long) = "post/$postId"
-    }
+    data object PostDetail : Screen("post/{postId}", R.string.nav_feed, Icons.Filled.Home, Icons.Outlined.Home)
     data object MyProfile : Screen("my_profile", R.string.settings_my_profile, Icons.Filled.Person, Icons.Outlined.Person)
     data object GamesHub : Screen("games_hub", R.string.games_hub_title, Icons.Filled.Games, Icons.Outlined.Games)
     data object GamePlay : Screen("game/{gameId}", R.string.games_hub_title, Icons.Filled.Games, Icons.Outlined.Games) {
@@ -202,8 +201,8 @@ open class MainActivity : AppCompatActivity() {
         }
 
         SubscriptionManager.setBillingConfigured(
-            configured = billingConfigured,
-            error = if (!BuildConfig.DEBUG && !billingConfigured) {
+            isConfigured = billingConfigured,
+            errorMessage = if (!BuildConfig.DEBUG && !billingConfigured) {
                 "Purchases are temporarily unavailable in this build."
             } else null
         )
@@ -355,7 +354,6 @@ open class MainActivity : AppCompatActivity() {
     fun onHandoffActivityRequested(): Any? {
         return if (Build.VERSION.SDK_INT >= 37) {
             try {
-                val dataClass = Class.forName("android.app.HandoffActivityData")
                 val builderClass = Class.forName("android.app.HandoffActivityData\$Builder")
                 val constructor = builderClass.getConstructor(ComponentName::class.java)
                 val builder = constructor.newInstance(ComponentName(this, MainActivity::class.java))
@@ -389,7 +387,15 @@ fun NeuroCometApp(
 
     // Route inbound Android App Link intents (https://getneurocomet.com/post/... or /u/...)
     // into the NavController so the correct destination is opened.
-    val deepLinkActivity = LocalContext.current as? MainActivity
+    val context = LocalContext.current
+    val deepLinkActivity = remember(context) {
+        var c = context
+        while (c is android.content.ContextWrapper) {
+            if (c is MainActivity) break
+            c = c.baseContext
+        }
+        c as? MainActivity
+    }
     val pendingDeepLink by (
         deepLinkActivity?.deepLinkIntent
             ?: kotlinx.coroutines.flow.MutableStateFlow<android.content.Intent?>(null)
@@ -405,9 +411,8 @@ fun NeuroCometApp(
         deepLinkActivity?.deepLinkIntent?.value = null
     }
 
+    val isGuestUser = authState?.id == "guest_user"
     val authedUser = authState
-    val isGuestUser = authedUser?.id == "guest_user"
-    val isUserVerified = authedUser?.isVerified ?: CURRENT_USER.isVerified
 
     var showPremiumDialog by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -421,7 +426,6 @@ fun NeuroCometApp(
         }
     }
 
-    val context = LocalContext.current
     val app = remember(context) { context.applicationContext as android.app.Application }
     val devOptionsViewModel: DevOptionsViewModel = viewModel()
     val devOptions by devOptionsViewModel.options.collectAsState()
@@ -500,7 +504,7 @@ fun NeuroCometApp(
         while (true) {
             val wellbeing = SocialSettingsManager.getWellbeingSettings(context)
             if (wellbeing.breakRemindersEnabled && wellbeing.breakIntervalMinutes > 0) {
-                kotlinx.coroutines.delay(wellbeing.breakIntervalMinutes * 60_000L)
+                kotlinx.coroutines.delay(wellbeing.breakIntervalMinutes.minutes)
                 val messages = listOf(
                     "🧘 Time for a mindful break! Stretch, breathe, or look away from the screen for a moment.",
                     "💙 Hey, you've been scrolling for a while. How about a quick break?",
@@ -677,7 +681,7 @@ fun NeuroCometApp(
         val adaptiveNavItems = remember(messagesState.conversations) {
             listOf(
                 AdaptiveNavItem(Screen.Feed.route, Screen.Feed.labelId, Screen.Feed.iconFilled, Screen.Feed.iconOutlined),
-                AdaptiveNavItem(Screen.Explore.route, Screen.Explore.labelId, Screen.Explore.iconFilled, Screen.Explore.iconOutlined),
+                AdaptiveNavItem(Screen.Explore.route, Screen.Explore.labelId, Screen.Feed.iconFilled, Screen.Explore.iconOutlined),
                 AdaptiveNavItem(
                     route = Screen.Messages.route,
                     labelRes = Screen.Messages.labelId,
@@ -687,21 +691,6 @@ fun NeuroCometApp(
                 ),
                 AdaptiveNavItem(Screen.Notifications.route, Screen.Notifications.labelId, Screen.Notifications.iconFilled, Screen.Notifications.iconOutlined),
                 AdaptiveNavItem(Screen.Settings.route, Screen.Settings.labelId, Screen.Settings.iconFilled, Screen.Settings.iconOutlined, section = NavigationSection.SETTINGS)
-            )
-        }
-        val settingsDetailRoutes = remember {
-            setOf(
-                Screen.ThemeSettings.route,
-                Screen.AnimationSettings.route,
-                Screen.IconCustomization.route,
-                Screen.PrivacySettings.route,
-                Screen.NotificationSettings.route,
-                Screen.ContentSettings.route,
-                Screen.AccessibilitySettingsScreen.route,
-                Screen.WellbeingSettings.route,
-                Screen.FontSettings.route,
-                Screen.ParentalControls.route,
-                Screen.BackupSettings.route
             )
         }
         val showMessagesSplitPane = canonicalLayout.supportsMultiPane &&
@@ -916,11 +905,11 @@ fun NeuroCometApp(
                         },
                         onStartCall = { userId, displayName, avatarUrl, isVideo ->
                             if (feedState.isMockInterfaceEnabled) {
-                                com.kyilmaz.neurocomet.MockCallManager.startCall(
+                                MockCallManager.startCall(
                                     recipientId = userId,
                                     recipientName = displayName,
                                     recipientAvatar = avatarUrl,
-                                    callType = if (isVideo) com.kyilmaz.neurocomet.CallType.VIDEO else com.kyilmaz.neurocomet.CallType.VOICE
+                                    callType = if (isVideo) CallType.VIDEO else CallType.VOICE
                                 )
                             } else {
                                 WebRTCCallManager.getInstance().startCall(
@@ -959,8 +948,8 @@ fun NeuroCometApp(
                             onReactToMessage = { messageId, emoji ->
                                 messagesViewModel.reactToMessage(activeConversation.id, messageId, emoji)
                             },
-                            isUserBlocked = (activeConversation.participants.firstOrNull { it != (authState?.id ?: "me") }?.let { messagesViewModel.isUserBlocked(it) } ?: false),
-                            isUserMuted = (activeConversation.participants.firstOrNull { it != (authState?.id ?: "me") }?.let { messagesViewModel.isUserMuted(it) } ?: false),
+                            isUserBlocked = (activeConversation.participants.firstOrNull { it != (authState.id) }?.let { messagesViewModel.isUserBlocked(it) } ?: false),
+                            isUserMuted = (activeConversation.participants.firstOrNull { it != (authState.id) }?.let { messagesViewModel.isUserMuted(it) } ?: false),
                             enableVideoChat = devOptions.enableVideoChat,
                             typingIndicatorVariant = dmTypingIndicatorVariant,
                             enableSimulatedReplies = BuildConfig.DEBUG && messagesState.currentUserId == "me",
@@ -1122,10 +1111,10 @@ fun NeuroCometApp(
                 composable(Screen.Feed.route) {
                     FeedScreen(
                         feedUiState = feedState,
-                        onAddPost = { content, tone, imageUrl, videoUrl, sourcePostId, sourcePostContent ->
+                        onAddPost = { content, tone, imageUrl, videoUrl, _, _ ->
                             feedViewModel.createPost(content, tone, imageUrl, videoUrl)
                         },
-                        onAddStory = { type, content, authorId, avatarUrl, duration, refPostId, linkData ->
+                        onAddStory = { type, content, _, _, duration, _, linkData ->
                             feedViewModel.createStory(
                                 imageUrl = if (type == StoryContentType.IMAGE || type == StoryContentType.VIDEO || type == StoryContentType.DOCUMENT || type == StoryContentType.AUDIO) content else "",
                                 duration = duration,
@@ -1168,7 +1157,7 @@ fun NeuroCometApp(
                                 onStoryViewed = { viewedStory ->
                                     feedViewModel.markStoryAsViewed(viewedStory.id)
                                 },
-                                onReply = { _, replyText ->
+                                onReply = { _, _ ->
                                     // TODO: wire to feedViewModel.sendStoryReply() when messaging backend is ready
                                     android.widget.Toast.makeText(
                                         navController.context,
@@ -1216,11 +1205,11 @@ fun NeuroCometApp(
                             },
                             onStartCall = { userId, displayName, avatarUrl, isVideo ->
                                 if (feedState.isMockInterfaceEnabled) {
-                                    com.kyilmaz.neurocomet.MockCallManager.startCall(
+                                    MockCallManager.startCall(
                                         recipientId = userId,
                                         recipientName = displayName,
                                         recipientAvatar = avatarUrl,
-                                        callType = if (isVideo) com.kyilmaz.neurocomet.CallType.VIDEO else com.kyilmaz.neurocomet.CallType.VOICE
+                                        callType = if (isVideo) CallType.VIDEO else CallType.VOICE
                                     )
                                 } else {
                                     WebRTCCallManager.getInstance().startCall(
@@ -1258,11 +1247,11 @@ fun NeuroCometApp(
                             },
                             onStartCall = { userId, displayName, avatarUrl, isVideo ->
                                 if (feedState.isMockInterfaceEnabled) {
-                                    com.kyilmaz.neurocomet.MockCallManager.startCall(
+                                    MockCallManager.startCall(
                                         recipientId = userId,
                                         recipientName = displayName,
                                         recipientAvatar = avatarUrl,
-                                        callType = if (isVideo) com.kyilmaz.neurocomet.CallType.VIDEO else com.kyilmaz.neurocomet.CallType.VOICE
+                                        callType = if (isVideo) CallType.VIDEO else CallType.VOICE
                                     )
                                 } else {
                                     WebRTCCallManager.getInstance().startCall(
@@ -1293,8 +1282,8 @@ fun NeuroCometApp(
                             onReactToMessage = { messageId, emoji ->
                                 messagesViewModel.reactToMessage(conv.id, messageId, emoji)
                             },
-                            isUserBlocked = (conv.participants.firstOrNull { it != (authState?.id ?: "me") }?.let { messagesViewModel.isUserBlocked(it) } ?: false),
-                            isUserMuted = (conv.participants.firstOrNull { it != (authState?.id ?: "me") }?.let { messagesViewModel.isUserMuted(it) } ?: false),
+                            isUserBlocked = (conv.participants.firstOrNull { it != authState.id }?.let { messagesViewModel.isUserBlocked(it) } ?: false),
+                            isUserMuted = (conv.participants.firstOrNull { it != authState.id }?.let { messagesViewModel.isUserMuted(it) } ?: false),
                             enableVideoChat = devOptions.enableVideoChat,
                             typingIndicatorVariant = dmTypingIndicatorVariant,
                             enableSimulatedReplies = BuildConfig.DEBUG && messagesState.currentUserId == "me",
@@ -1625,7 +1614,7 @@ fun NeuroCometApp(
                         feedUiState = feedState,
                         feedViewModel = feedViewModel,
                         safetyState = safetyState,
-                        currentUserId = authState?.id ?: "",
+                        currentUserId = authState.id,
                         isMockInterfaceEnabled = feedState.isMockInterfaceEnabled,
                         onBack = {
                             if (!navController.popBackStack()) {
@@ -1818,8 +1807,8 @@ fun NeuroCometApp(
 private fun CanonicalAdaptivePaneLayout(
     primary: @Composable () -> Unit,
     secondary: @Composable () -> Unit,
-    tertiary: (@Composable () -> Unit)? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    tertiary: (@Composable () -> Unit)? = null
 ) {
     val canonicalLayout = LocalCanonicalLayout.current
     val showTertiary = tertiary != null && canonicalLayout.paneLayout == CanonicalPaneLayout.TRIPLE
