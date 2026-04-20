@@ -7,6 +7,8 @@ import android.net.Uri
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -69,6 +71,7 @@ import java.net.URL
  * (DNS misconfigured, wrong fingerprint in assetlinks, etc.) before users
  * experience it as "tapping a shared post opens Chrome instead of the app."
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DeepLinkDiagnosticsDevSection() {
     val context = LocalContext.current
@@ -175,7 +178,11 @@ fun DeepLinkDiagnosticsDevSection() {
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             Button(
                 enabled = !assetlinksRunning,
                 onClick = {
@@ -427,7 +434,9 @@ private fun probeAssetLinks(expectedPackage: String): AssetLinksReport {
             try {
                 val arr = JSONArray(body)
                 var sawPackage = false
-                var sawPlaceholder = false
+                var placeholderCount = 0
+                var realCount = 0
+                val fpRegex = Regex("^[0-9A-Fa-f]{2}(:[0-9A-Fa-f]{2}){31}$")
                 for (i in 0 until arr.length()) {
                     val obj = arr.getJSONObject(i)
                     val target = obj.optJSONObject("target") ?: continue
@@ -437,7 +446,11 @@ private fun probeAssetLinks(expectedPackage: String): AssetLinksReport {
                     if (fps != null) {
                         for (j in 0 until fps.length()) {
                             val fp = fps.getString(j)
-                            if (fp.startsWith("REPLACE_") || fp.isBlank()) sawPlaceholder = true
+                            if (fp.isBlank() || fp.startsWith("REPLACE_") || !fpRegex.matches(fp)) {
+                                placeholderCount++
+                            } else {
+                                realCount++
+                            }
                         }
                     }
                 }
@@ -446,10 +459,17 @@ private fun probeAssetLinks(expectedPackage: String): AssetLinksReport {
                 } else {
                     StatusRowData(Status.FAIL, "package_name missing", "$expectedPackage not found in JSON")
                 }
-                rows += if (sawPlaceholder) {
-                    StatusRowData(Status.FAIL, "Fingerprint placeholder present", "Replace REPLACE_WITH_* with real SHA-256")
-                } else {
-                    StatusRowData(Status.OK, "No fingerprint placeholders")
+                rows += when {
+                    realCount == 0 ->
+                        StatusRowData(Status.FAIL, "No real fingerprints", "All entries are placeholders")
+                    placeholderCount > 0 ->
+                        StatusRowData(
+                            Status.WARN,
+                            "$realCount real, $placeholderCount placeholder fingerprint(s)",
+                            "App Links will work for builds matching the real fingerprints. Replace remaining placeholders (e.g. Play App Signing key) before going live on Play Store."
+                        )
+                    else ->
+                        StatusRowData(Status.OK, "$realCount valid SHA-256 fingerprint(s)")
                 }
             } catch (e: Throwable) {
                 rows += StatusRowData(Status.FAIL, "JSON parse error", e.message ?: "")

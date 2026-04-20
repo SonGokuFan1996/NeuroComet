@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Account | NeuroComet</title>
+    <script>
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: { brand: { 50: '#f0f5ff', 500: '#3b82f6', 600: '#2563eb', 900: '#0f172a' } }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans text-gray-800 dark:text-gray-200 antialiased bg-[#f8fafc] dark:bg-gray-900 transition-colors duration-300">
+
+<nav class="w-full z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-800/50 sticky top-0">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-20">
+            <a href="../index.html" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-meteor"></i>
+                </div>
+                <span class="font-extrabold text-xl text-gray-900 dark:text-white">NeuroComet</span>
+            </a>
+            <a href="../index.html" class="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-brand-600 transition-colors">
+                <i class="fa-solid fa-arrow-left mr-2"></i>Back to Home
+            </a>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="mb-12">
+        <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">How to Delete Your Account</h1>
+        <p class="text-gray-500 dark:text-gray-400">At NeuroComet, we believe you should have full control over your data. You can delete your account and all associated data at any time through our mobile application.</p>
+    </div>
+
+    <div class="space-y-8 text-gray-600 dark:text-gray-300 leading-relaxed">
+        <section>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Deleting Your Account from the App</h2>
+            <p>To delete your NeuroComet account, follow these steps within the app:</p>
+            <ol class="list-decimal pl-5 space-y-2 mt-4">
+                <li>Open the <strong>NeuroComet</strong> app and ensure you are signed in.</li>
+                <li>Navigate to your <strong>Profile</strong> by tapping your avatar.</li>
+                <li>Tap the <strong>Settings</strong> (gear) icon in the top right corner.</li>
+                <li>Go to <strong>Privacy & Security</strong>.</li>
+                <li>Scroll down to the <strong>Account Care</strong> section.</li>
+                <li>Tap <strong>Delete Account</strong> and confirm your choice.</li>
+            </ol>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">What Happens Next?</h2>
+            <p>Once you confirm the deletion in the app:</p>
+            <ul class="list-disc pl-5 space-y-2 mt-4">
+                <li><strong>Grace Period:</strong> Your account will be immediately deactivated and scheduled for permanent deletion. We provide a <strong>14-day grace period</strong> during which you can cancel the deletion simply by signing back into your account.</li>
+                <li><strong>Permanent Deletion:</strong> After 14 days, your profile, posts, stories, interactions, and all other personal data will be permanently purged from our servers and cannot be recovered.</li>
+                <li><strong>Third-Party Data:</strong> Authentication data managed via our provider (Supabase) will also be removed in accordance with their data retention policies.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Requesting Deletion via Email</h2>
+            <p>If you no longer have the app installed or cannot access your account, you can request manual deletion by contacting us at:</p>
+            <p class="mt-4 font-bold text-brand-600 dark:text-brand-400">
+                <a href="mailto:support@getneurocomet.com">support@getneurocomet.com</a>
+            </p>
+            <p class="mt-4">Please include the email address associated with your account. We may ask for additional verification to ensure the security of your data.</p>
+        </section>
+
+        <section>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Data Portability</h2>
+            <p>Before deleting your account, you may wish to export your local data using the <strong>Backup & Restore</strong> tools found in the app settings.</p>
+        </section>
+    </div>
+</main>
+
+<footer class="bg-gray-50 dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 py-8 text-center mt-12">
+    <p class="text-gray-400 dark:text-gray-500 text-sm">
+        &copy; <script>document.write(new Date().getFullYear())</script> NeuroComet. All rights reserved.
+    </p>
+</footer>
+</body>
+</html>

@@ -10,6 +10,7 @@ docs/
   privacy/index.html       → https://getneurocomet.com/privacy
   terms.html               → https://getneurocomet.com/terms.html    (legacy)
   terms/index.html         → https://getneurocomet.com/terms
+  delete-account/index.html → https://getneurocomet.com/delete-account
   .well-known/
     assetlinks.json        → https://getneurocomet.com/.well-known/assetlinks.json
                              (Android App Links proof — MUST be served with

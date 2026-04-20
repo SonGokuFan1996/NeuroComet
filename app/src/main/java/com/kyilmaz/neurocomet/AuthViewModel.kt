@@ -12,6 +12,7 @@ import com.kyilmaz.neurocomet.auth.Fido2Credential
 import com.kyilmaz.neurocomet.auth.TotpSecret
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
+import io.github.jan.supabase.auth.providers.Github
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.coroutines.delay
@@ -175,6 +176,29 @@ class AuthViewModel : ViewModel() {
                     Log.e(TAG, "Dev sign-up failed", signUpErr)
                     _devAuthStatus.value = "Auth failed: ${signUpErr.message ?: signInErr.message ?: "unknown error"}"
                 }
+            }
+        }
+    }
+
+    /**
+     * Signs in using GitHub OAuth. Ideal for developers who linked their Supabase project
+     * with their GitHub accounts.
+     */
+    fun devSignInWithGithub() {
+        viewModelScope.launch {
+            val client = AppSupabaseClient.client
+            if (client == null) {
+                _devAuthStatus.value = "Supabase client not configured"
+                return@launch
+            }
+            
+            try {
+                _devAuthStatus.value = "Opening GitHub sign in…"
+                client.auth.signInWith(Github)
+                _devAuthStatus.value = "Returning from GitHub sign in flow…"
+            } catch (e: Exception) {
+                Log.e(TAG, "Dev GitHub sign in failed", e)
+                _devAuthStatus.value = "GitHub sign in failed: ${e.message}"
             }
         }
     }

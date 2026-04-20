@@ -826,6 +826,15 @@ fun PrivacySettingsScreen(
                         ) {
                             Text(if (accountStatus?.hasDeletionScheduled == true) "Cancel scheduled deletion" else "Delete account")
                         }
+                        TextButton(
+                            onClick = {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(AppLinks.DELETE_ACCOUNT_URL))
+                                context.startActivity(intent)
+                            },
+                            modifier = Modifier.padding(top = 4.dp)
+                        ) {
+                            Text("Learn more about account deletion", style = MaterialTheme.typography.labelLarge)
+                        }
                     }
                 }
             }

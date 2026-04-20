@@ -5,11 +5,10 @@
       "namespace": "android_app",
       "package_name": "com.kyilmaz.neurocomet",
       "sha256_cert_fingerprints": [
-        "REPLACE_WITH_PLAY_APP_SIGNING_SHA256",
-        "REPLACE_WITH_UPLOAD_KEYSTORE_SHA256",
-        "REPLACE_WITH_DEBUG_KEYSTORE_SHA256_OPTIONAL"
+        "AF:C3:9F:35:F7:14:DD:13:BB:43:C0:4F:A7:D4:7C:22:E2:88:54:43:FC:35:D5:F7:74:BE:83:53:8B:C1:AF:39",
+        "B3:58:03:79:DF:F9:AD:2A:BE:81:7B:8C:BD:9D:BC:C0:49:01:D0:A6:10:3C:43:2A:18:17:52:40:F9:5A:A8:E4",
+        "REPLACE_WITH_PLAY_APP_SIGNING_SHA256_AFTER_UPLOAD"
       ]
     }
   }
 ]
-

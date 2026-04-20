@@ -41,6 +41,9 @@ object AppLinks {
         return "$CANONICAL_ORIGIN$normalized"
     }
 
+    /** URL for account deletion instructions. */
+    val DELETE_ACCOUNT_URL: String = "$CANONICAL_ORIGIN/delete-account"
+
     /** Full URL to the App Links proof file. */
     const val ASSETLINKS_URL: String = "$CANONICAL_ORIGIN/.well-known/assetlinks.json"
 
