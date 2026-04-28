@@ -1,6 +1,7 @@
 package com.kyilmaz.neurocomet.ui.design
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.core.*
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.kyilmaz.neurocomet.R
 
 /**
  * M3E Component Library for NeuroComet Android
@@ -253,7 +255,7 @@ fun M3EStoryAvatar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Add story",
+                        contentDescription = stringResource(R.string.stories_add_story),
                         modifier = Modifier.size(14.dp),
                         tint = MaterialTheme.colorScheme.onPrimary
                     )

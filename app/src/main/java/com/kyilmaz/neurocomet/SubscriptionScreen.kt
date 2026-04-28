@@ -707,7 +707,7 @@ else {
                         }
                     }
                 ) {
-                    Text("Retry")
+                    Text(stringResource(R.string.action_retry))
                 }
             }
         )
@@ -760,7 +760,7 @@ else {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showAllOfferingsDialog = false }) { Text("Close") }
+                TextButton(onClick = { showAllOfferingsDialog = false }) { Text(stringResource(R.string.cd_close)) }
             }
         )
     }

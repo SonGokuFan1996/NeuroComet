@@ -1,6 +1,7 @@
 package com.kyilmaz.neurocomet
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -127,7 +128,7 @@ fun LegacyBubblyPostCard(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     Icons.Outlined.LocationOn,
-                                    contentDescription = "Location",
+                                    contentDescription = stringResource(R.string.cd_location),
                                     modifier = Modifier.size(14.dp),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )

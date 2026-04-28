@@ -3,6 +3,7 @@
 package com.kyilmaz.neurocomet
 
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -221,7 +222,7 @@ private fun WallpaperPreviewCard(
                     ) {
                         Icon(
                             Icons.Default.Check,
-                            contentDescription = "Selected",
+                            contentDescription = stringResource(R.string.cd_selected_state),
                             tint = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(18.dp)
                         )

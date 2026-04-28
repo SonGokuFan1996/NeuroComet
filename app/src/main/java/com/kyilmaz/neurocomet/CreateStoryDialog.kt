@@ -42,6 +42,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import androidx.core.content.edit
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 
 /**
@@ -62,7 +64,7 @@ import kotlinx.coroutines.delay
 fun CreateStoryDialog(
     onDismiss: () -> Unit,
     onPost: (StoryContentType, String, Long, String?, Long, Long?, LinkPreviewData?) -> Unit,
-    safetyState: SafetyState = SafetyState()
+    @Suppress("UNUSED_PARAMETER") safetyState: SafetyState = SafetyState()
 ) {
     val context = LocalContext.current
 
@@ -77,12 +79,12 @@ fun CreateStoryDialog(
     var textOverlay by remember { mutableStateOf(prefs.getString("draft_overlay", "") ?: "") }
     
     LaunchedEffect(selectedTab, linkUrl, textContent, textOverlay) {
-        prefs.edit()
-            .putInt("draft_tab", selectedTab)
-            .putString("draft_link", linkUrl)
-            .putString("draft_text", textContent)
-            .putString("draft_overlay", textOverlay)
-            .apply()
+        prefs.edit {
+            putInt("draft_tab", selectedTab)
+            putString("draft_link", linkUrl)
+            putString("draft_text", textContent)
+            putString("draft_overlay", textOverlay)
+        }
     }
     var selectedBackgroundIndex by remember { mutableIntStateOf(0) }
     var selectedGradientIndex by remember { mutableIntStateOf(-1) }
@@ -98,7 +100,7 @@ fun CreateStoryDialog(
     // Entrance animation
     var isVisible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
-        delay(50)
+        delay(50.milliseconds)
         isVisible = true
     }
 
@@ -117,10 +119,12 @@ fun CreateStoryDialog(
         label = "dialogAlpha"
     )
 
-    // File picker launchers
+    // File picker launchers — uses Android Photo Picker (PickVisualMedia)
+    // so no storage permission prompt is required. Falls back automatically
+    // on API < 19 (Photo Picker has a back-compat shim in AndroidX activity).
     val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri ->
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
         uri?.let {
             selectedUri = it
             contentType = StoryFileUtils.getContentType(context, it)
@@ -130,8 +134,8 @@ fun CreateStoryDialog(
     }
 
     val videoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri ->
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
         uri?.let {
             selectedUri = it
             contentType = StoryContentType.VIDEO
@@ -165,7 +169,7 @@ fun CreateStoryDialog(
         if (linkUrl.isNotBlank() && (linkUrl.startsWith("http://") || linkUrl.startsWith("https://"))) {
             isLoadingPreview = true
             // Simulate network delay for real preview fetching
-            delay(500)
+            delay(500.milliseconds)
             val preview = LinkPreviewGenerator.generatePreview(linkUrl)
             linkPreview = preview
             isLoadingPreview = false
@@ -250,8 +254,20 @@ fun CreateStoryDialog(
                                     contentType = contentType,
                                     fileName = fileName,
                                     fileSize = fileSize,
-                                    onPickImage = { imagePickerLauncher.launch("image/*") },
-                                    onPickVideo = { videoPickerLauncher.launch("video/*") },
+                                    onPickImage = {
+                                        imagePickerLauncher.launch(
+                                            androidx.activity.result.PickVisualMediaRequest(
+                                                ActivityResultContracts.PickVisualMedia.ImageOnly
+                                            )
+                                        )
+                                    },
+                                    onPickVideo = {
+                                        videoPickerLauncher.launch(
+                                            androidx.activity.result.PickVisualMediaRequest(
+                                                ActivityResultContracts.PickVisualMedia.VideoOnly
+                                            )
+                                        )
+                                    },
                                     onPickDocument = { documentPickerLauncher.launch("*/*") },
                                     onTakePhoto = { attachmentState.onTakePhoto() },
                                     onClear = {
@@ -332,15 +348,15 @@ fun CreateStoryDialog(
 
                             when (selectedTab) {
                                 0 -> selectedUri?.let {
-                                    prefs.edit().clear().apply()
+                                    prefs.edit { clear() }
                                     onPost(contentType, it.toString(), durationMs, textOverlay.takeIf { overlay -> overlay.isNotBlank() }, bgColor, bgColorEnd, null)
                                 }
                                 1 -> if (linkPreview?.isSafe == true) {
-                                    prefs.edit().clear().apply()
+                                    prefs.edit { clear() }
                                     onPost(StoryContentType.LINK, linkUrl, durationMs, null, bgColor, bgColorEnd, linkPreview)
                                 }
                                 2 -> if (textContent.isNotBlank()) {
-                                    prefs.edit().clear().apply()
+                                    prefs.edit { clear() }
                                     onPost(StoryContentType.TEXT_ONLY, textContent, durationMs, null, bgColor, bgColorEnd, null)
                                 }
                             }
@@ -1225,7 +1241,7 @@ private fun TextTabContent(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(StoryBackgroundColors.colors.size) { index ->
-                val (color, name) = StoryBackgroundColors.colors[index]
+                val (color, _) = StoryBackgroundColors.colors[index]
                 val isSelected = selectedBackgroundIndex == index && selectedGradientIndex == -1
                 Box(
                     modifier = Modifier
@@ -1255,7 +1271,7 @@ private fun TextTabContent(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(StoryBackgroundColors.gradients.size) { index ->
-                val (gradientColors, name) = StoryBackgroundColors.gradients[index]
+                val (gradientColors, _) = StoryBackgroundColors.gradients[index]
                 val isSelected = selectedGradientIndex == index
                 Box(
                     modifier = Modifier

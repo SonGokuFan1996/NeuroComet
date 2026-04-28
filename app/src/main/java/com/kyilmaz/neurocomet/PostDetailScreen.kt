@@ -1,5 +1,6 @@
 package com.kyilmaz.neurocomet
 
+import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,8 +20,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -57,10 +63,35 @@ fun PostDetailScreen(
         }
     }
 
+    // Predictive Back (Android 14+). Shows the user how much they've swiped
+    // by subtly scaling + fading the PostDetail surface, so they can commit
+    // or cancel with full gesture feedback — less jarring for users with
+    // sensory sensitivities than the stock instant dismissal.
+    var backProgress by remember { mutableFloatStateOf(0f) }
+    PredictiveBackHandler(enabled = true) { progress ->
+        try {
+            progress.collect { event ->
+                backProgress = event.progress
+            }
+            // Gesture completed — navigate back.
+            backProgress = 0f
+            onBack()
+        } catch (_: kotlinx.coroutines.CancellationException) {
+            // Gesture cancelled — snap back.
+            backProgress = 0f
+        }
+    }
+
     Scaffold(
+        modifier = Modifier.graphicsLayer {
+            val scale = 1f - (backProgress * 0.08f)
+            scaleX = scale
+            scaleY = scale
+            alpha = 1f - (backProgress * 0.35f)
+        },
         topBar = {
             TopAppBar(
-                title = { Text("Post") },
+                title = { Text(stringResource(R.string.action_post)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(

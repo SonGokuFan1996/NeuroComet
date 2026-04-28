@@ -1261,7 +1261,7 @@ private fun ProfileHeader(
                 Spacer(modifier = Modifier.width(4.dp))
                 Icon(
                     Icons.Default.Verified,
-                    contentDescription = "Verified",
+                    contentDescription = stringResource(R.string.cd_verified),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )

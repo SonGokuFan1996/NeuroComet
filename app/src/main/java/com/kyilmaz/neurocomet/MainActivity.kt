@@ -402,6 +402,52 @@ fun NeuroCometApp(
     ).collectAsState()
     LaunchedEffect(pendingDeepLink) {
         val link = pendingDeepLink ?: return@LaunchedEffect
+
+        // 1) Launcher shortcut routing — long-press app icon, or
+        //    Google Assistant "create a new post in NeuroComet".
+        val shortcutDestination = AppShortcutsManager.routeForIntent(link)
+        if (shortcutDestination != null) {
+            // Let launchers rank this shortcut higher next time.
+            AppShortcutsManager.reportShortcutUsed(context, shortcutDestination)
+            kotlinx.coroutines.delay(50)
+            try {
+                navController.graph
+                when (shortcutDestination) {
+                    ShortcutDestination.NewPost -> {
+                        navController.navigate(Screen.Feed.route) {
+                            popUpTo(Screen.Feed.route) { inclusive = false }
+                            launchSingleTop = true
+                        }
+                        // Tell Feed to open the composer on next recomposition.
+                        feedViewModel.requestOpenComposer()
+                    }
+                    ShortcutDestination.Messages -> {
+                        navController.navigate(Screen.Messages.route) {
+                            launchSingleTop = true
+                        }
+                    }
+                    ShortcutDestination.Regulation -> {
+                        // Kick off the default regulation preset immediately,
+                        // then land the user on Feed so they see the live banner.
+                        runCatching {
+                            RegulationLiveSessionManager.startPreset(
+                                context,
+                                RegulationSessionPreset.RECHARGE_WINDOW
+                            )
+                        }
+                        navController.navigate(Screen.Feed.route) {
+                            launchSingleTop = true
+                        }
+                    }
+                }
+            } catch (t: Throwable) {
+                Log.w("Shortcut", "routing failed: ${t.message}")
+            }
+            deepLinkActivity?.deepLinkIntent?.value = null
+            return@LaunchedEffect
+        }
+
+        // 2) Android App Links VIEW intents (https://getneurocomet.com/...)
         val uri = link.data
         if (uri != null && uri.scheme == "https" &&
             (uri.host == "getneurocomet.com" || uri.host == "www.getneurocomet.com")
@@ -827,7 +873,7 @@ fun NeuroCometApp(
                 Screen.Settings.route -> CanonicalEmptyDetailPane(
                     icon = Icons.Default.Settings,
                     title = stringResource(R.string.nav_settings),
-                    subtitle = "Choose a settings category to open its full controls here."
+                    subtitle = stringResource(R.string.pane_settings_empty_subtitle)
                 )
 
                 Screen.ThemeSettings.route -> ThemeSettingsScreen(
@@ -884,7 +930,7 @@ fun NeuroCometApp(
                 else -> CanonicalEmptyDetailPane(
                     icon = Icons.Default.SettingsApplications,
                     title = stringResource(R.string.nav_settings),
-                    subtitle = "This section stays full-screen on the current route."
+                    subtitle = stringResource(R.string.pane_settings_fallback_subtitle)
                 )
             }
         }
@@ -939,7 +985,7 @@ fun NeuroCometApp(
                         CanonicalEmptyDetailPane(
                             icon = Icons.Default.MarkunreadMailbox,
                             title = stringResource(R.string.nav_messages),
-                            subtitle = "Select a conversation to keep your inbox list visible while you reply."
+                            subtitle = stringResource(R.string.pane_messages_empty_subtitle)
                         )
                     } else {
                         NeuroConversationScreen(
@@ -1010,7 +1056,7 @@ fun NeuroCometApp(
                         CanonicalEmptyDetailPane(
                             icon = Icons.Default.TravelExplore,
                             title = stringResource(R.string.nav_explore),
-                            subtitle = "Pick a topic to compare discovery results with its dedicated detail view side by side."
+                            subtitle = stringResource(R.string.pane_explore_empty_subtitle)
                         )
                     } else {
                         TopicDetailScreen(

@@ -3,6 +3,7 @@
 package com.kyilmaz.neurocomet
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -134,7 +135,7 @@ fun AospInboxScreen(
     if (restriction != null) {
         ParentalBlockedScreen(
             restrictionType = restriction,
-            featureName = "Direct Messages"
+            featureName = stringResource(R.string.feature_direct_messages)
         )
         return
     }
@@ -171,7 +172,7 @@ fun AospInboxScreen(
                             value = searchQuery,
                             onValueChange = { searchQuery = it },
                             modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text("Search conversations...") },
+                            placeholder = { Text(stringResource(R.string.aosp_search_conversations_placeholder)) },
                             singleLine = true,
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = Color.Transparent,
@@ -187,7 +188,7 @@ fun AospInboxScreen(
                             showSearch = false
                             searchQuery = ""
                         }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Close search")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_close_search))
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -198,8 +199,7 @@ fun AospInboxScreen(
                 // Normal app bar - AOSP style
                 TopAppBar(
                     title = {
-                        Text(
-                            text = "Messages",
+                        Text(text = stringResource(R.string.nav_messages),
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Normal // AOSP uses lighter weight
                         )
@@ -207,16 +207,16 @@ fun AospInboxScreen(
                     navigationIcon = {
                         if (onBack != null) {
                             IconButton(onClick = onBack) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                             }
                         }
                     },
                     actions = {
                         IconButton(onClick = { showSearch = true }) {
-                            Icon(Icons.Filled.Search, contentDescription = "Search")
+                            Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.cd_search))
                         }
                         IconButton(onClick = { /* Settings */ }) {
-                            Icon(Icons.Outlined.MoreVert, contentDescription = "More options")
+                            Icon(Icons.Outlined.MoreVert, contentDescription = stringResource(R.string.cd_more_options))
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -234,7 +234,7 @@ fun AospInboxScreen(
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = "New message")
+                Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = stringResource(R.string.aosp_new_message))
             }
         },
         containerColor = aospCalmModeBackgroundColor()
@@ -258,13 +258,16 @@ fun AospInboxScreen(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                     )
                     Text(
-                        text = if (searchQuery.isNotBlank()) "No results found" else "No conversations yet",
+                        text = if (searchQuery.isNotBlank())
+                            stringResource(R.string.aosp_no_results_found)
+                        else
+                            stringResource(R.string.aosp_no_conversations_yet),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     if (searchQuery.isBlank()) {
                         Text(
-                            text = "Start a conversation with someone!",
+                            text = stringResource(R.string.aosp_start_a_conversation),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
@@ -340,7 +343,7 @@ private fun AospConversationItem(
                         .data(avatar)
                         .crossfade(true)
                         .build(),
-                    contentDescription = "Profile picture of $displayName",
+                    contentDescription = stringResource(R.string.cd_profile_picture_of, displayName),
                     modifier = Modifier
                         .size(56.dp)
                         .clip(CircleShape)
@@ -391,7 +394,7 @@ private fun AospConversationItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = lastMessage?.content ?: "No messages yet",
+                        text = lastMessage?.content ?: stringResource(R.string.aosp_no_messages_yet),
                         style = MaterialTheme.typography.bodyMedium,
                         color = if (hasUnread)
                             MaterialTheme.colorScheme.onSurface
@@ -456,18 +459,25 @@ fun AospConversationScreen(
     // Detect keyboard visibility for emoji picker auto-dismiss
     val density = LocalDensity.current
     val imeInsets = WindowInsets.ime
-    val imeVisible = remember(imeInsets) {
+    val imeVisible by remember {
         derivedStateOf { imeInsets.getBottom(density) > 0 }
     }
 
-    LaunchedEffect(imeVisible.value) {
-        if (imeVisible.value && showEmojiPicker) showEmojiPicker = false
+    LaunchedEffect(imeVisible) {
+        if (imeVisible && showEmojiPicker) showEmojiPicker = false
     }
 
-    // Scroll to bottom on new messages
+    // Auto-scroll to newest only when the user is already near the bottom OR the
+    // newest message is from "me" — otherwise they're reading history and we
+    // mustn't yank them down.
     LaunchedEffect(conversation.messages.size) {
-        if (conversation.messages.isNotEmpty()) {
-            listState.animateScrollToItem(conversation.messages.size - 1)
+        val total = conversation.messages.size
+        if (total == 0) return@LaunchedEffect
+        val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+        val nearBottom = lastVisible >= total - 2
+        val mineIsLatest = conversation.messages.last().senderId == "me"
+        if (nearBottom || mineIsLatest) {
+            listState.animateScrollToItem(total - 1)
         }
     }
 
@@ -499,7 +509,7 @@ fun AospConversationScreen(
                             .data(avatar)
                             .crossfade(true)
                             .build(),
-                        contentDescription = "Avatar",
+                        contentDescription = stringResource(R.string.cd_avatar),
                         modifier = Modifier
                             .size(40.dp)
                             .clip(CircleShape)
@@ -532,7 +542,7 @@ fun AospConversationScreen(
             },
             navigationIcon = {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                 }
             },
             actions = {
@@ -540,7 +550,7 @@ fun AospConversationScreen(
                     Icon(Icons.Outlined.Phone, contentDescription = "Call")
                 }
                 IconButton(onClick = { /* More options */ }) {
-                    Icon(Icons.Outlined.MoreVert, contentDescription = "More")
+                    Icon(Icons.Outlined.MoreVert, contentDescription = stringResource(R.string.action_more))
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
@@ -578,8 +588,7 @@ fun AospConversationScreen(
                         fontWeight = FontWeight.Medium
                     )
                     Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = "Start your conversation",
+                    Text(text = stringResource(R.string.dm_start_conversation),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -633,7 +642,7 @@ fun AospConversationScreen(
                             .align(Alignment.BottomEnd)
                             .padding(16.dp)
                     ) {
-                        Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Scroll to latest")
+                        Icon(Icons.Filled.KeyboardArrowDown, contentDescription = stringResource(R.string.cd_scroll_to_latest))
                     }
                 }
             }
@@ -664,13 +673,11 @@ fun AospConversationScreen(
                             tint = MaterialTheme.colorScheme.onErrorContainer
                         )
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "User blocked",
+                            Text(text = stringResource(R.string.label_user_blocked),
                                 style = MaterialTheme.typography.titleSmall,
                                 color = MaterialTheme.colorScheme.onErrorContainer
                             )
-                            Text(
-                                text = "Unblock to send messages",
+                            Text(text = stringResource(R.string.dm_unblock_to_send),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.8f)
                             )
@@ -702,6 +709,7 @@ fun AospConversationScreen(
                         verticalAlignment = Alignment.Bottom,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
+                        val typeMessageCd = stringResource(R.string.call_type_prompt)
                         // Emoji toggle
                         IconButton(
                             onClick = {
@@ -728,7 +736,7 @@ fun AospConversationScreen(
                             onValueChange = { messageText = it },
                             modifier = Modifier
                                 .weight(1f)
-                                .semantics { contentDescription = "Type a message" },
+                                .semantics { contentDescription = typeMessageCd },
                             placeholder = {
                                 Text(
                                     "Message",
@@ -782,7 +790,7 @@ fun AospConversationScreen(
                             ) {
                                 Icon(
                                     Icons.AutoMirrored.Filled.Send,
-                                    contentDescription = "Send message",
+                                    contentDescription = stringResource(R.string.cd_send_message),
                                     tint = MaterialTheme.colorScheme.onPrimary
                                 )
                             }
@@ -883,7 +891,7 @@ private fun AospMessageBubble(
                         MessageDeliveryStatus.SENDING -> {
                             Icon(
                                 Icons.Filled.Schedule,
-                                contentDescription = "Sending",
+                                contentDescription = stringResource(R.string.status_sending),
                                 modifier = Modifier.size(14.dp),
                                 tint = aospTimestampTextColor()
                             )
@@ -904,8 +912,7 @@ private fun AospMessageBubble(
                                         modifier = Modifier.size(14.dp),
                                         tint = MaterialTheme.colorScheme.error
                                     )
-                                    Text(
-                                        text = "Tap to retry",
+                                    Text(text = stringResource(R.string.action_tap_to_retry),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.error
                                     )
@@ -915,7 +922,7 @@ private fun AospMessageBubble(
                         MessageDeliveryStatus.SENT -> {
                             Icon(
                                 Icons.Filled.Done,
-                                contentDescription = "Sent",
+                                contentDescription = stringResource(R.string.status_sent),
                                 modifier = Modifier.size(14.dp),
                                 tint = aospTimestampTextColor()
                             )
@@ -962,8 +969,7 @@ private fun AospEmojiPanel(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Quick emoji",
+                Text(text = stringResource(R.string.label_quick_emoji),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -973,7 +979,7 @@ private fun AospEmojiPanel(
                 ) {
                     Icon(
                         Icons.Filled.Close,
-                        contentDescription = "Close",
+                        contentDescription = stringResource(R.string.cd_close),
                         modifier = Modifier.size(18.dp)
                     )
                 }

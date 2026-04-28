@@ -517,8 +517,7 @@ fun NeurodivergentPermanentDrawerContent(
                 // Secondary items
                 if (secondaryItems.isNotEmpty()) {
                     Spacer(Modifier.height(16.dp))
-                    Text(
-                        "More",
+                    Text(stringResource(R.string.action_more),
                         style = MaterialTheme.typography.labelMedium,
                         color = if (highContrast) Color.Gray else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(vertical = 8.dp)
@@ -692,7 +691,7 @@ private fun DrawerProfileCard(
                 imageUrl = userAvatar,
                 shape = CircleShape,
                 size = M3EDesignSystem.AvatarSize.lg,
-                contentDescription = "Profile picture"
+                contentDescription = stringResource(R.string.cd_profile_picture)
             )
 
             Spacer(Modifier.width(M3EDesignSystem.Spacing.sm))

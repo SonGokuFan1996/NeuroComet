@@ -104,6 +104,7 @@ import java.time.Instant
  * - Production-ish message list + bubble reuse (uses existing NeuroMessageBubble)
  */
 @OptIn(ExperimentalMaterial3Api::class)
+@Suppress("unused")
 @Composable
 fun DmConversationScreenV2(
     conversation: Conversation,
@@ -169,7 +170,7 @@ fun DmConversationScreenV2(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         AsyncImage(
-                            model = ImageRequest.Builder(androidx.compose.ui.platform.LocalContext.current)
+                            model = ImageRequest.Builder(LocalContext.current)
                                 .data(avatar)
                                 .crossfade(true)
                                 .build(),
@@ -700,15 +701,13 @@ private fun MessageBubbleV2(
                          style = MaterialTheme.typography.labelSmall,
                          color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f)
                      )
-                     MessageDeliveryStatus.FAILED -> Text(
-                         text = "Retry",
+                     MessageDeliveryStatus.FAILED -> Text(text = stringResource(R.string.action_retry),
                          style = MaterialTheme.typography.labelSmall,
                          color = MaterialTheme.colorScheme.error,
                          fontWeight = FontWeight.SemiBold,
                          modifier = Modifier.clickable { onRetry() }
                      )
-                     MessageDeliveryStatus.SENT -> Text(
-                         text = "Sent",
+                     MessageDeliveryStatus.SENT -> Text(text = stringResource(R.string.status_sent),
                          style = MaterialTheme.typography.labelSmall,
                          color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f)
                      )

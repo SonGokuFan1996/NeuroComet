@@ -319,15 +319,14 @@ fun ImageCustomizationEditor(
                         IconButton(onClick = onDismiss) {
                             Icon(
                                 Icons.Filled.Close,
-                                contentDescription = "Cancel",
+                                contentDescription = stringResource(R.string.action_cancel),
                                 tint = Color.White
                             )
                         }
                     },
                     actions = {
                         TextButton(onClick = { onSave(state) }) {
-                            Text(
-                                "Done",
+                            Text(stringResource(R.string.action_done),
                                 color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Bold
                             )
@@ -491,7 +490,7 @@ private fun ImagePreview(
                     .data(uri)
                     .crossfade(true)
                     .build(),
-                contentDescription = "Image being edited",
+                contentDescription = stringResource(R.string.cd_image_editing),
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize(),
                 colorFilter = state.filter.colorMatrix?.let { matrixValues ->
@@ -506,7 +505,7 @@ private fun ImagePreview(
                 .background(Color.Gray),
             contentAlignment = Alignment.Center
         ) {
-            Text("No image selected", color = Color.White)
+            Text(stringResource(R.string.label_no_image_selected), color = Color.White)
         }
 
         // Drawings overlay
@@ -811,7 +810,7 @@ private fun TextOverlayPanel(
             ) {
                 Icon(Icons.Filled.Add, contentDescription = null)
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Add")
+                Text(stringResource(R.string.action_add))
             }
         }
     }
@@ -1102,7 +1101,7 @@ fun ProfilePictureEditor(
                         if (selectedUri != null) {
                             AsyncImage(
                                 model = selectedUri,
-                                contentDescription = "Profile picture",
+                                contentDescription = stringResource(R.string.cd_profile_picture),
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
                             )
@@ -1141,8 +1140,7 @@ fun ProfilePictureEditor(
                                     modifier = Modifier.size(28.dp)
                                 )
                                 Spacer(Modifier.height(8.dp))
-                                Text(
-                                    "Gallery",
+                                Text(stringResource(R.string.label_gallery),
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.SemiBold,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -1168,8 +1166,7 @@ fun ProfilePictureEditor(
                                     modifier = Modifier.size(28.dp)
                                 )
                                 Spacer(Modifier.height(8.dp))
-                                Text(
-                                    "Avatar",
+                                Text(stringResource(R.string.cd_avatar),
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.SemiBold,
                                     color = MaterialTheme.colorScheme.onTertiaryContainer
@@ -1196,8 +1193,7 @@ fun ProfilePictureEditor(
                                         modifier = Modifier.size(28.dp)
                                     )
                                     Spacer(Modifier.height(8.dp))
-                                    Text(
-                                        "Edit",
+                                    Text(stringResource(R.string.action_edit),
                                         style = MaterialTheme.typography.labelLarge,
                                         fontWeight = FontWeight.SemiBold,
                                         color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -1210,7 +1206,7 @@ fun ProfilePictureEditor(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     TextButton(onClick = onDismiss) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.action_cancel))
                     }
                 }
             }
@@ -1258,7 +1254,7 @@ private fun AvatarMakerSheet(
                             onClick = onSave,
                             modifier = Modifier.padding(end = 8.dp)
                         ) {
-                            Text("Save")
+                            Text(stringResource(R.string.action_save))
                         }
                     }
                 )

@@ -1,10 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
     <!--
-    Static shortcuts for app icon customization.
-    These appear when long-pressing the app icon.
-    Dynamic shortcuts can be added programmatically.
+        Static app shortcuts surfaced on launcher long-press (Android 7.1+)
+        and from Assistant / Google suggestions.
+
+        Each shortcut launches MainActivity with a private action string that
+        onCreate / onNewIntent inspect (see AppShortcutsManager.kt) to route
+        directly to the target screen.
+
+        Icons must be monochrome @ 24dp so launchers on Android 13+ can tint
+        them to match user accent colors.
     -->
 
+    <shortcut
+        android:shortcutId="new_post"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_new_post"
+        android:shortcutShortLabel="@string/shortcut_new_post_short"
+        android:shortcutLongLabel="@string/shortcut_new_post_long"
+        android:shortcutDisabledMessage="@string/shortcut_disabled_sign_in">
+        <intent
+            android:action="com.kyilmaz.neurocomet.action.NEW_POST"
+            android:targetPackage="com.kyilmaz.neurocomet"
+            android:targetClass="com.kyilmaz.neurocomet.MainActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="open_dms"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_dms"
+        android:shortcutShortLabel="@string/shortcut_dms_short"
+        android:shortcutLongLabel="@string/shortcut_dms_long"
+        android:shortcutDisabledMessage="@string/shortcut_disabled_sign_in">
+        <intent
+            android:action="com.kyilmaz.neurocomet.action.OPEN_DMS"
+            android:targetPackage="com.kyilmaz.neurocomet"
+            android:targetClass="com.kyilmaz.neurocomet.MainActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="regulation_session"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_regulation"
+        android:shortcutShortLabel="@string/shortcut_regulation_short"
+        android:shortcutLongLabel="@string/shortcut_regulation_long"
+        android:shortcutDisabledMessage="@string/shortcut_disabled_sign_in">
+        <intent
+            android:action="com.kyilmaz.neurocomet.action.START_REGULATION"
+            android:targetPackage="com.kyilmaz.neurocomet"
+            android:targetClass="com.kyilmaz.neurocomet.MainActivity" />
+    </shortcut>
 </shortcuts>
 

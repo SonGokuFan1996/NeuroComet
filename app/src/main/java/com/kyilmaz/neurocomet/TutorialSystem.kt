@@ -1,6 +1,7 @@
 package com.kyilmaz.neurocomet
 
 import android.content.Context
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
@@ -659,8 +660,7 @@ private fun CleanTutorialCard(
                         onClick = onSkip,
                         modifier = Modifier.padding(start = 8.dp)
                     ) {
-                        Text(
-                            "Skip",
+                        Text(stringResource(R.string.action_skip),
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                             style = MaterialTheme.typography.labelLarge
                         )
@@ -677,8 +677,7 @@ private fun CleanTutorialCard(
                             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                         Spacer(Modifier.width(4.dp))
-                        Text(
-                            "Back",
+                        Text(stringResource(R.string.cd_back),
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                             style = MaterialTheme.typography.labelLarge
                         )
@@ -917,8 +916,7 @@ private fun PracticeCallsPreview(accentColor: Color) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Messages title (left side)
-                    Text(
-                        text = "Messages",
+                    Text(text = stringResource(R.string.nav_messages),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -957,7 +955,7 @@ private fun PracticeCallsPreview(accentColor: Color) {
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.History,
-                                contentDescription = "Call History",
+                                contentDescription = stringResource(R.string.call_history_title),
                                 modifier = Modifier.size(24.dp),
                                 tint = Color.White.copy(alpha = 0.4f)
                             )
@@ -970,7 +968,7 @@ private fun PracticeCallsPreview(accentColor: Color) {
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.Search,
-                                contentDescription = "Search",
+                                contentDescription = stringResource(R.string.cd_search),
                                 modifier = Modifier.size(24.dp),
                                 tint = Color.White.copy(alpha = 0.4f)
                             )
@@ -1206,7 +1204,7 @@ private fun TutorialNavigationButtons(
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             ) {
-                Text("Skip")
+                Text(stringResource(R.string.action_skip))
             }
         } else {
             OutlinedButton(
@@ -1219,7 +1217,7 @@ private fun TutorialNavigationButtons(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(Modifier.width(4.dp))
-                Text("Back")
+                Text(stringResource(R.string.cd_back))
             }
         }
 
@@ -1483,7 +1481,7 @@ private fun TutorialCardContent(
                             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     ) {
-                        Text("Skip")
+                        Text(stringResource(R.string.action_skip))
                     }
                 } else {
                     OutlinedButton(
@@ -1496,7 +1494,7 @@ private fun TutorialCardContent(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Back")
+                        Text(stringResource(R.string.cd_back))
                     }
                 }
 

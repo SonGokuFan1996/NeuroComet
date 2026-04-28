@@ -128,7 +128,7 @@ fun CallPreparationScreen(
                 title = { Text(stringResource(R.string.call_prepare_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 }
             )
@@ -540,7 +540,7 @@ fun BreathingExerciseDialog(
                 Spacer(modifier = Modifier.height(48.dp))
 
                 TextButton(onClick = onDismiss) {
-                    Text("Skip", color = Color.White.copy(alpha = 0.7f))
+                    Text(stringResource(R.string.action_skip), color = Color.White.copy(alpha = 0.7f))
                 }
             }
         }
@@ -578,8 +578,7 @@ fun NeuroDivergentCallHistoryScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        "Call History",
+                    Text(stringResource(R.string.call_history_title),
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -617,7 +616,7 @@ fun NeuroDivergentCallHistoryScreen(
             ExtendedFloatingActionButton(
                 onClick = onOpenPracticeCallSelection,
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text("Practice Call") }
+                text = { Text(stringResource(R.string.call_practice_title)) }
             )
         }
     ) { padding ->

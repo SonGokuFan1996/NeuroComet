@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -46,6 +48,7 @@ import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.Games
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Person
@@ -63,6 +66,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -166,6 +170,7 @@ fun SettingsScreen(
     var showPinPromptForKidsToggle by remember { mutableStateOf(false) }
     var pinEntry by remember { mutableStateOf("") }
     var pinError by remember { mutableStateOf<String?>(null) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
 
     // ── PIN prompt dialog ──
     if (showPinPromptForKidsToggle) {
@@ -251,6 +256,63 @@ fun SettingsScreen(
                     Text(stringResource(R.string.button_cancel))
                 }
             }
+        )
+    }
+
+    if (showLanguageDialog) {
+        var selectedTag by remember { mutableStateOf(LanguagePreferences.getCurrentTag(context)) }
+        AlertDialog(
+            onDismissRequest = { showLanguageDialog = false },
+            title = { Text(stringResource(R.string.settings_language_title)) },
+            text = {
+                Column(
+                    modifier = Modifier.heightIn(max = 400.dp)
+                ) {
+                    Text(
+                        stringResource(R.string.settings_language_subtitle),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    LazyColumn {
+                        items(LanguagePreferences.SUPPORTED.size) { i ->
+                            val lang = LanguagePreferences.SUPPORTED[i]
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { selectedTag = lang.tag }
+                                    .padding(vertical = 10.dp, horizontal = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                RadioButton(
+                                    selected = lang.tag == selectedTag,
+                                    onClick = { selectedTag = lang.tag },
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    if (lang.tag.isBlank())
+                                        stringResource(R.string.settings_language_system_default)
+                                    else lang.nativeName,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    LanguagePreferences.apply(context, selectedTag)
+                    showLanguageDialog = false
+                }) {
+                    Text(stringResource(R.string.settings_language_apply))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLanguageDialog = false }) {
+                    Text(stringResource(R.string.settings_language_cancel))
+                }
+            },
         )
     }
 
@@ -383,11 +445,11 @@ fun SettingsScreen(
                             SettingsNavRow(
                                 icon = Icons.Default.Palette,
                                 title = themeTitle,
-                                subtitle = if (isUserPremium) themeDesc else "Premium Feature. Tap to unlock Themes.",
+                                subtitle = if (isUserPremium) themeDesc else stringResource(R.string.settings_theme_premium_locked),
                                 onClick = if (isUserPremium) onOpenThemeSettings else onOpenSubscription,
                                 trailingContent = {
                                     if (!isUserPremium) {
-                                        Icon(Icons.Default.Lock, contentDescription = "Locked", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                                        Icon(Icons.Default.Lock, contentDescription = stringResource(R.string.accessibility_locked), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
                                     }
                                 }
                             )
@@ -594,6 +656,29 @@ fun SettingsScreen(
                             )
                         }
                     }
+
+                    // Per-App Language (Android 13+ Per-App Language Preferences,
+                    // back-compat via AppCompatDelegate on older APIs).
+                    val langTitle = context.getString(R.string.settings_language_title)
+                    val langDesc = context.getString(R.string.settings_language_subtitle)
+                    if (matchesSearch(langTitle, langDesc)) {
+                        item(key = "a11y_language") {
+                            val currentTag = remember { LanguagePreferences.getCurrentTag(context) }
+                            val currentDisplay = remember(currentTag) {
+                                if (currentTag.isBlank())
+                                    context.getString(R.string.settings_language_system_default)
+                                else
+                                    LanguagePreferences.displayNameFor(currentTag)
+                            }
+                            SettingsNavRow(
+                                icon = Icons.Default.Language,
+                                title = langTitle,
+                                subtitle = "$langDesc — $currentDisplay",
+                                onClick = { showLanguageDialog = true }
+                            )
+                        }
+                    }
+
                     item(key = "div_a11y") { SettingsDivider() }
                 }
 
@@ -617,7 +702,7 @@ fun SettingsScreen(
 
                 // ── Feedback section ──
                 val feedbackHubTitle = context.getString(R.string.feedback_hub_title)
-                val feedbackHubDesc = "Report bugs, request features & share feedback"
+                val feedbackHubDesc = context.getString(R.string.feedback_hub_desc)
                 val feedbackVisible = matchesSearch(feedbackHubTitle, feedbackHubDesc)
 
                 if (feedbackVisible) {
@@ -876,7 +961,7 @@ fun ThemeSettingsScreen(
                 }
 
                 item {
-                    SettingsSectionHeader(title = "Neuro-Adaptive Themes")
+                    SettingsSectionHeader(title = stringResource(R.string.settings_neuro_adaptive_themes))
                 }
 
                 // List of themes, some are premium
@@ -889,7 +974,7 @@ fun ThemeSettingsScreen(
                     item(key = "theme_${neuroState.name}") {
                         SettingsNavRow(
                             title = stringResource(neuroState.displayNameResId),
-                            subtitle = if (isPremiumTheme && !isUserPremium) "Premium Theme" else stringResource(neuroState.descriptionResId),
+                            subtitle = if (isPremiumTheme && !isUserPremium) stringResource(R.string.theme_settings_premium_theme) else stringResource(neuroState.descriptionResId),
                             icon = Icons.Default.Palette,
                             onClick = {
                                 if (!isPremiumTheme || isUserPremium) {
@@ -899,9 +984,9 @@ fun ThemeSettingsScreen(
                             showChevron = false,
                             trailingContent = {
                                 if (themeState.selectedState == neuroState) {
-                                    Icon(Icons.Default.Check, contentDescription = "Selected", tint = MaterialTheme.colorScheme.primary)
+                                    Icon(Icons.Default.Check, contentDescription = stringResource(R.string.accessibility_selected), tint = MaterialTheme.colorScheme.primary)
                                 } else if (isPremiumTheme && !isUserPremium) {
-                                    Icon(Icons.Default.Lock, contentDescription = "Locked", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                                    Icon(Icons.Default.Lock, contentDescription = stringResource(R.string.accessibility_locked), modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
                                 }
                             }
                         )

@@ -444,7 +444,7 @@ private fun CommentItem(comment: Comment, variant: String = "control") {
         ) {
             AsyncImage(
                 model = comment.userAvatar.ifEmpty { avatarUrl(comment.userId) },
-                contentDescription = "User avatar",
+                contentDescription = stringResource(R.string.cd_user_avatar),
                 modifier = Modifier
                     .size(36.dp)
                     .clip(CircleShape)

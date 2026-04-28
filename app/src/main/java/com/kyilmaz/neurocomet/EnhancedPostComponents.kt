@@ -1167,7 +1167,7 @@ fun EnhancedCreatePostDialog(
                         if (isResolvingLocation) {
                             CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                         } else {
-                            Icon(if (locationTag == null) Icons.Outlined.LocationOn else Icons.Filled.LocationOff, contentDescription = "Location")
+                            Icon(if (locationTag == null) Icons.Outlined.LocationOn else Icons.Filled.LocationOff, contentDescription = stringResource(R.string.cd_location))
                         }
                     }
                 }
@@ -1226,8 +1226,7 @@ fun EnhancedCreatePostDialog(
             Spacer(Modifier.height(16.dp))
 
             // Moods
-            Text(
-                text = "How are you feeling?",
+            Text(text = stringResource(R.string.feed_mood_prompt),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

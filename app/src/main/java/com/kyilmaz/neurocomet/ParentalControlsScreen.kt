@@ -125,12 +125,12 @@ fun ParentalControlsScreen(
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Spacer(Modifier.width(8.dp))
-                        Text("Parental Controls", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.parental_controls_title), fontWeight = FontWeight.Bold)
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 }
             )
@@ -264,7 +264,7 @@ fun ParentalControlsScreen(
                     ) {
                         Icon(Icons.Default.Edit, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
-                        Text("Change PIN")
+                        Text(stringResource(R.string.parental_change_pin_title))
                     }
 
                     OutlinedButton(
@@ -276,7 +276,7 @@ fun ParentalControlsScreen(
                     ) {
                         Icon(Icons.Default.Delete, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
-                        Text("Remove")
+                        Text(stringResource(R.string.action_remove))
                     }
                 }
                 }
@@ -424,7 +424,7 @@ private fun SetupPromptCard(onSetupClick: () -> Unit) {
             Button(onClick = onSetupClick) {
                 Icon(Icons.Default.Lock, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Create PIN")
+                Text(stringResource(R.string.parental_create_pin_button))
             }
         }
     }
@@ -488,7 +488,7 @@ private fun VerifyPromptCard(
                 Button(onClick = onVerifyClick) {
                     Icon(Icons.Default.Lock, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Enter PIN")
+                    Text(stringResource(R.string.parental_enter_pin_button))
                 }
             }
         }
@@ -723,7 +723,7 @@ private fun TimePickerDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )
@@ -915,12 +915,12 @@ private fun PinSetupDialog(
                     }
                 }
             ) {
-                Text("Create PIN")
+                Text(stringResource(R.string.parental_create_pin_button))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )
@@ -990,12 +990,12 @@ private fun PinVerifyDialog(
                     }
                 }
             ) {
-                Text("Verify")
+                Text(stringResource(R.string.settings_pin_verify))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )
@@ -1082,12 +1082,12 @@ private fun ChangePinDialog(
                     }
                 }
             ) {
-                Text("Change PIN")
+                Text(stringResource(R.string.parental_change_pin_title))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )
@@ -1151,12 +1151,12 @@ private fun RemoveControlsDialog(
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
-                Text("Remove")
+                Text(stringResource(R.string.action_remove))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )

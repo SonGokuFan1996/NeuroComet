@@ -1,6 +1,7 @@
 package com.kyilmaz.neurocomet
 
 import android.Manifest
+import androidx.compose.ui.res.stringResource
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -311,7 +312,7 @@ fun PermissionTestingSection(
             },
             dismissButton = {
                 TextButton(onClick = { showBackgroundLocationDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )

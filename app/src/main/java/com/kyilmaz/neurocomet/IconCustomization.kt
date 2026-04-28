@@ -384,7 +384,7 @@ fun IconCustomizationScreen(
                 title = { Text(stringResource(R.string.settings_app_icon)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 }
             )
@@ -500,8 +500,7 @@ fun IconCustomizationScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text("🎨", fontSize = 20.sp)
                                 Spacer(Modifier.width(8.dp))
-                                Text(
-                                    "Change App Icon",
+                                Text(stringResource(R.string.icon_change_title),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.SemiBold
                                 )
@@ -522,7 +521,7 @@ fun IconCustomizationScreen(
                             ) {
                                 Icon(Icons.Filled.Check, null, Modifier.size(18.dp))
                                 Spacer(Modifier.width(4.dp))
-                                Text("Apply Icon")
+                                Text(stringResource(R.string.icon_apply_button))
                             }
                         }
                     }
@@ -559,8 +558,7 @@ fun IconCustomizationScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text("📌", fontSize = 20.sp)
                                 Spacer(Modifier.width(8.dp))
-                                Text(
-                                    "Add Shortcut",
+                                Text(stringResource(R.string.icon_add_shortcut_button),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.SemiBold
                                 )
@@ -592,7 +590,7 @@ fun IconCustomizationScreen(
                             ) {
                                 Icon(Icons.Filled.Add, null, Modifier.size(18.dp))
                                 Spacer(Modifier.width(4.dp))
-                                Text("Create Shortcut")
+                                Text(stringResource(R.string.icon_create_shortcut_button))
                             }
                         }
                     }
@@ -601,7 +599,7 @@ fun IconCustomizationScreen(
             confirmButton = {},
             dismissButton = {
                 TextButton(onClick = { showApplyDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )
@@ -752,7 +750,7 @@ private fun IconOptionCard(
                 ) {
                     Icon(
                         Icons.Filled.Check,
-                        contentDescription = "Selected",
+                        contentDescription = stringResource(R.string.cd_selected_state),
                         tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(16.dp)
                     )
@@ -1249,12 +1247,12 @@ fun IconCustomizationDialog(
             ) {
                 Icon(Icons.Filled.Add, null, Modifier.size(18.dp))
                 Spacer(Modifier.width(4.dp))
-                Text("Create Shortcut")
+                Text(stringResource(R.string.icon_create_shortcut_button))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )
@@ -1322,7 +1320,7 @@ private fun IconOptionCardCompact(
             if (isSelected) {
                 Icon(
                     Icons.Filled.CheckCircle,
-                    contentDescription = "Selected",
+                    contentDescription = stringResource(R.string.cd_selected_state),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )

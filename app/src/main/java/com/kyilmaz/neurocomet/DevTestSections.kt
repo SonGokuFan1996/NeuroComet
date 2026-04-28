@@ -949,7 +949,7 @@ fun SupabaseTestDataSection(authViewModel: AuthViewModel) {
                 onClick = { runAction("Send test post") { SupabaseTestData.sendTestPost() } },
                 enabled = !isLoading,
                 modifier = Modifier.weight(1f)
-            ) { Text("Post", fontSize = 12.sp) }
+            ) { Text(stringResource(R.string.action_post), fontSize = 12.sp) }
             Button(
                 onClick = { runAction("Bulk posts") { SupabaseTestData.sendBulkTestPosts(5) } },
                 enabled = !isLoading,
@@ -959,7 +959,7 @@ fun SupabaseTestDataSection(authViewModel: AuthViewModel) {
                 onClick = { runAction("Send test story") { SupabaseTestData.sendTestStory() } },
                 enabled = !isLoading,
                 modifier = Modifier.weight(1f)
-            ) { Text("Story", fontSize = 12.sp) }
+            ) { Text(stringResource(R.string.label_story), fontSize = 12.sp) }
         }
 
         Spacer(Modifier.height(8.dp))
@@ -976,7 +976,7 @@ fun SupabaseTestDataSection(authViewModel: AuthViewModel) {
                 onClick = { runAction("Practice call log") { SupabaseTestData.sendTestPracticeCall() } },
                 enabled = !isLoading && signedIn,
                 modifier = Modifier.weight(1f)
-            ) { Text("Practice Call", fontSize = 12.sp) }
+            ) { Text(stringResource(R.string.call_practice_title), fontSize = 12.sp) }
         }
 
         Spacer(Modifier.height(8.dp))
@@ -1228,7 +1228,7 @@ fun LocalStorageDevSection() {
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = { showInspector = false }) { Text("Close") } }
+            confirmButton = { TextButton(onClick = { showInspector = false }) { Text(stringResource(R.string.cd_close)) } }
         )
     }
 }
@@ -1452,7 +1452,7 @@ fun BiometricFidoDevSection(authViewModel: AuthViewModel?, devOptionsViewModel: 
                     },
                     modifier = Modifier.align(Alignment.CenterVertically),
                     enabled = totpCode.length == 6
-                ) { Text("Verify") }
+                ) { Text(stringResource(R.string.settings_pin_verify)) }
             }
             Spacer(Modifier.height(4.dp))
             OutlinedButton(
@@ -1531,7 +1531,7 @@ fun BiometricFidoDevSection(authViewModel: AuthViewModel?, devOptionsViewModel: 
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = { showBackupCodes = false }) { Text("Done") } }
+            confirmButton = { TextButton(onClick = { showBackupCodes = false }) { Text(stringResource(R.string.action_done)) } }
         )
     }
 }
@@ -1679,7 +1679,7 @@ fun DmDebugDevSection(devOptionsViewModel: DevOptionsViewModel) {
                 val delay = delayInput.toLongOrNull() ?: 0L
                 devOptionsViewModel.setDmSendDelayMs(application, delay)
                 Toast.makeText(context, "Delay set to ${delay}ms", Toast.LENGTH_SHORT).show()
-            }) { Text("Apply") }
+            }) { Text(stringResource(R.string.action_apply)) }
         }
 
         Spacer(Modifier.height(8.dp))
@@ -2022,7 +2022,7 @@ fun EnvironmentPickerDevSection(devOptionsViewModel: DevOptionsViewModel) {
                 }) { Text("Switch") }
             },
             dismissButton = {
-                TextButton(onClick = { showConfirmDialog = null }) { Text("Cancel") }
+                TextButton(onClick = { showConfirmDialog = null }) { Text(stringResource(R.string.action_cancel)) }
             }
         )
     }
@@ -2171,7 +2171,7 @@ fun RenderingNetworkDevSection(devOptionsViewModel: DevOptionsViewModel) {
                 val ms = latencyInput.toLongOrNull() ?: 0L
                 devOptionsViewModel.setNetworkLatencyMs(ms)
                 Toast.makeText(context, "Latency set to ${ms}ms", Toast.LENGTH_SHORT).show()
-            }) { Text("Apply") }
+            }) { Text(stringResource(R.string.action_apply)) }
         }
     }
 }
@@ -2416,7 +2416,7 @@ fun ContactPickerDevSection() {
                 },
                 modifier = Modifier.weight(0.5f)
             ) {
-                Text("Clear", fontSize = 12.sp)
+                Text(stringResource(R.string.cd_clear), fontSize = 12.sp)
             }
         }
 
@@ -2568,7 +2568,7 @@ fun ABTestingDevSection() {
             ) {
                 Icon(Icons.Filled.RestartAlt, null, Modifier.size(16.dp))
                 Spacer(Modifier.width(4.dp))
-                Text("Clear All", fontSize = 12.sp)
+                Text(stringResource(R.string.games_clear_all), fontSize = 12.sp)
             }
             OutlinedButton(
                 onClick = {
@@ -3006,7 +3006,7 @@ fun BackupDevTestSection(onNavigateToBackup: () -> Unit) {
                                     ),
                                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
                                 ) {
-                                    Text("Delete", style = MaterialTheme.typography.labelSmall)
+                                    Text(stringResource(R.string.action_delete), style = MaterialTheme.typography.labelSmall)
                                 }
                             }
                         }

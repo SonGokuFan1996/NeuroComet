@@ -30,7 +30,7 @@ val Typography = Typography(
         fontWeight = FontWeight.W400,
         fontSize = 57.sp,
         lineHeight = 64.sp,
-        letterSpacing = (-0.25).sp
+        letterSpacing = 0.sp
     ),
     displayMedium = TextStyle(
         fontFamily = M3EFontFamily,

@@ -462,8 +462,7 @@ fun FeedbackHubScreen(
                         Text("🧪", style = MaterialTheme.typography.titleMedium)
                         Spacer(Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Closed Beta",
+                            Text(text = stringResource(R.string.beta_closed_label),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onTertiaryContainer
@@ -951,7 +950,7 @@ fun GeneralFeedbackScreen(onBack: () -> Unit) {
                     onClick = onBack,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
                 Button(
                     onClick = {
@@ -971,7 +970,7 @@ fun GeneralFeedbackScreen(onBack: () -> Unit) {
                     enabled = rating > 0,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Submit")
+                    Text(stringResource(R.string.action_submit))
                 }
             }
         }
@@ -1149,7 +1148,7 @@ private fun FeatureRequestsTab() {
             FilterChip(
                 selected = sortByVotes,
                 onClick = { sortByVotes = true },
-                label = { Text("Top Voted") },
+                label = { Text(stringResource(R.string.feedback_top_voted)) },
                 leadingIcon = if (sortByVotes) {
                     { Icon(Icons.Filled.Check, null, Modifier.size(18.dp)) }
                 } else null
@@ -1157,7 +1156,7 @@ private fun FeatureRequestsTab() {
             FilterChip(
                 selected = !sortByVotes,
                 onClick = { sortByVotes = false },
-                label = { Text("Newest") },
+                label = { Text(stringResource(R.string.feedback_newest)) },
                 leadingIcon = if (!sortByVotes) {
                     { Icon(Icons.Filled.Check, null, Modifier.size(18.dp)) }
                 } else null
@@ -1210,7 +1209,7 @@ private fun FeatureRequestCard(
                 ) {
                     Icon(
                         if (request.userVoted) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
-                        contentDescription = "Vote",
+                        contentDescription = stringResource(R.string.action_vote),
                         tint = if (request.userVoted)
                             MaterialTheme.colorScheme.primary
                         else
@@ -1775,7 +1774,7 @@ fun GeneralFeedbackDialog(
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.action_cancel))
                     }
                     Button(
                         onClick = {
@@ -1785,7 +1784,7 @@ fun GeneralFeedbackDialog(
                         enabled = rating > 0,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Submit")
+                        Text(stringResource(R.string.action_submit))
                     }
                 }
             }

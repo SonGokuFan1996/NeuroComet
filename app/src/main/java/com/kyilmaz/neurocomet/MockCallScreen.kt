@@ -1,6 +1,7 @@
 package com.kyilmaz.neurocomet
 
 import androidx.compose.animation.core.*
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -401,7 +402,7 @@ fun VoiceCallScreen(
                     // Avatar
                     AsyncImage(
                         model = call.recipientAvatar,
-                        contentDescription = "Caller avatar",
+                        contentDescription = stringResource(R.string.cd_caller_avatar),
                         modifier = Modifier
                             .size(120.dp)
                             .clip(CircleShape),
@@ -615,7 +616,7 @@ fun VideoCallScreen(
                     ) {
                         AsyncImage(
                             model = call.recipientAvatar,
-                            contentDescription = "Caller avatar",
+                            contentDescription = stringResource(R.string.cd_caller_avatar),
                             modifier = Modifier
                                 .size(150.dp)
                                 .clip(CircleShape),
@@ -918,8 +919,7 @@ fun CallHistoryScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        "Call History",
+                    Text(stringResource(R.string.call_history_title),
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -946,7 +946,7 @@ fun CallHistoryScreen(
             ExtendedFloatingActionButton(
                 onClick = onOpenPracticeCallSelection,
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                text = { Text("Practice Call") }
+                text = { Text(stringResource(R.string.call_practice_title)) }
             )
         }
     ) { padding ->

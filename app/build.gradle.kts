@@ -273,6 +273,12 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.biometric)
 
+    // Android Credential Manager — Passkeys + Google Sign-In unified API
+    // (API 34+ native; back-compat shim on 26+ via play-services-auth).
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+
     implementation(libs.play.services.location)
     implementation(libs.play.services.ads)
 

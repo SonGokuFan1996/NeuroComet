@@ -4,8 +4,6 @@ package com.kyilmaz.neurocomet
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.*
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,13 +19,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -76,7 +73,6 @@ fun BackupSettingsScreen(
     var showFrequencyPicker by remember { mutableStateOf(false) }
     var showBackupDestinationPicker by remember { mutableStateOf(false) }
     var pendingExportBackupId by remember { mutableStateOf<String?>(null) }
-    var showImportOptions by remember { mutableStateOf(false) }
 
     // SAF launcher: create a new backup file at a user-chosen location (Google Drive, Downloads, etc.)
     val exportNewBackupLauncher = rememberLauncherForActivityResult(
@@ -286,7 +282,7 @@ fun BackupSettingsScreen(
                                 headlineContent = { Text(stringResource(R.string.backup_delete_all_local)) },
                                 supportingContent = {
                                     Text(
-                                        context.resources.getQuantityString(
+                                        pluralStringResource(
                                             R.plurals.backup_count_stored,
                                             state.localBackups.size,
                                             state.localBackups.size

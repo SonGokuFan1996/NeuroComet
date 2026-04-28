@@ -1,6 +1,7 @@
 package com.kyilmaz.neurocomet
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -588,8 +589,7 @@ fun DailyCheckInWidget(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "How are you feeling?",
+            Text(text = stringResource(R.string.feed_mood_prompt),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = if (highContrast) Color.White else MaterialTheme.colorScheme.onPrimaryContainer

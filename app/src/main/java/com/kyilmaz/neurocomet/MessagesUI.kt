@@ -851,7 +851,7 @@ private fun InlineCallHistoryView(
                     ) {
                         Icon(Icons.Filled.Headset, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("Practice Call")
+                        Text(stringResource(R.string.call_practice_title))
                     }
                     FilledTonalButton(
                         onClick = {
@@ -861,7 +861,7 @@ private fun InlineCallHistoryView(
                     ) {
                         Icon(Icons.Filled.History, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("Call History")
+                        Text(stringResource(R.string.call_history_title))
                     }
                 }
             }
@@ -870,8 +870,7 @@ private fun InlineCallHistoryView(
             if (callableContacts.isNotEmpty()) {
                 item {
                     Spacer(Modifier.height(28.dp))
-                    Text(
-                        text = "Contacts",
+                    Text(text = stringResource(R.string.nav_contacts),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -958,8 +957,7 @@ private fun InlineCallHistoryView(
             }
 
             item {
-                Text(
-                    text = "Recent",
+                Text(text = stringResource(R.string.label_recent),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1207,8 +1205,7 @@ private fun ContactsPermissionCard(
             )
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Access your contacts",
+                Text(text = stringResource(R.string.contacts_access_title),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -1221,7 +1218,7 @@ private fun ContactsPermissionCard(
             }
             Spacer(Modifier.width(8.dp))
             FilledTonalButton(onClick = onGrant) {
-                Text("Allow")
+                Text(stringResource(R.string.action_allow))
             }
         }
     }
@@ -1347,7 +1344,6 @@ private fun MessagesHeader(
                         text = stringResource(R.string.nav_messages),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = (-0.5).sp,
                         color = MaterialTheme.colorScheme.onBackground,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -1360,9 +1356,12 @@ private fun MessagesHeader(
                 Spacer(Modifier.height(4.dp))
                 Text(
                     text = if (unreadCount > 0) {
-                        "You have $unreadCount unread ${if (unreadCount == 1) "message" else "messages"}"
+                        if (unreadCount == 1)
+                            stringResource(R.string.messages_header_unread_one)
+                        else
+                            stringResource(R.string.messages_header_unread_many, unreadCount)
                     } else {
-                        "Meaningful connections \u2728"
+                        stringResource(R.string.messages_header_subtitle_empty)
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1404,7 +1403,7 @@ private fun MessagesHeader(
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.MoreHoriz,
-                                    contentDescription = "More options",
+                                    contentDescription = stringResource(R.string.cd_more_options),
                                     modifier = Modifier.size(20.dp),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -1424,7 +1423,7 @@ private fun MessagesHeader(
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.MoreHoriz,
-                                    contentDescription = "More options",
+                                    contentDescription = stringResource(R.string.cd_more_options),
                                     modifier = Modifier.size(20.dp),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -1436,12 +1435,12 @@ private fun MessagesHeader(
                         onDismissRequest = { showOverflowMenu = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Video Calls") },
+                            text = { Text(stringResource(R.string.label_video_calls)) },
                             onClick = { showOverflowMenu = false; onCallHistory() },
                             leadingIcon = { Icon(Icons.Outlined.Videocam, contentDescription = null) }
                         )
                         DropdownMenuItem(
-                            text = { Text("Call History") },
+                            text = { Text(stringResource(R.string.call_history_title)) },
                             onClick = { showOverflowMenu = false; onCallHistory() },
                             leadingIcon = { Icon(Icons.Outlined.Phone, contentDescription = null) }
                         )
@@ -1785,7 +1784,7 @@ private fun ModernConversationListItem(
                                 .data(conversation.groupAvatarUrl)
                                 .crossfade(true)
                                 .build(),
-                            contentDescription = "Group avatar",
+                            contentDescription = stringResource(R.string.cd_group_avatar),
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clip(CircleShape),
@@ -1794,7 +1793,7 @@ private fun ModernConversationListItem(
                     } else if (conversation.isGroup) {
                         Icon(
                             Icons.Default.Groups,
-                            contentDescription = "Group",
+                            contentDescription = stringResource(R.string.label_group),
                             modifier = Modifier.size(28.dp),
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -1863,7 +1862,7 @@ private fun ModernConversationListItem(
                         Spacer(Modifier.width(4.dp))
                         Icon(
                             imageVector = Icons.Filled.Verified,
-                            contentDescription = "Verified",
+                            contentDescription = stringResource(R.string.cd_verified),
                             modifier = Modifier.size(16.dp),
                             tint = primaryColor
                         )
@@ -1938,7 +1937,7 @@ private fun ModernConversationListItem(
                     ) {
                         Icon(
                             Icons.Filled.Phone,
-                            contentDescription = "Voice call",
+                            contentDescription = stringResource(R.string.cd_voice_call),
                             modifier = Modifier.size(18.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1949,7 +1948,7 @@ private fun ModernConversationListItem(
                     ) {
                         Icon(
                             Icons.Filled.Videocam,
-                            contentDescription = "Video call",
+                            contentDescription = stringResource(R.string.cd_video_call),
                             modifier = Modifier.size(18.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -2016,7 +2015,7 @@ private fun NeuroSearchBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onClose) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Close search")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_close_search))
                 }
                 OutlinedTextField(
                     value = query,
@@ -2035,7 +2034,7 @@ private fun NeuroSearchBar(
                 )
                 if (query.isNotEmpty()) {
                     IconButton(onClick = { onQueryChange("") }) {
-                        Icon(Icons.Filled.Clear, contentDescription = "Clear")
+                        Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.cd_clear))
                     }
                 }
             }
@@ -2055,7 +2054,7 @@ private fun NeuroSearchBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onClose) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Close search")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_close_search))
             }
             OutlinedTextField(
                 value = query,
@@ -2074,7 +2073,7 @@ private fun NeuroSearchBar(
             )
             if (query.isNotEmpty()) {
                 IconButton(onClick = { onQueryChange("") }) {
-                    Icon(Icons.Filled.Clear, contentDescription = "Clear")
+                    Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.cd_clear))
                 }
             }
         }
@@ -2295,7 +2294,7 @@ private fun NewChatDialog(
                             ) {
                                 Icon(
                                     Icons.Filled.Close,
-                                    contentDescription = "Close",
+                                    contentDescription = stringResource(R.string.cd_close),
                                     tint = palette?.accent ?: MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -2370,8 +2369,7 @@ private fun NewChatDialog(
                                     Icon(Icons.Filled.Contacts, contentDescription = null, tint = palette?.accent ?: MaterialTheme.colorScheme.primary)
                                 }
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "Allow contacts access",
+                                    Text(text = stringResource(R.string.contacts_allow_access_title),
                                         style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.SemiBold,
                                         color = MaterialTheme.colorScheme.onSurface
@@ -2425,8 +2423,7 @@ private fun NewChatDialog(
                 ) {
                     if (appUsers.isNotEmpty()) {
                         item {
-                            Text(
-                                text = "People on NeuroComet",
+                            Text(text = stringResource(R.string.contacts_people_on_app),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -2482,7 +2479,7 @@ private fun NewChatDialog(
                                             onClick = {
                                                 if (!isStartingConversation) onSelectUser(user.id)
                                             },
-                                            label = { Text("Open") }
+                                            label = { Text(stringResource(R.string.action_open)) }
                                         )
                                     }
                                 }
@@ -2916,7 +2913,7 @@ fun NeuroConversationScreen(
                                 .data(avatar)
                                 .crossfade(true)
                                 .build(),
-                            contentDescription = "Profile picture",
+                            contentDescription = stringResource(R.string.cd_profile_picture),
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clip(CircleShape)
@@ -3006,7 +3003,7 @@ fun NeuroConversationScreen(
                         IconButton(onClick = { showMenu = true }) {
                             Icon(
                                 Icons.Filled.MoreVert,
-                                contentDescription = "More options",
+                                contentDescription = stringResource(R.string.cd_more_options),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -3015,7 +3012,7 @@ fun NeuroConversationScreen(
                             onDismissRequest = { showMenu = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("View profile") },
+                                text = { Text(stringResource(R.string.menu_view_profile)) },
                                 onClick = {
                                     showMenu = false
                                     onProfileClick(recipientId ?: "")
@@ -3023,7 +3020,7 @@ fun NeuroConversationScreen(
                                 leadingIcon = { Icon(Icons.Outlined.Person, null) }
                             )
                             DropdownMenuItem(
-                                text = { Text("Search") },
+                                text = { Text(stringResource(R.string.cd_search)) },
                                 onClick = {
                                     showMenu = false
                                     showSearchBar = !showSearchBar
@@ -3032,7 +3029,7 @@ fun NeuroConversationScreen(
                                 leadingIcon = { Icon(Icons.Outlined.Search, null) }
                             )
                             DropdownMenuItem(
-                                text = { Text("Wallpaper") },
+                                text = { Text(stringResource(R.string.dm_wallpaper)) },
                                 onClick = {
                                     showMenu = false
                                     showWallpaperPicker = true
@@ -3073,7 +3070,7 @@ fun NeuroConversationScreen(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Report User", color = MaterialTheme.colorScheme.error) },
+                                text = { Text(stringResource(R.string.menu_report_user), color = MaterialTheme.colorScheme.error) },
                                 onClick = {
                                     showMenu = false
                                     onReportUser(recipientId ?: "")
@@ -3096,14 +3093,14 @@ fun NeuroConversationScreen(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
-                    placeholder = { Text("Search messages…") },
+                    placeholder = { Text(stringResource(R.string.dm_search_messages_placeholder)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp, vertical = 6.dp),
                     singleLine = true,
                     trailingIcon = {
                         IconButton(onClick = { showSearchBar = false; searchQuery = "" }) {
-                            Icon(Icons.Filled.Close, contentDescription = "Close search")
+                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.cd_close_search))
                         }
                     }
                 )
@@ -3264,7 +3261,7 @@ fun NeuroConversationScreen(
                     ) {
                         Icon(
                             Icons.Filled.KeyboardArrowDown,
-                            contentDescription = "Scroll to bottom"
+                            contentDescription = stringResource(R.string.cd_scroll_to_latest)
                         )
                     }
                 }
@@ -3297,20 +3294,18 @@ fun NeuroConversationScreen(
                                 modifier = Modifier.size(24.dp)
                             )
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    "Messaging paused",
+                                Text(stringResource(R.string.dm_messaging_paused),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colorScheme.onErrorContainer
                                 )
-                                Text(
-                                    "Unblock to resume conversation",
+                                Text(stringResource(R.string.dm_unblock_to_resume),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
                                 )
                             }
                             FilledTonalButton(onClick = { onUnblockUser(recipientId ?: "") }) {
-                                Text("Unblock")
+                                Text(stringResource(R.string.action_unblock))
                             }
                         }
                     } else {
@@ -3361,7 +3356,7 @@ fun NeuroConversationScreen(
                                         ) {
                                             Icon(
                                                 Icons.Filled.Close,
-                                                contentDescription = "Remove attachment",
+                                                contentDescription = stringResource(R.string.cd_remove_attachment),
                                                 modifier = Modifier.size(18.dp)
                                             )
                                         }
@@ -3393,8 +3388,7 @@ fun NeuroConversationScreen(
                                                     CircleShape
                                                 )
                                         )
-                                        Text(
-                                            "Recording...",
+                                        Text(stringResource(R.string.label_recording),
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onErrorContainer,
                                             modifier = Modifier.weight(1f)
@@ -3414,7 +3408,7 @@ fun NeuroConversationScreen(
                                         ) {
                                             Icon(
                                                 Icons.Filled.Close,
-                                                contentDescription = "Cancel recording",
+                                                contentDescription = stringResource(R.string.cd_cancel_recording),
                                                 tint = MaterialTheme.colorScheme.error,
                                                 modifier = Modifier.size(18.dp)
                                             )
@@ -3573,7 +3567,7 @@ fun NeuroConversationScreen(
                                             ) {
                                                 Icon(
                                                     Icons.Filled.CameraAlt,
-                                                    contentDescription = "Take photo",
+                                                    contentDescription = stringResource(R.string.cd_take_photo),
                                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                                     modifier = Modifier.size(22.dp)
                                                 )
@@ -3702,8 +3696,7 @@ private fun NeuroEmojiPanel(
         ) {
             // Recent emojis section
             item {
-                Text(
-                    "Recent",
+                Text(stringResource(R.string.label_recent),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -3714,8 +3707,7 @@ private fun NeuroEmojiPanel(
 
             // Smileys section
             item {
-                Text(
-                    "Smileys",
+                Text(stringResource(R.string.emoji_category_smileys),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -3726,8 +3718,7 @@ private fun NeuroEmojiPanel(
 
             // Gestures section
             item {
-                Text(
-                    "Gestures",
+                Text(stringResource(R.string.emoji_category_gestures),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -3738,8 +3729,7 @@ private fun NeuroEmojiPanel(
 
             // Hearts section
             item {
-                Text(
-                    "Hearts",
+                Text(stringResource(R.string.emoji_category_hearts),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -3750,8 +3740,7 @@ private fun NeuroEmojiPanel(
 
             // Objects section
             item {
-                Text(
-                    "Objects",
+                Text(stringResource(R.string.emoji_category_objects),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -3762,8 +3751,7 @@ private fun NeuroEmojiPanel(
 
             // Animals section
             item {
-                Text(
-                    "Animals",
+                Text(stringResource(R.string.emoji_category_animals),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -3869,8 +3857,7 @@ private fun NeuroAttachmentPicker(
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                "Share",
+            Text(stringResource(R.string.cd_share),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 4.dp)
@@ -4021,19 +4008,19 @@ private fun NeuroMessageItem(
                             when (message.deliveryStatus) {
                                 MessageDeliveryStatus.SENDING -> Icon(
                                     Icons.Filled.Schedule,
-                                    contentDescription = "Sending",
+                                    contentDescription = stringResource(R.string.status_sending),
                                     modifier = Modifier.size(12.dp),
                                     tint = textColor.copy(alpha = 0.6f)
                                 )
                                 MessageDeliveryStatus.SENT -> Icon(
                                     Icons.Filled.Done,
-                                    contentDescription = "Sent",
+                                    contentDescription = stringResource(R.string.status_sent),
                                     modifier = Modifier.size(12.dp),
                                     tint = textColor.copy(alpha = 0.6f)
                                 )
                                 MessageDeliveryStatus.FAILED -> Icon(
                                     Icons.Filled.ErrorOutline,
-                                    contentDescription = "Failed",
+                                    contentDescription = stringResource(R.string.status_failed),
                                     modifier = Modifier
                                         .size(12.dp)
                                         .clickable { onRetry() },

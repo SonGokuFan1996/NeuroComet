@@ -456,7 +456,7 @@ object M3ETypography {
                 fontWeight = FontWeight.W400,
                 fontSize = (57 * scale).sp,
                 lineHeight = (64 * scale).sp,
-                letterSpacing = (-0.25).sp
+                letterSpacing = 0.sp
             ),
             displayMedium = TextStyle(
                 fontFamily = fontFamily,

@@ -136,6 +136,7 @@ fun DevOptionsScreen(
     val sectionGroups = remember(devOptionsViewModel, safetyViewModel, feedViewModel, authViewModel, themeViewModel) {
         listOf(
             DevSectionGroup("app_info", "App Info & Diagnostics", Icons.Filled.Info, "version build device os memory") { AppInfoDevSection(devOptionsViewModel) },
+            DevSectionGroup("modern_apis", "Modern Android APIs", Icons.Filled.NewReleases, "photo picker pickvisualmedia per-app language locale app shortcuts predictive back credential manager passkey webauthn") { ModernApisDevSection() },
             DevSectionGroup("live_session_lab", "Live Session Lab", Icons.Filled.Timer, "live activity live session regulation recharge focus sprint stim braille notification") { RegulationLiveSessionLabSection() },
             DevSectionGroup("environment", "Environment", Icons.Filled.Cloud, "staging production local backend") { EnvironmentPickerDevSection(devOptionsViewModel) },
             DevSectionGroup("flags", "Feature Flags", Icons.Filled.Flag, "Toggles for experimental features") { FeatureFlagsDevSection(devOptionsViewModel) },
@@ -150,6 +151,13 @@ fun DevOptionsScreen(
             DevSectionGroup("nav", "Navigation", Icons.Filled.Navigation, "navigation adaptive drawer") { AdaptiveNavigationDevSection() },
             DevSectionGroup("dialogs", "Dialogs", Icons.Filled.ChatBubble, "dialogs popup message input choice") { NeurodivergentDialogsDevSection() },
             DevSectionGroup("deep_links", "Deep Links / App Links", Icons.Filled.Link, "deep link app link domain getneurocomet share url post profile assetlinks verification manifest") { DeepLinkDiagnosticsDevSection() },
+            DevSectionGroup("account_lifecycle", "Account Lifecycle", Icons.Filled.ManageAccounts, "account deletion delete detox lifecycle schedule cancel grace period data safety play store gdpr retention cascade") {
+                if (authViewModel != null) {
+                    AccountLifecycleDevSection(authViewModel)
+                } else {
+                    Text("AuthViewModel is not available.", modifier = Modifier.padding(16.dp))
+                }
+            },
             DevSectionGroup("location", "Location & Sensors", Icons.Filled.Sensors, "location gps sensors pressure") { EnhancedLocationSensorsDevSection() },
             DevSectionGroup("contact_picker", "Contact Picker", Icons.Filled.Contacts, "contact picker android 17 cinnamonbun cinnamon bun session privacy contacts api 36.1") { ContactPickerDevSection() },
             DevSectionGroup("storage", "Local Storage", Icons.Filled.Storage, "storage preferences credentials") { LocalStorageDevSection() },

@@ -568,8 +568,7 @@ private fun FilterPanel(
     onFilterSelect: (StoryImageFilter) -> Unit
 ) {
     Column(modifier = Modifier.padding(16.dp)) {
-        Text(
-            "Filters",
+        Text(stringResource(R.string.image_editor_tab_filters),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
@@ -765,7 +764,7 @@ private fun DrawPanel(
                 TextButton(onClick = onClearAll) {
                     Icon(Icons.Filled.Delete, null, Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("Clear")
+                    Text(stringResource(R.string.cd_clear))
                 }
             }
         }
@@ -1193,7 +1192,7 @@ private fun TextOverlayItem(
                 ) {
                     Icon(
                         Icons.Filled.Close,
-                        contentDescription = "Delete",
+                        contentDescription = stringResource(R.string.action_delete),
                         tint = Color.White,
                         modifier = Modifier.size(16.dp)
                     )
@@ -1257,7 +1256,7 @@ private fun StickerOverlayItem(
                 ) {
                     Icon(
                         Icons.Filled.Close,
-                        contentDescription = "Delete",
+                        contentDescription = stringResource(R.string.action_delete),
                         tint = Color.White,
                         modifier = Modifier.size(12.dp)
                     )
@@ -1300,12 +1299,12 @@ private fun TextInputDialog(
                 onClick = { onConfirm(text) },
                 enabled = text.isNotBlank()
             ) {
-                Text("Add")
+                Text(stringResource(R.string.action_add))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )

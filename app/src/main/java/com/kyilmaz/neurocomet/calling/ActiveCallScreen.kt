@@ -1,6 +1,7 @@
 package com.kyilmaz.neurocomet.calling
 
 import android.Manifest
+import androidx.compose.ui.res.stringResource
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -47,6 +48,7 @@ import org.webrtc.EglBase
 import org.webrtc.RendererCommon
 import org.webrtc.SurfaceViewRenderer
 import org.webrtc.VideoTrack
+import com.kyilmaz.neurocomet.R
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
@@ -239,7 +241,7 @@ private fun ActiveCallContent(
                                 .data(call.recipientAvatar)
                                 .crossfade(true)
                                 .build(),
-                            contentDescription = "Caller avatar",
+                            contentDescription = stringResource(R.string.cd_caller_avatar),
                             modifier = Modifier
                                 .size(100.dp)
                                 .align(Alignment.Center)

@@ -1,6 +1,7 @@
 package com.kyilmaz.neurocomet
 
 import androidx.compose.foundation.Image
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,7 +54,7 @@ fun CategoryFeedScreen(
                 title = { Text(categoryName) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 }
             )
@@ -89,7 +90,7 @@ fun PostCard(post: Post) {
             post.imageUrl?.let { url ->
                 Image(
                     painter = rememberAsyncImagePainter(model = url),
-                    contentDescription = "Post image", 
+                    contentDescription = stringResource(R.string.cd_post_image), 
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp)
@@ -158,7 +159,7 @@ fun PostCard(post: Post) {
                 // Using a placeholder icon for comments (assuming a comment bubble icon is not available by default)
                 Icon(
                     Icons.Default.ThumbUp, 
-                    contentDescription = "Comments",
+                    contentDescription = stringResource(R.string.comments_title),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp)
                 )

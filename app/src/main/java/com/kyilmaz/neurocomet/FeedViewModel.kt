@@ -239,6 +239,16 @@ class FeedViewModel(application: Application) : AndroidViewModel(application) {
     private val _devStoryStatus = MutableStateFlow<String?>(null)
     val devStoryStatus: StateFlow<String?> = _devStoryStatus
 
+    /**
+     * One-shot request to open the post composer, fired by launcher shortcuts
+     * (AppShortcutsManager.ACTION_NEW_POST) and Assistant intents. FeedScreen
+     * observes this and shows its composer, then calls [consumeOpenComposer].
+     */
+    private val _openComposerRequest = MutableStateFlow(false)
+    val openComposerRequest: StateFlow<Boolean> = _openComposerRequest
+    fun requestOpenComposer() { _openComposerRequest.value = true }
+    fun consumeOpenComposer() { _openComposerRequest.value = false }
+
     // Mock strike counter
     private val _userStrikeCount = MutableStateFlow<Map<String, Int>>(emptyMap())
 

@@ -165,12 +165,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 
-enum class FeedFilter(val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
-    FOR_YOU("For You", Icons.Outlined.AutoAwesome),
-    FOLLOWING("Following", Icons.Outlined.People),
-    TRENDING("Trending", Icons.Outlined.TrendingUp),
-    SUPPORT("Support", Icons.Outlined.Favorite),
-    WINS("Wins", Icons.Outlined.Celebration)
+enum class FeedFilter(val labelResId: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
+    FOR_YOU(R.string.feed_filter_for_you, Icons.Outlined.AutoAwesome),
+    FOLLOWING(R.string.feed_filter_following, Icons.Outlined.People),
+    TRENDING(R.string.feed_filter_trending, Icons.Outlined.TrendingUp),
+    SUPPORT(R.string.feed_filter_support, Icons.Outlined.Favorite),
+    WINS(R.string.feed_filter_wins, Icons.Outlined.Celebration)
 }
 
 enum class EmotionalTone(
@@ -476,7 +476,7 @@ fun FeedScreen(
                         val haptic = LocalHapticFeedback.current
                         FeedFilterPills(selectedFilter = selectedFilter, onFilterSelected = { haptic.performHapticFeedback(HapticFeedbackType.LongPress); selectedFilter = it }, isDark = isDark, variant = liquidGlassVariant)
                     }
-                    item(key = "section_header") { FeedSectionHeader(title = selectedFilter.label, icon = selectedFilter.icon, count = filteredPosts.size, isDark = isDark, variant = liquidGlassVariant) }
+                    item(key = "section_header") { FeedSectionHeader(title = stringResource(selectedFilter.labelResId), icon = selectedFilter.icon, count = filteredPosts.size, isDark = isDark, variant = liquidGlassVariant) }
                     val currentAdsState = adsState
                     itemsIndexed(items = filteredPosts, key = { _, post -> post.id ?: post.hashCode() }) { index, post ->
                         if (index > 0 && index % 5 == 4) {
@@ -560,7 +560,7 @@ private fun QuickActionsRow(modifier: Modifier = Modifier, onCreatePost: () -> U
                         Icon(imageVector = Icons.Default.Create, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(M3EDesignSystem.IconSize.sm))
                     }
                     Spacer(Modifier.width(M3EDesignSystem.Spacing.sm))
-                    Text(text = "What's on your mind?", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = stringResource(R.string.create_post_hint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             if (useSkeuomorphic) {
@@ -611,14 +611,14 @@ private fun FeedFilterPill(filter: FeedFilter, isSelected: Boolean, onClick: () 
             if (isSelected) Box(modifier = Modifier.matchParentSize().background(Brush.linearGradient(colors = listOf(palette.activeTop.copy(alpha = 0.92f), palette.activeBottom.copy(alpha = 0.96f)))))
             Row(modifier = Modifier.padding(horizontal = if (isSelected) 12.dp else 10.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Icon(imageVector = filter.icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = if (isSelected) palette.accent else MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(text = filter.label, style = MaterialTheme.typography.labelLarge, fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium, color = if (isSelected) palette.accent else MaterialTheme.colorScheme.onSurface)
+                Text(text = stringResource(filter.labelResId), style = MaterialTheme.typography.labelLarge, fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium, color = if (isSelected) palette.accent else MaterialTheme.colorScheme.onSurface)
             }
         }
     } else {
         Surface(modifier = Modifier.graphicsLayer { scaleX = scale.value; scaleY = scale.value }.clip(RoundedCornerShape(20.dp)).clickable { coroutineScope.launch { scale.animateTo(0.95f, animationSpec = spring(stiffness = Spring.StiffnessMedium)); scale.animateTo(1f, animationSpec = spring(stiffness = Spring.StiffnessMedium)) }; onClick() }, shape = RoundedCornerShape(20.dp), color = if (isSelected) primaryColor.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceContainerHighest, border = if (isSelected) BorderStroke(1.5.dp, primaryColor.copy(alpha = 0.4f)) else null, shadowElevation = if (isSelected) 4.dp else 0.dp, tonalElevation = if (isSelected) 2.dp else 0.dp) {
             Row(modifier = Modifier.padding(horizontal = if (isSelected) 12.dp else 10.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 Icon(imageVector = filter.icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = if (isSelected) primaryColor else MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(text = filter.label, style = MaterialTheme.typography.labelLarge, fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium, color = if (isSelected) primaryColor else MaterialTheme.colorScheme.onSurface)
+                Text(text = stringResource(filter.labelResId), style = MaterialTheme.typography.labelLarge, fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium, color = if (isSelected) primaryColor else MaterialTheme.colorScheme.onSurface)
             }
         }
     }
@@ -714,10 +714,10 @@ fun BubblyPostCard(
                         if (isFollowing) { Spacer(Modifier.width(8.dp)); Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.primaryContainer) { Text(text = "Following", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer, fontWeight = FontWeight.Medium, modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)) } }
                     }
                     Text(text = post.timeAgo, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    if (!post.locationTag.isNullOrBlank()) { Spacer(Modifier.height(2.dp)); Row(verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Outlined.LocationOn, contentDescription = "Location", modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant); Spacer(Modifier.width(2.dp)); Text(text = post.locationTag, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis) } }
+                    if (!post.locationTag.isNullOrBlank()) { Spacer(Modifier.height(2.dp)); Row(verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Outlined.LocationOn, contentDescription = stringResource(R.string.cd_location), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant); Spacer(Modifier.width(2.dp)); Text(text = post.locationTag, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis) } }
                 }
                 Box {
-                    IconButton(onClick = { showMenu = true }) { Icon(Icons.Default.MoreVert, contentDescription = "More options", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+                    IconButton(onClick = { showMenu = true }) { Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.cd_more_options), tint = MaterialTheme.colorScheme.onSurfaceVariant) }
                     DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
                         DropdownMenuItem(text = { Row(verticalAlignment = Alignment.CenterVertically) { Icon(if (isBookmarked) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder, contentDescription = null, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(12.dp)); Text(if (isBookmarked) stringResource(R.string.post_unsave) else stringResource(R.string.post_save), color = MaterialTheme.colorScheme.onSurface) } }, onClick = { isBookmarked = !isBookmarked; showMenu = false; post.id?.let { onBookmarkToggle?.invoke(it) }; Toast.makeText(context, if (isBookmarked) bookmarkedText else unbookmarkedText, Toast.LENGTH_SHORT).show() })
                         DropdownMenuItem(text = { Row(verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Filled.ContentCopy, contentDescription = null, modifier = Modifier.size(20.dp)); Spacer(Modifier.width(12.dp)); Text(stringResource(R.string.post_copy_text), color = MaterialTheme.colorScheme.onSurface) } }, onClick = { clipboardManager?.setPrimaryClip(ClipData.newPlainText("NeuroComet post text", post.content)); showMenu = false; Toast.makeText(context, copiedText, Toast.LENGTH_SHORT).show() })
@@ -755,13 +755,13 @@ fun BubblyPostCard(
             Spacer(Modifier.height(12.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    IconButton(onClick = onLike) { Icon(imageVector = if (post.isLikedByMe) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder, contentDescription = "Like", tint = if (post.isLikedByMe) Color(0xFFE91E63) else MaterialTheme.colorScheme.onSurfaceVariant) }
+                    IconButton(onClick = onLike) { Icon(imageVector = if (post.isLikedByMe) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder, contentDescription = stringResource(R.string.action_like), tint = if (post.isLikedByMe) Color(0xFFE91E63) else MaterialTheme.colorScheme.onSurfaceVariant) }
                     if (post.likes > 0 && !contentPrefs.hideLikeCounts) { Text(text = formatCount(post.likes), style = MaterialTheme.typography.labelMedium, color = if (post.isLikedByMe) Color(0xFFE91E63) else MaterialTheme.colorScheme.onSurfaceVariant) }
                     Spacer(Modifier.width(8.dp))
-                    IconButton(onClick = onReplyPost) { Icon(imageVector = Icons.AutoMirrored.Outlined.Comment, contentDescription = "Comment", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
-                    IconButton(onClick = { onShare(context, post) }) { Icon(imageVector = Icons.Outlined.Share, contentDescription = "Share", tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+                    IconButton(onClick = onReplyPost) { Icon(imageVector = Icons.AutoMirrored.Outlined.Comment, contentDescription = stringResource(R.string.action_comment), tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+                    IconButton(onClick = { onShare(context, post) }) { Icon(imageVector = Icons.Outlined.Share, contentDescription = stringResource(R.string.cd_share), tint = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
-                IconButton(onClick = { isBookmarked = !isBookmarked; post.id?.let { onBookmarkToggle?.invoke(it) }; Toast.makeText(context, if (isBookmarked) savedText else removedText, Toast.LENGTH_SHORT).show() }) { Icon(imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder, contentDescription = "Bookmark", tint = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant) }
+                IconButton(onClick = { isBookmarked = !isBookmarked; post.id?.let { onBookmarkToggle?.invoke(it) }; Toast.makeText(context, if (isBookmarked) savedText else removedText, Toast.LENGTH_SHORT).show() }) { Icon(imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder, contentDescription = stringResource(R.string.action_bookmark), tint = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant) }
             }
             if (emotionalTone != EmotionalTone.NEUTRAL && !safetyState.isKidsMode) {
                 Spacer(Modifier.height(10.dp))

@@ -3,6 +3,7 @@
 package com.kyilmaz.neurocomet
 
 import android.content.Context
+import androidx.compose.ui.res.stringResource
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -850,7 +851,7 @@ fun BadgeDetailDialog(
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Close")
+                    Text(stringResource(R.string.cd_close))
                 }
             }
         }

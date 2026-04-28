@@ -773,7 +773,7 @@ fun StoryViewerDialog(
                                     showCustomReactionDialog = false
                                 }
                             ) {
-                                Text("Save")
+                                Text(stringResource(R.string.action_save))
                             }
                         },
                         dismissButton = {
@@ -781,7 +781,7 @@ fun StoryViewerDialog(
                                 showCustomReactionDialog = false
                                 customReactionInput = ""
                             }) {
-                                Text("Cancel")
+                                Text(stringResource(R.string.action_cancel))
                             }
                         }
                     )

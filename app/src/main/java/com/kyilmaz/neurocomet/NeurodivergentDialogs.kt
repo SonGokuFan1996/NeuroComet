@@ -1,6 +1,7 @@
 package com.kyilmaz.neurocomet
 
 import android.content.Context
+import androidx.compose.ui.res.stringResource
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -173,7 +174,7 @@ fun NeurodivergentMessageDialog(
                         ) {
                             Icon(
                                 Icons.Filled.Close,
-                                contentDescription = "Close",
+                                contentDescription = stringResource(R.string.cd_close),
                                 tint = if (config.highContrast) Color.White
                                       else MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -701,7 +702,7 @@ fun NeurodivergentChoiceDialog(
                             } else if (isSelected) {
                                 Icon(
                                     Icons.Filled.CheckCircle,
-                                    contentDescription = "Selected",
+                                    contentDescription = stringResource(R.string.cd_selected_state),
                                     tint = if (highContrast) Color.White else MaterialTheme.colorScheme.primary
                                 )
                             }

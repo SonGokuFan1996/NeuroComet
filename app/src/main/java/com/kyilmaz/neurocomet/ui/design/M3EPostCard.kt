@@ -392,7 +392,7 @@ private fun PostCardHeader(
             IconButton(onClick = onMenuClick) {
                 Icon(
                     imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More options",
+                    contentDescription = stringResource(R.string.cd_more_options),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -462,7 +462,7 @@ private fun PostDropdownMenu(
             }
         )
         DropdownMenuItem(
-            text = { Text("Share") },
+            text = { Text(stringResource(R.string.cd_share)) },
             onClick = onShare,
             leadingIcon = {
                 Icon(Icons.Default.Share, contentDescription = null)
@@ -551,7 +551,7 @@ private fun PostMediaCarousel(
                 .data(mediaUrls[0])
                 .crossfade(true)
                 .build(),
-            contentDescription = "Post image",
+            contentDescription = stringResource(R.string.cd_post_image),
             modifier = modifier
                 .fillMaxWidth()
                 .height(220.dp)

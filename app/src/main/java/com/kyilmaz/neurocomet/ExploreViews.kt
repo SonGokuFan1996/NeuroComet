@@ -166,7 +166,7 @@ private fun GridPostItem(
         if (mediaItems.isNotEmpty()) {
             AsyncImage(
                 model = mediaItems.first().url,
-                contentDescription = "Post image",
+                contentDescription = stringResource(R.string.cd_post_image),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
@@ -328,7 +328,7 @@ private fun StandardPostCard(
                 // Medium avatar (44dp)
                 AsyncImage(
                     model = post.userAvatar ?: avatarUrl(post.userId ?: "unknown"),
-                    contentDescription = "User avatar",
+                    contentDescription = stringResource(R.string.cd_user_avatar),
                     modifier = Modifier
                         .size(44.dp)
                         .clip(CircleShape)
@@ -353,7 +353,7 @@ private fun StandardPostCard(
 
                 Icon(
                     Icons.Filled.MoreVert,
-                    contentDescription = "More options",
+                    contentDescription = stringResource(R.string.cd_more_options),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp)
                 )
@@ -375,7 +375,7 @@ private fun StandardPostCard(
                 if (mediaItems.size == 1) {
                     AsyncImage(
                         model = mediaItems.first().url,
-                        contentDescription = "Post image",
+                        contentDescription = stringResource(R.string.cd_post_image),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -390,7 +390,7 @@ private fun StandardPostCard(
                         items(mediaItems.take(4)) { media ->
                             AsyncImage(
                                 model = media.url,
-                                contentDescription = "Post image",
+                                contentDescription = stringResource(R.string.cd_post_image),
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .size(150.dp)
@@ -417,7 +417,7 @@ private fun StandardPostCard(
                 ) {
                     Icon(
                         if (post.isLikedByMe) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                        contentDescription = "Like",
+                        contentDescription = stringResource(R.string.action_like),
                         tint = if (post.isLikedByMe) Color(0xFFE91E63) else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(22.dp)
                     )
@@ -436,7 +436,7 @@ private fun StandardPostCard(
                 ) {
                     Icon(
                         Icons.Outlined.ChatBubbleOutline,
-                        contentDescription = "Comment",
+                        contentDescription = stringResource(R.string.action_comment),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(22.dp)
                     )
@@ -455,7 +455,7 @@ private fun StandardPostCard(
                 ) {
                     Icon(
                         Icons.Outlined.Share,
-                        contentDescription = "Share",
+                        contentDescription = stringResource(R.string.cd_share),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(22.dp)
                     )
@@ -470,7 +470,7 @@ private fun StandardPostCard(
                 // Bookmark
                 Icon(
                     Icons.Outlined.BookmarkBorder,
-                    contentDescription = "Bookmark",
+                    contentDescription = stringResource(R.string.action_bookmark),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(22.dp)
                 )
@@ -531,7 +531,7 @@ private fun CompactPostCard(
             // Avatar
             AsyncImage(
                 model = post.userAvatar ?: avatarUrl(post.userId ?: "unknown"),
-                contentDescription = "User avatar",
+                contentDescription = stringResource(R.string.cd_user_avatar),
                 modifier = Modifier
                     .size(36.dp)
                     .clip(CircleShape)
@@ -582,7 +582,7 @@ private fun CompactPostCard(
                         Icon(
                             imageVector = if (post.isLikedByMe) Icons.Filled.Favorite
                                          else Icons.Outlined.FavoriteBorder,
-                            contentDescription = "Like",
+                            contentDescription = stringResource(R.string.action_like),
                             tint = if (post.isLikedByMe) Color.Red
                                    else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(16.dp)
@@ -597,7 +597,7 @@ private fun CompactPostCard(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             Icons.Outlined.ChatBubbleOutline,
-                            contentDescription = "Comments",
+                            contentDescription = stringResource(R.string.comments_title),
                             modifier = Modifier.size(16.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -712,7 +712,7 @@ private fun LargePostCard(
                 // Large avatar
                 AsyncImage(
                     model = post.userAvatar ?: avatarUrl(post.userId ?: "unknown"),
-                    contentDescription = "User avatar",
+                    contentDescription = stringResource(R.string.cd_user_avatar),
                     modifier = Modifier
                         .size(56.dp)
                         .clip(CircleShape)
@@ -743,7 +743,7 @@ private fun LargePostCard(
                     // Single image - large display
                     AsyncImage(
                         model = mediaItems.first().url,
-                        contentDescription = "Post image",
+                        contentDescription = stringResource(R.string.cd_post_image),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -760,7 +760,7 @@ private fun LargePostCard(
                             items(mediaItems.take(Post.MAX_MEDIA_ITEMS)) { media ->
                                 AsyncImage(
                                     model = media.url,
-                                    contentDescription = "Post image",
+                                    contentDescription = stringResource(R.string.cd_post_image),
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
                                         .width(280.dp)
@@ -1204,7 +1204,7 @@ fun TopicDetailScreen(
                             style = MaterialTheme.typography.titleLarge
                         )
                         Text(
-                            text = "Explore this topic",
+                            text = stringResource(R.string.topic_detail_subtitle),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1214,7 +1214,7 @@ fun TopicDetailScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.topic_detail_back)
                         )
                     }
                 },
@@ -1251,87 +1251,49 @@ fun TopicDetailScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Join the conversation about $topicName. Connect with others who share your interests.",
+                            text = stringResource(R.string.topic_detail_description, topicName),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(24.dp)
-                        ) {
-                            Column {
-                                Text(
-                                    text = "12.3K",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = "Posts",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            Column {
-                                Text(
-                                    text = "4.5K",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = "Members",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
                     }
                 }
             }
 
             item {
                 Text(
-                    text = "Recent Posts",
+                    text = stringResource(R.string.topic_detail_recent_posts),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            // Placeholder for posts
-            items(5) { index ->
+            // Empty state — real topic posts are backend-driven and not yet wired in here.
+            // We deliberately avoid rendering English-only sample posts so translated
+            // locales never see broken/untranslated content.
+            item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                    )
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primaryContainer)
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column {
-                                Text(
-                                    text = "User ${index + 1}",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                Text(
-                                    text = "${index + 1}h ago",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "This is a sample post about #$topicName. Share your thoughts and connect with the community! 💭",
-                            style = MaterialTheme.typography.bodyMedium
+                            text = stringResource(R.string.topic_detail_empty_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = stringResource(R.string.topic_detail_empty_subtitle, topicName),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }

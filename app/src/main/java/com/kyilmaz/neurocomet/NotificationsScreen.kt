@@ -270,8 +270,9 @@ private fun NotificationsHeader(
                         text = stringResource(R.string.notifications_title),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = (-0.5).sp,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     if (unreadCount > 0) {
                         Spacer(Modifier.width(12.dp))

@@ -108,13 +108,13 @@ fun FontSettingsScreen(
             // === QUICK PRESETS ===
             item {
                 Text(
-                    "Quick Presets",
+                    stringResource(R.string.font_settings_quick_presets),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "One-tap settings optimized for your needs",
+                    stringResource(R.string.font_settings_quick_presets_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -127,35 +127,35 @@ fun FontSettingsScreen(
                 ) {
                     item {
                         PresetChip(
-                            label = "Dyslexia",
+                            label = stringResource(R.string.font_preset_dyslexia),
                             isSelected = fontSettings == FontPresets.dyslexiaFriendly,
                             onClick = { themeViewModel.applyFontPreset(FontPresets.dyslexiaFriendly) }
                         )
                     }
                     item {
                         PresetChip(
-                            label = "ADHD",
+                            label = stringResource(R.string.font_preset_adhd),
                             isSelected = fontSettings == FontPresets.adhdFocus,
                             onClick = { themeViewModel.applyFontPreset(FontPresets.adhdFocus) }
                         )
                     }
                     item {
                         PresetChip(
-                            label = "Autism",
+                            label = stringResource(R.string.font_preset_autism),
                             isSelected = fontSettings == FontPresets.autismConsistent,
                             onClick = { themeViewModel.applyFontPreset(FontPresets.autismConsistent) }
                         )
                     }
                     item {
                         PresetChip(
-                            label = "Low Vision",
+                            label = stringResource(R.string.font_preset_low_vision),
                             isSelected = fontSettings == FontPresets.lowVision,
                             onClick = { themeViewModel.applyFontPreset(FontPresets.lowVision) }
                         )
                     }
                     item {
                         PresetChip(
-                            label = "Calm",
+                            label = stringResource(R.string.font_preset_calm),
                             isSelected = fontSettings == FontPresets.anxietyCalm,
                             onClick = { themeViewModel.applyFontPreset(FontPresets.anxietyCalm) }
                         )
@@ -167,7 +167,7 @@ fun FontSettingsScreen(
             item {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "Preview",
+                    stringResource(R.string.font_settings_preview),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -181,7 +181,7 @@ fun FontSettingsScreen(
             item {
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    "Choose Your Font",
+                    stringResource(R.string.font_settings_choose_font),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -212,7 +212,7 @@ fun FontSettingsScreen(
             item {
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    "Fine-Tune Reading Experience",
+                    stringResource(R.string.font_settings_fine_tune),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -222,8 +222,8 @@ fun FontSettingsScreen(
             item {
                 SettingSliderCard(
                     icon = Icons.Default.SpaceBar,
-                    title = "Letter Spacing",
-                    description = "Wider spacing can help with dyslexia and visual crowding",
+                    title = stringResource(R.string.font_settings_letter_spacing),
+                    description = stringResource(R.string.font_settings_letter_spacing_desc),
                     options = LetterSpacingLevel.entries,
                     selectedOption = fontSettings.letterSpacing,
                     optionLabel = { it.displayName },
@@ -235,8 +235,8 @@ fun FontSettingsScreen(
             item {
                 SettingSliderCard(
                     icon = Icons.Default.VerticalAlignCenter,
-                    title = "Line Height",
-                    description = "More vertical space between lines reduces visual stress",
+                    title = stringResource(R.string.font_settings_line_height),
+                    description = stringResource(R.string.font_settings_line_height_desc),
                     options = LineHeightLevel.entries,
                     selectedOption = fontSettings.lineHeight,
                     optionLabel = { it.displayName },
@@ -248,8 +248,8 @@ fun FontSettingsScreen(
             item {
                 SettingSliderCard(
                     icon = Icons.Default.FormatSize,
-                    title = "Font Weight",
-                    description = "Bolder text can improve readability for some users",
+                    title = stringResource(R.string.font_settings_font_weight),
+                    description = stringResource(R.string.font_settings_font_weight_desc),
                     options = FontWeightLevel.entries,
                     selectedOption = fontSettings.fontWeight,
                     optionLabel = { it.displayName },
@@ -568,4 +568,3 @@ private fun <T> SettingSliderCard(
         }
     }
 }
-

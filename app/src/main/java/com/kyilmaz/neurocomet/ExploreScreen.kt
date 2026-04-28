@@ -359,19 +359,28 @@ private fun ExploreFilterSheet(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Each entry: (emoji, internalName, nameResId, descriptionResId).
+    // internalName is used for routing/hashtag URLs and must stay stable (English);
+    // display text goes through stringResource for translation.
+    data class BrowseCategory(
+        val emoji: String,
+        val internalName: String,
+        val nameResId: Int,
+        val descriptionResId: Int,
+    )
     val categories = listOf(
-        Triple("\uD83C\uDFAF", "ADHD Hacks", "Tips & strategies"),
-        Triple("\uD83E\uDDE9", "Autism Community", "Connection & support"),
-        Triple("\u2728", "Sensory Tips", "Sensory-friendly living"),
-        Triple("\uD83E\uDDE0", "Mental Health", "Wellness & recovery"),
-        Triple("\uD83D\uDCAA", "Executive Function", "Planning & focus"),
-        Triple("\uD83C\uDFA8", "Creative Arts", "Art therapy & expression"),
-        Triple("\uD83C\uDFAE", "Gaming", "ND-friendly gaming"),
-        Triple("\uD83D\uDCBC", "Career Paths", "Workplace tips"),
-        Triple("\uD83C\uDF7D\uFE0F", "Safe Foods", "ARFID & food support"),
-        Triple("\uD83E\uDD1D", "Relationships", "Communication & bonds"),
-        Triple("\uD83C\uDF93", "College Transition", "Academic support"),
-        Triple("\uD83C\uDFE0", "Independent Living", "Life skills")
+        BrowseCategory("\uD83C\uDFAF", "ADHD Hacks", R.string.browse_cat_adhd_hacks, R.string.browse_cat_adhd_hacks_desc),
+        BrowseCategory("\uD83E\uDDE9", "Autism Community", R.string.browse_cat_autism, R.string.browse_cat_autism_desc),
+        BrowseCategory("\u2728", "Sensory Tips", R.string.browse_cat_sensory, R.string.browse_cat_sensory_desc),
+        BrowseCategory("\uD83E\uDDE0", "Mental Health", R.string.browse_cat_mental_health, R.string.browse_cat_mental_health_desc),
+        BrowseCategory("\uD83D\uDCAA", "Executive Function", R.string.browse_cat_exec_function, R.string.browse_cat_exec_function_desc),
+        BrowseCategory("\uD83C\uDFA8", "Creative Arts", R.string.browse_cat_creative_arts, R.string.browse_cat_creative_arts_desc),
+        BrowseCategory("\uD83C\uDFAE", "Gaming", R.string.browse_cat_gaming, R.string.browse_cat_gaming_desc),
+        BrowseCategory("\uD83D\uDCBC", "Career Paths", R.string.browse_cat_career, R.string.browse_cat_career_desc),
+        BrowseCategory("\uD83C\uDF7D\uFE0F", "Safe Foods", R.string.browse_cat_safe_foods, R.string.browse_cat_safe_foods_desc),
+        BrowseCategory("\uD83E\uDD1D", "Relationships", R.string.browse_cat_relationships, R.string.browse_cat_relationships_desc),
+        BrowseCategory("\uD83C\uDF93", "College Transition", R.string.browse_cat_college, R.string.browse_cat_college_desc),
+        BrowseCategory("\uD83C\uDFE0", "Independent Living", R.string.browse_cat_independent, R.string.browse_cat_independent_desc),
     )
 
     Column(
@@ -380,7 +389,7 @@ private fun ExploreFilterSheet(
             .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Text(
-            text = "Browse by Category",
+            text = stringResource(R.string.explore_browse_by_category),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 16.dp)
@@ -391,11 +400,11 @@ private fun ExploreFilterSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                row.forEach { (emoji, name, description) ->
+                row.forEach { category ->
                     Surface(
                         modifier = Modifier
                             .weight(1f)
-                            .clickable { onCategorySelected(name) },
+                            .clickable { onCategorySelected(category.internalName) },
                         shape = RoundedCornerShape(16.dp),
                         color = MaterialTheme.colorScheme.surfaceContainerHigh,
                         tonalElevation = 2.dp
@@ -404,18 +413,18 @@ private fun ExploreFilterSheet(
                             modifier = Modifier.padding(14.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(text = emoji, fontSize = 24.sp)
+                            Text(text = category.emoji, fontSize = 24.sp)
                             Spacer(Modifier.width(10.dp))
                             Column {
                                 Text(
-                                    text = name,
+                                    text = stringResource(category.nameResId),
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.SemiBold,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
                                 Text(
-                                    text = description,
+                                    text = stringResource(category.descriptionResId),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1,
@@ -480,12 +489,13 @@ private fun ExploreHeader(
                         text = stringResource(R.string.explore_title),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = (-0.5).sp,
-                        color = if (isDark) Color.White else Color(0xFF1A1A2E)
+                        color = if (isDark) Color.White else Color(0xFF1A1A2E),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Find topics you love without the noise. \u2728",
+                        text = stringResource(R.string.explore_header_subtitle),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -496,13 +506,13 @@ private fun ExploreHeader(
                     ExploreHeaderIconButton(
                         icon = Icons.Default.Search,
                         onClick = onStartSearch,
-                        contentDescription = "Search",
+                        contentDescription = stringResource(R.string.cd_search),
                         isDark = isDark
                     )
                     ExploreHeaderIconButton(
                         icon = Icons.Default.Tune,
                         onClick = onFilterClick,
-                        contentDescription = "Filters",
+                        contentDescription = stringResource(R.string.image_editor_tab_filters),
                         isDark = isDark
                     )
                 }
@@ -548,8 +558,7 @@ private fun ExploreHeader(
                         decorationBox = { innerTextField ->
                             Box {
                                 if (searchQuery.isEmpty()) {
-                                    Text(
-                                        text = "Search posts, people, topics...",
+                                    Text(text = stringResource(R.string.explore_search_placeholder),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = if (isDark) Color.White.copy(alpha = 0.5f) else Color(0xFF999999)
                                     )
@@ -562,7 +571,7 @@ private fun ExploreHeader(
                     IconButton(onClick = onCancelSearch) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Cancel search",
+                            contentDescription = stringResource(R.string.explore_cancel_search),
                             tint = if (isDark) Color.White.copy(alpha = 0.7f) else Color(0xFF666680)
                         )
                     }
@@ -785,7 +794,7 @@ private fun RecentSearchesView(
                                 hapticFeedback(context)
                                 recentSearches = emptyList()
                             }) {
-                                Text("Clear All")
+                                Text(stringResource(R.string.games_clear_all))
                             }
                         }
                     )
@@ -1367,8 +1376,7 @@ private fun TrendingTab(
                     modifier = Modifier.size(28.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Trending Now",
+                Text(text = stringResource(R.string.explore_trending_now),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -2259,7 +2267,7 @@ private fun AnimatedPersonCard(
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
                             imageVector = Icons.Filled.Verified,
-                            contentDescription = "Verified",
+                            contentDescription = stringResource(R.string.cd_verified),
                             modifier = Modifier.size(16.dp),
                             tint = MaterialTheme.colorScheme.primary
                         )
@@ -2554,7 +2562,7 @@ private fun MembersSection(topicName: String) {
                 Box {
                     AsyncImage(
                         model = member.avatarUrl,
-                        contentDescription = "Avatar",
+                        contentDescription = stringResource(R.string.cd_avatar),
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
@@ -3019,7 +3027,7 @@ private fun StoryItem(
             ) {
                 AsyncImage(
                     model = avatar,
-                    contentDescription = "Story",
+                    contentDescription = stringResource(R.string.label_story),
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(CircleShape),
@@ -3040,7 +3048,7 @@ private fun StoryItem(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Add story",
+                        contentDescription = stringResource(R.string.stories_add_story),
                         tint = Color.White,
                         modifier = Modifier.size(14.dp)
                     )
@@ -3070,11 +3078,11 @@ private fun QuickAccessChips(
     onChipSelected: (String) -> Unit = {}
 ) {
     val chips = listOf(
-        QuickChipData("Autism", "\uD83C\uDF08", Color(0xFF7C4DFF)),
-        QuickChipData("ADHD Tips", "\uD83C\uDFAF", Color(0xFFFF7043)),
-        QuickChipData("Mindfulness", "\uD83E\uDDD8", Color(0xFF66BB6A)),
-        QuickChipData("Anxiety", "\uD83D\uDC99", Color(0xFF42A5F5)),
-        QuickChipData("Sleep", "\uD83D\uDCA4", Color(0xFFAB47BC))
+        QuickChipData("Autism", R.string.explore_chip_autism, "\uD83C\uDF08", Color(0xFF7C4DFF)),
+        QuickChipData("ADHD Tips", R.string.explore_chip_adhd_tips, "\uD83C\uDFAF", Color(0xFFFF7043)),
+        QuickChipData("Mindfulness", R.string.explore_chip_mindfulness, "\uD83E\uDDD8", Color(0xFF66BB6A)),
+        QuickChipData("Anxiety", R.string.explore_chip_anxiety, "\uD83D\uDC99", Color(0xFF42A5F5)),
+        QuickChipData("Sleep", R.string.explore_chip_sleep, "\uD83D\uDCA4", Color(0xFFAB47BC))
     )
 
     LazyRow(
@@ -3113,7 +3121,7 @@ private fun QuickAccessChips(
                         fontSize = 14.sp
                     )
                     Text(
-                        text = chip.label,
+                        text = stringResource(chip.labelResId),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = if (isSelected) Color.White else chip.color
@@ -3121,7 +3129,7 @@ private fun QuickAccessChips(
                     if (isSelected) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Clear filter",
+                            contentDescription = stringResource(R.string.cd_clear_filter),
                             modifier = Modifier.size(14.dp),
                             tint = Color.White.copy(alpha = 0.8f)
                         )
@@ -3132,7 +3140,7 @@ private fun QuickAccessChips(
     }
 }
 
-private data class QuickChipData(val label: String, val emoji: String, val color: Color)
+private data class QuickChipData(val label: String, val labelResId: Int, val emoji: String, val color: Color)
 
 // ============================================================================
 // Explore Post Card
@@ -3199,7 +3207,7 @@ private fun ExplorePostCard(
                     ) {
                         AsyncImage(
                             model = post.avatar,
-                            contentDescription = "Avatar",
+                            contentDescription = stringResource(R.string.cd_avatar),
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clip(CircleShape),
@@ -3220,7 +3228,7 @@ private fun ExplorePostCard(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Icon(
                                     imageVector = Icons.Filled.Verified,
-                                    contentDescription = "Verified",
+                                    contentDescription = stringResource(R.string.cd_verified),
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -3249,8 +3257,7 @@ private fun ExplorePostCard(
                                     modifier = Modifier.size(14.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "Viral",
+                                Text(text = stringResource(R.string.label_viral),
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFFFF6B35)
@@ -3264,7 +3271,7 @@ private fun ExplorePostCard(
                         IconButton(onClick = { showPostMenu = true }) {
                             Icon(
                                 imageVector = Icons.Default.MoreHoriz,
-                                contentDescription = "More options",
+                                contentDescription = stringResource(R.string.cd_more_options),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -3360,7 +3367,7 @@ private fun ExplorePostCard(
                     Spacer(modifier = Modifier.height(12.dp))
                     AsyncImage(
                         model = post.imageUrl,
-                        contentDescription = "Post image",
+                        contentDescription = stringResource(R.string.cd_post_image),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp)
@@ -3390,7 +3397,7 @@ private fun ExplorePostCard(
                     ) {
                         Icon(
                             imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                            contentDescription = "Like",
+                            contentDescription = stringResource(R.string.action_like),
                             tint = if (isLiked) Color(0xFFE91E63) else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(22.dp)
                         )
@@ -3412,7 +3419,7 @@ private fun ExplorePostCard(
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.ChatBubbleOutline,
-                            contentDescription = "Comment",
+                            contentDescription = stringResource(R.string.action_comment),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(22.dp)
                         )
@@ -3434,7 +3441,7 @@ private fun ExplorePostCard(
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Share,
-                            contentDescription = "Share",
+                            contentDescription = stringResource(R.string.cd_share),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(22.dp)
                         )
@@ -3517,7 +3524,7 @@ private fun TrendingHashtagsSection(
                             Spacer(modifier = Modifier.width(6.dp))
                             Icon(
                                 imageVector = Icons.Default.LocalFireDepartment,
-                                contentDescription = "Hot",
+                                contentDescription = stringResource(R.string.label_hot),
                                 tint = Color(0xFFFF6B35),
                                 modifier = Modifier.size(16.dp)
                             )
@@ -3578,7 +3585,7 @@ private fun FeaturedCreatorCard(creator: EnhancedPersonData) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 AsyncImage(
                     model = creator.avatar,
-                    contentDescription = "Avatar",
+                    contentDescription = stringResource(R.string.cd_avatar),
                     modifier = Modifier
                         .size(56.dp)
                         .clip(CircleShape),
@@ -3600,7 +3607,7 @@ private fun FeaturedCreatorCard(creator: EnhancedPersonData) {
                             Spacer(modifier = Modifier.width(4.dp))
                             Icon(
                                 imageVector = Icons.Filled.Verified,
-                                contentDescription = "Verified",
+                                contentDescription = stringResource(R.string.cd_verified),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(14.dp)
                             )
@@ -3670,7 +3677,13 @@ private fun FeaturedCreatorCard(creator: EnhancedPersonData) {
 
 @Composable
 private fun PeopleCategoryChips() {
-    val categories = listOf("All", "Professionals", "Creators", "Coaches", "Advocates")
+    val categories = listOf(
+        R.string.people_chip_all,
+        R.string.people_chip_professionals,
+        R.string.people_chip_creators,
+        R.string.people_chip_coaches,
+        R.string.people_chip_advocates,
+    )
     var selectedIndex by remember { mutableIntStateOf(0) }
 
     LazyRow(
@@ -3684,7 +3697,7 @@ private fun PeopleCategoryChips() {
                 color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest
             ) {
                 Text(
-                    text = categories[index],
+                    text = stringResource(categories[index]),
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
@@ -3741,7 +3754,7 @@ private fun EnhancedPersonCard(
                 // Avatar
                 AsyncImage(
                     model = person.avatar,
-                    contentDescription = "Avatar",
+                    contentDescription = stringResource(R.string.cd_avatar),
                     modifier = Modifier
                         .size(56.dp)
                         .clip(CircleShape),
@@ -3761,7 +3774,7 @@ private fun EnhancedPersonCard(
                             Spacer(modifier = Modifier.width(4.dp))
                             Icon(
                                 imageVector = Icons.Filled.Verified,
-                                contentDescription = "Verified",
+                                contentDescription = stringResource(R.string.cd_verified),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(16.dp)
                             )
@@ -4001,7 +4014,7 @@ private fun TopicCategorySection(
                 )
 
                 TextButton(onClick = { onTopicClick(category.name) }) {
-                    Text("See all")
+                    Text(stringResource(R.string.action_see_all))
                 }
             }
 

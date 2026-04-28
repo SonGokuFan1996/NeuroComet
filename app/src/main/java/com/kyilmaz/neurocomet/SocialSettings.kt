@@ -71,18 +71,18 @@ data class PrivacySettings(
     val twoFactorEnabled: Boolean = false
 )
 
-enum class DMPermission(val displayName: String, val description: String) {
-    EVERYONE("Everyone", "Anyone can message you"),
-    FOLLOWERS("Followers Only", "Only people who follow you"),
-    FOLLOWING("People You Follow", "Only people you follow"),
-    MUTUALS("Mutual Followers", "Only mutual followers"),
-    NOBODY("Nobody", "Disable DMs completely")
+enum class DMPermission(@androidx.annotation.StringRes val displayNameResId: Int, @androidx.annotation.StringRes val descriptionResId: Int) {
+    EVERYONE(R.string.dm_perm_everyone, R.string.dm_perm_everyone_desc),
+    FOLLOWERS(R.string.dm_perm_followers, R.string.dm_perm_followers_desc),
+    FOLLOWING(R.string.dm_perm_following, R.string.dm_perm_following_desc),
+    MUTUALS(R.string.dm_perm_mutuals, R.string.dm_perm_mutuals_desc),
+    NOBODY(R.string.dm_perm_nobody, R.string.dm_perm_nobody_desc)
 }
 
-enum class TagPermission(val displayName: String) {
-    EVERYONE("Everyone"),
-    FOLLOWERS("Followers Only"),
-    NOBODY("Nobody")
+enum class TagPermission(@androidx.annotation.StringRes val displayNameResId: Int) {
+    EVERYONE(R.string.tag_perm_everyone),
+    FOLLOWERS(R.string.tag_perm_followers),
+    NOBODY(R.string.tag_perm_nobody)
 }
 
 /**
@@ -119,17 +119,17 @@ data class ContentPreferences(
     val preferredLanguages: List<String> = listOf("en")
 )
 
-enum class AutoplayOption(val displayName: String) {
-    ALWAYS("Always"),
-    WIFI_ONLY("Wi-Fi Only"),
-    NEVER("Never")
+enum class AutoplayOption(@androidx.annotation.StringRes val displayNameResId: Int) {
+    ALWAYS(R.string.autoplay_always),
+    WIFI_ONLY(R.string.autoplay_wifi_only),
+    NEVER(R.string.autoplay_never)
 }
 
-enum class PostVisibility(val displayName: String, val icon: ImageVector) {
-    PUBLIC("Public", Icons.Default.Public),
-    FOLLOWERS("Followers Only", Icons.Default.People),
-    CLOSE_FRIENDS("Close Friends", Icons.Default.Favorite),
-    PRIVATE("Only Me", Icons.Default.Lock)
+enum class PostVisibility(@androidx.annotation.StringRes val displayNameResId: Int, val icon: ImageVector) {
+    PUBLIC(R.string.post_visibility_public, Icons.Default.Public),
+    FOLLOWERS(R.string.post_visibility_followers, Icons.Default.People),
+    CLOSE_FRIENDS(R.string.post_visibility_close_friends, Icons.Default.Favorite),
+    PRIVATE(R.string.post_visibility_private, Icons.Default.Lock)
 }
 
 /**
@@ -632,8 +632,8 @@ fun PrivacySettingsScreen(
             item {
                 SocialSettingsSelector(
                     title = stringResource(R.string.social_who_can_message),
-                    currentValue = settings.allowDMsFrom.displayName,
-                    description = settings.allowDMsFrom.description,
+                    currentValue = stringResource(settings.allowDMsFrom.displayNameResId),
+                    description = stringResource(settings.allowDMsFrom.descriptionResId),
                     icon = Icons.Default.Mail,
                     onClick = { showDMDialog = true }
                 )
@@ -642,7 +642,7 @@ fun PrivacySettingsScreen(
             item {
                 SocialSettingsSelector(
                     title = stringResource(R.string.social_who_can_tag),
-                    currentValue = settings.allowTagging.displayName,
+                    currentValue = stringResource(settings.allowTagging.displayNameResId),
                     icon = Icons.Default.AlternateEmail,
                     onClick = { showTagDialog = true }
                 )
@@ -782,7 +782,7 @@ fun PrivacySettingsScreen(
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Text(stringResource(R.string.social_data_local_hint), style = MaterialTheme.typography.bodyMedium)
                         Text(
-                            "Use Backup & Restore in Settings for export and recovery tools.",
+                            stringResource(R.string.social_data_backup_hint),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -866,9 +866,9 @@ fun PrivacySettingsScreen(
                             )
                             Spacer(Modifier.width(12.dp))
                             Column {
-                                Text(option.displayName, fontWeight = FontWeight.Medium)
+                                Text(stringResource(option.displayNameResId), fontWeight = FontWeight.Medium)
                                 Text(
-                                    option.description,
+                                    stringResource(option.descriptionResId),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -909,7 +909,7 @@ fun PrivacySettingsScreen(
                                 onClick = null
                             )
                             Spacer(Modifier.width(12.dp))
-                            Text(option.displayName)
+                            Text(stringResource(option.displayNameResId))
                         }
                     }
                 }
@@ -967,7 +967,7 @@ private fun ContactsAccessSettingsCard() {
         } else {
             deviceContacts = emptyList()
             matchedContacts = emptyList()
-            Toast.makeText(context, "Contacts access was not granted.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.contacts_access_not_granted), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -1022,41 +1022,40 @@ private fun ContactsAccessSettingsCard() {
                 AssistChip(
                     onClick = {},
                     enabled = false,
-                    label = { Text(if (hasContactsPermission) "Permission granted" else "Permission needed") }
+                    label = { Text(stringResource(if (hasContactsPermission) R.string.contacts_permission_granted else R.string.contacts_permission_needed)) }
                 )
                 AssistChip(
                     onClick = {},
                     enabled = false,
-                    label = { Text(if (syncEnabled) "Sync enabled" else "Sync off") }
+                    label = { Text(stringResource(if (syncEnabled) R.string.contacts_sync_enabled else R.string.contacts_sync_off)) }
                 )
             }
 
             if (hasContactsPermission) {
                 Text(
-                    "${deviceContacts.size} contacts visible on this device • ${matchedContacts.size} possible NeuroComet matches",
+                    stringResource(R.string.contacts_visible_summary, deviceContacts.size, matchedContacts.size),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (lastSyncTimestamp > 0L) {
                     Text(
-                        "Last synced ${formatContactsSyncTimestamp(lastSyncTimestamp)}",
+                        stringResource(R.string.contacts_last_synced, formatContactsSyncTimestamp(lastSyncTimestamp, context)),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else if (syncedCount > 0) {
                     Text(
-                        "Last local sync included $syncedCount contacts.",
+                        stringResource(R.string.contacts_last_local_sync, syncedCount),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             } else {
                 Text(
-                    if (isPermanentlyDenied) {
-                        "Contacts permission was denied in Android. Open App Settings to enable it for this device."
-                    } else {
-                        "Grant contacts access to let the app see and list the contacts saved on this device."
-                    },
+                    stringResource(
+                        if (isPermanentlyDenied) R.string.contacts_permission_permanently_denied
+                        else R.string.contacts_permission_rationale
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1074,7 +1073,7 @@ private fun ContactsAccessSettingsCard() {
                     enabled = !isLoading && !hasContactsPermission,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(if (hasContactsPermission) "Allowed" else "Allow contacts")
+                    Text(stringResource(if (hasContactsPermission) R.string.contacts_btn_allowed else R.string.contacts_btn_allow))
                 }
 
                 OutlinedButton(
@@ -1088,7 +1087,7 @@ private fun ContactsAccessSettingsCard() {
                     enabled = !isLoading,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(if (hasContactsPermission) "Refresh list" else "Open settings")
+                    Text(stringResource(if (hasContactsPermission) R.string.contacts_btn_refresh else R.string.contacts_btn_open_settings))
                 }
             }
 
@@ -1106,7 +1105,7 @@ private fun ContactsAccessSettingsCard() {
                         enabled = !isLoading,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Keep synced")
+                        Text(stringResource(R.string.contacts_btn_keep_synced))
                     }
                     TextButton(
                         onClick = {
@@ -1121,7 +1120,7 @@ private fun ContactsAccessSettingsCard() {
                         enabled = !isLoading,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Clear local data")
+                        Text(stringResource(R.string.contacts_btn_clear_local))
                     }
                 }
             }
@@ -1140,9 +1139,9 @@ private fun ContactsAccessSettingsCard() {
                     HorizontalDivider()
                     Text(
                         if (!showAllContacts && deviceContacts.size > visibleContacts.size) {
-                            "Contacts on this device • showing ${visibleContacts.size} of ${deviceContacts.size}"
+                            stringResource(R.string.contacts_on_device_preview, visibleContacts.size, deviceContacts.size)
                         } else {
-                            "Contacts on this device"
+                            stringResource(R.string.contacts_on_device_title)
                         },
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold
@@ -1154,14 +1153,17 @@ private fun ContactsAccessSettingsCard() {
                     }
                     if (deviceContacts.size > 8) {
                         TextButton(onClick = { showAllContacts = !showAllContacts }) {
-                            Text(if (showAllContacts) "Show fewer contacts" else "Show all ${deviceContacts.size} contacts")
+                            Text(
+                                if (showAllContacts) stringResource(R.string.contacts_show_fewer)
+                                else stringResource(R.string.contacts_show_all, deviceContacts.size)
+                            )
                         }
                     }
                 }
 
                 hasContactsPermission -> {
                     Text(
-                        "No contacts were found on this device yet.",
+                        stringResource(R.string.contacts_none_found),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1176,7 +1178,7 @@ private fun ContactPreviewRow(contact: ContactsManager.DeviceContact) {
     val subtitle = when {
         contact.phoneNumbers.isNotEmpty() -> contact.phoneNumbers.first()
         contact.emails.isNotEmpty() -> contact.emails.first()
-        else -> "No phone or email saved"
+        else -> stringResource(R.string.contacts_no_phone_email)
     }
 
     Surface(
@@ -1215,13 +1217,13 @@ private fun ContactPreviewRow(contact: ContactsManager.DeviceContact) {
     }
 }
 
-private fun formatContactsSyncTimestamp(timestamp: Long): String {
+private fun formatContactsSyncTimestamp(timestamp: Long, context: Context): String {
     return try {
         DateTimeFormatter.ofPattern("MMM d, h:mm a")
             .withZone(ZoneId.systemDefault())
             .format(Instant.ofEpochMilli(timestamp))
     } catch (_: Exception) {
-        "recently"
+        context.getString(R.string.contacts_recently)
     }
 }
 
@@ -1273,8 +1275,8 @@ fun NotificationSettingsScreen(
             // Master Toggle
             item {
                 SocialSettingsToggle(
-                    title = "Push Notifications",
-                    description = "Receive notifications on your device",
+                    title = stringResource(R.string.notif_push_title),
+                    description = stringResource(R.string.notif_push_desc),
                     icon = Icons.Default.Notifications,
                     isChecked = settings.pushEnabled,
                     onCheckedChange = {
@@ -1288,15 +1290,15 @@ fun NotificationSettingsScreen(
             item { Spacer(Modifier.height(8.dp)) }
             item {
                 SettingsSectionHeader(
-                    title = "Activity",
+                    title = stringResource(R.string.notif_section_activity),
                     icon = Icons.Default.Favorite
                 )
             }
 
             item {
                 SocialSettingsToggle(
-                    title = "Likes",
-                    description = "When someone likes your post",
+                    title = stringResource(R.string.notif_likes_title),
+                    description = stringResource(R.string.notif_likes_desc),
                     icon = Icons.Default.Favorite,
                     isChecked = settings.likesEnabled && settings.pushEnabled,
                     enabled = settings.pushEnabled,
@@ -1309,8 +1311,8 @@ fun NotificationSettingsScreen(
 
             item {
                 SocialSettingsToggle(
-                    title = "Comments",
-                    description = "When someone comments on your post",
+                    title = stringResource(R.string.notif_comments_title),
+                    description = stringResource(R.string.notif_comments_desc),
                     icon = Icons.AutoMirrored.Filled.Comment,
                     isChecked = settings.commentsEnabled && settings.pushEnabled,
                     enabled = settings.pushEnabled,
@@ -1323,8 +1325,8 @@ fun NotificationSettingsScreen(
 
             item {
                 SocialSettingsToggle(
-                    title = "New Followers",
-                    description = "When someone follows you",
+                    title = stringResource(R.string.notif_followers_title),
+                    description = stringResource(R.string.notif_followers_desc),
                     icon = Icons.Default.PersonAdd,
                     isChecked = settings.followsEnabled && settings.pushEnabled,
                     enabled = settings.pushEnabled,
@@ -1337,8 +1339,8 @@ fun NotificationSettingsScreen(
 
             item {
                 SocialSettingsToggle(
-                    title = "Mentions",
-                    description = "When someone mentions you",
+                    title = stringResource(R.string.notif_mentions_title),
+                    description = stringResource(R.string.notif_mentions_desc),
                     icon = Icons.Default.AlternateEmail,
                     isChecked = settings.mentionsEnabled && settings.pushEnabled,
                     enabled = settings.pushEnabled,
@@ -1351,8 +1353,8 @@ fun NotificationSettingsScreen(
 
             item {
                 SocialSettingsToggle(
-                    title = "Direct Messages",
-                    description = "When you receive a new message",
+                    title = stringResource(R.string.notif_dm_title),
+                    description = stringResource(R.string.notif_dm_desc),
                     icon = Icons.Default.Mail,
                     isChecked = settings.dmEnabled && settings.pushEnabled,
                     enabled = settings.pushEnabled,
@@ -1365,8 +1367,8 @@ fun NotificationSettingsScreen(
 
             item {
                 SocialSettingsToggle(
-                    title = "Story Replies",
-                    description = "When someone replies to your story",
+                    title = stringResource(R.string.notif_story_replies_title),
+                    description = stringResource(R.string.notif_story_replies_desc),
                     icon = Icons.AutoMirrored.Filled.Reply,
                     isChecked = settings.storyRepliesEnabled && settings.pushEnabled,
                     enabled = settings.pushEnabled,
@@ -1381,16 +1383,16 @@ fun NotificationSettingsScreen(
             item { Spacer(Modifier.height(8.dp)) }
             item {
                 SettingsSectionHeader(
-                    title = "Quiet Hours",
+                    title = stringResource(R.string.notif_quiet_hours_section_title),
                     icon = Icons.Default.Nightlight,
-                    subtitle = "For when you need peace"
+                    subtitle = stringResource(R.string.notif_quiet_hours_section_subtitle)
                 )
             }
 
             item {
                 SocialSettingsToggle(
-                    title = "Enable Quiet Hours",
-                    description = "Pause notifications during set times",
+                    title = stringResource(R.string.notif_quiet_hours_toggle_title),
+                    description = stringResource(R.string.notif_quiet_hours_toggle_desc),
                     icon = Icons.AutoMirrored.Filled.VolumeOff,
                     isChecked = settings.quietHoursEnabled,
                     onCheckedChange = {
@@ -1405,7 +1407,7 @@ fun NotificationSettingsScreen(
                 item {
                     // Start Time Picker
                     TimePickerSetting(
-                        title = "Quiet Hours Start",
+                        title = stringResource(R.string.notif_quiet_hours_start),
                         time = settings.quietHoursStart,
                         onTimeChange = { newTime: Int ->
                             settings = settings.copy(quietHoursStart = newTime)
@@ -1418,7 +1420,7 @@ fun NotificationSettingsScreen(
                 item {
                     // End Time Picker
                     TimePickerSetting(
-                        title = "Quiet Hours End",
+                        title = stringResource(R.string.notif_quiet_hours_end),
                         time = settings.quietHoursEnd,
                         onTimeChange = { newTime: Int ->
                             settings = settings.copy(quietHoursEnd = newTime)
@@ -1433,15 +1435,15 @@ fun NotificationSettingsScreen(
             item { Spacer(Modifier.height(8.dp)) }
             item {
                 SettingsSectionHeader(
-                    title = "Delivery",
+                    title = stringResource(R.string.notif_section_delivery),
                     icon = Icons.Default.SettingsApplications
                 )
             }
 
             item {
                 SocialSettingsToggle(
-                    title = "Group Notifications",
-                    description = "Bundle similar notifications together",
+                    title = stringResource(R.string.notif_group_title),
+                    description = stringResource(R.string.notif_group_desc),
                     icon = Icons.Default.Inbox,
                     isChecked = settings.groupNotifications,
                     onCheckedChange = {
@@ -1453,8 +1455,8 @@ fun NotificationSettingsScreen(
 
             item {
                 SocialSettingsToggle(
-                    title = "Sound",
-                    description = "Play sound for notifications",
+                    title = stringResource(R.string.notif_sound_title),
+                    description = stringResource(R.string.notif_sound_desc),
                     icon = Icons.AutoMirrored.Filled.VolumeUp,
                     isChecked = settings.soundEnabled,
                     onCheckedChange = {
@@ -1466,8 +1468,8 @@ fun NotificationSettingsScreen(
 
             item {
                 SocialSettingsToggle(
-                    title = "Vibration",
-                    description = "Vibrate for notifications",
+                    title = stringResource(R.string.notif_vibration_title),
+                    description = stringResource(R.string.notif_vibration_desc),
                     icon = Icons.Default.Vibration,
                     isChecked = settings.vibrationEnabled,
                     onCheckedChange = {
@@ -1479,8 +1481,8 @@ fun NotificationSettingsScreen(
 
             item {
                 SocialSettingsToggle(
-                    title = "Show Previews",
-                    description = "Show message content in notifications",
+                    title = stringResource(R.string.notif_previews_title),
+                    description = stringResource(R.string.notif_previews_desc),
                     icon = Icons.Default.Preview,
                     isChecked = settings.previewsEnabled,
                     onCheckedChange = {
@@ -1515,15 +1517,15 @@ fun ContentPreferencesScreen(
         ) {
             item {
                 SettingsSectionHeader(
-                    title = "Media",
+                    title = stringResource(R.string.content_prefs_media_section),
                     icon = Icons.Default.PlayCircle,
-                    subtitle = "Tune playback and content intensity"
+                    subtitle = stringResource(R.string.content_prefs_media_subtitle)
                 )
             }
             item {
                 SocialSettingsToggle(
-                    title = "Data Saver Mode",
-                    description = "Reduce media quality and network usage",
+                    title = stringResource(R.string.content_prefs_data_saver_title),
+                    description = stringResource(R.string.content_prefs_data_saver_desc),
                     icon = Icons.Default.SaveAlt,
                     isChecked = settings.dataSaverMode,
                     onCheckedChange = {
@@ -1534,10 +1536,10 @@ fun ContentPreferencesScreen(
             }
             item {
                 SocialSettingsSelector(
-                    title = "Autoplay Videos",
-                    currentValue = settings.autoplayVideos.displayName,
+                    title = stringResource(R.string.content_prefs_autoplay_title),
+                    currentValue = stringResource(settings.autoplayVideos.displayNameResId),
                     icon = Icons.Default.PlayArrow,
-                    description = "Tap to cycle autoplay preferences",
+                    description = stringResource(R.string.content_prefs_autoplay_desc),
                     onClick = {
                         val next = when (settings.autoplayVideos) {
                             AutoplayOption.ALWAYS -> AutoplayOption.WIFI_ONLY
@@ -1553,15 +1555,15 @@ fun ContentPreferencesScreen(
             item { Spacer(Modifier.height(8.dp)) }
             item {
                 SettingsSectionHeader(
-                    title = "Feed Preferences",
+                    title = stringResource(R.string.content_prefs_feed_section),
                     icon = Icons.Default.Tune,
-                    subtitle = "Control counts and sensitive content"
+                    subtitle = stringResource(R.string.content_prefs_feed_subtitle)
                 )
             }
             item {
                 SocialSettingsToggle(
-                    title = "Hide View Counts",
-                    description = "Remove view counts from posts",
+                    title = stringResource(R.string.content_prefs_hide_views_title),
+                    description = stringResource(R.string.content_prefs_hide_views_desc),
                     icon = Icons.Default.VisibilityOff,
                     isChecked = settings.hideViewCounts,
                     onCheckedChange = {
@@ -1572,8 +1574,8 @@ fun ContentPreferencesScreen(
             }
             item {
                 SocialSettingsToggle(
-                    title = "Hide Like Counts",
-                    description = "Remove like counts from posts",
+                    title = stringResource(R.string.content_prefs_hide_likes_title),
+                    description = stringResource(R.string.content_prefs_hide_likes_desc),
                     icon = Icons.Default.FavoriteBorder,
                     isChecked = settings.hideLikeCounts,
                     onCheckedChange = {
@@ -1584,8 +1586,8 @@ fun ContentPreferencesScreen(
             }
             item {
                 SocialSettingsToggle(
-                    title = "Show Sensitive Content",
-                    description = "Allow content that may require extra care",
+                    title = stringResource(R.string.content_prefs_sensitive_title),
+                    description = stringResource(R.string.content_prefs_sensitive_desc),
                     icon = Icons.Default.Warning,
                     isChecked = settings.showSensitiveContent,
                     onCheckedChange = {
@@ -1596,10 +1598,10 @@ fun ContentPreferencesScreen(
             }
             item {
                 SocialSettingsSelector(
-                    title = "Default Post Visibility",
-                    currentValue = settings.defaultPostVisibility.displayName,
+                    title = stringResource(R.string.content_prefs_default_visibility_title),
+                    currentValue = stringResource(settings.defaultPostVisibility.displayNameResId),
                     icon = settings.defaultPostVisibility.icon,
-                    description = "Tap to cycle post visibility presets",
+                    description = stringResource(R.string.content_prefs_default_visibility_desc),
                     onClick = {
                         val next = when (settings.defaultPostVisibility) {
                             PostVisibility.PUBLIC -> PostVisibility.FOLLOWERS
@@ -1638,15 +1640,15 @@ fun AccessibilitySettingsScreen(
         ) {
             item {
                 SettingsSectionHeader(
-                    title = "Reading & Motion",
+                    title = stringResource(R.string.a11y_settings_reading_section),
                     icon = Icons.Default.Accessibility,
-                    subtitle = "Reduce sensory load and improve readability"
+                    subtitle = stringResource(R.string.a11y_settings_reading_subtitle)
                 )
             }
             item {
                 SocialSettingsToggle(
-                    title = "Reduce Motion",
-                    description = "Minimize animation and movement",
+                    title = stringResource(R.string.a11y_settings_reduce_motion_title),
+                    description = stringResource(R.string.a11y_settings_reduce_motion_desc),
                     icon = Icons.Default.MotionPhotosOff,
                     isChecked = settings.reduceMotion,
                     onCheckedChange = {
@@ -1657,8 +1659,8 @@ fun AccessibilitySettingsScreen(
             }
             item {
                 SocialSettingsToggle(
-                    title = "Larger Text",
-                    description = "Increase text size throughout the app",
+                    title = stringResource(R.string.a11y_settings_larger_text_title),
+                    description = stringResource(R.string.a11y_settings_larger_text_desc),
                     icon = Icons.Default.FormatSize,
                     isChecked = settings.largerText,
                     onCheckedChange = {
@@ -1669,8 +1671,8 @@ fun AccessibilitySettingsScreen(
             }
             item {
                 SocialSettingsToggle(
-                    title = "Dyslexia-Friendly Font",
-                    description = "Use the accessibility reading font",
+                    title = stringResource(R.string.a11y_settings_dyslexia_title),
+                    description = stringResource(R.string.a11y_settings_dyslexia_desc),
                     icon = Icons.Default.TextFields,
                     isChecked = settings.dyslexiaFont,
                     onCheckedChange = {
@@ -1681,8 +1683,8 @@ fun AccessibilitySettingsScreen(
             }
             item {
                 SocialSettingsToggle(
-                    title = "High Contrast Icons",
-                    description = "Increase icon contrast and clarity",
+                    title = stringResource(R.string.a11y_settings_high_contrast_icons_title),
+                    description = stringResource(R.string.a11y_settings_high_contrast_icons_desc),
                     icon = Icons.Default.Contrast,
                     isChecked = settings.highContrastIcons,
                     onCheckedChange = {
@@ -1695,15 +1697,15 @@ fun AccessibilitySettingsScreen(
             item { Spacer(Modifier.height(8.dp)) }
             item {
                 SettingsSectionHeader(
-                    title = "Assistive Tech",
+                    title = stringResource(R.string.a11y_settings_assistive_section),
                     icon = Icons.Default.RecordVoiceOver,
-                    subtitle = "Support screen readers and braille displays"
+                    subtitle = stringResource(R.string.a11y_settings_assistive_subtitle)
                 )
             }
             item {
                 SocialSettingsToggle(
-                    title = "Screen Reader Optimized",
-                    description = "Improve labels, grouping, and navigation cues",
+                    title = stringResource(R.string.a11y_settings_screen_reader_title),
+                    description = stringResource(R.string.a11y_settings_screen_reader_desc),
                     icon = Icons.Default.RecordVoiceOver,
                     isChecked = settings.screenReaderOptimized,
                     onCheckedChange = {
@@ -1714,8 +1716,8 @@ fun AccessibilitySettingsScreen(
             }
             item {
                 SocialSettingsToggle(
-                    title = "Braille Display Optimized",
-                    description = "Prefer text-first labels and explicit state summaries",
+                    title = stringResource(R.string.a11y_settings_braille_title),
+                    description = stringResource(R.string.a11y_settings_braille_desc),
                     icon = Icons.Default.TouchApp,
                     isChecked = settings.brailleDisplayOptimized,
                     onCheckedChange = {
@@ -1726,8 +1728,8 @@ fun AccessibilitySettingsScreen(
             }
             item {
                 SocialSettingsToggle(
-                    title = "Simplified UI",
-                    description = "Reduce non-essential controls and clutter",
+                    title = stringResource(R.string.a11y_settings_simplified_title),
+                    description = stringResource(R.string.a11y_settings_simplified_desc),
                     icon = Icons.Default.FilterAlt,
                     isChecked = settings.simplifiedUI,
                     onCheckedChange = {
@@ -1738,8 +1740,8 @@ fun AccessibilitySettingsScreen(
             }
             item {
                 SocialSettingsToggle(
-                    title = "Focus Mode",
-                    description = "Reduce visual distractions in key flows",
+                    title = stringResource(R.string.a11y_settings_focus_mode_title),
+                    description = stringResource(R.string.a11y_settings_focus_mode_desc),
                     icon = Icons.Default.CenterFocusStrong,
                     isChecked = settings.focusMode,
                     onCheckedChange = {
@@ -1750,8 +1752,8 @@ fun AccessibilitySettingsScreen(
             }
             item {
                 SocialSettingsToggle(
-                    title = "Extended Timeouts",
-                    description = "Allow more time to read and respond",
+                    title = stringResource(R.string.a11y_settings_extended_timeouts_title),
+                    description = stringResource(R.string.a11y_settings_extended_timeouts_desc),
                     icon = Icons.Default.Timer,
                     isChecked = settings.extendedTimeouts,
                     onCheckedChange = {
@@ -1762,8 +1764,8 @@ fun AccessibilitySettingsScreen(
             }
             item {
                 SocialSettingsToggle(
-                    title = "Haptic Feedback",
-                    description = "Keep tactile feedback for app interactions",
+                    title = stringResource(R.string.a11y_settings_haptic_title),
+                    description = stringResource(R.string.a11y_settings_haptic_desc),
                     icon = Icons.Default.Vibration,
                     isChecked = settings.hapticFeedback,
                     onCheckedChange = {
@@ -1805,14 +1807,14 @@ fun WellbeingSettingsScreen(
         ) {
             item {
                 SettingsSectionHeader(
-                    title = "Daily Reminder",
+                    title = stringResource(R.string.wellbeing_daily_reminder_section),
                     icon = Icons.Default.Alarm
                 )
             }
             item {
                 SocialSettingsToggle(
-                    title = "Enable Daily Reminder",
-                    description = "Get reminded to check in with yourself",
+                    title = stringResource(R.string.wellbeing_daily_reminder_title),
+                    description = stringResource(R.string.wellbeing_daily_reminder_desc),
                     icon = Icons.Default.Notifications,
                     isChecked = settings.dailyReminderEnabled,
                     onCheckedChange = {
@@ -1824,7 +1826,7 @@ fun WellbeingSettingsScreen(
             if (settings.dailyReminderEnabled) {
                 item {
                     TimePickerSetting(
-                        title = "Reminder Time",
+                        title = stringResource(R.string.wellbeing_reminder_time),
                         time = settings.dailyLimitMinutes,
                         onTimeChange = { newTime: Int ->
                             settings = settings.copy(dailyLimitMinutes = newTime)
@@ -1838,14 +1840,14 @@ fun WellbeingSettingsScreen(
             item { Spacer(Modifier.height(8.dp)) }
             item {
                 SettingsSectionHeader(
-                    title = "Usage Limit",
+                    title = stringResource(R.string.wellbeing_usage_limit_section),
                     icon = Icons.Default.Timer
                 )
             }
             item {
                 SocialSettingsToggle(
-                    title = "Enable Usage Limit",
-                    description = "Limit app usage to reduce burnout",
+                    title = stringResource(R.string.wellbeing_usage_limit_title),
+                    description = stringResource(R.string.wellbeing_usage_limit_desc),
                     icon = Icons.Default.HourglassTop,
                     isChecked = settings.dailyLimitMinutes > 0,
                     onCheckedChange = { enabled ->
@@ -1857,7 +1859,7 @@ fun WellbeingSettingsScreen(
             if (settings.dailyLimitMinutes > 0) {
                 item {
                     SliderSetting(
-                        title = "Daily Limit (minutes)",
+                        title = stringResource(R.string.wellbeing_daily_limit_minutes),
                         value = settings.dailyLimitMinutes.toFloat(),
                         onValueChange = { newValue: Float ->
                             settings = settings.copy(dailyLimitMinutes = newValue.toInt())
@@ -1872,14 +1874,14 @@ fun WellbeingSettingsScreen(
             item { Spacer(Modifier.height(8.dp)) }
             item {
                 SettingsSectionHeader(
-                    title = "Break Reminders",
+                    title = stringResource(R.string.wellbeing_break_reminders_section),
                     icon = Icons.Default.BreakfastDining
                 )
             }
             item {
                 SocialSettingsToggle(
-                    title = "Enable Break Reminders",
-                    description = "Get reminded to take breaks and stretch",
+                    title = stringResource(R.string.wellbeing_break_reminders_title),
+                    description = stringResource(R.string.wellbeing_break_reminders_desc),
                     icon = Icons.Default.Notifications,
                     isChecked = settings.breakRemindersEnabled,
                     onCheckedChange = {
@@ -1891,7 +1893,7 @@ fun WellbeingSettingsScreen(
             if (settings.breakRemindersEnabled) {
                 item {
                     SliderSetting(
-                        title = "Break Interval (minutes)",
+                        title = stringResource(R.string.wellbeing_break_interval_minutes),
                         value = settings.breakIntervalMinutes.toFloat(),
                         onValueChange = { newValue: Float ->
                             settings = settings.copy(breakIntervalMinutes = newValue.toInt())
@@ -1906,9 +1908,9 @@ fun WellbeingSettingsScreen(
             item { Spacer(Modifier.height(8.dp)) }
             item {
                 SettingsSectionHeader(
-                    title = "Detox Mode",
+                    title = stringResource(R.string.wellbeing_detox_section),
                     icon = Icons.Default.SelfImprovement,
-                    subtitle = "Sign out and quiet the app for a while without deleting your account"
+                    subtitle = stringResource(R.string.wellbeing_detox_subtitle)
                 )
             }
             item {
@@ -1916,9 +1918,12 @@ fun WellbeingSettingsScreen(
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(
                             text = if (accountStatus?.isDetoxActive == true)
-                                "Detox mode is active until ${accountStatus?.detox_until ?: "your scheduled return"}."
+                                stringResource(
+                                    R.string.wellbeing_detox_active,
+                                    accountStatus?.detox_until ?: stringResource(R.string.wellbeing_detox_active_fallback_until)
+                                )
                             else
-                                "Start a break that silences push notifications, enables quiet hours, and signs you out so the break actually sticks.",
+                                stringResource(R.string.wellbeing_detox_start_hint),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         if (accountStatus?.isDetoxActive == true) {
@@ -1929,7 +1934,7 @@ fun WellbeingSettingsScreen(
                                     }
                                 }
                             ) {
-                                Text("End detox early")
+                                Text(stringResource(R.string.wellbeing_detox_end_early))
                             }
                         } else {
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1939,7 +1944,15 @@ fun WellbeingSettingsScreen(
                                             FilterChip(
                                                 selected = detoxDays == days,
                                                 onClick = { detoxDays = days },
-                                                label = { Text("$days day${if (days == 1) "" else "s"}") }
+                                                label = {
+                                                    Text(
+                                                        androidx.compose.ui.res.pluralStringResource(
+                                                            R.plurals.wellbeing_detox_days_chip,
+                                                            days,
+                                                            days
+                                                        )
+                                                    )
+                                                }
                                             )
                                         }
                                     }
@@ -1950,7 +1963,7 @@ fun WellbeingSettingsScreen(
                                     Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                                 }
                             }) {
-                                Text("Start detox")
+                                Text(stringResource(R.string.wellbeing_detox_start))
                             }
                         }
                     }
@@ -1960,14 +1973,14 @@ fun WellbeingSettingsScreen(
             item { Spacer(Modifier.height(8.dp)) }
             item {
                 SettingsSectionHeader(
-                    title = "Calm Mode",
+                    title = stringResource(R.string.wellbeing_calm_mode_section),
                     icon = Icons.Default.Spa
                 )
             }
             item {
                 SocialSettingsToggle(
-                    title = "Auto-enable Calm Mode",
-                    description = "Enable during quiet hours or based on usage",
+                    title = stringResource(R.string.wellbeing_calm_mode_title),
+                    description = stringResource(R.string.wellbeing_calm_mode_desc),
                     icon = Icons.Default.Schedule,
                     isChecked = settings.calmModeAutoEnable,
                     onCheckedChange = {
@@ -1978,8 +1991,8 @@ fun WellbeingSettingsScreen(
             }
             item {
                 SocialSettingsToggle(
-                    title = "Bedtime Mode",
-                    description = "Reduce notifications and screen time at night",
+                    title = stringResource(R.string.wellbeing_bedtime_title),
+                    description = stringResource(R.string.wellbeing_bedtime_desc),
                     icon = Icons.Default.Bedtime,
                     isChecked = settings.bedtimeModeEnabled,
                     onCheckedChange = {
@@ -1991,7 +2004,7 @@ fun WellbeingSettingsScreen(
             if (settings.bedtimeModeEnabled) {
                 item {
                     TimePickerSetting(
-                        title = "Bedtime Start",
+                        title = stringResource(R.string.wellbeing_bedtime_start),
                         time = settings.bedtimeStart,
                         onTimeChange = { newTime: Int ->
                             settings = settings.copy(bedtimeStart = newTime)
@@ -2002,7 +2015,7 @@ fun WellbeingSettingsScreen(
                 }
                 item {
                     TimePickerSetting(
-                        title = "Bedtime End",
+                        title = stringResource(R.string.wellbeing_bedtime_end),
                         time = settings.bedtimeEnd,
                         onTimeChange = { newTime: Int ->
                             settings = settings.copy(bedtimeEnd = newTime)
@@ -2016,14 +2029,14 @@ fun WellbeingSettingsScreen(
             item { Spacer(Modifier.height(8.dp)) }
             item {
                 SettingsSectionHeader(
-                    title = "Positivity Boost",
+                    title = stringResource(R.string.wellbeing_positivity_section),
                     icon = Icons.Default.EmojiEmotions
                 )
             }
             item {
                 SocialSettingsToggle(
-                    title = "Enable Positivity Boost",
-                    description = "Receive encouraging messages and content",
+                    title = stringResource(R.string.wellbeing_positivity_title),
+                    description = stringResource(R.string.wellbeing_positivity_desc),
                     icon = Icons.Default.Star,
                     isChecked = settings.positivityBoostEnabled,
                     onCheckedChange = {
@@ -2049,7 +2062,7 @@ fun AnimationSettingsScreen(
     val animSettings = themeState.animationSettings
 
     SocialSettingsScaffold(
-        title = "Animation Settings",
+        title = stringResource(R.string.anim_settings_title),
         onBack = onBack
     ) { contentModifier ->
         LazyColumn(
@@ -2059,15 +2072,15 @@ fun AnimationSettingsScreen(
         ) {
             item {
                 SettingsSectionHeader(
-                    title = "Animation Controls",
+                    title = stringResource(R.string.anim_settings_controls_section),
                     icon = Icons.Default.Animation,
-                    subtitle = "Dial motion down to match your sensory comfort"
+                    subtitle = stringResource(R.string.anim_settings_controls_subtitle)
                 )
             }
             item {
                 SocialSettingsToggle(
-                    title = "Disable All Animations",
-                    description = "Turn off app motion wherever possible",
+                    title = stringResource(R.string.anim_settings_disable_all_title),
+                    description = stringResource(R.string.anim_settings_disable_all_desc),
                     icon = Icons.Default.MotionPhotosOff,
                     isChecked = animSettings.disableAllAnimations,
                     onCheckedChange = { themeViewModel.setDisableAllAnimations(it) }
@@ -2075,8 +2088,8 @@ fun AnimationSettingsScreen(
             }
             item {
                 SocialSettingsToggle(
-                    title = "Logo Animations",
-                    description = "Splash and decorative logo motion",
+                    title = stringResource(R.string.anim_settings_logo_title),
+                    description = stringResource(R.string.anim_settings_logo_desc),
                     icon = Icons.Default.AutoAwesome,
                     isChecked = !animSettings.disableAllAnimations && !animSettings.disableLogoAnimations,
                     enabled = !animSettings.disableAllAnimations,
@@ -2085,8 +2098,8 @@ fun AnimationSettingsScreen(
             }
             item {
                 SocialSettingsToggle(
-                    title = "Story Animations",
-                    description = "Story progress and motion effects",
+                    title = stringResource(R.string.anim_settings_story_title),
+                    description = stringResource(R.string.anim_settings_story_desc),
                     icon = Icons.Default.Timelapse,
                     isChecked = !animSettings.disableAllAnimations && !animSettings.disableStoryAnimations,
                     enabled = !animSettings.disableAllAnimations,
@@ -2095,8 +2108,8 @@ fun AnimationSettingsScreen(
             }
             item {
                 SocialSettingsToggle(
-                    title = "Feed Animations",
-                    description = "Feed entry, expand, and content transitions",
+                    title = stringResource(R.string.anim_settings_feed_title),
+                    description = stringResource(R.string.anim_settings_feed_desc),
                     icon = Icons.Default.ViewStream,
                     isChecked = !animSettings.disableAllAnimations && !animSettings.disableFeedAnimations,
                     enabled = !animSettings.disableAllAnimations,
@@ -2105,8 +2118,8 @@ fun AnimationSettingsScreen(
             }
             item {
                 SocialSettingsToggle(
-                    title = "Screen Transitions",
-                    description = "Navigation and route transitions",
+                    title = stringResource(R.string.anim_settings_transitions_title),
+                    description = stringResource(R.string.anim_settings_transitions_desc),
                     icon = Icons.Default.SwapHoriz,
                     isChecked = !animSettings.disableAllAnimations && !animSettings.disableTransitionAnimations,
                     enabled = !animSettings.disableAllAnimations,
@@ -2115,8 +2128,8 @@ fun AnimationSettingsScreen(
             }
             item {
                 SocialSettingsToggle(
-                    title = "Button Animations",
-                    description = "Pressed, hover, and state-change feedback",
+                    title = stringResource(R.string.anim_settings_button_title),
+                    description = stringResource(R.string.anim_settings_button_desc),
                     icon = Icons.Default.SmartButton,
                     isChecked = !animSettings.disableAllAnimations && !animSettings.disableButtonAnimations,
                     enabled = !animSettings.disableAllAnimations,
@@ -2125,8 +2138,8 @@ fun AnimationSettingsScreen(
             }
             item {
                 SocialSettingsToggle(
-                    title = "Loading Animations",
-                    description = "Progress indicators and shimmer effects",
+                    title = stringResource(R.string.anim_settings_loading_title),
+                    description = stringResource(R.string.anim_settings_loading_desc),
                     icon = Icons.Default.HourglassTop,
                     isChecked = !animSettings.disableAllAnimations && !animSettings.disableLoadingAnimations,
                     enabled = !animSettings.disableAllAnimations,
@@ -2199,12 +2212,14 @@ fun SocialSettingsToggle(
     onCheckedChange: (Boolean) -> Unit
 ) {
     val alpha = if (enabled) 1f else 0.5f
+    val stateText = stringResource(if (isChecked) R.string.social_setting_enabled else R.string.social_setting_disabled)
+    val cd = stringResource(R.string.social_setting_toggle_cd, title, description, stateText)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .semantics(mergeDescendants = true) {
                 role = Role.Switch
-                contentDescription = "$title, $description, ${if (isChecked) "enabled" else "disabled"}"
+                contentDescription = cd
             }
             .clickable(enabled = enabled) { onCheckedChange(!isChecked) }
             .padding(vertical = 12.dp),
@@ -2294,7 +2309,7 @@ fun TimePickerSetting(
         title = title,
         currentValue = String.format(java.util.Locale.US, "%02d:00", time.coerceIn(0, 23)),
         icon = icon,
-        description = "Tap to cycle through hours",
+        description = stringResource(R.string.social_setting_tap_cycle_hours),
         onClick = { onTimeChange((time + 1) % 24) }
     )
 }
@@ -2312,7 +2327,7 @@ fun SliderSetting(
             title = title,
             currentValue = value.toInt().toString(),
             icon = icon,
-            description = "Adjust with the slider below",
+            description = stringResource(R.string.social_setting_adjust_slider),
             onClick = {}
         )
         Slider(
